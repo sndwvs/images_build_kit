@@ -1,51 +1,43 @@
 #!/bin/bash
 
-set -e
 
-CWD=$(pwd)
-
-URL_ROOTFS="ftp://ftp.arm.slackware.com/slackwarearm/slackwarearm-devtools/minirootfs/roots/"
-ROOTFS="slack-current-miniroot"
-VERSION="09Mar15"
-SIZE="512M"
-ROOT_DISK="mmcblk0p3"
-
-SOURCE="source"
-PKG="pkg"
-OUTPUT="output"
-TOOLS="tools"
-FLASH="flash"
 
 clean_rootfs (){
-	cd $CWD
-	echo "------ Clean ${ROOTFS}_${VERSION}"
-	rm -rf $SOURCE/${ROOTFS}_${VERSION} || exit 1
-	mkdir -p $SOURCE/${ROOTFS}_${VERSION} || exit 1
+	echo "------ Clean ${ROOTFS}-build-$VERSION"
+	rm -rf $CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION || exit 1
+	mkdir -p $CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION || exit 1
 }
 
-download (){
-	cd $CWD
-        echo "------ Download ${ROOTFS}_${VERSION}"
-	wget -c --no-check-certificate $URL_ROOTFS/${ROOTFS}_${VERSION}.tar.xz -O $SOURCE/${ROOTFS}_${VERSION}.tar.xz || exit 1
+download_rootfs (){
+        echo "------ Download ${ROOTFS}"
+	wget -c --no-check-certificate $URL_ROOTFS/${ROOTFS}.tar.xz -O $CWD/$BUILD/$SOURCE/${ROOTFS}.tar.xz || exit 1
 }
 
 prepare (){
-	cd $CWD
-	echo "------ Prepare ${ROOTFS}_${VERSION}"
-	tar xvf $SOURCE/${ROOTFS}_${VERSION}.tar.xz -C $SOURCE/${ROOTFS}_${VERSION} || exit 1
-	installpkg --root $SOURCE/${ROOTFS}_${VERSION} $PKG/kernel-*.txz || exit 1
+	echo "------ Prepare ${ROOTFS}"
+	tar xvf $CWD/$BUILD/$SOURCE/${ROOTFS}.tar.?z* -C $CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION || exit 1
+	installpkg --root $CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION $CWD/$BUILD/$PKG/kernel-*.txz || exit 1
 }
 
 setting_fstab (){
-	cd $CWD
-	echo "------ Settings fstab ${ROOTFS}_${VERSION}"
-	echo "/dev/$ROOT_DISK      /               ext4    defaults 0       1" >> $SOURCE/${ROOTFS}_${VERSION}/etc/fstab || exit 1
+	echo "------ Settings fstab ${ROOTFS}-build-$VERSION"
+	echo "/dev/$ROOT_DISK      /               ext4    defaults       0       1" >> $CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/fstab || exit 1
+}
+
+setting_motd (){
+	echo "------ Settings motd ${ROOTFS}-build-$VERSION"
+	cat <<EOF >"$CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/motd"
+ ____  ____  ____  ____  ____  __   _  _    ____  _  _  ___  ___   ___  ___
+( ___)(_  _)(  _ \( ___)( ___)(  ) ( \/ )  (  _ \( )/ )(__ )(__ \ ( _ )( _ ) 
+ )__)  _)(_  )   / )__)  )__)  )(__ \  /    )   / )  (  (_ \ / _/ / _ \/ _ \ 
+(__)  (____)(_)\_)(____)(__)  (____)(__)   (_)\_)(_)\_)(___/(____)\___/\___/ 
+Slackware
+EOF
 }
 
 setting_wifi (){
-	cd $CWD
-	echo "------ Settings wifi ${ROOTFS}_${VERSION}"
-cat <<EOF >"$SOURCE/${ROOTFS}_${VERSION}/etc/rc.d/rc.wifi"
+	echo "------ Settings wifi ${ROOTFS}-build-$VERSION"
+cat <<EOF >"$CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/rc.d/rc.wifi"
 #!/bin/sh
 
 wifi_start() {
@@ -84,14 +76,14 @@ case "\$1" in
 	echo "Usage: \$0 {start|stop}"
 esac
 EOF
-	chmod 755 "$SOURCE/${ROOTFS}_${VERSION}/etc/rc.d/rc.wifi"
+	chmod 755 "$CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/rc.d/rc.wifi"
 
 
 	# fix wifi driver
-	sed -i "s#wext#nl80211#" $SOURCE/${ROOTFS}_${VERSION}/etc/rc.d/rc.inet1.conf
+	sed -i "s#wext#nl80211#" $CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/rc.d/rc.inet1.conf
 
 	# add start wifi boot
-	cat <<EOF >>"$SOURCE/${ROOTFS}_${VERSION}/etc/rc.d/rc.local"
+	cat <<EOF >>"$CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/rc.d/rc.local"
 if [ -x /etc/rc.d/rc.wifi ] ; then
     /etc/rc.d/rc.wifi start
 fi
@@ -99,11 +91,10 @@ EOF
 }
 
 setting_firstboot (){
-	cd $CWD
-	echo "------ Settings firstboot ${ROOTFS}_${VERSION}"
+	echo "------ Settings firstboot ${ROOTFS}-build-$VERSION"
 	# add start wifi boot
-	touch "$SOURCE/${ROOTFS}_${VERSION}/firstboot"
-	cat <<EOF >>"$SOURCE/${ROOTFS}_${VERSION}/etc/rc.d/rc.local"
+	touch "$CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/firstboot"
+	cat <<EOF >>"$CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/rc.d/rc.local"
 if [ -e /firstboot ]; then
     resize2fs -p /dev/$ROOT_DISK
     rm -f /firstboot 2>/dev/null
@@ -112,17 +103,18 @@ EOF
 }
 
 create_img (){
-	$OUTPUT/$TOOLS/mkrootfs $SOURCE/${ROOTFS}_${VERSION} $SIZE
-	if [ -e $SOURCE/${ROOTFS}_${VERSION}.img ];then
-		mv $SOURCE/${ROOTFS}_${VERSION}.img $OUTPUT/$FLASH
+	$CWD/$BUILD/$OUTPUT/$TOOLS/mkrootfs $CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION $ROOTFS_SIZE
+	if [ -e $CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION.img ];then
+		mv $CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION.img $CWD/$BUILD/$OUTPUT/$FLASH
 	fi
 }
 
 
 clean_rootfs
-download
+download_rootfs
 prepare
 setting_fstab
+setting_motd
 setting_wifi
 setting_firstboot
 create_img
@@ -132,7 +124,7 @@ exit
 
 
 
-cat <<EOF >>"$SOURCE/${ROOTFS}_${VERSION}/etc/wpa_supplicant.conf"
+cat <<EOF >>"$CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/wpa_supplicant.conf"
 #eapol_version=2
 #update_config=1
 
@@ -145,6 +137,7 @@ network={
     auth_alg=OPEN
 }
 EOF
+
 
 
 
