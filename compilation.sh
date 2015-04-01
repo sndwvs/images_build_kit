@@ -260,19 +260,19 @@ $CWD/$BUILD/$OUTPUT/$TOOLS/rkflashtool w resource < resource.img || exit 1
 echo "------ flash boot"
 $CWD/$BUILD/$OUTPUT/$TOOLS/rkflashtool w boot < boot.img || exit 1
 echo "------ flash rootfs"
-$CWD/$BUILD/$OUTPUT/$TOOLS/rkflashtool w linuxroot < ${ROOTFS}_${VERSION}.img || exit 1
+$CWD/$BUILD/$OUTPUT/$TOOLS/rkflashtool w linuxroot < ${ROOTFS}-build-${VERSION}.img || exit 1
 echo "------ reboot device"
 $CWD/$BUILD/$OUTPUT/$TOOLS/rkflashtool b RK320A || exit 1
 EOF
 chmod 755 "$CWD/$BUILD/$OUTPUT/$FLASH/flash.sh"
 }
 
-#download
-#compile_rk2918
-#compile_rkflashtool
-#compile_mkbooting
-#compile_boot_loader
-#compile_kernel
+download
+compile_rk2918
+compile_rkflashtool
+compile_mkbooting
+compile_boot_loader
+compile_kernel
 build_pkg
 add_linux_upgrade_tool
 build_parameters
