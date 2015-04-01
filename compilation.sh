@@ -2,7 +2,7 @@
 
 
 
-if [ !$CWD ];then
+if [ empty $CWD ];then
     exit
 fi
 
@@ -236,9 +236,9 @@ build_resource (){
 build_boot (){
 	echo "------ Create boot"
 	# create boot for flash
-	cd $CWD/$BUILD/$SOURCE
-	$CWD/$BUILD/$OUTPUT/$TOOLS/mkcpiogz $CWD/initrd-tree || exit 1
-	mv -f $CWD/initrd-tree.cpio.gz . || exit 1
+	tar xf $CWD/initrd-tree.tar.xz -C $CWD/$BUILD/$SOURCE/
+	cd $CWD/$BUILD/$SOURCE/
+	$CWD/$BUILD/$OUTPUT/$TOOLS/mkcpiogz $CWD/$BUILD/$SOURCE/initrd-tree || exit 1
 	$CWD/$BUILD/$OUTPUT/$TOOLS/mkbootimg --kernel $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/arm/boot/zImage --ramdisk $CWD/$BUILD/$SOURCE/initrd-tree.cpio.gz -o $CWD/$BUILD/$OUTPUT/$FLASH/boot.img || exit 1
 	if [ -e $CWD/$BUILD/$SOURCE/initrd-tree.cpio.gz ];then
 		rm $CWD/$BUILD/$SOURCE/initrd-tree.cpio.gz

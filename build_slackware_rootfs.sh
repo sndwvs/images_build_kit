@@ -2,7 +2,7 @@
 
 
 
-if [ !$CWD ];then
+if [ empty $CWD ];then
     exit
 fi
 
@@ -80,7 +80,7 @@ case "\$1" in
 	echo "Usage: \$0 {start|stop}"
 esac
 EOF
-	chmod 755 "$CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/rc.d/rc.wifi"
+#	chmod 755 "$CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/rc.d/rc.wifi"
 
 
 	# fix wifi driver
