@@ -2,6 +2,10 @@
 
 
 
+if [ !$CWD ];then
+    exit
+fi
+
 clean_rootfs (){
 	echo "------ Clean ${ROOTFS}-build-$VERSION"
 	rm -rf $CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION || exit 1

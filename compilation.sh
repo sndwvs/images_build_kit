@@ -2,6 +2,10 @@
 
 
 
+if [ !$CWD ];then
+    exit
+fi
+
 #---------------------------------------------
 # create dir
 #---------------------------------------------
@@ -158,15 +162,16 @@ build_pkg (){
 	_BUILD=1
 	_PACKAGER="mara"
 
+	# clean-up unnecessary files generated during install
+	find "$CWD/$BUILD/$PKG/kernel-modules" "$CWD/$BUILD/$PKG/kernel-headers" \( -name .install -o -name ..install.cmd \) -delete
+
 	echo "------ Create kernel pakages"
 	# split install_modules -> firmware
 	install -dm755 "$CWD/$BUILD/$PKG/kernel-firmware/lib"
 	if [ -d $CWD/$BUILD/$PKG/kernel-modules/lib/firmware ];then
 		mv $CWD/$BUILD/$PKG/kernel-modules/lib/firmware "$CWD/$BUILD/$PKG/kernel-firmware/lib"
-		# clean-up unnecessary files generated during install
-		find "$CWD/$BUILD/$PKG/kernel-firmware/lib" \( -name .install -o -name ..install.cmd \) -delete
 	fi
-	
+
 	# add firmware
 	unzip -o $CWD/$BUILD/$SOURCE/$FIRMWARE -d $CWD/$BUILD/$SOURCE/ || exit 1
 	cp -a $CWD/$BUILD/$SOURCE/overlay-master/overlay-rksdk/files-overlay-rk3288/system/etc/firmware $CWD/$BUILD/$PKG/kernel-firmware/lib/
@@ -180,7 +185,7 @@ build_pkg (){
 		echo "/sbin/modprobe $mod" >> $CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/rc.modules
 	done
 	chmod 755 $CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/rc.modules
-	cd $CWD/$BUILD/$PKG/kernel-modules/lib/modules/$VERSION*
+	cd $CWD/$BUILD/$PKG/kernel-modules/lib/modules/$_VERSION*
 	rm build source
 	ln -s /usr/include build
 	ln -s /usr/include source

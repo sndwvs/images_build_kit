@@ -64,7 +64,7 @@ CROSS="arm-unknown-linux-gnueabihf-"
 #---------------------------------------------
 # create dir
 #---------------------------------------------
-#rm -rf ${CWD}/$BUILD/{$SOURCE/{$XTOOLS,$XTOOLS_OLD},$PKG,$OUTPUT/{$TOOLS,$FLASH}}
+rm -rf ${CWD}/$BUILD/{$SOURCE/{$XTOOLS,$XTOOLS_OLD},$PKG,$OUTPUT/{$TOOLS,$FLASH}}
 mkdir -p ${CWD}/$BUILD/{$SOURCE/$XTOOLS,$PKG,$OUTPUT/{$TOOLS,$FLASH}}
 
 
