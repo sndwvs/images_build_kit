@@ -50,7 +50,7 @@ wifi_start() {
 	    echo 1 > /sys/class/rkwifi/power
 	    sleep 2
 	    echo 1 > /sys/class/rkwifi/driver
-	    /etc/rc.d/rc.inet1 restart
+	    /etc/rc.d/rc.inet1 wlan0_start
 	else
 	    echo "No wifi driver"
 	fi
@@ -59,10 +59,10 @@ wifi_start() {
 wifi_stop() {
 	if [ -e /sys/class/rkwifi/power ] ; then
 	    echo "Enable wifi"
+	    /etc/rc.d/rc.inet1 wlan0_stop
 	    echo 0 > /sys/class/rkwifi/driver
 	    sleep 2
 	    echo 0 > /sys/class/rkwifi/power
-	    /etc/rc.d/rc.inet1 stop
 	else
 	    echo "No wifi driver"
 	fi
