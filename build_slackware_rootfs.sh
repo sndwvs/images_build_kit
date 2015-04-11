@@ -97,11 +97,23 @@ EOF
 setting_firstboot (){
 	echo "------ Settings firstboot ${ROOTFS}-build-$VERSION"
 	# add start wifi boot
-	touch "$CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/firstboot"
-	cat <<EOF >>"$CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/rc.d/rc.local"
+	cat <<EOF >>"$CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/firstboot"
+#!/bin/sh
+
 if [ -e /firstboot ]; then
     resize2fs -p /dev/$ROOT_DISK
+    # add user
+    echo user | adduser
+    echo "user:password" | chpasswd
+
     rm -f /firstboot 2>/dev/null
+fi
+
+EOF
+	chmod 755 "$CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/firstboot"
+	cat <<EOF >>"$CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/rc.d/rc.local"
+if [ -x /firstboot ]; then
+    /firstboot 2>/dev/null
 fi
 EOF
 }
@@ -141,6 +153,7 @@ network={
     auth_alg=OPEN
 }
 EOF
+
 
 
 
