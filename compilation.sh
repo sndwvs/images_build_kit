@@ -130,7 +130,8 @@ compile_kernel (){
 		cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE
 
 		# fix firmware /system /lib
-		sed -i "s#\"/system/etc/firmware/\"#\"/lib/firmware/\"#" drivers/net/wireless/rockchip_wlan/rkwifi/rk_wifi_config.c
+		find drivers/net/wireless/rockchip_wlan/rkwifi/ -type f -exec \
+		    sed -i "s#\/system\/etc\/firmware\/#\/lib\/firmware\/#" {} \;
 
 		# fix kernel version
 		sed -i "/SUBLEVEL = 0/d" Makefile
@@ -139,6 +140,10 @@ compile_kernel (){
 		make CROSS_COMPILE=$CROSS clean || exit 1
 
 		make $CTHREADS ARCH=arm CROSS_COMPILE=$CROSS firefly-rk3288-linux_defconfig || exit 1
+
+		if [ "$APPLY_PATCH" = "true" ]; then
+		    echo "$KERNEL_CONFIG_PATCH" | patch -p0 -b || exit 1
+		fi
 
 #		make $CTHREADS ARCH=arm CROSS_COMPILE=$CROSS menuconfig  || exit 1
 
