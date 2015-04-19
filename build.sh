@@ -26,6 +26,10 @@ do
 	    shift
 	    DOWNLOAD_SOURCE_BINARIES="true"
 	    ;;
+	-p | --patch )
+	    shift
+	    APPLY_PATCH="true"
+	    ;;
 	--clean )
 	    shift
 	    clean_sources
@@ -56,6 +60,9 @@ do
 
 	    echo -e "\t-d | --download"
 	    echo -e "\t\tdownload source and use pre-built binaries"
+
+	    echo -e "\t-p | --patch"
+	    echo -e "\t\tpatch the kernel configuration"
 
 	    echo -e "\t-c | --compile"
 	    echo -e "\t\tbuild binaries locally"

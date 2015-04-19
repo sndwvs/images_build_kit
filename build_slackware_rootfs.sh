@@ -65,7 +65,7 @@ wifi_start() {
 
 wifi_stop() {
 	if [ -e /sys/class/rkwifi/power ] ; then
-	    echo "Enable wifi"
+	    echo "Disable wifi"
 	    /etc/rc.d/rc.inet1 wlan0_stop
 	    echo 0 > /sys/class/rkwifi/driver
 	    sleep 2
@@ -242,6 +242,7 @@ build_video_driver_pkg (){
 
 	mkdir -p $CWD/$BUILD/$PKG/$VIDEO_DRIVER/etc/{X11,rc.d,udev/rules.d} $CWD/$BUILD/$PKG/$VIDEO_DRIVER/usr/lib
 	tar --strip-components=1 -xzf $CWD/$BUILD/$SOURCE/$VIDEO_DRIVER.tar.gz -C $CWD/$BUILD/$PKG/$VIDEO_DRIVER/usr/lib
+	find $CWD/$BUILD/$PKG/$VIDEO_DRIVER/usr/lib -exec chmod 755 {} \; -exec chown root:root {} \;
 
 	cat <<EOF >$CWD/$BUILD/$PKG/$VIDEO_DRIVER/etc/X11/xorg.conf
 
