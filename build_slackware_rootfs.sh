@@ -31,7 +31,7 @@ prepare (){
 setting_fstab (){
 	if [[ ! $(cat $CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/fstab | grep $ROOT_DISK) ]];then
 	    echo "------ Settings fstab ${ROOTFS}-build-$VERSION"
-	    echo "/dev/$ROOT_DISK      /               ext4    defaults       0       1" >> $CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/fstab || exit 1
+	    echo "/dev/$ROOT_DISK    /    ext4    noatime,nodiratime,errors=remount-ro       0       1" >> $CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/fstab || exit 1
 	fi
 }
 
