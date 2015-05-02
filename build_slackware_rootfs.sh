@@ -113,8 +113,7 @@ setting_firstboot (){
 if [ -e /firstboot ]; then
     resize2fs -p /dev/$ROOT_DISK
     # add user
-    echo user | adduser 2>&1>/dev/null
-    echo "user:password" | chpasswd 1>&2>/dev/null
+    echo user | xargs useradd -g users -G video,audio -m -p $(openssl passwd -1 password) 2>&1>/dev/null
 
     rm -f /firstboot 2>&1>/dev/null
 fi
