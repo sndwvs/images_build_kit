@@ -82,16 +82,20 @@ a=' acpid
 
 ap=' alsa-utils
      groff
+     flac
      htop
      man
      man-page
      mc
+     mpg123
      sqlite
      sudo'
 
 l=' ConsoleKit
     GConf
     M2Crypto
+    aalib
+    a52dec
     alsa-lib
     alsa-oss
     apr
@@ -111,8 +115,10 @@ l=' ConsoleKit
     dconf
     desktop-file-utils
     djvulibre
+    esound
     expat
     freetype
+    fribidi
     gamin
     gdk-pixbuf2
     gegl
@@ -125,7 +131,7 @@ l=' ConsoleKit
     gmime
     gmm
     gmp
-    gnome-icon-theme
+    adwaita-icon-theme
     gnome-keyring
     gnome-themes-standard
     gobject-introspection
@@ -143,7 +149,6 @@ l=' ConsoleKit
     icon-naming-utils
     icu4c
     ilmbase
-    imlib
     iso-codes
     jasper
     keybinder
@@ -157,8 +162,11 @@ l=' ConsoleKit
     libcaca
     libcanberra
     libcap
+    libcdio
+    libcdio-paranoia
     libcroco
     libdiscid
+    libdvdnav
     libdvdread
     libelf
     libevent
@@ -203,10 +211,12 @@ l=' ConsoleKit
     libtasn1
     libtermcap
     libtiff
+    libtheora
     libunistring
     libusb
     libusb-compat
     libvorbis
+    libvpx
     libwmf
     libwmf-docs
     libwnck
@@ -223,6 +233,7 @@ l=' ConsoleKit
     mozilla-nss
     mpfr
     ncurses
+    openjpeg
     pango
     pcre
     polkit
@@ -252,7 +263,9 @@ n=' bluez
     gnutls
     iptables
     nettle
-    p11-kit'
+    openssl
+    p11-kit
+    samba'
 
 x=' anthy
     appres
@@ -329,6 +342,7 @@ x=' anthy
     libICE
     libSM
     libX11
+    libXaw3dXft
     libXScrnSaver
     libXau
     libXaw
@@ -366,6 +380,7 @@ x=' anthy
     libfontenc
     libhangul
     libpciaccess
+    libva
     libpthread-stubs
     libvdpau
     libxcb
@@ -507,7 +522,6 @@ xfce=' Thunar
     gtk-xfce-engine
     libxfce4ui
     libxfce4util
-    libxfcegui4
     orage
     thunar-volman
     tumbler
@@ -528,8 +542,7 @@ xfce=' Thunar
     xfce4-weather-plugin
     xfconf
     xfdesktop
-    xfwm4
-    xfwm4-themes'
+    xfwm4'
 
 
 
