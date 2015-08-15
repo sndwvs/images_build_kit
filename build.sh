@@ -115,6 +115,7 @@ if [ "$CREATE_IMAGE" = "true" ]; then
     prepare
     setting_fstab
     setting_motd
+    setting_rc_local
     setting_wifi
     setting_dhcpcd
     setting_firstboot
