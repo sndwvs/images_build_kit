@@ -141,6 +141,7 @@ EOF
 	if [[ ! $(cat $CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/rc.d/rc.local | grep wifi) ]];then
 	# add start wifi boot
 	cat <<EOF >>"$CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/rc.d/rc.local"
+
 if [ -x /etc/rc.d/rc.wifi ] ; then
     /etc/rc.d/rc.wifi start
 fi
@@ -169,6 +170,7 @@ EOF
 
 	if [[ ! $(cat $CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/rc.d/rc.local | grep firstboot) ]];then
 	cat <<EOF >>"$CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/rc.d/rc.local"
+
 if [ -x /firstboot ]; then
     /firstboot 2>&1>/dev/null
 fi
@@ -268,10 +270,10 @@ setting_default_start_x (){
 	if [[ ! $(cat $CWD/$BUILD/$SOURCE/${ROOTFS_XFCE}-build-${VERSION}/etc/rc.d/rc.local | grep fbset) ]];then
 	# add start fbset for DefaultDepth 24
 	cat <<EOF >>"$CWD/$BUILD/$SOURCE/${ROOTFS_XFCE}-build-${VERSION}/etc/rc.d/rc.local"
+
 if [ -x /etc/rc.d/rc.fbset ] ; then
     /etc/rc.d/rc.fbset
 fi
-
 EOF
 	fi
 }
