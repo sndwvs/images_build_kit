@@ -143,7 +143,7 @@ EOF
 	cat <<EOF >>"$CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/rc.d/rc.local"
 
 if [ -x /etc/rc.d/rc.wifi ] ; then
-    /etc/rc.d/rc.wifi start
+  . /etc/rc.d/rc.wifi \$command
 fi
 EOF
 	fi
