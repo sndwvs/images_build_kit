@@ -46,6 +46,51 @@ Slackware
 EOF
 }
 
+setting_rc_local (){
+	echo "------ Settings rc.local ${ROOTFS}-build-$VERSION"
+	cat <<EOF >"$CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/rc.d/rc.local"
+#!/bin/sh
+#
+# /etc/rc.d/rc.local:  Local system initialization script.
+#
+# Put any local setup commands in here:
+
+echo "Running script \$0:"
+
+# Find out how we were called.
+case "\$0" in
+        *local|*M) # if booting name script rc.M
+                command="start"
+                ;;
+        *local_shutdown)
+                command="stop"
+                ;;
+        *)
+                echo "\$0: call me as \"rc.local_shutdown\" or \"rc.local\" please!"
+                exit 1
+                ;;
+esac
+
+
+# start pppd c 20130914
+if [ -x /etc/rc.d/rc.netd ]; then
+    /etc/rc.d/rc.netd
+fi
+
+if [ -x /etc/rc.d/rc.pun ]; then
+  . /etc/rc.d/rc.pun \$command
+fi
+
+if [ -x /etc/rc.d/rc.settings ]; then
+  . /etc/rc.d/rc.settings
+fi
+EOF
+
+        ln -s "$CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/rc.d/rc.local" \
+           -r "$CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/rc.d/rc.local_shutdown"
+
+}
+
 setting_wifi (){
 	echo "------ Settings wifi ${ROOTFS}-build-$VERSION"
 cat <<EOF >"$CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/rc.d/rc.wifi"
@@ -96,8 +141,9 @@ EOF
 	if [[ ! $(cat $CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/rc.d/rc.local | grep wifi) ]];then
 	# add start wifi boot
 	cat <<EOF >>"$CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/rc.d/rc.local"
+
 if [ -x /etc/rc.d/rc.wifi ] ; then
-    /etc/rc.d/rc.wifi start
+  . /etc/rc.d/rc.wifi \$command
 fi
 EOF
 	fi
@@ -124,6 +170,7 @@ EOF
 
 	if [[ ! $(cat $CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/rc.d/rc.local | grep firstboot) ]];then
 	cat <<EOF >>"$CWD/$BUILD/$SOURCE/${ROOTFS}-build-$VERSION/etc/rc.d/rc.local"
+
 if [ -x /firstboot ]; then
     /firstboot 2>&1>/dev/null
 fi
@@ -223,10 +270,10 @@ setting_default_start_x (){
 	if [[ ! $(cat $CWD/$BUILD/$SOURCE/${ROOTFS_XFCE}-build-${VERSION}/etc/rc.d/rc.local | grep fbset) ]];then
 	# add start fbset for DefaultDepth 24
 	cat <<EOF >>"$CWD/$BUILD/$SOURCE/${ROOTFS_XFCE}-build-${VERSION}/etc/rc.d/rc.local"
+
 if [ -x /etc/rc.d/rc.fbset ] ; then
     /etc/rc.d/rc.fbset
 fi
-
 EOF
 	fi
 }
