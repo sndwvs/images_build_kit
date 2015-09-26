@@ -4,9 +4,9 @@ project site http://fail.pp.ua
 
 # FAQ #
 
-login: root
-password: password
+login: root  
+password: password  
 
-unprivileged user:
-login: user
+unprivileged user:  
+login: user  
 password: password
