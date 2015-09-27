@@ -247,22 +247,16 @@ create_img (){
 }
 
 download_pkg (){
-    for category in $CATEGORY_PKG;do
+    for category in $1;do
 	wget -c -q -nc -nd -np -r -A txz,tgz $URL_DISTR/$category/ -P $CWD/$BUILD/$PKG/$category/
-	if [[ "$XFCE" != "true" && $category == "a" ]]; then
-	    return 0
-	fi
     done
 }
 
 install_pkg (){
-    for category in $CATEGORY_PKG;do
+    for category in $1;do
 	for pkg in $(eval echo \$${category}) ;do
 	    installpkg --root $CWD/$BUILD/$SOURCE/${ROOTFS_XFCE}-$BOARD_NAME-build-${VERSION} $CWD/$BUILD/$PKG/$category/$pkg* || exit 1
 	done
-	if [[ "$XFCE" != "true" && $category == "a" ]]; then
-	    return 0
-	fi
     done
 }
 

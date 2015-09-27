@@ -89,7 +89,8 @@ URL_DISTR="http://dl.fail.pp.ua/slackware/slackwarearm-current/slackware"
 _ARCH="arm"
 _BUILD=1
 _PACKAGER="mara"
-CATEGORY_PKG="a ap l n x xfce"
+CATEGORY_PKG_MINI="a ap n"
+CATEGORY_PKG_ALL="a ap l n x xfce"
 a=' acpid
     cpio
     gpm

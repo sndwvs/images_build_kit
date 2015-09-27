@@ -71,7 +71,7 @@ do
 	    echo -e "\t-c | --compile"
 	    echo -e "\t\tbuild binaries locally"
 
-	    echo -e "\t-i | --create-image (default)"
+	    echo -e "\t-i | --create-image (default mini root)"
 	    echo -e "\t\tgenerate image"
 
 	    echo -e "\t-t | --tools"
@@ -157,12 +157,12 @@ if [ "$CREATE_IMAGE" == "true" ]; then
     setting_wifi
     setting_dhcpcd
     setting_firstboot
-    download_pkg
-    install_pkg
+    download_pkg $CATEGORY_PKG_MINI
+    install_pkg $CATEGORY_PKG_MINI
     if [ "$XFCE" == "true" ]; then
 	cp -fr $CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-${VERSION}/ $CWD/$BUILD/$SOURCE/${ROOTFS_XFCE}-$BOARD_NAME-build-${VERSION} || exit 1
-	download_pkg
-	install_pkg
+	download_pkg $CATEGORY_PKG_ALL
+	install_pkg $CATEGORY_PKG_ALL
 	setting_default_theme_xfce
 	setting_default_start_x
 	if [ "$BOARD_NAME" == "firefly" ]; then
