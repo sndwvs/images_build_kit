@@ -157,6 +157,8 @@ if [ "$CREATE_IMAGE" == "true" ]; then
     setting_wifi
     setting_dhcpcd
     setting_firstboot
+    download_pkg
+    install_pkg
     if [ "$XFCE" == "true" ]; then
 	cp -fr $CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-${VERSION}/ $CWD/$BUILD/$SOURCE/${ROOTFS_XFCE}-$BOARD_NAME-build-${VERSION} || exit 1
 	download_pkg
