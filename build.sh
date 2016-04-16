@@ -5,92 +5,60 @@
 #---------------------------------------------
 # environment
 #---------------------------------------------
+set -e
 CWD=$(pwd)
 
 
 
-# commandline arguments processing
-while [ 1 ]
-do
-    case "$1" in
-	-d | --download )
-	    shift
-	    DOWNLOAD_SOURCE_BINARIES="true"
-	    ;;
-	-b | --board )
-	    if [ $(echo "$2" | egrep "cubietruck|firefly") ]; then
-		BOARD_NAME="$2"
-	        shift 2
-	    else
-		exit -1
-	    fi
-	    ;;
-	-p | --patch )
-	    shift
-	    APPLY_PATCH="true"
-	    ;;
-	--clean )
-	    shift
-	    CLEAN="true"
-	    ;;
-	-c | --compile )
-	    shift
-	    COMPILE_BINARIES="true"
-	    ;;
-	-i | --create-image )
-	    shift
-	    CREATE_IMAGE="true"
-	    ;;
-	-t | --tools )
-	    shift
-	    TOOLS_PACK="true"
-	    ;;
-	--xfce )
-	    shift
-	    XFCE="true"
-	    ;;
-	--next )
-	    shift
-	    NEXT="next"
-	    ;;
-	-h | --help )
-	    echo -e "Usage: run as root: $0 <options>"
-	    echo -e "Options:"
-	    echo -e "\t--clean"
-	    echo -e "\t\tclean sources, remove binaries and image"
+# Duplicate file descriptor 1 on descriptor 3
+exec 3>&1
 
-	    echo -e "\t-d | --download"
-	    echo -e "\t\tdownload source and use pre-built binaries"
+while true; do
+    BOARD_NAME=$(dialog --title "build rootfs" \
+           --radiolist "selected your board" 21 76 10 \
+    "cubietruck" "Allwinner Tech SOC A20 ARM® Cortex™-A7" "off" \
+    "firefly" "Rockchip RK3288 Cortex-A17 quad core@ 1.8GHz" "off" \
+    2>&1 1>&3)
 
-	    echo -e "\t-b | --board"
-	    echo -e "\t\tbuild for board cubietruck | firefly"
+    if [ ! -e $BOARD_NAME ]; then
+        break
+    fi
+done
 
-	    echo -e "\t-p | --patch"
-	    echo -e "\t\tpatch the kernel configuration"
+result=$(dialog --title "build for $BOARD_NAME" \
+       --checklist "select build options" 21 76 10 \
+"clean" "clean sources, remove binaries and image" "off" \
+"download" "download source and use pre-built binaries" "on" \
+"compile" "build binaries locally" "on" \
+"create-image" "generate image" "on" \
+"tools" "create and pack tools" "on" \
+"xfce" "create image with xfce" "off" \
+"next" "mainline kernel" "on" \
+"hdmi" "video mode hdmi (defaul vga)" "off" \
+2>&1 1>&3)
 
-	    echo -e "\t-c | --compile"
-	    echo -e "\t\tbuild binaries locally"
+exit_status=$?
+# Close file descriptor 3
+exec 3>&-
 
-	    echo -e "\t-i | --create-image (default mini root)"
-	    echo -e "\t\tgenerate image"
-
-	    echo -e "\t-t | --tools"
-	    echo -e "\t\tcreate and pack tools"
-
-	    echo -e "\t--xfce"
-	    echo -e "\t\tcreate image with xfce"
-
-	    echo -e "\t--next"
-	    echo -e "\t\tmainline kernel"
-    
-	    exit 0
-	    ;;
-	"" )
-#	    shift
-	    break
-	    ;;
-
-    esac
+for arg in $result; do
+    if [ "$arg" == "download" ]; then
+            DOWNLOAD_SOURCE_BINARIES="true"
+    elif [ "$arg" == "clean" ]; then
+            CLEAN="true"
+    elif [ "$arg" == "compile" ]; then
+            COMPILE_BINARIES="true"
+    elif [ "$arg" == "create-image" ]; then
+            CREATE_IMAGE="true"
+    elif [ "$arg" == "tools" ]; then
+            TOOLS_PACK="true"
+    elif [ "$arg" == "xfce" ]; then
+            XFCE="true"
+    elif [ "$arg" == "next" ]; then
+            NEXT=$arg
+    elif [ "$arg" == "hdmi" ]; then
+            HDMI=$arg
+    fi
 done
 
 
@@ -99,16 +67,28 @@ done
 #---------------------------------------------
 # configuration
 #---------------------------------------------
-source $CWD/configuration.sh
-source $CWD/compilation.sh
-source $CWD/build_slackware_rootfs.sh
+source $CWD/overall.sh || exit 1
+source $CWD/configuration.sh || exit 1
+source $CWD/compilation.sh || exit 1
+source $CWD/build_slackware_rootfs.sh || exit 1
 
 
 
+
+#---------------------------------------------
+# clear log
+#---------------------------------------------
+if [[ -f $CWD/$BUILD/$SOURCE/$LOG ]];then
+    rm $CWD/$BUILD/$SOURCE/$LOG
+fi
 
 #---------------------------------------------
 # main script
 #---------------------------------------------
+
+if [ ! -z "$KERNEL_VERSION" ]; then
+    message "" "build" "rootfs for kernel version $KERNEL_VERSION"
+fi
 
 if [ "$CLEAN" == "true" ]; then
     clean_sources
@@ -128,6 +108,8 @@ if [ "$COMPILE_BINARIES" == "true" ]; then
         compile_rkflashtool
         compile_mkbooting
         add_linux_upgrade_tool
+#        compile_boot_loader
+        compile_kernel
         build_parameters
         build_resource
         build_boot
@@ -136,13 +118,15 @@ if [ "$COMPILE_BINARIES" == "true" ]; then
     if [ "$BOARD_NAME" == "cubietruck" ]; then
         patching_kernel_sources
         compile_sunxi_tools
+        build_sunxi_tools
+        compile_boot_loader
+        compile_kernel
     fi
-    compile_boot_loader
-    compile_kernel
-    build_pkg
+
+    build_kernel_pkg
 fi
 
-if [ "$TOOLS_PACK" == "true" ]; then
+if [[ "$TOOLS_PACK" == "true" && "$BOARD_NAME" == "firefly" ]]; then
     build_flash_script
     create_tools_pack
 fi
@@ -154,17 +138,19 @@ if [ "$CREATE_IMAGE" == "true" ]; then
     setting_fstab
     setting_motd
     setting_rc_local
-    setting_wifi
     setting_dhcpcd
     setting_firstboot
-    download_pkg $CATEGORY_PKG_MINI
-    install_pkg $CATEGORY_PKG_MINI
+    setting_settings
+    if [ "$BOARD_NAME" == "firefly" ]; then
+        setting_wifi
+    fi
     if [ "$XFCE" == "true" ]; then
-	cp -fr $CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-${VERSION}/ $CWD/$BUILD/$SOURCE/${ROOTFS_XFCE}-$BOARD_NAME-build-${VERSION} || exit 1
-	download_pkg $CATEGORY_PKG_ALL
-	install_pkg $CATEGORY_PKG_ALL
-	setting_default_theme_xfce
-	setting_default_start_x
+	    message "" "create" "$ROOTFS_XFCE"
+	    cp -fr $CWD/$BUILD/$SOURCE/$ROOTFS/ $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+	    download_pkg $CATEGORY_PKG
+	    install_pkg $CATEGORY_PKG
+	    setting_default_theme_xfce
+	    setting_default_start_x
 	if [ "$BOARD_NAME" == "firefly" ]; then
 	    download_video_driver
 	    build_video_driver_pkg

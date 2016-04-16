@@ -7,60 +7,102 @@ if [ -z $CWD ];then
 fi
 
 clean_rootfs (){
-	if [ -d $CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-$VERSION ];then
-	    echo "------ Clean ${ROOTFS}-$BOARD_NAME-build-$VERSION"
-	    rm -rf $CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-$VERSION || exit 1
-	    if [ -d $CWD/$BUILD/$SOURCE/${ROOTFS_XFCE}-$BOARD_NAME-build-$VERSION ];then
-		rm -rf $CWD/$BUILD/$SOURCE/${ROOTFS_XFCE}-$BOARD_NAME-build-${VERSION} || exit 1
+	if [ -d $CWD/$BUILD/$SOURCE/$ROOTFS ];then
+	    message "" "clean" "$ROOTFS"
+	    rm -rf $CWD/$BUILD/$SOURCE/$ROOTFS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+	    if [ -d $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE ];then
+		message "" "clean" "$ROOTFS_XFCE"
+		rm -rf $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 	    fi
 	fi
-	mkdir -p $CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-$VERSION || exit 1
+	mkdir -p $CWD/$BUILD/$SOURCE/$ROOTFS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 }
 
 download_rootfs (){
-        echo "------ download ${ROOTFS}"
-	wget -c --no-check-certificate $URL_ROOTFS/${ROOTFS}.tar.xz -O $CWD/$BUILD/$SOURCE/${ROOTFS}.tar.xz || exit 1
+    message "" "download" "$ROOTFS_NAME"
+    wget -c --no-check-certificate $URL_ROOTFS/$ROOTFS_NAME.tar.xz -O $CWD/$BUILD/$SOURCE/$ROOTFS_NAME.tar.xz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 }
 
 prepare (){
-	echo "------ prepare ${ROOTFS}"
-	tar xpf $CWD/$BUILD/$SOURCE/${ROOTFS}.tar.?z* -C "$CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-$VERSION" || exit 1
-	installpkg --root $CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-$VERSION $CWD/$BUILD/$PKG/kernel-*.txz || exit 1
+    message "" "prepare" "$ROOTFS"
+    tar xpf $CWD/$BUILD/$SOURCE/$ROOTFS_NAME.tar.xz -C "$CWD/$BUILD/$SOURCE/$ROOTFS" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+
+    message "" "install" "$ROOTFS"
+    installpkg --root $CWD/$BUILD/$SOURCE/$ROOTFS $CWD/$BUILD/$PKG/*.txz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+}
+
+build_sunxi_tools (){
+	message "" "build" "package ${SUNXI_TOOLS}"
+	mkdir -p $CWD/$BUILD/$PKG/${SUNXI_TOOLS}/{sbin,install}
+	
+	cat <<EOF >"$CWD/$BUILD/$PKG/${SUNXI_TOOLS}/install/slack-desc"
+# HOW TO EDIT THIS FILE:
+# The "handy ruler" below makes it easier to edit a package description.  Line
+# up the first '|' above the ':' following the base package name, and the '|'
+# on the right side marks the last column you can put a character in.  You must
+# make exactly 11 lines for the formatting to be correct.  It's also
+# customary to leave one space after the ':'.
+
+     |-----handy-ruler------------------------------------------------------|
+sunxi-tools: sunxi-tools
+sunxi-tools:
+sunxi-tools: Tools to help hacking Allwinner A10 (aka sun4i) based devicesand possibly
+sunxi-tools: and possibly it's successors, that's why the 'x' in the package name.
+sunxi-tools:
+sunxi-tools:
+sunxi-tools: Homepage:  https://github.com/linux-sunxi/sunxi-tools
+sunxi-tools:
+sunxi-tools:
+sunxi-tools:
+sunxi-tools:
+EOF
+
+	find "$CWD/$BUILD/$SOURCE/${SUNXI_TOOLS}" \( -name bin2fex -o -name fex2bin -o -name fexc -o -name nand-part \) \
+	     -exec cp -P {} $CWD/$BUILD/$PKG/${SUNXI_TOOLS}/sbin/. \;
+
+	cd $CWD/$BUILD/$PKG/${SUNXI_TOOLS}/
+	makepkg -l n -c n $CWD/$BUILD/$PKG/${SUNXI_TOOLS}-git_$(date +%Y%m%d)_$(cat $CWD/$BUILD/$SOURCE/${SUNXI_TOOLS}/.git/packed-refs | grep refs/remotes/origin/master | cut -b1-7)-${_ARCH}-${_BUILD}${_PACKAGER}.txz
+	
+	if [ -d $CWD/$BUILD/$PKG/${SUNXI_TOOLS} ];then
+	    rm -rf $CWD/$BUILD/$PKG/${SUNXI_TOOLS}
+	fi
 }
 
 setting_fstab (){
-	if [[ ! $(cat $CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-$VERSION/etc/fstab | grep $ROOT_DISK) ]];then
-	    echo "------ settings fstab ${ROOTFS}-$BOARD_NAME-build-$VERSION"
-	    echo "/dev/$ROOT_DISK    /    ext4    noatime,nodiratime,errors=remount-ro       0       1" >> $CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-$VERSION/etc/fstab || exit 1
+	if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/fstab | grep $ROOT_DISK) ]];then
+	    message "" "setting" "fstab"
+	    echo "/dev/$ROOT_DISK    /    ext4    noatime,nodiratime,errors=remount-ro       0       1" >> $CWD/$BUILD/$SOURCE/$ROOTFS/etc/fstab || exit 1
 	fi
 }
 
 setting_motd (){
-	echo "------ settings motd ${ROOTFS}-$BOARD_NAME-build-$VERSION"
+	message "" "setting" "motd"
 	if [ "$BOARD_NAME" == "firefly" ]; then
-	    cat <<EOF >"$CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-$VERSION/etc/motd"
+	    cat <<EOF >"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/motd"
  ____  ____  ____  ____  ____  __   _  _    ____  _  _  ___  ___   ___  ___
 ( ___)(_  _)(  _ \( ___)( ___)(  ) ( \/ )  (  _ \( )/ )(__ )(__ \ ( _ )( _ ) 
  )__)  _)(_  )   / )__)  )__)  )(__ \  /    )   / )  (  (_ \ / _/ / _ \/ _ \ 
 (__)  (____)(_)\_)(____)(__)  (____)(__)   (_)\_)(_)\_)(___/(____)\___/\___/ 
 Slackware
+
 EOF
 	fi
 
 	if [ "$BOARD_NAME" == "cubietruck" ]; then
-	    cat <<EOF >"$CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-$VERSION/etc/motd"
+	    cat <<EOF >"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/motd"
   ___  __  __  ____  ____  ____  ____  _____    __    ____  ____  
  / __)(  )(  )(  _ \(_  _)( ___)(  _ \(  _  )  /__\  (  _ \(  _ \ 
 ( (__  )(__)(  ) _ < _)(_  )__)  ) _ < )(_)(  /(__)\  )   / )(_) )
  \___)(______)(____/(____)(____)(____/(_____)(__)(__)(_)\_)(____/ 
 Slackware
+
 EOF
 	fi
 }
 
 setting_rc_local (){
-	echo "------ Settings rc.local ${ROOTFS}-$BOARD_NAME-build-$VERSION"
-	cat <<EOF >"$CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-$VERSION/etc/rc.d/rc.local"
+	message "" "setting" "rc.local"
+	cat <<EOF >"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local"
 #!/bin/sh
 #
 # /etc/rc.d/rc.local:  Local system initialization script.
@@ -98,14 +140,14 @@ if [ -x /etc/rc.d/rc.settings ]; then
 fi
 EOF
 
-        ln -s "$CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-$VERSION/etc/rc.d/rc.local" \
-           -r "$CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-$VERSION/etc/rc.d/rc.local_shutdown"
+        ln -s "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local" \
+           -r "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local_shutdown"
 
 }
 
 setting_wifi (){
-	echo "------ Settings wifi ${ROOTFS}-$BOARD_NAME-build-$VERSION"
-cat <<EOF >"$CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-$VERSION/etc/rc.d/rc.wifi"
+	message "" "setting" "wifi"
+cat <<EOF >"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.wifi"
 #!/bin/sh
 
 wifi_start() {
@@ -148,11 +190,11 @@ EOF
 
 
 	# fix wifi driver
-	sed -i "s#wext#nl80211#" $CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-$VERSION/etc/rc.d/rc.inet1.conf
+	sed -i "s#wext#nl80211#" $CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.inet1.conf
 
-	if [[ ! $(cat $CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-$VERSION/etc/rc.d/rc.local | grep wifi) ]];then
+	if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local | grep wifi) ]];then
 	# add start wifi boot
-	cat <<EOF >>"$CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-$VERSION/etc/rc.d/rc.local"
+	cat <<EOF >>"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local"
 
 if [ -x /etc/rc.d/rc.wifi ] ; then
   . /etc/rc.d/rc.wifi \$command
@@ -162,38 +204,76 @@ EOF
 }
 
 setting_firstboot (){
-	if [[ ! -x $CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-$VERSION/firstboot ]];then
-	echo "------ Settings firstboot ${ROOTFS}-$BOARD_NAME-build-$VERSION"
+	if [[ ! -x $CWD/$BUILD/$SOURCE/$ROOTFS/firstboot ]];then
+	message "" "setting" "firstboot"
 	# add start wifi boot
-	cat <<EOF >>"$CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-$VERSION/firstboot"
+	cat <<EOF >>"$CWD/$BUILD/$SOURCE/$ROOTFS/firstboot"
 #!/bin/sh
 
-if [ -e /firstboot ]; then
-    resize2fs -p /dev/$ROOT_DISK
-    # add user
-    echo user | xargs useradd -g users -G video,audio -m -p \$(openssl passwd -1 password) 2>&1>/dev/null
+case "\$1" in
+  'start')
+	if [ -e /firstboot ]; then
+	    if [ ! -f /swap ]; then
+		echo -e "\e[0;37mResizing partition SD card\x1B[0m"
+		device="/dev/"\$(lsblk -idn -o NAME | grep mmc)
+		(( echo d; echo p; echo n; echo p; echo 1; echo; echo; echo w; ) | fdisk \$device )>/dev/null 2>&1
+		#PARTITIONS=\$((\$(fdisk -l \$device | grep \$device | wc -l)-1))
+		#((echo d; echo n; echo p; echo \$PARTITIONS; echo; echo; echo w;) | fdisk \$device)>/dev/null
+		#((echo d; echo \$PARTITIONS; echo n; echo p; echo ; echo ; echo ; echo w;) | fdisk \$device)>/dev/null
+  
+		# change root password
+                usermod -p  '$(openssl passwd -1 password)' root
+    
+		# add user
+		echo -e "\e[0;37mAdd new user\x1B[0m"
+		echo user | xargs useradd -g users -G video,audio -m -p '$(openssl passwd -1 password)' 2>&1>/dev/null
 
-    rm -f /firstboot 2>&1>/dev/null
-fi
+		echo -e "\e[0;37mCreating 128Mb emergency swap area\x1B[0m"
+		dd if=/dev/zero of=/swap bs=1024 count=131072 status=noxfer >/dev/null 2>&1
+		chown root:root /swap
+		chmod 0600 /swap
+		mkswap /swap >/dev/null 2>&1
+		swapon /swap >/dev/null 2>&1
+		echo "/swap none swap sw 0 0" >> /etc/fstab
+		echo 'vm.swappiness=0' >> /etc/sysctl.conf
+
+		sleep 2
+		shutdown -r now
+	    fi
+
+	    echo -e "\e[0;37mResizing SD card file-system\x1B[0m"
+	    /sbin/resize2fs -p /dev/$ROOT_DISK >/dev/null
+
+	    rm -f /firstboot 2>&1>/dev/null
+	fi
+	;;
+   'stop')
+	echo -e "\e[0;37mResizing in next start\x1B[0m"
+        ;;
+   *)
+        echo "Usage: \$0 {start|stop}" >&2
+        exit 1
+	;;
+esac
 
 EOF
 	fi
-	chmod 755 "$CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-$VERSION/firstboot"
+	chmod 755 "$CWD/$BUILD/$SOURCE/$ROOTFS/firstboot"
 
-	if [[ ! $(cat $CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-$VERSION/etc/rc.d/rc.local | grep firstboot) ]];then
-	cat <<EOF >>"$CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-$VERSION/etc/rc.d/rc.local"
+	if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local | grep firstboot) ]];then
+	cat <<EOF >>"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local"
 
 if [ -x /firstboot ]; then
-    /firstboot 2>&1>/dev/null
+  . /firstboot \$command
 fi
 EOF
 	fi
 }
 
 setting_dhcpcd (){
-	if [[ ! $(cat $CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-$VERSION/etc/dhcpcd.conf | grep nolink) ]];then
-		echo "------ Settings dhcpcd.conf ${ROOTFS}-$BOARD_NAME-build-$VERSION"
-	cat <<EOF >>"$CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-$VERSION/etc/dhcpcd.conf"
+	if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/dhcpcd.conf | grep nolink) ]];then
+		message "" "setting" "dhcpcd.conf"
+	cat <<EOF >>"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/dhcpcd.conf"
 noarp
 nolink
 
@@ -203,36 +283,44 @@ EOF
 
 create_img (){
 	if [ "$1" = "xfce" ]; then
-	    IMAGE="${ROOTFS_XFCE}-$BOARD_NAME-build-${VERSION}"
+	    IMAGE="$ROOTFS_XFCE"
 	else
-	    IMAGE="${ROOTFS}-$BOARD_NAME-build-${VERSION}"
+	    IMAGE="$ROOTFS"
 	fi
-	ROOTFS_SIZE=$(expr $(du -sH $CWD/$BUILD/$SOURCE/$IMAGE | awk '{print $1}') / 1024 + 200)"M"
+	# +400M for create swap firstrun
+	ROOTFS_SIZE=$(expr $(du -sH $CWD/$BUILD/$SOURCE/$IMAGE | awk '{print $1}') / 1024 + 400)"M"
 	
 	if [ "$BOARD_NAME" == "firefly" ];then
-	    $CWD/$BUILD/$OUTPUT/$TOOLS/mkrootfs $CWD/$BUILD/$SOURCE/$IMAGE ${ROOTFS_SIZE} || exit 1
+	    $CWD/$BUILD/$OUTPUT/$TOOLS/mkrootfs $CWD/$BUILD/$SOURCE/$IMAGE ${ROOTFS_SIZE} >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 	elif [ "$BOARD_NAME" == "cubietruck" ]; then
 	
-	    echo "------ create image size $ROOTFS_SIZE"
-	    dd if=/dev/zero of=$CWD/$BUILD/$SOURCE/$IMAGE.img bs=1 count=0 seek=$ROOTFS_SIZE
+	    message "" "create" "image size $ROOTFS_SIZE"
+	    dd if=/dev/zero of=$CWD/$BUILD/$SOURCE/$IMAGE.img bs=1 count=0 seek=$ROOTFS_SIZE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 
 	    LOOP=$(losetup -f)
 	
 	    losetup $LOOP $CWD/$BUILD/$SOURCE/$IMAGE.img || exit 1
-	
-	    echo "------ save $BOOT_LOADER"
-	    dd if=$CWD/$BUILD/$SOURCE/$BOOT_LOADER"/u-boot-sunxi-with-spl.bin" of=$LOOP bs=1024 seek=8 status=noxfer || exit 1
 
-	    echo "------ create partition"
-	    ((echo o; echo p; echo n; echo p; echo 1; echo 2048; echo; echo w) | fdisk $LOOP)>/dev/null
+	    message "" "save" "$BOOT_LOADER"
+	    dd if="$CWD/$BUILD/$SOURCE/$BOOT_LOADER/$BOOT_LOADER_BIN" of=$LOOP bs=1024 seek=8 status=noxfer >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+
+	    message "" "create" "partition"
+#	    ((echo o; echo p; echo n; echo p; echo 1; echo 2048; echo; echo w) | fdisk $LOOP) >/dev/null 2>&1
+#	    ( ((echo o; echo p; echo n; echo p; echo 1; echo 2048; echo; echo w) | fdisk $LOOP) >/dev/null 2>&1 ) || true
+#	    ( ((echo o; echo p; echo n; echo p; echo 1; echo 2048; echo; echo w) | fdisk $LOOP) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1 ) # || true
+	    ((echo o; echo p; echo n; echo p; echo 1; echo 2048; echo; echo w) | fdisk $LOOP) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || true
+
+	    partprobe $LOOP >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+
 	    losetup -d $LOOP
+
 	    # 2048 (start) x 512 (block size) = where to mount partition
-	    losetup -o 1048576 $LOOP $CWD/$BUILD/$SOURCE/$IMAGE.img
+	    losetup -o 1048576 $LOOP $CWD/$BUILD/$SOURCE/$IMAGE.img >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 
-	    echo "------ create filesystem"
-	    mkfs.ext4 -F -m 0 -L linuxroot $LOOP
-
-	    echo "------ create mount point and mount image"
+	    message "" "create" "filesystem"
+	    mkfs.ext4 -F -m 0 -L linuxroot $LOOP >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+	    
+	    message "" "create" "mount point and mount image"
 	    mkdir -p $CWD/$BUILD/$SOURCE/image
 	    mount $LOOP $CWD/$BUILD/$SOURCE/image
 	    cp -a $CWD/$BUILD/$SOURCE/$IMAGE/* $CWD/$BUILD/$SOURCE/image
@@ -246,24 +334,85 @@ create_img (){
 	fi
 }
 
+setting_settings (){
+    if [[ ! -f "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.settings" ]];then
+        message "" "setting" "rc.settings"
+
+        if [ "$NEXT" == "next" ];then
+            cat <<EOF >>"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.settings"
+#!/bin/sh
+
+LED="/sys/class/leds"
+
+#echo "heartbeat" > \$LED/cubietruck:blue:usr/trigger
+echo "mmc0" > \$LED/cubietruck:green:usr/trigger
+echo "cpu1" > \$LED/cubietruck:orange:usr/trigger
+echo "cpu0" > \$LED/cubietruck:white:usr/trigger
+
+
+# cpufreq
+CORES=\$(cat /proc/cpuinfo | grep processor | wc -l)
+core=0
+
+#while [ \$core -lt \$CORES ]; do
+#    echo performance > /sys/devices/system/cpu/cpu\$core/cpufreq/scaling_governor
+#    echo 1008000 > /sys/devices/system/cpu/cpu\$core/cpufreq/scaling_max_freq
+#    echo 912000 > /sys/devices/system/cpu/cpu\$core/cpufreq/scaling_min_freq
+#    core=\$((\$core+1))
+#done
+
+# ondemand
+while [ \$core -lt \$CORES ]; do
+    echo ondemand > /sys/devices/system/cpu/cpu\$core/cpufreq/scaling_governor
+    echo 1008000 > /sys/devices/system/cpu/cpu\$core/cpufreq/scaling_max_freq
+    echo 336000 > /sys/devices/system/cpu/cpu\$core/cpufreq/scaling_min_freq
+    core=\$((\$core+1))
+done
+
+echo 40 > /sys/devices/system/cpu/cpufreq/ondemand/up_threshold
+echo 200000 > /sys/devices/system/cpu/cpufreq/ondemand/sampling_rate
+
+EOF
+        fi
+
+        if [[ -f "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.settings" ]];then
+            chmod 755 "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.settings"
+        fi
+    fi
+}
+
 download_pkg (){
-    for category in $1;do
-	wget -c -q -nc -nd -np -r -A txz,tgz $URL_DISTR/$category/ -P $CWD/$BUILD/$PKG/$category/
+    for category in "$@";do
+        eval packages=\$${category}
+        for _pkg in $packages;do
+#            PKG_NAME=$(wget -q -O - ${URL_DISTR}/${category} | grep -oP "(\"$(echo $_pkg | sed "s#\+#\\\+#")-[\.\-\+\d\w]+.txz\")"  | sed "s#\"##g" | head -n1)
+            PKG_NAME=$(wget -q -O - ${URL_DISTR}/${category} | grep -oP "(\>$(echo $_pkg | sed "s#\+#\\\+#")-[\.\-\+\d\w]+.txz\<)" | sed "s#[><]##g" | head -n1)
+            message "" "download" "package $category/$PKG_NAME"
+            wget -c -nc -nd -np ${URL_DISTR}/${category}/$PKG_NAME -P $CWD/$BUILD/$PKG/${category}/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+        done
     done
 }
 
 install_pkg (){
-    for category in $1;do
+    if [ ! -d "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE" ]; then
+	_ROOTFS="$ROOTFS"
+    else
+	_ROOTFS="$ROOTFS_XFCE"
+    fi
+
+    for category in "$@";do
 	for pkg in $(eval echo \$${category}) ;do
-	    installpkg --root $CWD/$BUILD/$SOURCE/${ROOTFS_XFCE}-$BOARD_NAME-build-${VERSION} $CWD/$BUILD/$PKG/$category/$pkg* || exit 1
+	    message "" "install" "package $category/$pkg"
+	    installpkg --root $CWD/$BUILD/$SOURCE/$_ROOTFS $CWD/$BUILD/$PKG/$category/$pkg* >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 	done
     done
 }
 
 setting_default_theme_xfce (){
-	if [[ ! -d "$CWD/$BUILD/$SOURCE/${ROOTFS_XFCE}-$BOARD_NAME-build-${VERSION}/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml" ]];then
-	install -m755 -d "$CWD/$BUILD/$SOURCE/${ROOTFS_XFCE}-$BOARD_NAME-build-${VERSION}/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml"
-	cat <<EOF >>"$CWD/$BUILD/$SOURCE/${ROOTFS_XFCE}-$BOARD_NAME-build-${VERSION}/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml"
+    if [[ ! -d "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml" ]];then
+        message "" "setting" "default settings xfce"
+        install -m755 -d "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml"
+        cat <<EOF >>"$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml"
 <?xml version="1.0" encoding="UTF-8"?>
 
 <channel name="xsettings" version="1.0">
@@ -300,40 +449,43 @@ setting_default_theme_xfce (){
 </channel>
 EOF
 
-	install -D "$CWD/$BUILD/$SOURCE/${ROOTFS_XFCE}-$BOARD_NAME-build-${VERSION}/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml" "$CWD/$BUILD/$SOURCE/${ROOTFS_XFCE}-$BOARD_NAME-build-${VERSION}/root/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml"
-	fi
+        install -D "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml" \
+                   "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/root/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml"
+    fi
 }
 
 setting_default_start_x (){
-	sed "s#id:3#id:4#" -i $CWD/$BUILD/$SOURCE/${ROOTFS_XFCE}-$BOARD_NAME-build-${VERSION}/etc/inittab
-	# fix default xfce
-	cd $CWD/$BUILD/$SOURCE/${ROOTFS_XFCE}-$BOARD_NAME-build-${VERSION}/etc/X11/xinit || exit 1
-	ln -sf xinitrc.xfce xinitrc || exit 1
+    sed "s#id:3#id:4#" -i $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/inittab
+    # fix default xfce
+    ln -sf $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/X11/xinit/xinitrc.xfce \
+       -r $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/X11/xinit/xinitrc
 
-	if [[ ! $(cat $CWD/$BUILD/$SOURCE/${ROOTFS_XFCE}-$BOARD_NAME-build-${VERSION}/etc/rc.d/rc.local | grep fbset) ]];then
-	# add start fbset for DefaultDepth 24
-	cat <<EOF >>"$CWD/$BUILD/$SOURCE/${ROOTFS_XFCE}-$BOARD_NAME-build-${VERSION}/etc/rc.d/rc.local"
+    if [ "$BOARD_NAME" == "firefly" ]; then
+        if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.local | grep fbset) ]];then
+            # add start fbset for DefaultDepth 24
+            cat <<EOF >>"$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.local"
 
 if [ -x /etc/rc.d/rc.fbset ] ; then
     /etc/rc.d/rc.fbset
 fi
 EOF
-	fi
+        fi
+    fi
 }
 
 download_video_driver (){
-	echo "------ Download $VIDEO_DRIVER"
-	wget -c --no-check-certificate $URL_VIDEO_DRIVER/$VIDEO_DRIVER.tar.gz -O $CWD/$BUILD/$SOURCE/$VIDEO_DRIVER.tar.gz || exit 1
+    message "" "download" "$VIDEO_DRIVER"
+    wget -c --no-check-certificate $URL_VIDEO_DRIVER/$VIDEO_DRIVER.tar.gz -O $CWD/$BUILD/$SOURCE/$VIDEO_DRIVER.tar.gz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 }
 
 build_video_driver_pkg (){
-	echo "------ Create $VIDEO_DRIVER pakages"
+    message "" "create" "pakage $VIDEO_DRIVER"
 
-	mkdir -p $CWD/$BUILD/$PKG/$VIDEO_DRIVER/etc/{X11,rc.d,udev/rules.d} $CWD/$BUILD/$PKG/$VIDEO_DRIVER/usr/lib
-	tar --strip-components=1 -xzf $CWD/$BUILD/$SOURCE/$VIDEO_DRIVER.tar.gz -C $CWD/$BUILD/$PKG/$VIDEO_DRIVER/usr/lib
-	find $CWD/$BUILD/$PKG/$VIDEO_DRIVER/usr/lib -exec chmod 755 {} \; -exec chown root:root {} \;
+    mkdir -p $CWD/$BUILD/$PKG/$VIDEO_DRIVER/etc/{X11,rc.d,udev/rules.d} $CWD/$BUILD/$PKG/$VIDEO_DRIVER/usr/lib
+    tar --strip-components=1 -xzf $CWD/$BUILD/$SOURCE/$VIDEO_DRIVER.tar.gz -C $CWD/$BUILD/$PKG/$VIDEO_DRIVER/usr/lib
+    find $CWD/$BUILD/$PKG/$VIDEO_DRIVER/usr/lib -exec chmod 755 {} \; -exec chown root:root {} \;
 
-	cat <<EOF >$CWD/$BUILD/$PKG/$VIDEO_DRIVER/etc/X11/xorg.conf
+    cat <<EOF >$CWD/$BUILD/$PKG/$VIDEO_DRIVER/etc/X11/xorg.conf
 
 Section "Device"
 	Identifier	"Mali FBDEV"
@@ -386,7 +538,7 @@ Section "ServerLayout"
 EndSection
 EOF
 
-	cat <<EOF >$CWD/$BUILD/$PKG/$VIDEO_DRIVER/etc/rc.d/rc.fbset
+    cat <<EOF >$CWD/$BUILD/$PKG/$VIDEO_DRIVER/etc/rc.d/rc.fbset
 #!/bin/bash
 
 if [ -x /usr/sbin/fbset ];then
@@ -394,21 +546,21 @@ if [ -x /usr/sbin/fbset ];then
 fi
 EOF
 
-	chmod 755 $CWD/$BUILD/$PKG/$VIDEO_DRIVER/etc/rc.d/rc.fbset
+    chmod 755 $CWD/$BUILD/$PKG/$VIDEO_DRIVER/etc/rc.d/rc.fbset
 
 # fix permission
-	cat <<EOF >$CWD/$BUILD/$PKG/$VIDEO_DRIVER/etc/udev/rules.d/50-mali.rules
+    cat <<EOF >$CWD/$BUILD/$PKG/$VIDEO_DRIVER/etc/udev/rules.d/50-mali.rules
 KERNEL=="fb*", MODE="0660", GROUP="video"
 KERNEL=="mali*", MODE="0660", GROUP="video"
 EOF
 
-	cd $CWD/$BUILD/$PKG/$VIDEO_DRIVER
-	makepkg  -l n -c n $CWD/$BUILD/$PKG/$VIDEO_DRIVER-${_ARCH}-${_BUILD}${_PACKAGER}.txz
+    cd $CWD/$BUILD/$PKG/$VIDEO_DRIVER
+    makepkg  -l n -c n $CWD/$BUILD/$PKG/$VIDEO_DRIVER-${_ARCH}-${_BUILD}${_PACKAGER}.txz
 }
 
 install_video_driver_pkg (){
-	echo "------ Install $VIDEO_DRIVER"
-        installpkg --root $CWD/$BUILD/$SOURCE/${ROOTFS_XFCE}-$BOARD_NAME-build-${VERSION} $CWD/$BUILD/$PKG/$VIDEO_DRIVER-* || exit 1
+    message "" "install" "$VIDEO_DRIVER"
+    installpkg --root $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE $CWD/$BUILD/$PKG/$VIDEO_DRIVER-* >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 }
 
 

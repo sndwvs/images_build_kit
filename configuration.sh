@@ -10,14 +10,14 @@ CTHREADS=" -j$(($CPUS + $CPUS/2)) ";
 #---------------------------------------------
 # environment
 #---------------------------------------------
-CWD=$(pwd)
+PWD=$(pwd)
 BUILD="build"
 SOURCE="source"
 PKG="pkg"
 OUTPUT="output"
 TOOLS="tools"
 FLASH="flash"
-
+LOG="build.log"
 
 
 #---------------------------------------------
@@ -37,7 +37,7 @@ if [ "$BOARD_NAME" = "firefly" ]; then
     RKFLASH_TOOLS="rkflashtool"
     URL_MKBOOTIMG_TOOLS="https://github.com/neo-technologies/"
     MKBOOTIMG_TOOLS="rockchip-mkbootimg"
-    URL_BOOT_LOADER_SOURCE="https://github.com/linux-rockchip/"
+    URL_BOOT_LOADER_SOURCE="https://github.com/linux-rockchip"
     BOOT_LOADER="u-boot-rockchip"
     BOOT_LOADER_CONFIG="rk3288_defconfig"
     URL_FIRMWARE="https://github.com/rkchrome/overlay/archive/"
@@ -46,17 +46,19 @@ if [ "$BOARD_NAME" = "firefly" ]; then
     LINUX_SOURCE="firefly-rk3288-kernel"
     LINUX_CONFIG="rk3288_config"
     MODULES="mali_kbase gspca_main"
-    URL_VIDEO_DRIVER="http://malideveloper.arm.com/downloads/drivers/binary/r5p0-06rel0/"
-    VIDEO_DRIVER="mali-t76x_r5p0-06rel0_linux_1+fbdev"
+    URL_VIDEO_DRIVER="http://malideveloper.arm.com/downloads/drivers/binary/r6p0-02rel0/"
+    VIDEO_DRIVER="mali-t76x_r6p0-02rel0_linux_1+fbdev"
+    ROOT_DISK="mmcblk0p3"
 fi
 #---------------------------------------------
 
 #---------------------------------------------
 # cubietruck
 #---------------------------------------------
-if [ "$BOARD_NAME" = "cubietruck" ]; then
+if [ "$BOARD_NAME" == "cubietruck" ]; then
     URL_SUNXI_TOOLS="https://github.com/linux-sunxi"
     SUNXI_TOOLS="sunxi-tools"
+    SUNXI_TOOLS_VERSION="v1.2"
     URL_FIRMWARE="https://github.com/igorpecovnik/lib/raw/next/bin"
     FIRMWARE="ap6210.zip"
     FIRMWARE1="linux-firmware.zip"
@@ -69,17 +71,40 @@ if [ "$BOARD_NAME" = "cubietruck" ]; then
     BOOT_LOADER_CONFIG="Cubietruck_config"
     BOOT_LOADER_BIN="u-boot-sunxi-with-spl.bin"
     MODULES="hci_uart gpio_sunxi bt_gpio wifi_gpio rfcomm hidp sunxi-ir bonding spi_sun7i bcmdhd ump mali mali_drm"
+
+    if [[ $NEXT == "next" ]];then
+    LINUX_CONFIG="linux-sunxi-next.config"
+    FIRMWARE=""
+    MODULES="brcmfmac rfcomm hidp bonding"
+    fi
+
+    ROOT_DISK="mmcblk0p1"
 fi
 #---------------------------------------------
 
-BOOT_LOADER_VERSION="v2015.07"
-URL_XTOOLS="http://archlinuxarm.org/builder/xtools/4.9.2-4/x-tools7h.tar.xz"
+#---------------------------------------------
+# get version linux source
+#---------------------------------------------
+kernel_version KERNEL_VERSION
+
+#---------------------------------------------
+# Vanilla Linux
+#---------------------------------------------
+if [[ $NEXT == "next" ]];then
+    URL_LINUX_SOURCE="http://mirror.yandex.ru/pub/linux/kernel/v4.x"
+    LINUX_SOURCE="linux-$KERNEL_VERSION"
+fi
+#---------------------------------------------
+
+BOOT_LOADER_VERSION="v2016.01"
 XTOOLS="x-tools7h"
-URL_ROOTFS="ftp://ftp.arm.slackware.com/slackwarearm/slackwarearm-devtools/minirootfs/roots"
-ROOTFS="slack-current-miniroot_10Sep15"
-ROOTFS_XFCE=$(echo $ROOTFS | sed 's#miniroot#xfce#')
+URL_XTOOLS="http://archlinuxarm.org/builder/xtools/$XTOOLS.tar.xz"
+URL_ROOTFS="ftp://ftp.arm.slackware.com/slackwarearm/slackwarearm-devtools/minirootfs/roots/"
+ROOTFS_NAME=$(wget -q -O - $URL_ROOTFS | grep -oP "(slack-current[\.\-\+\d\w]+.tar.xz)" | head -n1 | cut -d '.' -f1)
 VERSION=$(date +%Y%m%d)
-ROOT_DISK="mmcblk0p1"
+ROOTFS="$ROOTFS_NAME-$KERNEL_VERSION-$BOARD_NAME-build-$VERSION"
+ROOTFS_XFCE="$(echo $ROOTFS_NAME | sed 's#miniroot#xfce#')-$KERNEL_VERSION-$BOARD_NAME-build-$VERSION"
+#ROOT_DISK="mmcblk0p1"
 
 
 #---------------------------------------------
@@ -89,8 +114,7 @@ URL_DISTR="http://dl.fail.pp.ua/slackware/slackwarearm-current/slackware"
 _ARCH="arm"
 _BUILD=1
 _PACKAGER="mara"
-CATEGORY_PKG_MINI="a ap n"
-CATEGORY_PKG_ALL="a ap l n x xfce"
+CATEGORY_PKG="a ap l n x xfce"
 a=' acpid
     cpio
     gpm
@@ -114,19 +138,24 @@ ap=' alsa-utils
      flac
      htop
      man
-     man-page
+     man-pages
      mc
      mpg123
+     pamixer
+     cgmanager
      sqlite
      sudo'
 
-l=' ConsoleKit
+d=' llvm'
+
+l=' ConsoleKit2
     GConf
     M2Crypto
     aalib
     a52dec
     alsa-lib
     alsa-oss
+    alsa-plugins
     apr
     apr-util
     aspell
@@ -134,9 +163,11 @@ l=' ConsoleKit
     at-spi2-atk
     at-spi2-core
     atk
+    atkmm
     audiofile
     boost
     cairo
+    cairomm
     db42
     db44
     db48
@@ -158,6 +189,7 @@ l=' ConsoleKit
     glib2
     glibc-i18n
     glibc-profile
+    glibmm
     gmime
     gmm
     gmp
@@ -172,6 +204,8 @@ l=' ConsoleKit
     gtk+
     gtk+2
     gtk+3
+    gtkmm2
+    gtkmm3
     gtkspell
     gvfs
     harfbuzz
@@ -181,6 +215,7 @@ l=' ConsoleKit
     ilmbase
     iso-codes
     jasper
+    json-c
     keybinder
     keyutils
     lcms2
@@ -188,6 +223,7 @@ l=' ConsoleKit
     libao
     libarchive
     libart_lgpl
+    libasyncns
     libbluedevil
     libcaca
     libcanberra
@@ -233,6 +269,7 @@ l=' ConsoleKit
     librsvg
     libsamplerate
     libsecret
+    libsigc++
     libsndfile
     libsoup
     libspectre
@@ -264,13 +301,16 @@ l=' ConsoleKit
     ncurses
     openjpeg
     pango
+    pangomm
     pcre
     polkit
     polkit-gnome
     poppler
     poppler-data
+    pulseaudio
     readline
     sdl
+    speexdsp
     shared-desktop-ontologies
     shared-mime-info
     slang
@@ -285,7 +325,6 @@ l=' ConsoleKit
 
 n=' bluez
     bluez-firmware
-    bluez-hcidump
     ca-certificates
     conntrack-tools
     cyrus-sasl
@@ -492,7 +531,6 @@ x=' anthy
     xf86-input-keyboard
     xf86-input-mouse
     xf86-video-fbdev
-    xf86-video-modesetting
     xf86-video-v4l
     xf86bigfontproto
     xf86dga
@@ -559,7 +597,7 @@ xfce=' Thunar
     xfce4-appfinder
     xfce4-clipman-plugin
     xfce4-dev-tools
-    xfce4-mixer
+    xfce4-pulseaudio-plugin
     xfce4-notifyd
     xfce4-panel
     xfce4-power-manager
@@ -569,7 +607,6 @@ xfce=' Thunar
     xfce4-systemload-plugin
     xfce4-taskmanager
     xfce4-terminal
-    xfce4-volumed
     xfce4-weather-plugin
     xfconf
     xfdesktop
@@ -580,183 +617,69 @@ patching_kernel_sources (){
 #--------------------------------------------------------------------------------------------------------------------------------
 # patching kernel sources
 #--------------------------------------------------------------------------------------------------------------------------------
-echo "------ patching kernel"
-    cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE
+    message "" "patching" "kernel $LINUX_SOURCE"
+
+    cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 
     # mainline
-    if [ "$NEXT" = "next" ];then
-	# Fix BRCMFMAC AP mode for Cubietruck / Banana PRO
-	if [ "$(cat drivers/net/wireless/brcm80211/brcmfmac/feature.c | grep "mbss\", 0);\*")" == "" ]; then
-		sed -i 's/brcmf_feat_iovar_int_set(ifp, BRCMF_FEAT_MBSS, "mbss", 0);/\/*brcmf_feat_iovar_int_set(ifp, BRCMF_FEAT_MBSS, "mbss", 0);*\//g' drivers/net/wireless/brcm80211/brcmfmac/feature.c
-	fi
-	
-	# install device tree blobs in separate package, link zImage to kernel image script
-	wget -c --no-check-certificate https://raw.githubusercontent.com/igorpecovnik/lib/next/patch/packaging-next.patch -O $CWD/$BUILD/$SOURCE/packaging-next.patch
-	if [ "$(patch --dry-run -t -p1 < $CWD/$BUILD/$SOURCE/packaging-next.patch | grep previ)" == "" ]; then
-		patch -p1 < $CWD/$BUILD/$SOURCE/packaging-next.patch || exit 1
-	fi
+    if [[ "$NEXT" == "next" ]];then
+         # fix BRCMFMAC AP mode Banana & CT
+        if [ "$(patch --dry-run -t -p1 < $CWD/patch/brcmfmac_ap_banana_ct.patch | grep Reversed)" == "" ]; then
+            patch  --batch -f -p1 < $CWD/patch/brcmfmac_ap_banana_ct.patch || exit 1
+        fi
+
+         # fix BRCMF and MMC if copy big data to WIFI
+	 # http://forum.armbian.com/index.php/topic/230-cubietruck-armbian-42-cubietruck-debian-jessie-416-wifi-does-not-work/
+	 # https://groups.google.com/forum/#!msg/linux-sunxi/v6Ktt8lAnw0/T9gOChygom0J
+        if [ "$(patch --dry-run -t -p1 < $CWD/patch/brcmf_mmc_copy_big_data.patch | grep Reversed)" == "" ]; then
+            patch  --batch -f -p1 < $CWD/patch/brcmf_mmc_copy_big_data.patch || exit 1
+        fi
     fi
+
 
     # sunxi 3.4
-    if [ "$NEXT" != "next" ];then
+    if [[ "$NEXT" != "next" ]];then
+#	rm $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/drivers/spi/spi-sun7i.c
+#	rm -r $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/drivers/net/wireless/ap6210/
+
 	# SPI functionality
-        wget -c --no-check-certificate https://raw.githubusercontent.com/igorpecovnik/lib/next/patch/spi.patch -O $CWD/$BUILD/$SOURCE/spi.patch
-	if [ "$(patch --dry-run -t -p1 < $CWD/$BUILD/$SOURCE/spi.patch | grep previ)" == "" ]; then
-	    patch --batch -f -p1 < $CWD/$BUILD/$SOURCE/spi.patch || exit 1
+        if [ "$(patch --dry-run -t -p1 < $CWD/patch/spi.patch | grep previ)" == "" ]; then
+	    patch --batch -f -p1 < $CWD/patch/spi.patch || exit 1
 	fi
 
-	# compiler reverse patch. It has already been fixed.
-	wget -c --no-check-certificate https://raw.githubusercontent.com/igorpecovnik/lib/next/patch/compiler.patch -O $CWD/$BUILD/$SOURCE/compiler.patch
-	if [ "$(patch --dry-run -t -p1 < $CWD/$BUILD/$SOURCE/compiler.patch | grep Reversed)" != "" ]; then
-	    patch --batch -t -p1 < $CWD/$BUILD/$SOURCE/compiler.patch || exit 1
+	# Aufs3
+	if [ "$(patch --dry-run -t -p1 < $CWD/patch/linux-sunxi-3.4.108-overlayfs.patch | grep Reversed)" == "" ]; then
+	    patch --batch -f -p1 < $CWD/patch/linux-sunxi-3.4.108-overlayfs.patch || exit 1
+	fi
+
+	# More I2S and Spdif
+	if [ "$(patch --dry-run -t -p1 < $CWD/patch/i2s_spdif_sunxi.patch | grep Reversed)" == "" ]; then
+	    patch --batch -f -p1 < $CWD/patch/i2s_spdif_sunxi.patch || exit 1
+	fi
+
+	# A fix for rt8192
+	if [ "$(patch --dry-run -t -p1 < $CWD/patch/rt8192cu-missing-case.patch | grep Reversed)" == "" ]; then
+	    patch --batch -f -p1 < $CWD/patch/rt8192cu-missing-case.patch || exit 1
+	fi
+
+	# Upgrade to 3.4.109"
+	if [ "$(patch --dry-run -t -p1 < $CWD/patch/patch-3.4.108-109 | grep Reversed)" == "" ]; then
+	    patch --batch -f -p1 < $CWD/patch/patch-3.4.108-109 || exit 1
 	fi
     fi
-
-#    # u-boot
-#    cd $CWD/$BUILD/$SOURCE/$BOOT_LOADER
-#    echo "------ patching $BOOT_LOADER"
-
-#    # Add awsom to uboot
-#    wget -c --no-check-certificate https://raw.githubusercontent.com/igorpecovnik/lib/next/patch/add-awsom-uboot.patch -O $CWD/$BUILD/$SOURCE/add-awsom-uboot.patch
-#    if [ "$(patch --dry-run -t -p1 < $CWD/$BUILD/$SOURCE/add-awsom-uboot.patch | grep create)" == "" ]; then
-#	    patch --batch -N -p1 < $CWD/$BUILD/$SOURCE/add-awsom-uboot.patch || exit 1
-#    fi
 }
 
 
 #---------------------------------------------
 # patch the kernel configuration
 #---------------------------------------------
-KERNEL_CONFIG_PATCH='--- .config.orig	2015-08-15 18:11:41.251087567 +0300
-+++ .config	2015-08-15 18:09:34.000000000 +0300
-@@ -119,11 +119,8 @@
- CONFIG_NAMESPACES=y
- # CONFIG_UTS_NS is not set
- # CONFIG_IPC_NS is not set
--# CONFIG_USER_NS is not set
- # CONFIG_PID_NS is not set
- CONFIG_NET_NS=y
--CONFIG_UIDGID_CONVERTED=y
--# CONFIG_UIDGID_STRICT_TYPE_CHECKS is not set
- # CONFIG_SCHED_AUTOGROUP is not set
- # CONFIG_SYSFS_DEPRECATED is not set
- CONFIG_RELAY=y
-@@ -875,10 +872,15 @@
- # CONFIG_L2TP_DEBUGFS is not set
- # CONFIG_L2TP_V3 is not set
- CONFIG_STP=y
-+CONFIG_GARP=y
-+CONFIG_MRP=y
- CONFIG_BRIDGE=y
- CONFIG_BRIDGE_IGMP_SNOOPING=y
-+# CONFIG_BRIDGE_VLAN_FILTERING is not set
- CONFIG_HAVE_NET_DSA=y
--# CONFIG_VLAN_8021Q is not set
-+CONFIG_VLAN_8021Q=y
-+CONFIG_VLAN_8021Q_GVRP=y
-+CONFIG_VLAN_8021Q_MVRP=y
- # CONFIG_DECNET is not set
- CONFIG_LLC=y
- # CONFIG_LLC2 is not set
-@@ -3285,20 +3287,35 @@
- # CONFIG_JBD2_DEBUG is not set
- CONFIG_FS_MBCACHE=y
- # CONFIG_REISERFS_FS is not set
--# CONFIG_JFS_FS is not set
--# CONFIG_XFS_FS is not set
-+CONFIG_JFS_FS=y
-+CONFIG_JFS_POSIX_ACL=y
-+CONFIG_JFS_SECURITY=y
-+# CONFIG_JFS_DEBUG is not set
-+# CONFIG_JFS_STATISTICS is not set
-+CONFIG_XFS_FS=y
-+CONFIG_XFS_QUOTA=y
-+CONFIG_XFS_POSIX_ACL=y
-+CONFIG_XFS_RT=y
-+# CONFIG_XFS_WARN is not set
-+# CONFIG_XFS_DEBUG is not set
- # CONFIG_GFS2_FS is not set
- # CONFIG_OCFS2_FS is not set
--# CONFIG_BTRFS_FS is not set
-+CONFIG_BTRFS_FS=y
-+CONFIG_BTRFS_FS_POSIX_ACL=y
-+# CONFIG_BTRFS_FS_CHECK_INTEGRITY is not set
-+CONFIG_BTRFS_FS_RUN_SANITY_TESTS=y
-+# CONFIG_BTRFS_DEBUG is not set
- # CONFIG_NILFS2_FS is not set
- CONFIG_FS_POSIX_ACL=y
-+CONFIG_EXPORTFS=y
- CONFIG_FILE_LOCKING=y
- CONFIG_FSNOTIFY=y
- CONFIG_DNOTIFY=y
- CONFIG_INOTIFY_USER=y
- # CONFIG_FANOTIFY is not set
- # CONFIG_QUOTA is not set
--# CONFIG_QUOTACTL is not set
-+# CONFIG_QUOTA_NETLINK_INTERFACE is not set
-+CONFIG_QUOTACTL=y
- # CONFIG_AUTOFS4_FS is not set
- CONFIG_FUSE_FS=y
- # CONFIG_CUSE is not set
-@@ -3342,8 +3359,33 @@
- CONFIG_CONFIGFS_FS=y
- # CONFIG_MISC_FILESYSTEMS is not set
- CONFIG_NETWORK_FILESYSTEMS=y
--# CONFIG_NFS_FS is not set
--# CONFIG_NFSD is not set
-+CONFIG_NFS_FS=y
-+# CONFIG_NFS_V2 is not set
-+CONFIG_NFS_V3=y
-+CONFIG_NFS_V3_ACL=y
-+CONFIG_NFS_V4=y
-+CONFIG_NFS_SWAP=y
-+CONFIG_NFS_V4_1=y
-+CONFIG_PNFS_FILE_LAYOUT=m
-+CONFIG_PNFS_BLOCK=m
-+CONFIG_NFS_V4_1_IMPLEMENTATION_ID_DOMAIN="kernel.org"
-+CONFIG_ROOT_NFS=y
-+CONFIG_NFS_USE_LEGACY_DNS=y
-+CONFIG_NFSD=y
-+CONFIG_NFSD_V2_ACL=y
-+CONFIG_NFSD_V3=y
-+CONFIG_NFSD_V3_ACL=y
-+CONFIG_NFSD_V4=y
-+# CONFIG_NFSD_FAULT_INJECTION is not set
-+CONFIG_LOCKD=y
-+CONFIG_LOCKD_V4=y
-+CONFIG_NFS_ACL_SUPPORT=y
-+CONFIG_NFS_COMMON=y
-+CONFIG_SUNRPC=y
-+CONFIG_SUNRPC_GSS=y
-+CONFIG_SUNRPC_BACKCHANNEL=y
-+CONFIG_SUNRPC_SWAP=y
-+# CONFIG_SUNRPC_DEBUG is not set
- # CONFIG_CEPH_FS is not set
- CONFIG_CIFS=y
- # CONFIG_CIFS_STATS is not set
-@@ -3573,6 +3615,7 @@
- CONFIG_DEFAULT_SECURITY_SELINUX=y
- # CONFIG_DEFAULT_SECURITY_DAC is not set
- CONFIG_DEFAULT_SECURITY="selinux"
-+CONFIG_XOR_BLOCKS=y
- CONFIG_CRYPTO=y
- 
- #
-@@ -3687,6 +3730,7 @@
- #
- # Library routines
- #
-+CONFIG_RAID6_PQ=y
- CONFIG_BITREVERSE=y
- CONFIG_GENERIC_STRNCPY_FROM_USER=y
- CONFIG_GENERIC_STRNLEN_USER=y
-@@ -3732,4 +3776,5 @@
- CONFIG_AVERAGE=y
- # CONFIG_CORDIC is not set
- # CONFIG_DDR is not set
-+CONFIG_OID_REGISTRY=y
- # CONFIG_VIRTUALIZATION is not set
-'
+patching_kernel_config (){
+	message "" "patching" "kernel config $LINUX_CONFIG"
+	if [ "$(patch --dry-run -t -p1 < $CWD/patch/linux-fitefly-rk3288.config.patch | grep Reversed)" == "" ]; then
+	    patch --batch -f -p1 < $CWD/patch/linux-fitefly-rk3288.config.patch  || exit 1
+	fi
+}
+
 
 
 #---------------------------------------------
@@ -772,12 +695,12 @@ CROSS="arm-unknown-linux-gnueabihf-"
 # create dir
 #---------------------------------------------
 clean_sources (){
-    #rm -rf ${CWD}/$BUILD/{$SOURCE/{$XTOOLS,$XTOOLS_OLD},$PKG,$OUTPUT/{$TOOLS,$FLASH}}
-    rm -rf ${CWD}/$BUILD/ || exit 1
+    #rm -rf $CWD/$BUILD/{$SOURCE/{$XTOOLS,$XTOOLS_OLD},$PKG,$OUTPUT/{$TOOLS,$FLASH}}
+    rm -rf $CWD/$BUILD/ || exit 1
 }
 
 prepare_dest (){
-    mkdir -p ${CWD}/$BUILD/{$SOURCE/$XTOOLS,$PKG,$OUTPUT/{$TOOLS,$FLASH}} || exit 1
+    mkdir -p $CWD/$BUILD/{$SOURCE/$XTOOLS,$PKG,$OUTPUT/{$TOOLS,$FLASH}} || exit 1
 }
 
 
