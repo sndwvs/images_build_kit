@@ -21,13 +21,10 @@ LOG="build.log"
 
 
 #---------------------------------------------
-# resources
-#---------------------------------------------
-#---------------------------------------------
 # firefly
 #---------------------------------------------
 if [ "$BOARD_NAME" = "firefly" ]; then
-    URL_XTOOLS_OLD="https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/"
+    URL_XTOOLS_OLD="https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-eabi-4.6/"
     XTOOLS_OLD="x-tools7h_old"
     URL_LINUX_UPGRADE_TOOL="http://dl.radxa.com/rock/tools/linux"
     LINUX_UPGRADE_TOOL="Linux_Upgrade_Tool_v1.21"
@@ -46,9 +43,19 @@ if [ "$BOARD_NAME" = "firefly" ]; then
     LINUX_SOURCE="firefly-rk3288-kernel"
     LINUX_CONFIG="rk3288_config"
     MODULES="mali_kbase gspca_main"
-    URL_VIDEO_DRIVER="http://malideveloper.arm.com/downloads/drivers/binary/r6p0-02rel0/"
-    VIDEO_DRIVER="mali-t76x_r6p0-02rel0_linux_1+fbdev"
+#    URL_VIDEO_DRIVER="http://malideveloper.arm.com/downloads/drivers/binary/r6p0-02rel0/"
+#    VIDEO_DRIVER="mali-t76x_r6p0-02rel0_linux_1+fbdev"
     ROOT_DISK="mmcblk0p3"
+    if [[ $KERNEL_SOURCE == "next" ]];then
+        # Vanilla Linux  
+        URL_LINUX_SOURCE="https://github.com/mmind/"
+        LINUX_SOURCE="linux-rockchip"
+        BARANCH="remotes/origin/devel/somewhat-stable"
+        LINUX_SOURCE_VERSION="https://raw.githubusercontent.com/mmind/linux-rockchip/devel/somewhat-stable/Makefile"  
+        LINUX_CONFIG="linux-firefly-next.config" #original rk3288_veyron_defconfig
+        MODULES=""
+        ROOT_DISK="mmcblk0p1"     
+    fi    
 fi
 #---------------------------------------------
 
@@ -72,10 +79,13 @@ if [ "$BOARD_NAME" == "cubietruck" ]; then
     BOOT_LOADER_BIN="u-boot-sunxi-with-spl.bin"
     MODULES="hci_uart gpio_sunxi bt_gpio wifi_gpio rfcomm hidp sunxi-ir bonding spi_sun7i bcmdhd ump mali mali_drm"
 
-    if [[ $NEXT == "next" ]];then
-    LINUX_CONFIG="linux-sunxi-next.config"
-    FIRMWARE=""
-    MODULES="brcmfmac rfcomm hidp bonding"
+    if [[ $KERNEL_SOURCE == "next" ]];then
+        # Vanilla Linux
+        URL_LINUX_SOURCE="http://mirror.yandex.ru/pub/linux/kernel/v4.x"
+        LINUX_SOURCE="linux-$KERNEL_VERSION"  
+        LINUX_CONFIG="linux-sunxi-next.config"
+        FIRMWARE=""
+        MODULES="brcmfmac rfcomm hidp bonding"
     fi
 
     ROOT_DISK="mmcblk0p1"
@@ -87,14 +97,6 @@ fi
 #---------------------------------------------
 kernel_version KERNEL_VERSION
 
-#---------------------------------------------
-# Vanilla Linux
-#---------------------------------------------
-if [[ $NEXT == "next" ]];then
-    URL_LINUX_SOURCE="http://mirror.yandex.ru/pub/linux/kernel/v4.x"
-    LINUX_SOURCE="linux-$KERNEL_VERSION"
-fi
-#---------------------------------------------
 
 BOOT_LOADER_VERSION="v2016.01"
 XTOOLS="x-tools7h"
@@ -104,7 +106,6 @@ ROOTFS_NAME=$(wget -q -O - $URL_ROOTFS | grep -oP "(slack-current[\.\-\+\d\w]+.t
 VERSION=$(date +%Y%m%d)
 ROOTFS="$ROOTFS_NAME-$KERNEL_VERSION-$BOARD_NAME-build-$VERSION"
 ROOTFS_XFCE="$(echo $ROOTFS_NAME | sed 's#miniroot#xfce#')-$KERNEL_VERSION-$BOARD_NAME-build-$VERSION"
-#ROOT_DISK="mmcblk0p1"
 
 
 #---------------------------------------------
@@ -612,6 +613,11 @@ xfce=' Thunar
     xfdesktop
     xfwm4'
 
+URL_DISTR_EXTRA="http://dl.fail.pp.ua/slackware/pkg/arm"
+x_extra_firefly='   xf86-video-armsoc-rockchip
+                    firefly-libgl'
+
+
 
 patching_kernel_sources (){
 #--------------------------------------------------------------------------------------------------------------------------------
@@ -621,51 +627,64 @@ patching_kernel_sources (){
 
     cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 
-    # mainline
-    if [[ "$NEXT" == "next" ]];then
-         # fix BRCMFMAC AP mode Banana & CT
-        if [ "$(patch --dry-run -t -p1 < $CWD/patch/brcmfmac_ap_banana_ct.patch | grep Reversed)" == "" ]; then
-            patch  --batch -f -p1 < $CWD/patch/brcmfmac_ap_banana_ct.patch || exit 1
+    if [[ "$BOARD_NAME" == "cubietruck" ]];then
+        # mainline
+        if [[ "$KERNEL_SOURCE" == "next" ]];then
+             # fix BRCMFMAC AP mode Banana & CT
+            if [ "$(patch --dry-run -t -p1 < $CWD/patch/brcmfmac_ap_banana_ct.patch | grep Reversed)" == "" ]; then
+                patch  --batch -f -p1 < $CWD/patch/brcmfmac_ap_banana_ct.patch || exit 1
+            fi
+
+             # fix BRCMF and MMC if copy big data to WIFI
+            # http://forum.armbian.com/index.php/topic/230-cubietruck-armbian-42-cubietruck-debian-jessie-416-wifi-does-not-work/
+            # https://groups.google.com/forum/#!msg/linux-sunxi/v6Ktt8lAnw0/T9gOChygom0J
+            if [ "$(patch --dry-run -t -p1 < $CWD/patch/brcmf_mmc_copy_big_data.patch | grep Reversed)" == "" ]; then
+                patch  --batch -f -p1 < $CWD/patch/brcmf_mmc_copy_big_data.patch || exit 1
+            fi
+        else
+        # sunxi 3.4
+        #   rm $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/drivers/spi/spi-sun7i.c
+        #   rm -r $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/drivers/net/wireless/ap6210/
+
+            # SPI functionality
+                if [ "$(patch --dry-run -t -p1 < $CWD/patch/$BOARD_NAME/spi.patch | grep previ)" == "" ]; then
+                patch --batch -f -p1 < $CWD/patch/$BOARD_NAME/spi.patch || exit 1
+            fi
+
+            # Aufs3
+            if [ "$(patch --dry-run -t -p1 < $CWD/patch/$BOARD_NAME/linux-sunxi-3.4.108-overlayfs.patch | grep Reversed)" == "" ]; then
+                patch --batch -f -p1 < $CWD/patch/$BOARD_NAME/linux-sunxi-3.4.108-overlayfs.patch || exit 1
+            fi
+
+            # More I2S and Spdif
+            if [ "$(patch --dry-run -t -p1 < $CWD/patch/$BOARD_NAME/i2s_spdif_sunxi.patch | grep Reversed)" == "" ]; then
+                patch --batch -f -p1 < $CWD/patch/$BOARD_NAME/i2s_spdif_sunxi.patch || exit 1
+            fi
+
+            # A fix for rt8192
+            if [ "$(patch --dry-run -t -p1 < $CWD/patch/$BOARD_NAME/rt8192cu-missing-case.patch | grep Reversed)" == "" ]; then
+                patch --batch -f -p1 < $CWD/patch/$BOARD_NAME/rt8192cu-missing-case.patch || exit 1
+            fi
+
+            # Upgrade to 3.4.109"
+            if [ "$(patch --dry-run -t -p1 < $CWD/patch/$BOARD_NAME/patch-3.4.108-109 | grep Reversed)" == "" ]; then
+                patch --batch -f -p1 < $CWD/patch/$BOARD_NAME/patch-3.4.108-109 || exit 1
+            fi
         fi
+    elif [[ "$BOARD_NAME" == "firefly" ]];then
+        if [[ "$KERNEL_SOURCE" == "next" ]];then
+            #   [ 11.822938] eth0: device MAC address 86:d7:74:ee:31:69
+            #   [ 11.828080] libphy: PHY stmmac-0:ffffffff not found
+            #   [ 11.832956] eth0: Could not attach to PHY
+            #   [ 11.836963] stmmac_open: Cannot attach to PHY (error: -19)
+            if [ "$(patch --dry-run -t -p1 < $CWD/patch/$BOARD_NAME/01_fix_tx_normaldesc.patch | grep Reversed)" == "" ]; then
+                patch  --batch -f -p1 < $CWD/patch/$BOARD_NAME/01_fix_tx_normaldesc.patch || exit 1
+            fi
 
-         # fix BRCMF and MMC if copy big data to WIFI
-	 # http://forum.armbian.com/index.php/topic/230-cubietruck-armbian-42-cubietruck-debian-jessie-416-wifi-does-not-work/
-	 # https://groups.google.com/forum/#!msg/linux-sunxi/v6Ktt8lAnw0/T9gOChygom0J
-        if [ "$(patch --dry-run -t -p1 < $CWD/patch/brcmf_mmc_copy_big_data.patch | grep Reversed)" == "" ]; then
-            patch  --batch -f -p1 < $CWD/patch/brcmf_mmc_copy_big_data.patch || exit 1
+            if [ "$(patch --dry-run -t -p1 < $CWD/patch/$BOARD_NAME/02_fix_no_phy_found_regression.patch | grep Reversed)" == "" ]; then
+                patch  --batch -f -p1 < $CWD/patch/$BOARD_NAME/02_fix_no_phy_found_regression.patch || exit 1
+            fi
         fi
-    fi
-
-
-    # sunxi 3.4
-    if [[ "$NEXT" != "next" ]];then
-#	rm $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/drivers/spi/spi-sun7i.c
-#	rm -r $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/drivers/net/wireless/ap6210/
-
-	# SPI functionality
-        if [ "$(patch --dry-run -t -p1 < $CWD/patch/spi.patch | grep previ)" == "" ]; then
-	    patch --batch -f -p1 < $CWD/patch/spi.patch || exit 1
-	fi
-
-	# Aufs3
-	if [ "$(patch --dry-run -t -p1 < $CWD/patch/linux-sunxi-3.4.108-overlayfs.patch | grep Reversed)" == "" ]; then
-	    patch --batch -f -p1 < $CWD/patch/linux-sunxi-3.4.108-overlayfs.patch || exit 1
-	fi
-
-	# More I2S and Spdif
-	if [ "$(patch --dry-run -t -p1 < $CWD/patch/i2s_spdif_sunxi.patch | grep Reversed)" == "" ]; then
-	    patch --batch -f -p1 < $CWD/patch/i2s_spdif_sunxi.patch || exit 1
-	fi
-
-	# A fix for rt8192
-	if [ "$(patch --dry-run -t -p1 < $CWD/patch/rt8192cu-missing-case.patch | grep Reversed)" == "" ]; then
-	    patch --batch -f -p1 < $CWD/patch/rt8192cu-missing-case.patch || exit 1
-	fi
-
-	# Upgrade to 3.4.109"
-	if [ "$(patch --dry-run -t -p1 < $CWD/patch/patch-3.4.108-109 | grep Reversed)" == "" ]; then
-	    patch --batch -f -p1 < $CWD/patch/patch-3.4.108-109 || exit 1
-	fi
     fi
 }
 
@@ -701,6 +720,7 @@ clean_sources (){
 
 prepare_dest (){
     mkdir -p $CWD/$BUILD/{$SOURCE/$XTOOLS,$PKG,$OUTPUT/{$TOOLS,$FLASH}} || exit 1
+    reset
 }
 
 
