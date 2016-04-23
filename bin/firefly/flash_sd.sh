@@ -155,14 +155,14 @@ calculate_partitions_for_sdcard () {
     echo "Making ext4 file system for $(echo ${PARTITION} | tr '[:upper:]' '[:lower:]') partition on ${SDCARD}${PARTITION_NUMBER}"
     #echo -e "o\np\nn\np\n${PARTITION_NUMBER}\n\n\nw" | fdisk ${SDCARD}
      #echo -e "\nd\nn\n${PARTITION_NUMBER}\n${START_OF_PARTITION}M\n\n8300\n\nw\ny" | gdisk ${SDCARD}
-    echo -e "\n2\no\ny\np\nn\n\n${START_OF_PARTITION}M\n\n8300\n\nw\ny" | gdisk ${SDCARD} > /dev/null 2>&1
+    echo -e "\n2\no\ny\nn\n${PARTITION_NUMBER}\n${START_OF_PARTITION}M\n\n8300\nc\n${PARTITION}\nw\ny" | gdisk ${SDCARD} > /dev/null 2>&1
     partprobe ${SDCARD}
     #mkfs.ext4 -F ${SDCARD}${PARTITION_NUMBER} > /dev/null 2>&1
 }
 
 
 echo "Zero the beginning of the USB drive ${SDCARD}"
-dd if=/dev/zero of=${SDCARD} bs=1M count=8 > /dev/null 2>&1
+dd if=/dev/zero of=${SDCARD} bs=1M count=80 > /dev/null 2>&1
 
 #sgdisk -Z ${SDCARD} > /dev/null 2>&1
 echo -e "\nx\nz\ny\ny" | gdisk ${SDCARD} > /dev/null 2>&1
@@ -173,10 +173,10 @@ echo -e "\nx\no\ng\nr\nw\ny" | gdisk ${SDCARD} > /dev/null 2>&1
 
 calculate_partitions_for_sdcard
 
-echo $((0x2000))
-echo "kernel" $((0x2000+KERNEL_START_PARTITION))
-echo "boot" $((0x2000+BOOT_START_PARTITION))
-echo "rootlinux" $((0x2000+LINUXROOT_START_PARTITION))
+#echo $((0x2000))
+#echo "kernel" $((0x2000+KERNEL_START_PARTITION))
+#echo "boot" $((0x2000+BOOT_START_PARTITION))
+#echo "rootlinux" $((0x2000+LINUXROOT_START_PARTITION))
 
 ${RKCRC} -p ${PARAMETER_FILE} ${PARAMETER_IMG} || exit 1
 
