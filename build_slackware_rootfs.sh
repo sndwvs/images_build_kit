@@ -306,7 +306,7 @@ create_img (){
         dd if=/dev/zero of=$CWD/$BUILD/$SOURCE/$IMAGE.img bs=1 count=0 seek=$ROOTFS_SIZE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 
         LOOP=$(losetup -f)
-    
+
         losetup $LOOP $CWD/$BUILD/$SOURCE/$IMAGE.img || exit 1
 
         message "" "save" "$BOOT_LOADER"
@@ -327,7 +327,7 @@ create_img (){
 
         message "" "create" "filesystem"
         mkfs.ext4 -F -m 0 -L linuxroot $LOOP >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-        
+
         message "" "create" "mount point and mount image"
         mkdir -p $CWD/$BUILD/$SOURCE/image
         mount $LOOP $CWD/$BUILD/$SOURCE/image
@@ -340,6 +340,8 @@ create_img (){
     if [ -f $CWD/$BUILD/$SOURCE/$IMAGE.img ];then
         mv $CWD/$BUILD/$SOURCE/$IMAGE.img $CWD/$BUILD/$OUTPUT/$FLASH
     fi
+
+    message "" "done" "image $IMAGE"
 }
 
 setting_settings (){
