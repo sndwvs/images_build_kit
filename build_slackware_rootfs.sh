@@ -296,12 +296,13 @@ create_img (){
     fi
     # +400M for create swap firstrun
     ROOTFS_SIZE=$(expr $(du -sH $CWD/$BUILD/$SOURCE/$IMAGE | awk '{print $1}') / 1024 + 400)"M"
-    
+
+    message "" "create" "image size $ROOTFS_SIZE"
+
     if [ "$BOARD_NAME" == "firefly" ];then
         $CWD/$BUILD/$OUTPUT/$TOOLS/mkrootfs $CWD/$BUILD/$SOURCE/$IMAGE ${ROOTFS_SIZE} >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
     elif [ "$BOARD_NAME" == "cubietruck" ]; then
-    
-        message "" "create" "image size $ROOTFS_SIZE"
+
         dd if=/dev/zero of=$CWD/$BUILD/$SOURCE/$IMAGE.img bs=1 count=0 seek=$ROOTFS_SIZE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 
         LOOP=$(losetup -f)
