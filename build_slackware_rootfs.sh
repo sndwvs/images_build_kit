@@ -425,12 +425,37 @@ install_pkg (){
     _ROOTFS="$ROOTFS_XFCE"
     fi
 
-    for category in "$@";do
-    for pkg in $(eval echo \$${category}) ;do
-        message "" "install" "package $category/$pkg"
-        installpkg --root $CWD/$BUILD/$SOURCE/$_ROOTFS $CWD/$BUILD/$PKG/$category/$pkg* >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+#    for category in "$@";do
+#    for pkg in $(eval echo \$${category}) ;do
+#        message "" "install" "package $category/$pkg"
+#        installpkg --root $CWD/$BUILD/$SOURCE/$_ROOTFS $CWD/$BUILD/$PKG/$category/$pkg* >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+#    done
+#    done
+
+    # get parameters
+    for _in in "$@";do
+        let "count = $count+1"
+        if [ "$count" == "1" ];then
+            if [[ ${_in} == '' ]];then
+                suffix=${_in}
+            else
+                suffix='_'${_in}'_'$BOARD_NAME
+            fi
+        elif [[ "$count" > "1" ]];then
+            category=${_in}
+            eval packages=\$${_in}${suffix}
+            if [[ "${packages}" != '' ]];then
+                for _pkg in $packages;do
+                    message "" "install" "package $category/${_pkg}"
+                    installpkg --root $CWD/$BUILD/$SOURCE/$_ROOTFS $CWD/$BUILD/$PKG/$category/${_pkg}* >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+                done
+            fi
+        fi
     done
-    done
+    # clean
+    count=''
+    category=''
+    packages='' 
 }
 
 setting_default_theme_xfce (){

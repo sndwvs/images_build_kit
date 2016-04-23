@@ -177,8 +177,9 @@ if [ "$CREATE_IMAGE" == "true" ]; then
         download_pkg $URL_DISTR '' $CATEGORY_PKG
         if [ "$BOARD_NAME" == "firefly" ]; then
             download_pkg $URL_DISTR_EXTRA 'extra' $CATEGORY_PKG
+            install_pkg 'extra' $CATEGORY_PKG
         fi
-        install_pkg $CATEGORY_PKG
+        install_pkg '' $CATEGORY_PKG
         setting_default_theme_xfce
         setting_default_start_x
 #        if [ "$BOARD_NAME" == "firefly" ]; then
