@@ -43,8 +43,6 @@ if [ "$BOARD_NAME" = "firefly" ]; then
     LINUX_SOURCE="firefly-rk3288-kernel"
     LINUX_CONFIG="rk3288_config"
     MODULES="mali_kbase gspca_main"
-#    URL_VIDEO_DRIVER="http://malideveloper.arm.com/downloads/drivers/binary/r6p0-02rel0/"
-#    VIDEO_DRIVER="mali-t76x_r6p0-02rel0_linux_1+fbdev"
     ROOT_DISK="mmcblk0p3"
     if [[ $KERNEL_SOURCE == "next" ]];then
         # Vanilla Linux  
@@ -54,6 +52,7 @@ if [ "$BOARD_NAME" = "firefly" ]; then
         LINUX_SOURCE_VERSION="https://raw.githubusercontent.com/mmind/linux-rockchip/devel/somewhat-stable/Makefile"  
         LINUX_CONFIG="linux-firefly-next.config" #original rk3288_veyron_defconfig
         MODULES=""
+        BOOT_LOADER_CONFIG="firefly-rk3288_defconfig"
         ROOT_DISK="mmcblk0p1"     
     fi    
 fi
@@ -73,12 +72,9 @@ if [ "$BOARD_NAME" == "cubietruck" ]; then
     LINUX_SOURCE="linux-sunxi"
     URL_LINUX_CONFIG_SOURCE="https://github.com/igorpecovnik/lib/raw/next/config"
     LINUX_CONFIG="linux-sunxi.config"
-    URL_BOOT_LOADER_SOURCE="http://git.denx.de"
-    BOOT_LOADER="u-boot"
     BOOT_LOADER_CONFIG="Cubietruck_config"
     BOOT_LOADER_BIN="u-boot-sunxi-with-spl.bin"
     MODULES="hci_uart gpio_sunxi bt_gpio wifi_gpio rfcomm hidp sunxi-ir bonding spi_sun7i bcmdhd ump mali mali_drm"
-
     if [[ $KERNEL_SOURCE == "next" ]];then
         # Vanilla Linux
         URL_LINUX_SOURCE="http://mirror.yandex.ru/pub/linux/kernel/v4.x"
@@ -87,7 +83,6 @@ if [ "$BOARD_NAME" == "cubietruck" ]; then
         FIRMWARE=""
         MODULES="brcmfmac rfcomm hidp bonding"
     fi
-
     ROOT_DISK="mmcblk0p1"
 fi
 #---------------------------------------------
@@ -98,7 +93,9 @@ fi
 kernel_version KERNEL_VERSION
 
 
-BOOT_LOADER_VERSION="v2016.01"
+URL_BOOT_LOADER_SOURCE="http://git.denx.de"
+BOOT_LOADER="u-boot"
+BOOT_LOADER_VERSION="" #>v2016.03
 XTOOLS="x-tools7h"
 URL_XTOOLS="http://archlinuxarm.org/builder/xtools/$XTOOLS.tar.xz"
 URL_ROOTFS="ftp://ftp.arm.slackware.com/slackwarearm/slackwarearm-devtools/minirootfs/roots/"
@@ -684,6 +681,10 @@ patching_kernel_sources (){
             if [ "$(patch --dry-run -t -p1 < $CWD/patch/$BOARD_NAME/02_fix_no_phy_found_regression.patch | grep Reversed)" == "" ]; then
                 patch  --batch -f -p1 < $CWD/patch/$BOARD_NAME/02_fix_no_phy_found_regression.patch || exit 1
             fi
+
+#            if [ "$(patch --dry-run -t -p1 < $CWD/patch/$BOARD_NAME/03_dts_remove_broken-cd_from_emmc_and_sdio.patch | grep Reversed)" == "" ]; then
+#                patch  --batch -f -p1 < $CWD/patch/$BOARD_NAME/03_dts_remove_broken-cd_from_emmc_and_sdio.patch || exit 1
+#            fi
         fi
     fi
 }

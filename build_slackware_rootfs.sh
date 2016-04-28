@@ -616,5 +616,41 @@ install_video_driver_pkg (){
     installpkg --root $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE $CWD/$BUILD/$PKG/$VIDEO_DRIVER-* >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 }
 
+setting_move_to_nand (){
+    message "" "setting" "data move to nand"
+    install -m755 -D "$CWD/bin/$BOARD_NAME/setup.sh" "$CWD/$BUILD/$SOURCE/$ROOTFS/root/setup.sh"
+    
+    if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/issue | grep setup.sh) ]];then
+        cat <<EOF >$CWD/$BUILD/$SOURCE/$ROOTFS/etc/issue
 
+[0;36m=======================================================================[0;39m
 
+if you want to transfer the system to SD card to internal memory (eMMC),
+follow [1;36msetup[0;39m
+
+login: root
+password: password
+or
+login: user
+password: password
+
+[0;36m=======================================================================[0;39m
+
+Slackware GNU/\s (\l)
+Kernel \r (\m)
+
+EOF
+    fi
+
+    if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/root/.bashrc | grep setup.sh) ]];then
+        cat <<EOF >$CWD/$BUILD/$SOURCE/$ROOTFS/root/.bashrc
+alias setup='/root/setup.sh'
+EOF
+    fi
+
+    if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/root/.bash_profile | grep .bashrc) ]];then
+        cat <<EOF >$CWD/$BUILD/$SOURCE/$ROOTFS/root/.bash_profile
+source ~/.bashrc
+EOF
+    fi
+}

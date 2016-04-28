@@ -62,15 +62,26 @@ compile_boot_loader (){
     cd $CWD/$BUILD/$SOURCE/$BOOT_LOADER >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 
     make ARCH=arm clean || exit 1
+    git checkout $BOOT_LOADER_VERSION >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 
     if [ "$BOARD_NAME" == "firefly" ]; then
-        make ARCH=arm $BOOT_LOADER_CONFIG CROSS_COMPILE=$CROSS_OLD || exit 1
-        make $CTHREADS ARCH=arm CROSS_COMPILE=$CROSS_OLD || exit 1
+        make ARCH=arm $BOOT_LOADER_CONFIG CROSS_COMPILE=$CROSS || exit 1
+        if [ "$KERNEL_SOURCE" == "next" ] ; then
+            # u-boot-firefly-rk3288 2016.03 package contains backports
+            # of EFI support patches and fails to boot the kernel on the Firefly.
+            sed 's/^\(CONFIG_EFI_LOADER=y\)/# CONFIG_EFI_LOADER is not set/' -i .config || exit 1
+            make $CTHREADS ARCH=arm CROSS_COMPILE=$CROSS || exit 1
+            # create RK3288UbootLoader.bin
+            tools/mkimage -n rk3288 -T rkimage -d \
+            spl/u-boot-spl-dtb.bin out && \
+            cat out | openssl rc4 -K 7c4e0304550509072d2c7b38170d1711 > "RK3288UbootLoader${BOOT_LOADER_VERSION}.bin"
+        else
+            make $CTHREADS ARCH=arm CROSS_COMPILE=$CROSS_OLD || exit 1
+        fi
         find -name "RK3288UbootLoader*" -exec install -D {} $CWD/$BUILD/$OUTPUT/$FLASH/{} \;
     fi
 
     if [ "$BOARD_NAME" == "cubietruck" ]; then
-        git checkout $BOOT_LOADER_VERSION >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
         make ARCH=arm $BOOT_LOADER_CONFIG CROSS_COMPILE=$CROSS || exit 1
 
         if [ "$KERNEL_SOURCE" != "next" ] ; then
@@ -113,10 +124,10 @@ compile_kernel (){
     install -D $CWD/config/$LINUX_CONFIG $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/.config || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
         
     if [ "$BOARD_NAME" == "firefly" ]; then
-        CROSS=$CROSS_OLD
         DTB=rk3288-firefly.dtb
 
         if [ "$KERNEL_SOURCE" != "next" ]; then
+            CROSS=$CROSS_OLD
             # fix firmware /system /lib
             find drivers/net/wireless/rockchip_wlan/rkwifi/ -type f -exec \
             sed -i "s#\/system\/etc\/firmware\/#\/lib\/firmware\/#" {} \;

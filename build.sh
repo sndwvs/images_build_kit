@@ -170,6 +170,8 @@ if [ "$CREATE_IMAGE" == "true" ]; then
     setting_settings
     if [[ "$KERNEL_SOURCE" != "next" && "$BOARD_NAME" == "firefly" ]]; then
         setting_wifi
+    elif [[ "$BOARD_NAME" == "firefly" ]]; then
+        setting_move_to_nand
     fi
     if [ "$XFCE" == "true" ]; then
         message "" "create" "$ROOTFS_XFCE"
