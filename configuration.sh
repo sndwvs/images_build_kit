@@ -694,10 +694,10 @@ patching_kernel_sources (){
 # patch the kernel configuration
 #---------------------------------------------
 patching_kernel_config (){
-	message "" "patching" "kernel config $LINUX_CONFIG"
-	if [ "$(patch --dry-run -t -p1 < $CWD/patch/linux-fitefly-rk3288.config.patch | grep Reversed)" == "" ]; then
-	    patch --batch -f -p1 < $CWD/patch/linux-fitefly-rk3288.config.patch  || exit 1
-	fi
+    message "" "patching" "kernel config $LINUX_CONFIG"
+    if [ "$(patch --dry-run -t -p1 < $CWD/patch/linux-fitefly-rk3288.config.patch | grep Reversed)" == "" ]; then
+        patch --batch -f -p1 < $CWD/patch/linux-fitefly-rk3288.config.patch  || exit 1
+    fi
 }
 
 

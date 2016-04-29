@@ -3,8 +3,8 @@
 set -e
 
 
-ROOT="/dev/mmcblk1p1"
-
+DISK="/dev/mmcblk1"
+ROOT="${DISK}p1"
 
 
 #---------------------------------------------
@@ -30,7 +30,7 @@ message (){
 }
 
 
-if [[ ! -b "$ROOT" ]];then
+if [[ ! -b "$DISK" ]];then
     message "" "there is no section $ROOT for the system transfer"
     exit 1
 fi
@@ -39,8 +39,11 @@ if [[ $(mount | grep "$ROOT") ]];then
     umount "$ROOT" >/dev/null 2>&1
 fi
 
+message "" "create" "partition"
+echo -e "\ng\nn\n1\n81920\n\nw" | fdisk "$DISK" >/dev/null 2>&1
+
 message "" "format" "the partition root $ROOT"
-echo y | mkfs.ext4 /dev/mmcblk1p1 || exit 1
+echo y | mkfs.ext4 "$ROOT" || exit 1
 
 message "" "create" "the missing folder"
 mkdir -p /nand/ || exit 1
