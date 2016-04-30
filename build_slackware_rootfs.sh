@@ -619,7 +619,7 @@ install_video_driver_pkg (){
 setting_move_to_nand (){
     message "" "setting" "data move to nand"
     install -m755 -D "$CWD/bin/$BOARD_NAME/setup.sh" "$CWD/$BUILD/$SOURCE/$ROOTFS/root/setup.sh"
-    
+
     if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/issue | grep setup.sh) ]];then
         cat <<EOF >$CWD/$BUILD/$SOURCE/$ROOTFS/etc/issue
 
