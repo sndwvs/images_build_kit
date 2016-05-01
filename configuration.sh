@@ -144,7 +144,8 @@ ap=' alsa-utils
      sqlite
      sudo'
 
-d=' llvm'
+d=' binutils
+    llvm'
 
 l=' ConsoleKit2
     GConf
