@@ -686,6 +686,15 @@ patching_kernel_sources (){
 #            if [ "$(patch --dry-run -t -p1 < $CWD/patch/$BOARD_NAME/03_dts_remove_broken-cd_from_emmc_and_sdio.patch | grep Reversed)" == "" ]; then
 #                patch  --batch -f -p1 < $CWD/patch/$BOARD_NAME/03_dts_remove_broken-cd_from_emmc_and_sdio.patch || exit 1
 #            fi
+            # The rtc hym8563 maybe failed to register if first startup or rtc
+            # powerdown:
+            # [    0.988540 ] rtc-hym8563 1-0051: no valid clock/calendar values available
+            # [    0.995642 ] rtc-hym8563 1-0051: rtc core: registered hym8563 as rtc0
+            # [    1.078985 ] rtc-hym8563 1-0051: no valid clock/calendar values available
+            # [    1.085698 ] rtc-hym8563 1-0051: hctosys: unable to read the hardware clock
+            if [ "$(patch --dry-run -t -p1 < $CWD/patch/$BOARD_NAME/04_rtc_hym8563_make_sure_hym8563_can_be_normal_work.patch | grep Reversed)" == "" ]; then
+                patch  --batch -f -p1 < $CWD/patch/$BOARD_NAME/04_rtc_hym8563_make_sure_hym8563_can_be_normal_work.patch || exit 1
+            fi
         fi
     fi
 }
