@@ -230,10 +230,6 @@ case "\$1" in
   
         # change root password
                 usermod -p  '$(openssl passwd -1 password)' root
-    
-        # add user
-        echo -e "\e[0;37mAdd new user\x1B[0m"
-        echo user | xargs useradd -g users -G video,audio -m -p '$(openssl passwd -1 password)' 2>&1>/dev/null
 
         echo -e "\e[0;37mCreating 128Mb emergency swap area\x1B[0m"
         dd if=/dev/zero of=/swap bs=1024 count=131072 status=noxfer >/dev/null 2>&1
@@ -653,4 +649,10 @@ EOF
 source ~/.bashrc
 EOF
     fi
+}
+
+setting_first_login (){
+    message "" "setting" "first login"
+    install -m755 -D "$CWD/bin/check_first_login.sh" "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/profile.d/check_first_login.sh"
+    touch "$CWD/$BUILD/$SOURCE/$ROOTFS/root/.never_logge"
 }

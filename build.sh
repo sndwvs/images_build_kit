@@ -168,6 +168,7 @@ if [ "$CREATE_IMAGE" == "true" ]; then
     setting_dhcpcd
     setting_firstboot
     setting_settings
+    setting_first_login
     if [[ "$KERNEL_SOURCE" != "next" && "$BOARD_NAME" == "firefly" ]]; then
         setting_wifi
     elif [[ "$BOARD_NAME" == "firefly" ]]; then
