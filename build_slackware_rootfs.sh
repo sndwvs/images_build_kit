@@ -654,5 +654,5 @@ EOF
 setting_first_login (){
     message "" "setting" "first login"
     install -m755 -D "$CWD/bin/check_first_login.sh" "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/profile.d/check_first_login.sh"
-    touch "$CWD/$BUILD/$SOURCE/$ROOTFS/root/.never_logge"
+    touch "$CWD/$BUILD/$SOURCE/$ROOTFS/root/.never_logged"
 }
