@@ -626,9 +626,6 @@ follow [1;36msetup[0;39m
 
 login: root
 password: password
-or
-login: user
-password: password
 
 [0;36m=======================================================================[0;39m
 
