@@ -58,6 +58,13 @@ if [ "$BOARD_NAME" = "firefly" ]; then
 fi
 #---------------------------------------------
 
+
+#---------------------------------------------
+# get version linux source
+#---------------------------------------------
+kernel_version KERNEL_VERSION
+
+
 #---------------------------------------------
 # cubietruck
 #---------------------------------------------
@@ -86,11 +93,6 @@ if [ "$BOARD_NAME" == "cubietruck" ]; then
     ROOT_DISK="mmcblk0p1"
 fi
 #---------------------------------------------
-
-#---------------------------------------------
-# get version linux source
-#---------------------------------------------
-kernel_version KERNEL_VERSION
 
 
 URL_BOOT_LOADER_SOURCE="http://git.denx.de"
