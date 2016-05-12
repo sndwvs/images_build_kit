@@ -42,7 +42,7 @@ kernel_version (){
             EXTRAVERSION=$(wget --no-check-certificate -qO- $LINUX_SOURCE_VERSION | grep EXTRAVERSION | head -1 | awk '{print $(NF)}')
             if [ "$EXTRAVERSION" != "=" ]; then VER=$VER$EXTRAVERSION; fi
         else
-            VER=$(wget --no-check-certificate -qO-  https://www.kernel.org/finger_banner | grep "The latest mainline" | awk '{print $NF}')
+            VER=$(wget --no-check-certificate -qO-  https://www.kernel.org/finger_banner | grep "The latest stable" | awk '{print $NF}')
         fi
     fi
 
