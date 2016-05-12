@@ -80,23 +80,23 @@ download (){
             wget -c --no-check-certificate $URL_FIRMWARE/$FIRMWARE1 -O $CWD/$BUILD/$SOURCE/$FIRMWARE1 >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
         fi
 
-    #    message "" "download" "$LINUX_SOURCE"
-    #    if [[ $KERNEL_SOURCE != "next" ]];then
-    #        if [ -d $CWD/$BUILD/$SOURCE/$LINUX_SOURCE ]; then
-    #            cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE && git pull origin HEAD >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-    #        else
-    #            git clone $URL_LINUX_SOURCE/$LINUX_SOURCE $CWD/$BUILD/$SOURCE/$LINUX_SOURCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-    #        fi
-    #    else
-    #        wget -c --no-check-certificate $URL_LINUX_SOURCE/$LINUX_SOURCE.tar.xz -O $CWD/$BUILD/$SOURCE/$LINUX_SOURCE.tar.xz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+        message "" "download" "$LINUX_SOURCE"
+        if [[ $KERNEL_SOURCE != "next" ]];then
+            if [ -d $CWD/$BUILD/$SOURCE/$LINUX_SOURCE ]; then
+                cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE && git pull origin HEAD >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+            else
+                git clone $URL_LINUX_SOURCE/$LINUX_SOURCE $CWD/$BUILD/$SOURCE/$LINUX_SOURCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+            fi
+        else
+            wget -c --no-check-certificate $URL_LINUX_SOURCE/$LINUX_SOURCE.tar.xz -O $CWD/$BUILD/$SOURCE/$LINUX_SOURCE.tar.xz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 
-    #        message "" "extract" "$LINUX_SOURCE"
-    #        tar xpf $CWD/$BUILD/$SOURCE/$LINUX_SOURCE.tar.xz -C "$CWD/$BUILD/$SOURCE/" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-    #    fi
+            message "" "extract" "$LINUX_SOURCE"
+            tar xpf $CWD/$BUILD/$SOURCE/$LINUX_SOURCE.tar.xz -C "$CWD/$BUILD/$SOURCE/" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+        fi
 
-    #    if [[ ! -f $CWD/$BUILD/$SOURCE/$FIRMWARE && ! -z $FIRMWARE ]]; then
-    #        message "" "download" "$FIRMWARE"
-    #        wget -c --no-check-certificate $URL_FIRMWARE/$FIRMWARE -O $CWD/$BUILD/$SOURCE/$FIRMWARE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-    #    fi
+        if [[ ! -f $CWD/$BUILD/$SOURCE/$FIRMWARE && ! -z $FIRMWARE ]]; then
+            message "" "download" "$FIRMWARE"
+            wget -c --no-check-certificate $URL_FIRMWARE/$FIRMWARE -O $CWD/$BUILD/$SOURCE/$FIRMWARE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+        fi
     fi
 }
