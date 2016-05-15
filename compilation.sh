@@ -184,7 +184,7 @@ build_kernel_pkg (){
         install -Dm644 $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/$_ARCH/boot/zImage "$CWD/$BUILD/$PKG/kernel-${_KERNEL}/boot/zImage"
 
         cat > "$CWD/$BUILD/$PKG/kernel-${_KERNEL}/boot/boot.cmd" << EOF
-setenv bootargs 'console=tty0,115200 root=/dev/$ROOT_DISK ro rootwait rootfstype=ext4 sunxi_ve_mem_reserve=0 sunxi_g2d_mem_reserve=0 sunxi_no_mali_mem_reserve sunxi_fb_mem_reserve=16 hdmi.audio=EDID:0 disp.screen0_output_mode=1920x1080p60 panic=10 consoleblank=0 enforcing=0 loglevel=8'
+setenv bootargs 'console=ttyS0,115200 console=tty1 earlyprintk root=/dev/$ROOT_DISK ro rootwait rootfstype=ext4 sunxi_ve_mem_reserve=0 sunxi_g2d_mem_reserve=0 sunxi_no_mali_mem_reserve sunxi_fb_mem_reserve=16 hdmi.audio=EDID:0 disp.screen0_output_mode=1920x1080p60 panic=10 consoleblank=0 enforcing=0 loglevel=8'
 #--------------------------------------------------------------------------------------------------------------------------------
 # Boot loader script to boot with different boot methods for old and new kernel
 #--------------------------------------------------------------------------------------------------------------------------------

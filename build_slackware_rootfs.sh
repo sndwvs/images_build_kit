@@ -43,7 +43,7 @@ build_sunxi_tools (){
 # make exactly 11 lines for the formatting to be correct.  It's also
 # customary to leave one space after the ':'.
 
-     |-----handy-ruler------------------------------------------------------|
+           |-----handy-ruler------------------------------------------------------|
 sunxi-tools: sunxi-tools
 sunxi-tools:
 sunxi-tools: Tools to help hacking Allwinner A10 (aka sun4i) based devicesand possibly
@@ -71,7 +71,7 @@ EOF
 setting_fstab (){
     if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/fstab | grep $ROOT_DISK) ]];then
         message "" "setting" "fstab"
-        echo "/dev/$ROOT_DISK    /    ext4    noatime,nodiratime,errors=remount-ro       0       1" >> $CWD/$BUILD/$SOURCE/$ROOTFS/etc/fstab || exit 1
+        echo "/dev/$ROOT_DISK    /    ext4    defaults,noatime,nodiratime,commit=600,errors=remount-ro       0       1" >> $CWD/$BUILD/$SOURCE/$ROOTFS/etc/fstab || exit 1
     fi
 }
 
@@ -312,7 +312,8 @@ create_img (){
 #       ((echo o; echo p; echo n; echo p; echo 1; echo 2048; echo; echo w) | fdisk $LOOP) >/dev/null 2>&1
 #       ( ((echo o; echo p; echo n; echo p; echo 1; echo 2048; echo; echo w) | fdisk $LOOP) >/dev/null 2>&1 ) || true
 #       ( ((echo o; echo p; echo n; echo p; echo 1; echo 2048; echo; echo w) | fdisk $LOOP) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1 ) # || true
-        ((echo o; echo p; echo n; echo p; echo 1; echo 2048; echo; echo w) | fdisk $LOOP) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || true
+#        ((echo o; echo p; echo n; echo p; echo 1; echo 2048; echo; echo w) | fdisk $LOOP) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || true
+        echo -e "\no\nn\np\n1\n2048\n\nw" | fdisk $LOOP >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || true
 
         partprobe $LOOP >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 

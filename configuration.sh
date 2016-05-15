@@ -630,17 +630,30 @@ patching_kernel_sources (){
     if [[ "$BOARD_NAME" == "cubietruck" ]];then
         # mainline
         if [[ "$KERNEL_SOURCE" == "next" ]];then
-             # fix BRCMFMAC AP mode Banana & CT
-            if [ "$(patch --dry-run -t -p1 < $CWD/patch/brcmfmac_ap_banana_ct.patch | grep Reversed)" == "" ]; then
-                patch  --batch -f -p1 < $CWD/patch/brcmfmac_ap_banana_ct.patch || exit 1
+            #   [ 11.822938] eth0: device MAC address 86:d7:74:ee:31:69
+            #   [ 11.828080] libphy: PHY stmmac-0:ffffffff not found
+            #   [ 11.832956] eth0: Could not attach to PHY
+            #   [ 11.836963] stmmac_open: Cannot attach to PHY (error: -19)
+            if [ "$(patch --dry-run -t -p1 < $CWD/patch/$BOARD_NAME/02_fix_no_phy_found_regression.patch | grep Reversed)" == "" ]; then
+                patch  --batch -f -p1 < $CWD/patch/$BOARD_NAME/02_fix_no_phy_found_regression.patch || exit 1
             fi
 
-             # fix BRCMF and MMC if copy big data to WIFI
+            # sun4i: spi: Allow transfers larger than FIFO size
+            if [ "$(patch --dry-run -t -p1 < $CWD/patch/$BOARD_NAME/03_spi_allow_transfer_larger.patch | grep Reversed)" == "" ]; then
+                patch  --batch -f -p1 < $CWD/patch/$BOARD_NAME/03_spi_allow_transfer_larger.patch || exit 1
+            fi
+
+            # fix BRCMFMAC AP mode Banana & CT
+#            if [ "$(patch --dry-run -t -p1 < $CWD/patch/$BOARD_NAME/brcmfmac_ap_banana_ct.patch | grep Reversed)" == "" ]; then
+#                patch  --batch -f -p1 < $CWD/patch/$BOARD_NAME/brcmfmac_ap_banana_ct.patch || exit 1
+#            fi
+
+            # fix BRCMF and MMC if copy big data to WIFI
             # http://forum.armbian.com/index.php/topic/230-cubietruck-armbian-42-cubietruck-debian-jessie-416-wifi-does-not-work/
             # https://groups.google.com/forum/#!msg/linux-sunxi/v6Ktt8lAnw0/T9gOChygom0J
-            if [ "$(patch --dry-run -t -p1 < $CWD/patch/brcmf_mmc_copy_big_data.patch | grep Reversed)" == "" ]; then
-                patch  --batch -f -p1 < $CWD/patch/brcmf_mmc_copy_big_data.patch || exit 1
-            fi
+#            if [ "$(patch --dry-run -t -p1 < $CWD/patch/$BOARD_NAME/brcmf_mmc_copy_big_data.patch | grep Reversed)" == "" ]; then
+#                patch  --batch -f -p1 < $CWD/patch/$BOARD_NAME/brcmf_mmc_copy_big_data.patch || exit 1
+#            fi
         else
         # sunxi 3.4
         #   rm $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/drivers/spi/spi-sun7i.c
