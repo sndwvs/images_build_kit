@@ -28,13 +28,13 @@ prepare (){
     tar xpf $CWD/$BUILD/$SOURCE/$ROOTFS_NAME.tar.xz -C "$CWD/$BUILD/$SOURCE/$ROOTFS" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 
     message "" "install" "$ROOTFS"
-    installpkg --root $CWD/$BUILD/$SOURCE/$ROOTFS $CWD/$BUILD/$PKG/*.txz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+    installpkg --root $CWD/$BUILD/$SOURCE/$ROOTFS $CWD/$BUILD/$PKG/*${KERNEL_VERSION}*.txz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 }
 
 build_sunxi_tools (){
     message "" "build" "package ${SUNXI_TOOLS}"
     mkdir -p $CWD/$BUILD/$PKG/${SUNXI_TOOLS}/{sbin,install}
-    
+
     cat <<EOF >"$CWD/$BUILD/$PKG/${SUNXI_TOOLS}/install/slack-desc"
 # HOW TO EDIT THIS FILE:
 # The "handy ruler" below makes it easier to edit a package description.  Line
@@ -75,7 +75,7 @@ setting_fstab (){
     fi
 }
 
-setting_debug(){
+setting_debug (){
     message "" "setting" "uart debugging"
     sed 's/#\(ttyS[1-2]\)/\1/' -i "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/securetty"
     sed 's/#\(s\([1-2]\)\)\(.*\)\(ttyS[0-1]\)\(.*\)\(9600\)/\1\3ttyS\2 115200/' \
@@ -391,19 +391,19 @@ EOF
 download_pkg (){
     # get parameters
     for _in in "$@";do
-        let "count = $count+1"
-        if [ "$count" == "1" ];then
+        let "count=$count+1"
+        if [[ $count = 1 ]];then
             _URL_DISTR=${_in}
-        elif [ "$count" == "2" ];then
-            if [[ ${_in} == '' ]];then
+        elif [[ $count = 2 ]];then
+            if [[ -z ${_in} ]];then
                 suffix=${_in}
             else
-                suffix='_'${_in}'_'$BOARD_NAME
+                suffix='_'${_in}
             fi
-        elif [[ "$count" > "2" ]];then
+        elif [[ $count -ge 2 ]];then
             category=${_in}
             eval packages=\$${_in}${suffix}
-            if [[ "${packages}" != '' ]];then
+            if [[ ! -z ${packages} ]];then
                 for _pkg in $packages;do
                     PKG_NAME=$(wget -q -O - ${_URL_DISTR}/${category} | grep -oP "(\>$(echo $_pkg | sed "s#\+#\\\+#")-[\.\-\+\d\w]+.txz\<)" | sed "s#[><]##g" | head -n1)
                     message "" "download" "package $category/$PKG_NAME"
@@ -415,7 +415,7 @@ download_pkg (){
     # clean
     count=''
     category=''
-    _URL_DISTR=''  
+    _URL_DISTR=''
 }
 
 install_pkg (){
@@ -434,17 +434,17 @@ install_pkg (){
 
     # get parameters
     for _in in "$@";do
-        let "count = $count+1"
-        if [ "$count" == "1" ];then
-            if [[ ${_in} == '' ]];then
+        let "count=$count+1"
+        if [[ $count = 1 ]];then
+            if [[ -z ${_in} ]];then
                 suffix=${_in}
             else
-                suffix='_'${_in}'_'$BOARD_NAME
+                suffix='_'${_in}
             fi
-        elif [[ "$count" > "1" ]];then
+        elif [[ $count -gt 1 ]];then
             category=${_in}
             eval packages=\$${_in}${suffix}
-            if [[ "${packages}" != '' ]];then
+            if [[ ! -z ${packages} ]];then
                 for _pkg in $packages;do
                     message "" "install" "package $category/${_pkg}"
                     installpkg --root $CWD/$BUILD/$SOURCE/$_ROOTFS $CWD/$BUILD/$PKG/$category/${_pkg}* >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
@@ -455,7 +455,7 @@ install_pkg (){
     # clean
     count=''
     category=''
-    packages='' 
+    packages=''
 }
 
 setting_default_theme_xfce (){

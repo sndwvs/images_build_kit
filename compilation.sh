@@ -102,7 +102,7 @@ compile_kernel (){
     message "" "compiling" "$LINUX_SOURCE"
     cd "$CWD/$BUILD/$SOURCE/$LINUX_SOURCE" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 
-    if [ "$BOARD_NAME" == "cubietruck" ]; then	    
+    if [ "$BOARD_NAME" == "cubietruck" ]; then
         # Attempting to run 'firmware_install' with CONFIG_USB_SERIAL_TI=y when
         # using make 3.82 results in an error
         # make[2]: *** No rule to make target `/lib/firmware/./', needed by
@@ -121,8 +121,8 @@ compile_kernel (){
     # delete previous creations
     make CROSS_COMPILE=$CROSS clean || exit 1
     # use proven config
-    install -D $CWD/config/$LINUX_CONFIG $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/.config || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-        
+    install -D $CWD/config/kernel/$BOARD_NAME/$LINUX_CONFIG $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/.config || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+
     if [ "$BOARD_NAME" == "firefly" ]; then
         DTB=rk3288-firefly.dtb
 
@@ -141,13 +141,8 @@ compile_kernel (){
         make $CTHREADS ARCH=arm CROSS_COMPILE=$CROSS zImage modules || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
         make $CTHREADS ARCH=arm CROSS_COMPILE=$CROSS $DTB || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1        
     fi
-        
-    if [ "$BOARD_NAME" == "cubietruck" ]; then
-        if [[ ! -z $FIRMWARE ]]; then
-            # adding custom firmware to kernel source
-            echo A | unzip -o $CWD/$BUILD/$SOURCE/$FIRMWARE -d $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/firmware >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-        fi
 
+    if [ "$BOARD_NAME" == "cubietruck" ]; then
 #        make $CTHREADS ARCH=arm CROSS_COMPILE=$CROSS menuconfig  || exit 1
         make $CTHREADS ARCH=arm CROSS_COMPILE=$CROSS oldconfig
         make $CTHREADS ARCH=arm CROSS_COMPILE=$CROSS zImage modules || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
@@ -179,7 +174,7 @@ build_kernel_pkg (){
             _KERNEL="sun7i"
 
         # adding custom firmware
-        unzip -o $CWD/$BUILD/$SOURCE/$FIRMWARE1 -d $CWD/$BUILD/$PKG/kernel-modules/lib/firmware || exit 1
+        unzip -o $CWD/$BUILD/$SOURCE/$FIRMWARE -d $CWD/$BUILD/$PKG/kernel-modules/lib/firmware || exit 1
 
         install -Dm644 $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/$_ARCH/boot/zImage "$CWD/$BUILD/$PKG/kernel-${_KERNEL}/boot/zImage"
 
@@ -215,8 +210,8 @@ EOF
                 touch "$CWD/$BUILD/$PKG/kernel-${_KERNEL}/boot/.next"
         else
 
-            install -Dm644 "$CWD/config/script-hdmi.bin" "$CWD/$BUILD/$PKG/kernel-${_KERNEL}/boot/script-hdmi.bin"
-            install -Dm644 "$CWD/config/script-vga.bin" "$CWD/$BUILD/$PKG/kernel-${_KERNEL}/boot/script-vga.bin"
+            install -Dm644 "$CWD/config/board/$BOARD_NAME/script-hdmi.bin" "$CWD/$BUILD/$PKG/kernel-${_KERNEL}/boot/script-hdmi.bin"
+            install -Dm644 "$CWD/config/board/$BOARD_NAME/script-vga.bin" "$CWD/$BUILD/$PKG/kernel-${_KERNEL}/boot/script-vga.bin"
 
             cd "$CWD/$BUILD/$PKG/kernel-${_KERNEL}/boot/"
             if [ -e $HDMI ];then
@@ -228,7 +223,7 @@ EOF
 
             install -dm755 "$CWD/$BUILD/$PKG/kernel-${_KERNEL}/install/"
             cat > "$CWD/$BUILD/$PKG/kernel-${_KERNEL}/install/doinst.sh" << EOF
-rm /boot/.next 2> /dev/null
+rm boot/.next 2> /dev/null
 EOF
         fi
     fi
@@ -265,12 +260,26 @@ EOF
 
     cd $CWD/$BUILD/$PKG/kernel-modules/
     makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-modules-${_KERNEL}-${_VERSION}-${_ARCH}-${_BUILD}${_PACKAGER}.txz
-    
+
     cd $CWD/$BUILD/$PKG/kernel-headers/
     makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-headers-${_KERNEL}-${_VERSION}-${_ARCH}-${_BUILD}${_PACKAGER}.txz
-    
+
     cd $CWD/$BUILD/$PKG/kernel-firmware/
     makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-firmware-${_KERNEL}-${_VERSION}-${_ARCH}-${_BUILD}${_PACKAGER}.txz
+
+    # clear kernel packages directories
+    if [ -d "$CWD/$BUILD/$PKG/kernel-${_KERNEL}" ]; then
+        rm -rf "$CWD/$BUILD/$PKG/kernel-${_KERNEL}" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+    fi
+    if [ -d "$CWD/$BUILD/$PKG/kernel-modules" ]; then
+        rm -rf "$CWD/$BUILD/$PKG/kernel-modules" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+    fi
+    if [ -d "$CWD/$BUILD/$PKG/kernel-headers" ]; then
+        rm -rf "$CWD/$BUILD/$PKG/kernel-headers" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+    fi
+    if [ -d "$CWD/$BUILD/$PKG/kernel-firmware" ]; then
+        rm -rf "$CWD/$BUILD/$PKG/kernel-firmware" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+    fi
 }
 
 add_linux_upgrade_tool (){

@@ -1,0 +1,72 @@
+--- a/drivers/mmc/host/sunxi-mmc.c	2015-10-03 14:52:18.000000000 +0300
++++ b/drivers/mmc/host/sunxi-mmc.c	2015-10-19 18:55:24.011560222 +0300
+@@ -1083,6 +1083,23 @@
+ };
+ module_platform_driver(sunxi_mmc_driver);
+ 
++int sw_mci_check_r1_ready(struct mmc_host* mmc, unsigned ms)
++{
++    struct sunxi_mmc_host *smc_host = mmc_priv(mmc);
++    unsigned expire = jiffies + msecs_to_jiffies(ms);
++    do {
++        if (!(mmc_readl(smc_host, REG_STAS) & SDXC_CARD_DATA_BUSY))
++            break;
++    } while (jiffies < expire);
++
++    if ((mmc_readl(smc_host, REG_STAS) & SDXC_CARD_DATA_BUSY)) {
++        dev_err(mmc_dev(mmc), "wait r1 rdy %d ms timeout\n", ms);
++        return -1;
++    } else
++        return 0;
++}
++EXPORT_SYMBOL_GPL(sw_mci_check_r1_ready);
++
+ MODULE_DESCRIPTION("Allwinner's SD/MMC Card Controller Driver");
+ MODULE_LICENSE("GPL v2");
+ MODULE_AUTHOR("David Lanzend�rfer <david.lanzendoerfer@o2s.ch>");
+--- a/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c	2015-10-03 14:52:18.000000000 +0300
++++ b/drivers/net/wireless/brcm80211/brcmfmac/bcmsdh.c	2015-10-19 19:36:36.581145374 +0300
+@@ -68,6 +68,8 @@
+ 	struct completion resumed;
+ };
+ 
++extern int sw_mci_check_r1_ready(struct mmc_host* mmc, unsigned ms);
++
+ static int brcmf_sdiod_txglomsz = BRCMF_DEFAULT_TXGLOM_SIZE;
+ module_param_named(txglomsz, brcmf_sdiod_txglomsz, int, 0);
+ MODULE_PARM_DESC(txglomsz, "maximum tx packet chain size [SDIO]");
+@@ -300,6 +302,10 @@
+ 		brcmf_dbg(SDIO, "failed to %s data F%d@0x%05x, err: %d\n",
+ 			  write ? "write" : "read", fn, addr, ret);
+ 
++    //AW judge sdio read write timeout, 1s
++    if (sw_mci_check_r1_ready(sdiodev->func[fn]->card->host, 1000) != 0)
++            brcmf_err("sw_mci_check_r1_ready data timeout.\n");
++
+ 	return ret;
+ }
+ 
+@@ -350,6 +356,11 @@
+ 			brcmf_dbg(SDIO, "failed to %s data F%d@0x%05x, err: %d\n",
+ 				  write ? "write" : "read", func, addr, ret);
+ 	}
++
++    //AW judge sdio read write timeout, 1s
++    if (sw_mci_check_r1_ready(sdiodev->func[func]->card->host, 1000) != 0)
++            brcmf_err("sw_mci_check_r1_ready data timeout.\n");
++
+ 	return ret;
+ }
+ 
+@@ -489,6 +500,11 @@
+ 				  req_sz);
+ 	if (err == -ENOMEDIUM)
+ 		brcmf_sdiod_change_state(sdiodev, BRCMF_SDIOD_NOMEDIUM);
++
++    //AW judge sdio read write timeout, 1s
++    if (sw_mci_check_r1_ready(sdiodev->func[fn]->card->host, 1000) != 0)
++            brcmf_err("sw_mci_check_r1_ready data timeout.\n");
++
+ 	return err;
+ }
+ 

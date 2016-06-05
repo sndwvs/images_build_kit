@@ -12,6 +12,9 @@ fi
 download (){
 
     message "" "download" "$XTOOLS"
+    if [ -f "$CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz" ]; then
+        rm $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+    fi
     wget -c --no-check-certificate $URL_XTOOLS -O $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 
     message "" "extract" "$XTOOLS"
@@ -75,11 +78,6 @@ download (){
             git clone $URL_SUNXI_TOOLS/$SUNXI_TOOLS $CWD/$BUILD/$SOURCE/$SUNXI_TOOLS 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
         fi
 
-        if [ ! -f $CWD/$BUILD/$SOURCE/$FIRMWARE1 ]; then
-            message "" "download" "$FIRMWARE1"
-            wget -c --no-check-certificate $URL_FIRMWARE/$FIRMWARE1 -O $CWD/$BUILD/$SOURCE/$FIRMWARE1 >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-        fi
-
         message "" "download" "$LINUX_SOURCE"
         if [[ $KERNEL_SOURCE != "next" ]];then
             if [ -d $CWD/$BUILD/$SOURCE/$LINUX_SOURCE ]; then
@@ -93,8 +91,7 @@ download (){
             message "" "extract" "$LINUX_SOURCE"
             tar xpf $CWD/$BUILD/$SOURCE/$LINUX_SOURCE.tar.xz -C "$CWD/$BUILD/$SOURCE/" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
         fi
-
-        if [[ ! -f $CWD/$BUILD/$SOURCE/$FIRMWARE && ! -z $FIRMWARE ]]; then
+        if [[ ! -f "$CWD/$BUILD/$SOURCE/$FIRMWARE" && ! -z "$FIRMWARE" ]]; then
             message "" "download" "$FIRMWARE"
             wget -c --no-check-certificate $URL_FIRMWARE/$FIRMWARE -O $CWD/$BUILD/$SOURCE/$FIRMWARE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
         fi

@@ -71,18 +71,15 @@ for arg in $result; do
     elif [ "$arg" == "compile" ]; then
             COMPILE_BINARIES="true"
     elif [ "$arg" == "mini-image" ]; then
-            CREATE_IMAGE="true"
+            CREATE_IMAGE=($(echo $arg | cut -f1 -d '-'))
     elif [ "$arg" == "tools" ]; then
             TOOLS_PACK="true"
     elif [ "$arg" == "xfce-image" ]; then
-            XFCE="true"
+            CREATE_IMAGE+=($(echo $arg | cut -f1 -d '-'))
     elif [ "$arg" == "hdmi" ]; then
             HDMI=$arg
-    fi   
+    fi
 done
-
-
-
 
 #---------------------------------------------
 # configuration
@@ -142,7 +139,7 @@ if [ "$COMPILE_BINARIES" == "true" ]; then
     fi
 
     if [ "$BOARD_NAME" == "cubietruck" ]; then
-        patching_kernel_sources
+        patching_kernel_source
         compile_sunxi_tools
         build_sunxi_tools
         compile_boot_loader
@@ -157,43 +154,43 @@ if [[ "$TOOLS_PACK" == "true" && "$BOARD_NAME" == "firefly" ]]; then
     create_tools_pack
 fi
 
-if [ "$CREATE_IMAGE" == "true" ]; then
-    clean_rootfs
-    download_rootfs
-    prepare
-    setting_fstab
-    setting_debug
-    setting_motd
-    setting_rc_local
-    setting_dhcpcd
-    setting_firstboot
-    setting_settings
-    setting_first_login
-    if [[ "$KERNEL_SOURCE" != "next" && "$BOARD_NAME" == "firefly" ]]; then
-        setting_wifi
-    elif [[ "$BOARD_NAME" == "firefly" ]]; then
-        setting_move_to_nand
+for image_type in ${CREATE_IMAGE[@]}; do
+    if [ "$image_type" == "mini" ]; then
+        message "" "create" "$ROOTFS"
+        clean_rootfs
+        download_rootfs
+        prepare
+        setting_fstab
+        setting_debug
+        setting_motd
+        setting_rc_local
+        setting_dhcpcd
+        setting_firstboot
+        setting_settings
+        setting_first_login
+        if [[ "$KERNEL_SOURCE" != "next" && "$BOARD_NAME" == "firefly" ]]; then
+            setting_wifi
+        elif [[ "$BOARD_NAME" == "firefly" ]]; then
+            setting_move_to_nand
+        fi
+        download_pkg $URL_DISTR '' ${CATEGORY_PKG[@]}
+        install_pkg '' ${CATEGORY_PKG[@]}
+        create_img
     fi
-    if [ "$XFCE" == "true" ]; then
+
+    if [ "$image_type" == "xfce" ]; then
         message "" "create" "$ROOTFS_XFCE"
         cp -fr $CWD/$BUILD/$SOURCE/$ROOTFS/ $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-        download_pkg $URL_DISTR '' $CATEGORY_PKG
+        download_pkg $URL_DISTR '' ${CATEGORY_PKG[@]}
+        install_pkg '' ${CATEGORY_PKG[@]}
         if [ "$BOARD_NAME" == "firefly" ]; then
-            download_pkg $URL_DISTR_EXTRA 'extra' $CATEGORY_PKG
-            install_pkg 'extra' $CATEGORY_PKG
+            download_pkg $URL_DISTR_EXTRA 'extra' ${CATEGORY_PKG[@]}
+            install_pkg 'extra' ${CATEGORY_PKG[@]}
         fi
-        install_pkg '' $CATEGORY_PKG
         setting_default_theme_xfce
         setting_default_start_x
-#        if [ "$BOARD_NAME" == "firefly" ]; then
-#            download_video_driver
-#            build_video_driver_pkg
-#            install_video_driver_pkg
-#        fi
         create_img xfce
     fi
-    create_img
-fi
-
+done
 
 
