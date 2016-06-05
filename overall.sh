@@ -74,9 +74,13 @@ kernel_version() {
 #---------------------------------------------
 get_config() {
     reset
-    local dirs=("$CWD/config/board/$BOARD_NAME" "$CWD/config/packages")
+    local dirs=("$CWD/config/environment" "$CWD/config/board/$BOARD_NAME" "$CWD/config/packages")
     for dir in "${dirs[@]}"; do
         for file in ${dir}/*.conf; do
+            if $(echo "${dir}" | grep -q "environment"); then
+                message "" "add" "configuration file $(basename $file)"
+                source "$file" || exit 1
+            fi
             if $(echo "$file" | grep -q "$BOARD_NAME"); then
                 message "" "add" "configuration file $(basename $file)"
                 source "$file" || exit 1

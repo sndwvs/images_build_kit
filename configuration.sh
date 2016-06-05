@@ -2,22 +2,22 @@
 
 
 
-CPUS=$(grep -c 'processor' /proc/cpuinfo)
-CTHREADS=" -j$(($CPUS + $CPUS/2)) ";
+#CPUS=$(grep -c 'processor' /proc/cpuinfo)
+#CTHREADS=" -j$(($CPUS + $CPUS/2)) ";
 
 
 
 #---------------------------------------------
 # environment
 #---------------------------------------------
-PWD=$(pwd)
-BUILD="build"
-SOURCE="source"
-PKG="pkg"
-OUTPUT="output"
-TOOLS="tools"
-FLASH="flash"
-LOG="build.log"
+#PWD=$(pwd)
+#BUILD="build"
+#SOURCE="source"
+#PKG="pkg"
+#OUTPUT="output"
+#TOOLS="tools"
+#FLASH="flash"
+#LOG="build.log"
 
 
 

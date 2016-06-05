@@ -159,9 +159,6 @@ compile_kernel (){
 
 build_kernel_pkg (){
     kernel_version _VERSION
-#   _ARCH="arm"
-#   _BUILD=1
-#   _PACKAGER="mara"
     if [ "$BOARD_NAME" == "firefly" ]; then
             _KERNEL="rk3288"
 
