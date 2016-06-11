@@ -2,31 +2,14 @@
 
 
 
-#CPUS=$(grep -c 'processor' /proc/cpuinfo)
-#CTHREADS=" -j$(($CPUS + $CPUS/2)) ";
-
-
-
-#---------------------------------------------
-# environment
-#---------------------------------------------
-#PWD=$(pwd)
-#BUILD="build"
-#SOURCE="source"
-#PKG="pkg"
-#OUTPUT="output"
-#TOOLS="tools"
-#FLASH="flash"
-#LOG="build.log"
-
-
+if [ -z $CWD ];then
+    exit
+fi
 
 #---------------------------------------------
 # board configuration
 #---------------------------------------------
 get_config
-
-
 
 #---------------------------------------------
 # get version linux source

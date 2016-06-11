@@ -31,47 +31,11 @@ prepare (){
     installpkg --root $CWD/$BUILD/$SOURCE/$ROOTFS $CWD/$BUILD/$PKG/*${KERNEL_VERSION}*.txz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 }
 
-build_sunxi_tools (){
-    message "" "build" "package ${SUNXI_TOOLS}"
-    mkdir -p $CWD/$BUILD/$PKG/${SUNXI_TOOLS}/{sbin,install}
-
-    cat <<EOF >"$CWD/$BUILD/$PKG/${SUNXI_TOOLS}/install/slack-desc"
-# HOW TO EDIT THIS FILE:
-# The "handy ruler" below makes it easier to edit a package description.  Line
-# up the first '|' above the ':' following the base package name, and the '|'
-# on the right side marks the last column you can put a character in.  You must
-# make exactly 11 lines for the formatting to be correct.  It's also
-# customary to leave one space after the ':'.
-
-           |-----handy-ruler------------------------------------------------------|
-sunxi-tools: sunxi-tools
-sunxi-tools:
-sunxi-tools: Tools to help hacking Allwinner A10 (aka sun4i) based devicesand possibly
-sunxi-tools: and possibly it's successors, that's why the 'x' in the package name.
-sunxi-tools:
-sunxi-tools:
-sunxi-tools: Homepage:  https://github.com/linux-sunxi/sunxi-tools
-sunxi-tools:
-sunxi-tools:
-sunxi-tools:
-sunxi-tools:
-EOF
-
-    find "$CWD/$BUILD/$SOURCE/${SUNXI_TOOLS}" \( -name bin2fex -o -name fex2bin -o -name fexc -o -name nand-part \) \
-         -exec cp -P {} $CWD/$BUILD/$PKG/${SUNXI_TOOLS}/sbin/. \;
-
-    cd $CWD/$BUILD/$PKG/${SUNXI_TOOLS}/
-    makepkg -l n -c n $CWD/$BUILD/$PKG/${SUNXI_TOOLS}-git_$(date +%Y%m%d)_$(cat $CWD/$BUILD/$SOURCE/${SUNXI_TOOLS}/.git/packed-refs | grep refs/remotes/origin/master | cut -b1-7)-${_ARCH}-${_BUILD}${_PACKAGER}.txz
-    
-    if [ -d $CWD/$BUILD/$PKG/${SUNXI_TOOLS} ];then
-        rm -rf $CWD/$BUILD/$PKG/${SUNXI_TOOLS}
-    fi
-}
-
 setting_fstab (){
     if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/fstab | grep $ROOT_DISK) ]];then
         message "" "setting" "fstab"
-        echo "/dev/$ROOT_DISK    /    ext4    defaults,noatime,nodiratime,commit=600,errors=remount-ro       0       1" >> $CWD/$BUILD/$SOURCE/$ROOTFS/etc/fstab || exit 1
+        sed -i "s:# tmpfs:tmpfs:" $CWD/$BUILD/$SOURCE/$ROOTFS/etc/fstab
+        echo "/dev/$ROOT_DISK    /          ext4    defaults,noatime,nodiratime,commit=600,errors=remount-ro       0       1" >> $CWD/$BUILD/$SOURCE/$ROOTFS/etc/fstab || exit 1
     fi
 }
 
@@ -84,8 +48,10 @@ setting_debug (){
 
 setting_motd (){
     message "" "setting" "motd"
-    if [ "$BOARD_NAME" == "firefly" ]; then
-        cat <<EOF >"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/motd"
+
+    case "$BOARD_NAME" in
+		firefly)
+		cat <<EOF >"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/motd"
  ____  ____  ____  ____  ____  __   _  _    ____  _  _  ___  ___   ___  ___
 ( ___)(_  _)(  _ \( ___)( ___)(  ) ( \/ )  (  _ \( )/ )(__ )(__ \ ( _ )( _ ) 
  )__)  _)(_  )   / )__)  )__)  )(__ \  /    )   / )  (  (_ \ / _/ / _ \/ _ \ 
@@ -93,10 +59,9 @@ setting_motd (){
 Slackware
 
 EOF
-    fi
-
-    if [ "$BOARD_NAME" == "cubietruck" ]; then
-        cat <<EOF >"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/motd"
+		;;
+		cubietruck)
+	        cat <<EOF >"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/motd"
   ___  __  __  ____  ____  ____  ____  _____    __    ____  ____  
  / __)(  )(  )(  _ \(_  _)( ___)(  _ \(  _  )  /__\  (  _ \(  _ \ 
 ( (__  )(__)(  ) _ < _)(_  )__)  ) _ < )(_)(  /(__)\  )   / )(_) )
@@ -104,7 +69,18 @@ EOF
 Slackware
 
 EOF
-    fi
+		;;
+		orange_pi_plus_2e)
+	        cat <<EOF >"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/motd"
+ _____  ____    __    _  _  ___  ____    ____  ____    ____  __    __  __  ___    ___   ____ 
+(  _  )(  _ \  /__\  ( \( )/ __)( ___)  (  _ \(_  _)  (  _ \(  )  (  )(  )/ __)  (__ \ ( ___)
+ )(_)(  )   / /(__)\  )  (( (_-. )__)    )___/ _)(_    )___/ )(__  )(__)( \__ \   / _/  )__) 
+(_____)(_)\_)(__)(__)(_)\_)\___/(____)  (__)  (____)  (__)  (____)(______)(___/  (____)(____)
+Slackware
+
+EOF
+		;;
+    esac
 }
 
 setting_rc_local (){
@@ -319,6 +295,9 @@ create_img (){
 
         losetup -d $LOOP
 
+        # device is busy
+        sleep 2
+
         # 2048 (start) x 512 (block size) = where to mount partition
         losetup -o 1048576 $LOOP $CWD/$BUILD/$SOURCE/$IMAGE.img >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 
@@ -459,48 +438,10 @@ install_pkg (){
 }
 
 setting_default_theme_xfce (){
-    if [[ ! -d "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml" ]];then
+    if [[ ! -d "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/skel/.config/xfce4" ]];then
         message "" "setting" "default settings xfce"
-        install -m755 -d "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml"
-        cat <<EOF >>"$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml"
-<?xml version="1.0" encoding="UTF-8"?>
-
-<channel name="xsettings" version="1.0">
-  <property name="Net" type="empty">
-    <property name="ThemeName" type="string" value="Adwaita"/>
-    <property name="IconThemeName" type="string" value="Tango"/>
-    <property name="DoubleClickTime" type="empty"/>
-    <property name="DoubleClickDistance" type="empty"/>
-    <property name="DndDragThreshold" type="empty"/>
-    <property name="CursorBlink" type="empty"/>
-    <property name="CursorBlinkTime" type="empty"/>
-    <property name="SoundThemeName" type="empty"/>
-    <property name="EnableEventSounds" type="empty"/>
-    <property name="EnableInputFeedbackSounds" type="empty"/>
-  </property>
-  <property name="Gtk" type="empty">
-    <property name="CanChangeAccels" type="empty"/>
-    <property name="ColorPalette" type="empty"/>
-    <property name="FontName" type="string" value="Sans 10"/>
-    <property name="IconSizes" type="empty"/>
-    <property name="KeyThemeName" type="empty"/>
-    <property name="ToolbarStyle" type="empty"/>
-    <property name="ToolbarIconSize" type="empty"/>
-    <property name="MenuImages" type="bool" value="true"/>
-    <property name="ButtonImages" type="bool" value="true"/>
-    <property name="MenuBarAccel" type="empty"/>
-    <property name="CursorThemeName" type="empty"/>
-    <property name="CursorThemeSize" type="empty"/>
-    <property name="DecorationLayout" type="empty"/>
-  </property>
-  <property name="Xft" type="empty">
-    <property name="HintStyle" type="string" value="hintfull"/>
-  </property>
-</channel>
-EOF
-
-        install -D "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml" \
-                   "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/root/.config/xfce4/xfconf/xfce-perchannel-xml/xsettings.xml"
+		rsync -a "$CWD/config/xfce/" "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/skel/" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+		rsync -a "$CWD/config/xfce/" "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/root/" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
     fi
 }
 
@@ -523,9 +464,16 @@ EOF
     fi
 }
 
-download_video_driver (){
-    message "" "download" "$VIDEO_DRIVER"
-    wget -c --no-check-certificate $URL_VIDEO_DRIVER/$VIDEO_DRIVER.tar.gz -O $CWD/$BUILD/$SOURCE/$VIDEO_DRIVER.tar.gz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+setting_for_desktop() {
+    # correcting the sound output through the alsa
+    if [ ! -x "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.pulseaudio" ]; then
+		chmod 755 "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.pulseaudio"
+    fi
+
+	# adjustment for vdpau
+    sed -i 's#sunxi_ve_mem_reserve=0#sunxi_ve_mem_reserve=128#' "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/boot/boot.cmd"
+	$CWD/$BUILD/$SOURCE/$BOOT_LOADER/tools/mkimage -C none -A arm -T script -d $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/boot/boot.cmd \
+	"$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/boot/boot.scr" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 }
 
 build_video_driver_pkg (){

@@ -9,15 +9,18 @@ set -e
 CWD=$(pwd)
 
 
+TTY_X=$(($(stty size | cut -f2 -d " ")-10)) # determine terminal width
+TTY_Y=$(($(stty size | cut -f1 -d " ")-10)) # determine terminal height
 
 # Duplicate file descriptor 1 on descriptor 3
 exec 3>&1
 
 while true; do
     BOARD_NAME=$(dialog --title "build rootfs" \
-           --radiolist "selected your board" 21 76 10 \
-    "cubietruck" "Allwinner Tech SOC A20 ARM® Cortex™-A7" "off" \
+           --radiolist "selected your board" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
+    "cubietruck" "Allwinner Tech SoC A20 ARM® Cortex™-A7" "off" \
     "firefly" "Rockchip RK3288 Cortex-A17 quad core@ 1.8GHz" "off" \
+    "orange_pi_plus_2e" "Allwinner Tech SoC H3 ARM® Cortex™-A7" "off" \
     2>&1 1>&3)
 
     if [ ! -e $BOARD_NAME ]; then
@@ -27,7 +30,7 @@ done
 
 # kernel source
 result=$(dialog --title "build for $BOARD_NAME" \
-       --radiolist "select kernel source" 21 76 10 \
+       --radiolist "select kernel source" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
 "legacy" "legacy kernel-source" "off" \
 "next" "mainline kernel-source" "on" \
 2>&1 1>&3)
@@ -47,9 +50,9 @@ done
 
 # Duplicate file descriptor 1 on descriptor 3
 exec 3>&1
-       
+
 result=$(dialog --title "build for $BOARD_NAME" \
-       --checklist "select build options" 21 76 10 \
+       --checklist "select build options" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
 "clean" "clean sources, remove binaries and image" "off" \
 "download" "download source and use pre-built binaries" "on" \
 "compile" "build binaries locally" "on" \
@@ -82,12 +85,18 @@ for arg in $result; do
 done
 
 #---------------------------------------------
+# clean terminal
+#---------------------------------------------
+reset
+
+#---------------------------------------------
 # configuration
 #---------------------------------------------
 source $CWD/overall.sh || exit 1
 source $CWD/configuration.sh || exit 1
 source $CWD/downloads.sh || exit 1
 source $CWD/compilation.sh || exit 1
+source $CWD/build_packages.sh || exit 1
 source $CWD/build_slackware_rootfs.sh || exit 1
 
 
@@ -108,7 +117,7 @@ if [ ! -z "$KERNEL_VERSION" ]; then
     message "" "build" "rootfs for kernel version $KERNEL_VERSION"
 fi
 
-if [ "$CLEAN" == "true" ]; then
+if [[ "$CLEAN" == "true" ]]; then
     clean_sources
 fi
 
@@ -173,22 +182,24 @@ for image_type in ${CREATE_IMAGE[@]}; do
         elif [[ "$BOARD_NAME" == "firefly" ]]; then
             setting_move_to_nand
         fi
-        download_pkg $URL_DISTR '' ${CATEGORY_PKG[@]}
-        install_pkg '' ${CATEGORY_PKG[@]}
+        download_pkg $URL_DISTR "$image_type" ${CATEGORY_PKG[@]}
+        install_pkg "$image_type" ${CATEGORY_PKG[@]}
         create_img
     fi
 
     if [ "$image_type" == "xfce" ]; then
         message "" "create" "$ROOTFS_XFCE"
         cp -fr $CWD/$BUILD/$SOURCE/$ROOTFS/ $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-        download_pkg $URL_DISTR '' ${CATEGORY_PKG[@]}
-        install_pkg '' ${CATEGORY_PKG[@]}
-        if [ "$BOARD_NAME" == "firefly" ]; then
-            download_pkg $URL_DISTR_EXTRA 'extra' ${CATEGORY_PKG[@]}
-            install_pkg 'extra' ${CATEGORY_PKG[@]}
-        fi
+        download_pkg $URL_DISTR "$image_type" ${CATEGORY_PKG[@]}
+        install_pkg "$image_type" ${CATEGORY_PKG[@]}
+
+        # install extra packages
+        download_pkg $URL_DISTR_EXTRA 'extra' ${CATEGORY_PKG[@]}
+        install_pkg 'extra' ${CATEGORY_PKG[@]}
+
         setting_default_theme_xfce
         setting_default_start_x
+        setting_for_desktop
         create_img xfce
     fi
 done

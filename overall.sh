@@ -73,8 +73,7 @@ kernel_version() {
 # get config
 #---------------------------------------------
 get_config() {
-    reset
-    local dirs=("$CWD/config/environment" "$CWD/config/board/$BOARD_NAME" "$CWD/config/packages")
+    local dirs=("$CWD/config/environment" "$CWD/config/boards/$BOARD_NAME" "$CWD/config/packages")
     for dir in "${dirs[@]}"; do
         for file in ${dir}/*.conf; do
             if $(echo "${dir}" | grep -q "environment"); then
@@ -86,9 +85,9 @@ get_config() {
                 source "$file" || exit 1
             fi
             for image_type in ${CREATE_IMAGE[@]}; do
-                if $(echo "$file" | grep -q $image_type); then
-                    message "" "add" "configuration file $(basename $file)"
-                    source "$file" || exit 1
+                if $(echo "$file" | grep -q "$image_type"); then
+                     message "" "add" "configuration file $(basename $file)"
+                     source "$file" || exit 1
                 fi
             done
         done
@@ -99,7 +98,7 @@ get_config() {
 # kernel patching process
 #---------------------------------------------
 patching_kernel_source() {
-    local dir="$CWD/patch/kernel/$BOARD_NAME-$KERNEL_SOURCE"
+    local dir="$CWD/patch/kernel/$SOCFAMILY-$KERNEL_SOURCE"
     cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
     for file in "$dir/*.patch"; do
              names+=($(basename -a $file)) || exit 1

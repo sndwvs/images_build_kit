@@ -61,40 +61,40 @@ compile_boot_loader (){
     message "" "compiling" "$BOOT_LOADER"
     cd $CWD/$BUILD/$SOURCE/$BOOT_LOADER >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 
-    make ARCH=arm clean || exit 1
+    make ARCH=$ARCH clean || exit 1
     git checkout $BOOT_LOADER_VERSION >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 
     if [ "$BOARD_NAME" == "firefly" ]; then
-        make ARCH=arm $BOOT_LOADER_CONFIG CROSS_COMPILE=$CROSS || exit 1
+        make ARCH=$ARCH $BOOT_LOADER_CONFIG CROSS_COMPILE=$CROSS || exit 1
         if [ "$KERNEL_SOURCE" == "next" ] ; then
             # u-boot-firefly-rk3288 2016.03 package contains backports
             # of EFI support patches and fails to boot the kernel on the Firefly.
             sed 's/^\(CONFIG_EFI_LOADER=y\)/# CONFIG_EFI_LOADER is not set/' -i .config || exit 1
-            make $CTHREADS ARCH=arm CROSS_COMPILE=$CROSS || exit 1
+            make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS || exit 1
             # create RK3288UbootLoader.bin
             tools/mkimage -n rk3288 -T rkimage -d \
             spl/u-boot-spl-dtb.bin out && \
             cat out | openssl rc4 -K 7c4e0304550509072d2c7b38170d1711 > "RK3288UbootLoader${BOOT_LOADER_VERSION}.bin"
         else
-            make $CTHREADS ARCH=arm CROSS_COMPILE=$CROSS_OLD || exit 1
+            make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS_OLD || exit 1
         fi
         find -name "RK3288UbootLoader*" -exec install -D {} $CWD/$BUILD/$OUTPUT/$FLASH/{} \;
     fi
 
     if [ "$BOARD_NAME" == "cubietruck" ]; then
-        make ARCH=arm $BOOT_LOADER_CONFIG CROSS_COMPILE=$CROSS || exit 1
+        make ARCH=$ARCH $BOOT_LOADER_CONFIG CROSS_COMPILE=$CROSS || exit 1
 
         if [ "$KERNEL_SOURCE" != "next" ] ; then
-            ## patch mainline uboot configuration to boot with old kernels
+            # patch mainline uboot configuration to boot with old kernels
             if [ "$(cat $CWD/$BUILD/$SOURCE/$BOOT_LOADER/.config | grep CONFIG_ARMV7_BOOT_SEC_DEFAULT=y)" == "" ]; then
                 echo "CONFIG_ARMV7_BOOT_SEC_DEFAULT=y" >> $CWD/$BUILD/$SOURCE/$BOOT_LOADER/.config
-                echo "CONFIG_ARMV7_BOOT_SEC_DEFAULT=y" >> $CWD/$BUILD/$SOURCE/$BOOT_LOADER/spl/.config
+                #echo "CONFIG_ARMV7_BOOT_SEC_DEFAULT=y" >> $CWD/$BUILD/$SOURCE/$BOOT_LOADER/spl/.config
                 echo "CONFIG_OLD_SUNXI_KERNEL_COMPAT=y" >> $CWD/$BUILD/$SOURCE/$BOOT_LOADER/.config
-                echo "CONFIG_OLD_SUNXI_KERNEL_COMPAT=y" >> $CWD/$BUILD/$SOURCE/$BOOT_LOADER/spl/.config
+                #echo "CONFIG_OLD_SUNXI_KERNEL_COMPAT=y" >> $CWD/$BUILD/$SOURCE/$BOOT_LOADER/spl/.config
             fi
         fi
 
-        make $CTHREADS ARCH=arm CROSS_COMPILE=$CROSS || exit 1
+        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS || exit 1
     fi
 }
 
@@ -121,7 +121,7 @@ compile_kernel (){
     # delete previous creations
     make CROSS_COMPILE=$CROSS clean || exit 1
     # use proven config
-    install -D $CWD/config/kernel/$BOARD_NAME/$LINUX_CONFIG $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/.config || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+    install -D $CWD/config/kernel/$LINUX_CONFIG $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/.config || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 
     if [ "$BOARD_NAME" == "firefly" ]; then
         DTB=rk3288-firefly.dtb
@@ -137,146 +137,24 @@ compile_kernel (){
             DTB=firefly-rk3288.dtb
         fi
 
-#        make $CTHREADS ARCH=arm CROSS_COMPILE=$CROSS menuconfig  || exit 1
-        make $CTHREADS ARCH=arm CROSS_COMPILE=$CROSS zImage modules || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-        make $CTHREADS ARCH=arm CROSS_COMPILE=$CROSS $DTB || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1        
+#        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS menuconfig  || exit 1
+        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS zImage modules || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS $DTB || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1        
     fi
 
     if [ "$BOARD_NAME" == "cubietruck" ]; then
-#        make $CTHREADS ARCH=arm CROSS_COMPILE=$CROSS menuconfig  || exit 1
-        make $CTHREADS ARCH=arm CROSS_COMPILE=$CROSS oldconfig
-        make $CTHREADS ARCH=arm CROSS_COMPILE=$CROSS zImage modules || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+#        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS menuconfig  || exit 1
+        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS oldconfig
+        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS zImage modules || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 
         if [[ "$KERNEL_SOURCE" == "next" ]]; then
-            make $CTHREADS ARCH=arm CROSS_COMPILE=$CROSS sun7i-a20-cubietruck.dtb || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+            make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS sun7i-a20-cubietruck.dtb || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
         fi
     fi
 
-    make $CTHREADS O=$(pwd) ARCH=arm CROSS_COMPILE=$CROSS INSTALL_MOD_PATH=$CWD/$BUILD/$PKG/kernel-modules modules_install >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-    make $CTHREADS O=$(pwd) ARCH=arm CROSS_COMPILE=$CROSS INSTALL_MOD_PATH=$CWD/$BUILD/$PKG/kernel-modules firmware_install >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-    make $CTHREADS O=$(pwd) ARCH=arm CROSS_COMPILE=$CROSS INSTALL_HDR_PATH=$CWD/$BUILD/$PKG/kernel-headers/usr headers_install >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-}
-
-build_kernel_pkg (){
-    kernel_version _VERSION
-    if [ "$BOARD_NAME" == "firefly" ]; then
-            _KERNEL="rk3288"
-
-        # add firmware
-        unzip -o $CWD/bin/$BOARD_NAME/$FIRMWARE -d $CWD/$BUILD/$SOURCE/ || exit 1
-        cp -a $CWD/$BUILD/$SOURCE/hwpacks-master/system/etc/firmware $CWD/$BUILD/$PKG/kernel-modules/lib/ || exit 1  
-    fi
-
-    if [ "$BOARD_NAME" == "cubietruck" ]; then
-            _KERNEL="sun7i"
-
-        # adding custom firmware
-        unzip -o $CWD/$BUILD/$SOURCE/$FIRMWARE -d $CWD/$BUILD/$PKG/kernel-modules/lib/firmware || exit 1
-
-        install -Dm644 $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/$_ARCH/boot/zImage "$CWD/$BUILD/$PKG/kernel-${_KERNEL}/boot/zImage"
-
-        cat > "$CWD/$BUILD/$PKG/kernel-${_KERNEL}/boot/boot.cmd" << EOF
-setenv bootargs 'console=ttyS0,115200 console=tty1 earlyprintk root=/dev/$ROOT_DISK ro rootwait rootfstype=ext4 sunxi_ve_mem_reserve=0 sunxi_g2d_mem_reserve=0 sunxi_no_mali_mem_reserve sunxi_fb_mem_reserve=16 hdmi.audio=EDID:0 disp.screen0_output_mode=1920x1080p60 panic=10 consoleblank=0 enforcing=0 loglevel=8'
-#--------------------------------------------------------------------------------------------------------------------------------
-# Boot loader script to boot with different boot methods for old and new kernel
-#--------------------------------------------------------------------------------------------------------------------------------
-if ext4load mmc 0 0x00000000 /boot/.next
-then
-# sunxi mainline kernel
-#--------------------------------------------------------------------------------------------------------------------------------
-ext4load mmc 0 0x49000000 /boot/dtb/sun7i-a20-cubietruck.dtb
-ext4load mmc 0 0x46000000 /boot/zImage
-env set fdt_high ffffffff
-bootz 0x46000000 - 0x49000000
-#--------------------------------------------------------------------------------------------------------------------------------
-else
-# sunxi old kernel
-#--------------------------------------------------------------------------------------------------------------------------------
-ext4load mmc 0 0x43000000 /boot/script.bin
-ext4load mmc 0 0x48000000 /boot/zImage
-bootz 0x48000000
-#--------------------------------------------------------------------------------------------------------------------------------
-fi
-EOF
-
-        $CWD/$BUILD/$SOURCE/$BOOT_LOADER/tools/mkimage -C none -A arm -T script -d $CWD/$BUILD/$PKG/kernel-${_KERNEL}/boot/boot.cmd "$CWD/$BUILD/$PKG/kernel-${_KERNEL}/boot/boot.scr" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-        install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER/$BOOT_LOADER_BIN" "$CWD/$BUILD/$PKG/kernel-${_KERNEL}/boot/$BOOT_LOADER_BIN"
-
-        if [[ "$KERNEL_SOURCE" == "next" ]];then
-                install -Dm644 $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/$_ARCH/boot/dts/sun7i-a20-cubietruck.dtb "$CWD/$BUILD/$PKG/kernel-${_KERNEL}/boot/dtb/sun7i-a20-cubietruck.dtb" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-                touch "$CWD/$BUILD/$PKG/kernel-${_KERNEL}/boot/.next"
-        else
-
-            install -Dm644 "$CWD/config/board/$BOARD_NAME/script-hdmi.bin" "$CWD/$BUILD/$PKG/kernel-${_KERNEL}/boot/script-hdmi.bin"
-            install -Dm644 "$CWD/config/board/$BOARD_NAME/script-vga.bin" "$CWD/$BUILD/$PKG/kernel-${_KERNEL}/boot/script-vga.bin"
-
-            cd "$CWD/$BUILD/$PKG/kernel-${_KERNEL}/boot/"
-            if [ -e $HDMI ];then
-                ln -sf "script-vga.bin" "script.bin"
-            else
-                ln -sf "script-hdmi.bin" "script.bin"
-            fi
-            cd "$CWD"
-
-            install -dm755 "$CWD/$BUILD/$PKG/kernel-${_KERNEL}/install/"
-            cat > "$CWD/$BUILD/$PKG/kernel-${_KERNEL}/install/doinst.sh" << EOF
-rm boot/.next 2> /dev/null
-EOF
-        fi
-    fi
-
-    # clean-up unnecessary files generated during install
-    find "$CWD/$BUILD/$PKG/kernel-modules" "$CWD/$BUILD/$PKG/kernel-headers" \( -name .install -o -name ..install.cmd \) -delete
-
-    message "" "create" "kernel pakages"
-    # split install_modules -> firmware
-    install -dm755 "$CWD/$BUILD/$PKG/kernel-firmware/lib"
-    if [ -d $CWD/$BUILD/$PKG/kernel-modules/lib/firmware ];then
-        cp -af "$CWD/$BUILD/$PKG/kernel-modules/lib/firmware" "$CWD/$BUILD/$PKG/kernel-firmware/lib"
-        rm -rf "$CWD/$BUILD/$PKG/kernel-modules/lib/firmware"
-    fi
-
-
-    cd $CWD/$BUILD/$PKG/kernel-modules/
-
-    install -dm755 "$CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/"
-    echo -e "#!/bin/sh\n" > $CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/rc.modules
-    for mod in $MODULES;do
-        echo "/sbin/modprobe $mod" >> $CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/rc.modules
-    done
-    chmod 755 $CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/rc.modules
-    cd $CWD/$BUILD/$PKG/kernel-modules/lib/modules/$_VERSION*
-    rm build source
-    ln -s /usr/include build
-    ln -s /usr/include source
-
-    if [ "$BOARD_NAME" == "cubietruck" ]; then
-        cd $CWD/$BUILD/$PKG/kernel-${_KERNEL}/
-        makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-${_KERNEL}-${_VERSION}-${_ARCH}-${_BUILD}${_PACKAGER}.txz
-    fi
-
-    cd $CWD/$BUILD/$PKG/kernel-modules/
-    makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-modules-${_KERNEL}-${_VERSION}-${_ARCH}-${_BUILD}${_PACKAGER}.txz
-
-    cd $CWD/$BUILD/$PKG/kernel-headers/
-    makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-headers-${_KERNEL}-${_VERSION}-${_ARCH}-${_BUILD}${_PACKAGER}.txz
-
-    cd $CWD/$BUILD/$PKG/kernel-firmware/
-    makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-firmware-${_KERNEL}-${_VERSION}-${_ARCH}-${_BUILD}${_PACKAGER}.txz
-
-    # clear kernel packages directories
-    if [ -d "$CWD/$BUILD/$PKG/kernel-${_KERNEL}" ]; then
-        rm -rf "$CWD/$BUILD/$PKG/kernel-${_KERNEL}" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-    fi
-    if [ -d "$CWD/$BUILD/$PKG/kernel-modules" ]; then
-        rm -rf "$CWD/$BUILD/$PKG/kernel-modules" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-    fi
-    if [ -d "$CWD/$BUILD/$PKG/kernel-headers" ]; then
-        rm -rf "$CWD/$BUILD/$PKG/kernel-headers" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-    fi
-    if [ -d "$CWD/$BUILD/$PKG/kernel-firmware" ]; then
-        rm -rf "$CWD/$BUILD/$PKG/kernel-firmware" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-    fi
+    make $CTHREADS O=$(pwd) ARCH=$ARCH CROSS_COMPILE=$CROSS INSTALL_MOD_PATH=$CWD/$BUILD/$PKG/kernel-modules modules_install >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+    make $CTHREADS O=$(pwd) ARCH=$ARCH CROSS_COMPILE=$CROSS INSTALL_MOD_PATH=$CWD/$BUILD/$PKG/kernel-modules firmware_install >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+    make $CTHREADS O=$(pwd) ARCH=$ARCH CROSS_COMPILE=$CROSS INSTALL_HDR_PATH=$CWD/$BUILD/$PKG/kernel-headers/usr headers_install >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 }
 
 add_linux_upgrade_tool (){
@@ -351,7 +229,7 @@ build_boot (){
     if [[ "$KERNEL_SOURCE" == "next" ]]; then
         find $CWD/$BUILD/$SOURCE/initrd-tree/ ! -path "./.git*" | cpio -H newc -ov > initrd.img
         $CWD/$BUILD/$OUTPUT/$TOOLS/mkkrnlimg -a initrd.img $CWD/$BUILD/$OUTPUT/$FLASH/boot.img
-        
+
         if [ -e $CWD/$BUILD/$SOURCE/initrd.img ];then
             rm $CWD/$BUILD/$SOURCE/initrd.img
         fi
