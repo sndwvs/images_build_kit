@@ -2,7 +2,7 @@
 
 
 
-if [ -z $CWD ];then
+if [ -z $CWD ]; then
     exit
 fi
 
@@ -12,28 +12,29 @@ fi
 get_config
 
 #---------------------------------------------
-# get version linux source
+# boot loader configuration
 #---------------------------------------------
-kernel_version KERNEL_VERSION
-
-
-
 URL_BOOT_LOADER_SOURCE="http://git.denx.de"
 BOOT_LOADER="u-boot"
 BOOT_LOADER_VERSION="" #>v2016.03
+
+#---------------------------------------------
+# xtools configuration
+#---------------------------------------------
 XTOOLS="x-tools7h"
-if [ "$BOARD_NAME" == "cubietruck" ] && [ "$KERNEL_SOURCE" != "next" ]; then
-    URL_XTOOLS="https://archlinuxarm.org/builder/xtools/4.9.2-4/$XTOOLS.tar.xz"
+if [[ $SOCFAMILY == sun* ]] && [[ $KERNEL_SOURCE != next ]]; then
+#    URL_XTOOLS="https://archlinuxarm.org/builder/xtools/4.9.2-4/$XTOOLS.tar.xz"
+    URL_XTOOLS="https://archlinuxarm.org/builder/xtools/5.3.0-5/$XTOOLS.tar.xz"
 else
     URL_XTOOLS="http://archlinuxarm.org/builder/xtools/$XTOOLS.tar.xz"
 fi
+
+#---------------------------------------------
+# rootfs configuration
+#---------------------------------------------
 URL_ROOTFS="ftp://ftp.arm.slackware.com/slackwarearm/slackwarearm-devtools/minirootfs/roots/"
 ROOTFS_NAME=$(wget -q -O - $URL_ROOTFS | grep -oP "(slack-current[\.\-\+\d\w]+.tar.xz)" | head -n1 | cut -d '.' -f1)
-VERSION=$(date +%Y%m%d)
-ROOTFS="$ROOTFS_NAME-$KERNEL_VERSION-$BOARD_NAME-build-$VERSION"
-ROOTFS_XFCE="$(echo $ROOTFS_NAME | sed 's#miniroot#xfce#')-$KERNEL_VERSION-$BOARD_NAME-build-$VERSION"
-
-
+ROOTFS_VERSION=$(date +%Y%m%d)
 
 #---------------------------------------------
 # cross compilation

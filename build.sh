@@ -105,32 +105,30 @@ source $CWD/build_slackware_rootfs.sh || exit 1
 #---------------------------------------------
 # clear log
 #---------------------------------------------
-if [[ -f $CWD/$BUILD/$SOURCE/$LOG ]];then
+if [[ -f $CWD/$BUILD/$SOURCE/$LOG ]]; then
     rm $CWD/$BUILD/$SOURCE/$LOG
 fi
 
 #---------------------------------------------
 # main script
 #---------------------------------------------
-
-if [ ! -z "$KERNEL_VERSION" ]; then
-    message "" "build" "rootfs for kernel version $KERNEL_VERSION"
-fi
-
-if [[ "$CLEAN" == "true" ]]; then
+if [[ $CLEAN == true ]]; then
     clean_sources
 fi
 
-if [ ! -e "$BOARD_NAME" ]; then
+if [[ ! -e $BOARD_NAME ]]; then
     prepare_dest
 fi
 
-if [ "$DOWNLOAD_SOURCE_BINARIES" == "true" ]; then
+if [[ $DOWNLOAD_SOURCE_BINARIES == true ]]; then
     download
 fi
 
-if [ "$COMPILE_BINARIES" == "true" ]; then
-    if [ "$BOARD_NAME" == "firefly" ]; then
+#---------------------------------------------
+# start build
+#---------------------------------------------
+if [[ $COMPILE_BINARIES == true ]]; then
+    if [[ $SOCFAMILY == firefly ]]; then
         compile_rk2918
         compile_rkflashtool
         compile_mkbooting
@@ -139,7 +137,7 @@ if [ "$COMPILE_BINARIES" == "true" ]; then
         patching_kernel_sources
         compile_kernel
         build_parameters
-        if [ "$KERNEL_SOURCE" == "next" ]; then
+        if [[ $KERNEL_SOURCE == next ]]; then
             build_kernel
         else
             build_resource
@@ -147,7 +145,7 @@ if [ "$COMPILE_BINARIES" == "true" ]; then
         build_boot
     fi
 
-    if [ "$BOARD_NAME" == "cubietruck" ]; then
+    if [[ $SOCFAMILY == sun* ]]; then
         patching_kernel_source
         compile_sunxi_tools
         build_sunxi_tools
@@ -158,17 +156,19 @@ if [ "$COMPILE_BINARIES" == "true" ]; then
     build_kernel_pkg
 fi
 
-if [[ "$TOOLS_PACK" == "true" && "$BOARD_NAME" == "firefly" ]]; then
+if [[ $TOOLS_PACK == true && $SOCFAMILY == rk3288 ]]; then
     build_flash_script
     create_tools_pack
 fi
 
 for image_type in ${CREATE_IMAGE[@]}; do
-    if [ "$image_type" == "mini" ]; then
-        message "" "create" "$ROOTFS"
-        clean_rootfs
+
+    get_name_rootfs $image_type
+    clean_rootfs $image_type
+
+    if [[ $image_type == mini ]]; then
         download_rootfs
-        prepare
+        prepare_rootfs
         setting_fstab
         setting_debug
         setting_motd
@@ -187,9 +187,9 @@ for image_type in ${CREATE_IMAGE[@]}; do
         create_img
     fi
 
-    if [ "$image_type" == "xfce" ]; then
+    if [[ $image_type == xfce ]]; then
         message "" "create" "$ROOTFS_XFCE"
-        cp -fr $CWD/$BUILD/$SOURCE/$ROOTFS/ $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+        cp -fr $CWD/$BUILD/$SOURCE/$ROOTFS/ $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         download_pkg $URL_DISTR "$image_type" ${CATEGORY_PKG[@]}
         install_pkg "$image_type" ${CATEGORY_PKG[@]}
 
@@ -203,5 +203,3 @@ for image_type in ${CREATE_IMAGE[@]}; do
         create_img xfce
     fi
 done
-
-

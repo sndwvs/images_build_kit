@@ -46,8 +46,8 @@ compile_mkbooting (){
 
 compile_sunxi_tools (){
     message "" "compiling" "$SUNXI_TOOLS"
-    cd $CWD/$BUILD/$SOURCE/$SUNXI_TOOLS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-    git checkout $SUNXI_TOOLS_VERSION >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+    cd $CWD/$BUILD/$SOURCE/$SUNXI_TOOLS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    git checkout $SUNXI_TOOLS_VERSION >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     # for host
     make -s clean && make -s all clean && make -s fex2bin && make -s bin2fex || exit 1
@@ -59,14 +59,15 @@ compile_sunxi_tools (){
 
 compile_boot_loader (){
     message "" "compiling" "$BOOT_LOADER"
-    cd $CWD/$BUILD/$SOURCE/$BOOT_LOADER >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+    cd $CWD/$BUILD/$SOURCE/$BOOT_LOADER >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     make ARCH=$ARCH clean || exit 1
-    git checkout $BOOT_LOADER_VERSION >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+    git checkout $BOOT_LOADER_VERSION >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    if [ "$BOARD_NAME" == "firefly" ]; then
-        make ARCH=$ARCH $BOOT_LOADER_CONFIG CROSS_COMPILE=$CROSS || exit 1
-        if [ "$KERNEL_SOURCE" == "next" ] ; then
+    make ARCH=$ARCH $BOOT_LOADER_CONFIG CROSS_COMPILE=$CROSS || exit 1
+
+    if [[ $SOCFAMILY == rk3288 ]]; then
+        if [[ $KERNEL_SOURCE == next ]]; then
             # u-boot-firefly-rk3288 2016.03 package contains backports
             # of EFI support patches and fails to boot the kernel on the Firefly.
             sed 's/^\(CONFIG_EFI_LOADER=y\)/# CONFIG_EFI_LOADER is not set/' -i .config || exit 1
@@ -81,49 +82,38 @@ compile_boot_loader (){
         find -name "RK3288UbootLoader*" -exec install -D {} $CWD/$BUILD/$OUTPUT/$FLASH/{} \;
     fi
 
-    if [ "$BOARD_NAME" == "cubietruck" ]; then
-        make ARCH=$ARCH $BOOT_LOADER_CONFIG CROSS_COMPILE=$CROSS || exit 1
-
+    if [[ $SOCFAMILY == sun* ]]; then
         if [ "$KERNEL_SOURCE" != "next" ] ; then
             # patch mainline uboot configuration to boot with old kernels
             if [ "$(cat $CWD/$BUILD/$SOURCE/$BOOT_LOADER/.config | grep CONFIG_ARMV7_BOOT_SEC_DEFAULT=y)" == "" ]; then
                 echo "CONFIG_ARMV7_BOOT_SEC_DEFAULT=y" >> $CWD/$BUILD/$SOURCE/$BOOT_LOADER/.config
-                #echo "CONFIG_ARMV7_BOOT_SEC_DEFAULT=y" >> $CWD/$BUILD/$SOURCE/$BOOT_LOADER/spl/.config
                 echo "CONFIG_OLD_SUNXI_KERNEL_COMPAT=y" >> $CWD/$BUILD/$SOURCE/$BOOT_LOADER/.config
-                #echo "CONFIG_OLD_SUNXI_KERNEL_COMPAT=y" >> $CWD/$BUILD/$SOURCE/$BOOT_LOADER/spl/.config
             fi
         fi
-
         make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS || exit 1
     fi
 }
 
 compile_kernel (){
     message "" "compiling" "$LINUX_SOURCE"
-    cd "$CWD/$BUILD/$SOURCE/$LINUX_SOURCE" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+    cd "$CWD/$BUILD/$SOURCE/$LINUX_SOURCE" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    if [ "$BOARD_NAME" == "cubietruck" ]; then
+    if [[ $SOCFAMILY == sun* ]]; then
         # Attempting to run 'firmware_install' with CONFIG_USB_SERIAL_TI=y when
         # using make 3.82 results in an error
         # make[2]: *** No rule to make target `/lib/firmware/./', needed by
         # `/lib/firmware/ti_3410.fw'.  Stop.
-        if [[ `grep '$(INSTALL_FW_PATH)/$$(dir %)' scripts/Makefile.fwinst` ]];then
+        if [[ $(grep '$(INSTALL_FW_PATH)/$$(dir %)' scripts/Makefile.fwinst) ]];then
             sed -i 's:$(INSTALL_FW_PATH)/$$(dir %):$$(dir $(INSTALL_FW_PATH)/%):' scripts/Makefile.fwinst
-        fi
-
-        if [ "$KERNEL_SOURCE" == "next" ]; then
-            DEFCONFIG="sunxi_defconfig"
-        else
-            DEFCONFIG="sun7i_defconfig"
         fi
     fi
 
     # delete previous creations
     make CROSS_COMPILE=$CROSS clean || exit 1
     # use proven config
-    install -D $CWD/config/kernel/$LINUX_CONFIG $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/.config || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+    install -D $CWD/config/kernel/$LINUX_CONFIG $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/.config || (message "err" "details" && exit 1) || exit 1
 
-    if [ "$BOARD_NAME" == "firefly" ]; then
+    if [[ $SOCFAMILY == rk3288 ]]; then
         DTB=rk3288-firefly.dtb
 
         if [ "$KERNEL_SOURCE" != "next" ]; then
@@ -138,23 +128,23 @@ compile_kernel (){
         fi
 
 #        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS menuconfig  || exit 1
-        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS zImage modules || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS $DTB || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1        
+        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS zImage modules || (message "err" "details" && exit 1) || exit 1
+        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS $DTB || (message "err" "details" && exit 1) || exit 1        
     fi
 
-    if [ "$BOARD_NAME" == "cubietruck" ]; then
+    if [[ $SOCFAMILY == sun* ]]; then
 #        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS menuconfig  || exit 1
         make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS oldconfig
-        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS zImage modules || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS zImage modules || (message "err" "details" && exit 1) || exit 1
 
         if [[ "$KERNEL_SOURCE" == "next" ]]; then
-            make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS sun7i-a20-cubietruck.dtb || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+            make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS $DEVICE_TREE_BLOB || (message "err" "details" && exit 1) || exit 1
         fi
     fi
 
-    make $CTHREADS O=$(pwd) ARCH=$ARCH CROSS_COMPILE=$CROSS INSTALL_MOD_PATH=$CWD/$BUILD/$PKG/kernel-modules modules_install >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-    make $CTHREADS O=$(pwd) ARCH=$ARCH CROSS_COMPILE=$CROSS INSTALL_MOD_PATH=$CWD/$BUILD/$PKG/kernel-modules firmware_install >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-    make $CTHREADS O=$(pwd) ARCH=$ARCH CROSS_COMPILE=$CROSS INSTALL_HDR_PATH=$CWD/$BUILD/$PKG/kernel-headers/usr headers_install >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+    make $CTHREADS O=$(pwd) ARCH=$ARCH CROSS_COMPILE=$CROSS INSTALL_MOD_PATH=$CWD/$BUILD/$PKG/kernel-modules modules_install >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make $CTHREADS O=$(pwd) ARCH=$ARCH CROSS_COMPILE=$CROSS INSTALL_MOD_PATH=$CWD/$BUILD/$PKG/kernel-modules firmware_install >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make $CTHREADS O=$(pwd) ARCH=$ARCH CROSS_COMPILE=$CROSS INSTALL_HDR_PATH=$CWD/$BUILD/$PKG/kernel-headers/usr headers_install >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 add_linux_upgrade_tool (){
@@ -238,7 +228,7 @@ build_boot (){
         $CWD/$BUILD/$OUTPUT/$TOOLS/mkbootimg \
                             --kernel $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/arm/boot/zImage \
                             --ramdisk $CWD/$BUILD/$SOURCE/initrd-tree.cpio.gz \
-                            -o $CWD/$BUILD/$OUTPUT/$FLASH/boot.img >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+                            -o $CWD/$BUILD/$OUTPUT/$FLASH/boot.img >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         if [ -e $CWD/$BUILD/$SOURCE/initrd-tree.cpio.gz ];then
             rm $CWD/$BUILD/$SOURCE/initrd-tree.cpio.gz
         fi

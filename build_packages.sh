@@ -8,14 +8,16 @@ fi
 
 
 build_kernel_pkg() {
-    kernel_version _VERSION
-    if [ "$BOARD_NAME" == "firefly" ]; then
+    # get kernel version
+    kernel_version KERNEL_VERSION
+
+    if [[ $SOCFAMILY == rk3288 ]]; then
         # add firmware
         unzip -o $CWD/bin/$BOARD_NAME/$FIRMWARE -d $CWD/$BUILD/$SOURCE/ || exit 1
         cp -a $CWD/$BUILD/$SOURCE/hwpacks-master/system/etc/firmware $CWD/$BUILD/$PKG/kernel-modules/lib/ || exit 1  
     fi
 
-    if [ "$BOARD_NAME" == "cubietruck" ]; then
+    if [[ $SOCFAMILY == sun* ]]; then
         # adding custom firmware
         unzip -o $CWD/$BUILD/$SOURCE/$FIRMWARE -d $CWD/$BUILD/$PKG/kernel-modules/lib/firmware || exit 1
 
@@ -25,11 +27,11 @@ build_kernel_pkg() {
 
         touch "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/.verbose"
 
-        $CWD/$BUILD/$SOURCE/$BOOT_LOADER/tools/mkimage -C none -A arm -T script -d $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.scr" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+        $CWD/$BUILD/$SOURCE/$BOOT_LOADER/tools/mkimage -C none -A arm -T script -d $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.scr" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER/$BOOT_LOADER_BIN" "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/$BOOT_LOADER_BIN"
 
-        if [[ "$KERNEL_SOURCE" == "next" ]];then
-                install -Dm644 $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/${ARCH}/boot/dts/sun7i-a20-cubietruck.dtb "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/sun7i-a20-cubietruck.dtb" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+        if [[ $KERNEL_SOURCE == next ]];then
+                install -Dm644 $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/${ARCH}/boot/dts/$DEVICE_TREE_BLOB "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/$DEVICE_TREE_BLOB" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
                 touch "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/.next"
         else
 
@@ -90,18 +92,20 @@ EOF
     cd $CWD/$BUILD/$PKG/kernel-firmware/
     makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-firmware-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${_BUILD}${PACKAGER}.txz
 
+    cd $CWD/$BUILD/$PKG
+
     # clear kernel packages directories
     if [ -d "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}" ]; then
-        rm -rf "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+        rm -rf "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
     if [ -d "$CWD/$BUILD/$PKG/kernel-modules" ]; then
-        rm -rf "$CWD/$BUILD/$PKG/kernel-modules" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+        rm -rf "$CWD/$BUILD/$PKG/kernel-modules" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
     if [ -d "$CWD/$BUILD/$PKG/kernel-headers" ]; then
-        rm -rf "$CWD/$BUILD/$PKG/kernel-headers" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+        rm -rf "$CWD/$BUILD/$PKG/kernel-headers" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
     if [ -d "$CWD/$BUILD/$PKG/kernel-firmware" ]; then
-        rm -rf "$CWD/$BUILD/$PKG/kernel-firmware" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+        rm -rf "$CWD/$BUILD/$PKG/kernel-firmware" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 }
 

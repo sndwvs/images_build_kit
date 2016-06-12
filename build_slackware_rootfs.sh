@@ -2,36 +2,51 @@
 
 
 
-if [ -z $CWD ];then
+if [ -z $CWD ]; then
     exit
 fi
 
-clean_rootfs (){
-    if [ -d $CWD/$BUILD/$SOURCE/$ROOTFS ];then
-        message "" "clean" "$ROOTFS"
-        rm -rf $CWD/$BUILD/$SOURCE/$ROOTFS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-        if [ -d $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE ];then
-            message "" "clean" "$ROOTFS_XFCE"
-            rm -rf $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-        fi
+get_name_rootfs() {
+    # name for rootfs image
+    image_type=$1
+    kernel_version KERNEL_VERSION
+
+    if [[ $image_type == mini ]]; then
+        ROOTFS="$ROOTFS_NAME-$KERNEL_VERSION-$BOARD_NAME-build-$ROOTFS_VERSION"
+    else
+        ROOTFS_XFCE="$(echo $ROOTFS_NAME | sed 's#miniroot#xfce#')-$KERNEL_VERSION-$BOARD_NAME-build-$ROOTFS_VERSION"
     fi
-    mkdir -p $CWD/$BUILD/$SOURCE/$ROOTFS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
 }
 
-download_rootfs (){
+clean_rootfs() {
+    image_type=$1
+
+    if [[ $image_type == mini ]] && [[ ! -z $ROOTFS ]] && [[ -d $CWD/$BUILD/$SOURCE/$ROOTFS ]]; then
+        message "" "clean" "$ROOTFS"
+        rm -rf $CWD/$BUILD/$SOURCE/$ROOTFS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
+
+    if [[ $image_type == xfce ]] && [[ ! -z $ROOTFS_XFCE ]] && [[ -d $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE ]] ;then
+        message "" "clean" "$ROOTFS_XFCE"
+        rm -rf $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
+}
+
+download_rootfs() {
     message "" "download" "$ROOTFS_NAME"
-    wget -c --no-check-certificate $URL_ROOTFS/$ROOTFS_NAME.tar.xz -O $CWD/$BUILD/$SOURCE/$ROOTFS_NAME.tar.xz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+    wget -c --no-check-certificate $URL_ROOTFS/$ROOTFS_NAME.tar.xz -O $CWD/$BUILD/$SOURCE/$ROOTFS_NAME.tar.xz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
-prepare (){
+prepare_rootfs() {
     message "" "prepare" "$ROOTFS"
-    tar xpf $CWD/$BUILD/$SOURCE/$ROOTFS_NAME.tar.xz -C "$CWD/$BUILD/$SOURCE/$ROOTFS" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+    mkdir -p $CWD/$BUILD/$SOURCE/$ROOTFS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    tar xpf $CWD/$BUILD/$SOURCE/$ROOTFS_NAME.tar.xz -C "$CWD/$BUILD/$SOURCE/$ROOTFS" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    message "" "install" "$ROOTFS"
-    installpkg --root $CWD/$BUILD/$SOURCE/$ROOTFS $CWD/$BUILD/$PKG/*${KERNEL_VERSION}*.txz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+    message "" "install" "kernel for $ROOTFS"
+    installpkg --root $CWD/$BUILD/$SOURCE/$ROOTFS $CWD/$BUILD/$PKG/*${KERNEL_VERSION}*.txz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
-setting_fstab (){
+setting_fstab() {
     if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/fstab | grep $ROOT_DISK) ]];then
         message "" "setting" "fstab"
         sed -i "s:# tmpfs:tmpfs:" $CWD/$BUILD/$SOURCE/$ROOTFS/etc/fstab
@@ -39,7 +54,7 @@ setting_fstab (){
     fi
 }
 
-setting_debug (){
+setting_debug() {
     message "" "setting" "uart debugging"
     sed 's/#\(ttyS[1-2]\)/\1/' -i "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/securetty"
     sed 's/#\(s\([1-2]\)\)\(.*\)\(ttyS[0-1]\)\(.*\)\(9600\)/\1\3ttyS\2 115200/' \
@@ -272,26 +287,26 @@ create_img (){
     message "" "create" "image size $ROOTFS_SIZE"
 
     if [ "$BOARD_NAME" == "firefly" ];then
-        $CWD/$BUILD/$OUTPUT/$TOOLS/mkrootfs $CWD/$BUILD/$SOURCE/$IMAGE ${ROOTFS_SIZE} >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+        $CWD/$BUILD/$OUTPUT/$TOOLS/mkrootfs $CWD/$BUILD/$SOURCE/$IMAGE ${ROOTFS_SIZE} >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     elif [ "$BOARD_NAME" == "cubietruck" ]; then
 
-        dd if=/dev/zero of=$CWD/$BUILD/$SOURCE/$IMAGE.img bs=1 count=0 seek=$ROOTFS_SIZE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+        dd if=/dev/zero of=$CWD/$BUILD/$SOURCE/$IMAGE.img bs=1 count=0 seek=$ROOTFS_SIZE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
         LOOP=$(losetup -f)
 
         losetup $LOOP $CWD/$BUILD/$SOURCE/$IMAGE.img || exit 1
 
         message "" "save" "$BOOT_LOADER"
-        dd if="$CWD/$BUILD/$SOURCE/$BOOT_LOADER/$BOOT_LOADER_BIN" of=$LOOP bs=1024 seek=8 status=noxfer >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+        dd if="$CWD/$BUILD/$SOURCE/$BOOT_LOADER/$BOOT_LOADER_BIN" of=$LOOP bs=1024 seek=8 status=noxfer >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
         message "" "create" "partition"
 #       ((echo o; echo p; echo n; echo p; echo 1; echo 2048; echo; echo w) | fdisk $LOOP) >/dev/null 2>&1
 #       ( ((echo o; echo p; echo n; echo p; echo 1; echo 2048; echo; echo w) | fdisk $LOOP) >/dev/null 2>&1 ) || true
-#       ( ((echo o; echo p; echo n; echo p; echo 1; echo 2048; echo; echo w) | fdisk $LOOP) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1 ) # || true
+#       ( ((echo o; echo p; echo n; echo p; echo 1; echo 2048; echo; echo w) | fdisk $LOOP) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 ) # || true
 #        ((echo o; echo p; echo n; echo p; echo 1; echo 2048; echo; echo w) | fdisk $LOOP) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || true
         echo -e "\no\nn\np\n1\n2048\n\nw" | fdisk $LOOP >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || true
 
-        partprobe $LOOP >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+        partprobe $LOOP >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
         losetup -d $LOOP
 
@@ -299,10 +314,10 @@ create_img (){
         sleep 2
 
         # 2048 (start) x 512 (block size) = where to mount partition
-        losetup -o 1048576 $LOOP $CWD/$BUILD/$SOURCE/$IMAGE.img >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+        losetup -o 1048576 $LOOP $CWD/$BUILD/$SOURCE/$IMAGE.img >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
         message "" "create" "filesystem"
-        mkfs.ext4 -F -m 0 -L linuxroot $LOOP >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+        mkfs.ext4 -F -m 0 -L linuxroot $LOOP >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
         message "" "create" "mount point and mount image"
         mkdir -p $CWD/$BUILD/$SOURCE/image
@@ -386,7 +401,7 @@ download_pkg (){
                 for _pkg in $packages;do
                     PKG_NAME=$(wget -q -O - ${_URL_DISTR}/${category} | grep -oP "(\>$(echo $_pkg | sed "s#\+#\\\+#")-[\.\-\+\d\w]+.txz\<)" | sed "s#[><]##g" | head -n1)
                     message "" "download" "package $category/$PKG_NAME"
-                    wget -c -nc -nd -np ${_URL_DISTR}/${category}/$PKG_NAME -P $CWD/$BUILD/$PKG/${category}/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+                    wget -c -nc -nd -np ${_URL_DISTR}/${category}/$PKG_NAME -P $CWD/$BUILD/$PKG/${category}/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
                 done
             fi
         fi
@@ -398,18 +413,13 @@ download_pkg (){
 }
 
 install_pkg (){
-    if [ ! -d "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE" ]; then
-    _ROOTFS="$ROOTFS"
-    else
-    _ROOTFS="$ROOTFS_XFCE"
-    fi
+    local ROOTFS
 
-#    for category in "$@";do
-#    for pkg in $(eval echo \$${category}) ;do
-#        message "" "install" "package $category/$pkg"
-#        installpkg --root $CWD/$BUILD/$SOURCE/$_ROOTFS $CWD/$BUILD/$PKG/$category/$pkg* >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-#    done
-#    done
+    if [[ ! -d $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE ]]; then
+        ROOTFS="$ROOTFS"
+    else
+        ROOTFS="$ROOTFS_XFCE"
+    fi
 
     # get parameters
     for _in in "$@";do
@@ -426,7 +436,7 @@ install_pkg (){
             if [[ ! -z ${packages} ]];then
                 for _pkg in $packages;do
                     message "" "install" "package $category/${_pkg}"
-                    installpkg --root $CWD/$BUILD/$SOURCE/$_ROOTFS $CWD/$BUILD/$PKG/$category/${_pkg}* >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+                    installpkg --root $CWD/$BUILD/$SOURCE/$ROOTFS $CWD/$BUILD/$PKG/$category/${_pkg}* >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
                 done
             fi
         fi
@@ -440,13 +450,14 @@ install_pkg (){
 setting_default_theme_xfce (){
     if [[ ! -d "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/skel/.config/xfce4" ]];then
         message "" "setting" "default settings xfce"
-		rsync -a "$CWD/config/xfce/" "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/skel/" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
-		rsync -a "$CWD/config/xfce/" "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/root/" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+        rsync -a "$CWD/config/xfce/" "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/skel/" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        rsync -a "$CWD/config/xfce/" "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/root/" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 }
 
 setting_default_start_x (){
     sed "s#id:3#id:4#" -i $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/inittab
+
     # fix default xfce
     ln -sf $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/X11/xinit/xinitrc.xfce \
        -r $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/X11/xinit/xinitrc
@@ -467,13 +478,13 @@ EOF
 setting_for_desktop() {
     # correcting the sound output through the alsa
     if [ ! -x "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.pulseaudio" ]; then
-		chmod 755 "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.pulseaudio"
+        chmod 755 "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.pulseaudio"
     fi
 
-	# adjustment for vdpau
+    # adjustment for vdpau
     sed -i 's#sunxi_ve_mem_reserve=0#sunxi_ve_mem_reserve=128#' "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/boot/boot.cmd"
-	$CWD/$BUILD/$SOURCE/$BOOT_LOADER/tools/mkimage -C none -A arm -T script -d $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/boot/boot.cmd \
-	"$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/boot/boot.scr" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+    $CWD/$BUILD/$SOURCE/$BOOT_LOADER/tools/mkimage -C none -A arm -T script -d $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/boot/boot.cmd \
+    "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/boot/boot.scr" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 build_video_driver_pkg (){
@@ -558,7 +569,7 @@ EOF
 
 install_video_driver_pkg (){
     message "" "install" "$VIDEO_DRIVER"
-    installpkg --root $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE $CWD/$BUILD/$PKG/$VIDEO_DRIVER-* >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" "$BUILD/$SOURCE/$LOG" && exit 1) || exit 1
+    installpkg --root $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE $CWD/$BUILD/$PKG/$VIDEO_DRIVER-* >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 setting_move_to_nand (){

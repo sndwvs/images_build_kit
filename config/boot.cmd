@@ -27,4 +27,3 @@ bootz 0x48000000
 fi
 # Recompile with:
 # mkimage -C none -A arm -T script -d /boot/boot.cmd /boot/boot.scr
-EOF
