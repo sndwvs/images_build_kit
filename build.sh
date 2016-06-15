@@ -128,13 +128,13 @@ fi
 # start build
 #---------------------------------------------
 if [[ $COMPILE_BINARIES == true ]]; then
-    if [[ $SOCFAMILY == firefly ]]; then
+    if [[ $SOCFAMILY == rk3288 ]]; then
         compile_rk2918
         compile_rkflashtool
         compile_mkbooting
         add_linux_upgrade_tool
         compile_boot_loader
-        patching_kernel_sources
+        patching_kernel_source
         compile_kernel
         build_parameters
         if [[ $KERNEL_SOURCE == next ]]; then
@@ -177,9 +177,9 @@ for image_type in ${CREATE_IMAGE[@]}; do
         setting_firstboot
         setting_settings
         setting_first_login
-        if [[ "$KERNEL_SOURCE" != "next" && "$BOARD_NAME" == "firefly" ]]; then
+        if [[ $KERNEL_SOURCE != "next" && $SOCFAMILY == rk3288 ]]; then
             setting_wifi
-        elif [[ "$BOARD_NAME" == "firefly" ]]; then
+        elif [[ $SOCFAMILY == rk3288 ]]; then
             setting_move_to_nand
         fi
         download_pkg $URL_DISTR "$image_type" ${CATEGORY_PKG[@]}

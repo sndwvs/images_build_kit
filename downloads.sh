@@ -2,7 +2,7 @@
 
 
 
-if [ -z $CWD ];then
+if [ -z $CWD ]; then
     exit
 fi
 
@@ -27,20 +27,20 @@ download (){
         git clone $URL_BOOT_LOADER_SOURCE/${BOOT_LOADER}.git $CWD/$BUILD/$SOURCE/$BOOT_LOADER >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
-    if [ "$BOARD_NAME" = "firefly" ];then
+    if [[ $SOCFAMILY == rk3288 ]]; then
         message "" "download" "$LINUX_UPGRADE_TOOL"
         wget -c --no-check-certificate $URL_LINUX_UPGRADE_TOOL/$LINUX_UPGRADE_TOOL.zip -O $CWD/$BUILD/$SOURCE/$LINUX_UPGRADE_TOOL.zip >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         unzip -o $CWD/$BUILD/$SOURCE/$LINUX_UPGRADE_TOOL.zip -d $CWD/$BUILD/$SOURCE/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-        message "" "download" "$URL_XTOOLS_OLD"
-        if [ -d $CWD/$BUILD/$SOURCE/$XTOOLS_OLD ]; then
-            cd $CWD/$BUILD/$SOURCE/$XTOOLS_OLD && git pull origin HEAD >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        else
-            git clone $URL_XTOOLS_OLD $CWD/$BUILD/$SOURCE/$XTOOLS_OLD >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        fi
+#        message "" "download" "$URL_XTOOLS_OLD"
+#        if [[ ! -z $XTOOLS_OLD ]] && [[ -d $CWD/$BUILD/$SOURCE/$XTOOLS_OLD ]]; then
+#            cd $CWD/$BUILD/$SOURCE/$XTOOLS_OLD && git pull origin HEAD >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+#        else
+#            git clone $URL_XTOOLS_OLD $CWD/$BUILD/$SOURCE/$XTOOLS_OLD >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+#        fi
 
         message "" "download" "$RK2918_TOOLS"
-        if [ -d $CWD/$BUILD/$SOURCE/$RK2918_TOOLS ]; then
+        if [[ -d $CWD/$BUILD/$SOURCE/$RK2918_TOOLS ]]; then
             cd $CWD/$BUILD/$SOURCE/$RK2918_TOOLS && git pull origin HEAD >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         else
             git clone $URL_RK2918_TOOLS/$RK2918_TOOLS $CWD/$BUILD/$SOURCE/$RK2918_TOOLS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
@@ -50,14 +50,14 @@ download (){
         if [ -d $CWD/$BUILD/$SOURCE/$RKFLASH_TOOLS ]; then
             cd $CWD/$BUILD/$SOURCE/$RKFLASH_TOOLS && git pull origin HEAD >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         else
-            git clone $URL_RKFLASH_TOOLS/$RKFLASH_TOOLS $CWD/$BUILD/$SOURCE/$RKFLASH_TOOLS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            git clone $URL_TOOLS/$RKFLASH_TOOLS $CWD/$BUILD/$SOURCE/$RKFLASH_TOOLS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
 
         message "" "download" "$MKBOOTIMG_TOOLS"
         if [ -d $CWD/$BUILD/$SOURCE/$MKBOOTIMG_TOOLS ]; then
             cd $CWD/$BUILD/$SOURCE/$MKBOOTIMG_TOOLS && git pull origin HEAD >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         else
-            git clone $URL_MKBOOTIMG_TOOLS/$MKBOOTIMG_TOOLS $CWD/$BUILD/$SOURCE/$MKBOOTIMG_TOOLS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            git clone $URL_TOOLS/$MKBOOTIMG_TOOLS $CWD/$BUILD/$SOURCE/$MKBOOTIMG_TOOLS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
 
         message "" "download" "$LINUX_SOURCE"

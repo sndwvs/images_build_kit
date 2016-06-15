@@ -86,7 +86,7 @@ get_config() {
 patching_kernel_source() {
     local dir="$CWD/patch/kernel/$SOCFAMILY-$KERNEL_SOURCE"
     cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    for file in "$dir/*.patch"; do
+    for file in $(ls $dir/ | grep patch); do
              names+=($(basename -a $file)) || exit 1
     done
 
@@ -96,10 +96,8 @@ patching_kernel_source() {
             LANGUAGE=english patch --batch --dry-run -p1 -N < $dir/${file} | grep create \
                     | awk '{print $NF}' | sed -n 's/,//p' | xargs -I % sh -c 'rm %'
 
-            patch --batch --silent -p1 -N < $dir/${file} >> $CWD/$BUILD/$SOURCE/$LOG 2>&1
-            if [[ $? -ne 0 ]]; then
-                message "err" "patching" "$file"
-            else
+            patch --batch --silent -p1 -N < $dir/${file} >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            if [[ $? -eq 0 ]]; then
                 message "" "patching" "succeeded $file"
             fi
         fi

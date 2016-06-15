@@ -412,13 +412,11 @@ download_pkg (){
     _URL_DISTR=''
 }
 
-install_pkg (){
-    local ROOTFS
-
-    if [[ ! -d $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE ]]; then
-        ROOTFS="$ROOTFS"
+install_pkg(){
+    if [[ $1 == mini ]]; then
+        local ROOTFS="$ROOTFS"
     else
-        ROOTFS="$ROOTFS_XFCE"
+        local ROOTFS="$ROOTFS_XFCE"
     fi
 
     # get parameters
@@ -447,7 +445,7 @@ install_pkg (){
     packages=''
 }
 
-setting_default_theme_xfce (){
+setting_default_theme_xfce() {
     if [[ ! -d "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/skel/.config/xfce4" ]];then
         message "" "setting" "default settings xfce"
         rsync -a "$CWD/config/xfce/" "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/skel/" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
@@ -455,7 +453,7 @@ setting_default_theme_xfce (){
     fi
 }
 
-setting_default_start_x (){
+setting_default_start_x() {
     sed "s#id:3#id:4#" -i $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/inittab
 
     # fix default xfce
@@ -487,7 +485,7 @@ setting_for_desktop() {
     "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/boot/boot.scr" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
-build_video_driver_pkg (){
+build_video_driver_pkg() {
     message "" "create" "pakage $VIDEO_DRIVER"
 
     mkdir -p $CWD/$BUILD/$PKG/$VIDEO_DRIVER/etc/{X11,rc.d,udev/rules.d} $CWD/$BUILD/$PKG/$VIDEO_DRIVER/usr/lib
@@ -567,16 +565,16 @@ EOF
     makepkg  -l n -c n $CWD/$BUILD/$PKG/$VIDEO_DRIVER-${_ARCH}-${_BUILD}${_PACKAGER}.txz
 }
 
-install_video_driver_pkg (){
+install_video_driver_pkg() {
     message "" "install" "$VIDEO_DRIVER"
     installpkg --root $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE $CWD/$BUILD/$PKG/$VIDEO_DRIVER-* >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
-setting_move_to_nand (){
+setting_move_to_nand() {
     message "" "setting" "data move to nand"
     install -m755 -D "$CWD/bin/$BOARD_NAME/setup.sh" "$CWD/$BUILD/$SOURCE/$ROOTFS/root/setup.sh"
 
-    if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/issue | grep setup.sh) ]];then
+    if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/issue 2>&1 | grep setup.sh) ]];then
         cat <<EOF >$CWD/$BUILD/$SOURCE/$ROOTFS/etc/issue
 
 [0;36m=======================================================================[0;39m
@@ -595,13 +593,13 @@ Kernel \r (\m)
 EOF
     fi
 
-    if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/root/.bashrc | grep setup.sh) ]];then
+    if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/root/.bashrc 2>&1 | grep setup.sh) ]];then
         cat <<EOF >$CWD/$BUILD/$SOURCE/$ROOTFS/root/.bashrc
 alias setup='/root/setup.sh'
 EOF
     fi
 
-    if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/root/.bash_profile | grep .bashrc) ]];then
+    if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/root/.bash_profile 2>&1 | grep setup.sh) ]];then
         cat <<EOF >$CWD/$BUILD/$SOURCE/$ROOTFS/root/.bash_profile
 source ~/.bashrc
 EOF
