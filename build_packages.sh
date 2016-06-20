@@ -199,7 +199,7 @@ if [ -f $TOOLS-$(uname -m).tar.xz ];then
     echo "------ unpack $TOOLS"
     tar xf $TOOLS-$(uname -m).tar.xz || exit 1
 fi
-echo "------ flash boot loader"
+#echo "------ flash boot loader"
 #$TOOLS/upgrade_tool ul \$(ls | grep RK3288UbootLoader) || exit 1
 $TOOLS/rkflashtool l < \$(ls | grep RK3288UbootLoader) || exit 1
 echo "------ flash parameters"
@@ -215,8 +215,10 @@ else
     echo "------ flash linuxroot $ROOTFS.img"
     $TOOLS/rkflashtool w linuxroot < $ROOTFS.img || exit 1
 fi
+echo "------ flash boot loader"
+$TOOLS/rkflashtool l < \$(ls | grep RK3288UbootLoader) || exit 1
 echo "------ reboot device"
-$TOOLS/rkflashtool b RK320A || exit 1
+#$TOOLS/rkflashtool b RK320A || exit 1
 EOF
     chmod 755 "$CWD/$BUILD/$OUTPUT/$FLASH/flash.sh"
     if [ "$KERNEL_SOURCE" == "next" ]; then
