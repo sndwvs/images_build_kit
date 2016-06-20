@@ -201,7 +201,6 @@ if [ -f $TOOLS-$(uname -m).tar.xz ];then
 fi
 #echo "------ flash boot loader"
 #$TOOLS/upgrade_tool ul \$(ls | grep RK3288UbootLoader) || exit 1
-$TOOLS/rkflashtool l < \$(ls | grep RK3288UbootLoader) || exit 1
 echo "------ flash parameters"
 $TOOLS/rkflashtool P < parameters.txt || exit 1
 echo "------ flash resource"
