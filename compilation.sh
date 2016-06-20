@@ -61,23 +61,26 @@ compile_boot_loader (){
     message "" "compiling" "$BOOT_LOADER"
     cd $CWD/$BUILD/$SOURCE/$BOOT_LOADER >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    make ARCH=$ARCH clean || exit 1
-    git checkout $BOOT_LOADER_VERSION >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make ARCH=$ARCH CROSS_COMPILE=$CROSS clean || exit 1
 
-    make ARCH=$ARCH $BOOT_LOADER_CONFIG CROSS_COMPILE=$CROSS || exit 1
+    if [[ ! -z $BOOT_LOADER_VERSION ]]; then
+        git checkout $BOOT_LOADER_VERSION >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
+
+    make ARCH=$ARCH $BOOT_LOADER_CONFIG CROSS_COMPILE=$CROSS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     if [[ $SOCFAMILY == rk3288 ]]; then
         if [[ $KERNEL_SOURCE == next ]]; then
             # u-boot-firefly-rk3288 2016.03 package contains backports
             # of EFI support patches and fails to boot the kernel on the Firefly.
-            sed 's/^\(CONFIG_EFI_LOADER=y\)/# CONFIG_EFI_LOADER is not set/' -i .config || exit 1
-            make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS || exit 1
+            sed 's/^\(CONFIG_EFI_LOADER=y\)/# CONFIG_EFI_LOADER is not set/' -i .config >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             # create RK3288UbootLoader.bin
             tools/mkimage -n rk3288 -T rkimage -d \
             spl/u-boot-spl-dtb.bin out && \
             cat out | openssl rc4 -K 7c4e0304550509072d2c7b38170d1711 > "RK3288UbootLoader${BOOT_LOADER_VERSION}.bin"
         else
-            make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS_OLD || exit 1
+            make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS_OLD >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
         find -name "RK3288UbootLoader*" -exec install -D {} $CWD/$BUILD/$OUTPUT/$FLASH/{} \;
     fi
@@ -90,7 +93,7 @@ compile_boot_loader (){
                 echo "CONFIG_OLD_SUNXI_KERNEL_COMPAT=y" >> $CWD/$BUILD/$SOURCE/$BOOT_LOADER/.config
             fi
         fi
-        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS || exit 1
+        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 }
 
@@ -114,8 +117,6 @@ compile_kernel (){
     install -D $CWD/config/kernel/$LINUX_CONFIG $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/.config || (message "err" "details" && exit 1) || exit 1
 
     if [[ $SOCFAMILY == rk3288 ]]; then
-        DTB=rk3288-firefly.dtb
-
         if [ "$KERNEL_SOURCE" != "next" ]; then
             CROSS=$CROSS_OLD
             # fix firmware /system /lib
@@ -124,12 +125,11 @@ compile_kernel (){
 
             # fix kernel version
             sed -i "/SUBLEVEL = 0/d" Makefile
-            DTB=firefly-rk3288.dtb
         fi
 
 #        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS menuconfig  || exit 1
         make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS zImage modules || (message "err" "details" && exit 1) || exit 1
-        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS $DTB || (message "err" "details" && exit 1) || exit 1        
+        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS $DEVICE_TREE_BLOB || (message "err" "details" && exit 1) || exit 1
     fi
 
     if [[ $SOCFAMILY == sun* ]]; then
@@ -170,14 +170,14 @@ build_boot() {
     # create boot for flash
     tar xf $CWD/bin/initrd-tree.tar.xz -C $CWD/$BUILD/$SOURCE/
     cd $CWD/$BUILD/$SOURCE/
-    if [[ "$KERNEL_SOURCE" == "next" ]]; then
+    if [[ $KERNEL_SOURCE == next ]]; then
         find $CWD/$BUILD/$SOURCE/initrd-tree/ ! -path "./.git*" | cpio -H newc -ov > initrd.img
         $CWD/$BUILD/$OUTPUT/$TOOLS/mkkrnlimg -a initrd.img $CWD/$BUILD/$OUTPUT/$FLASH/boot.img
 
         if [ -e $CWD/$BUILD/$SOURCE/initrd.img ];then
             rm $CWD/$BUILD/$SOURCE/initrd.img
         fi
-    else   
+    else
         $CWD/$BUILD/$OUTPUT/$TOOLS/mkcpiogz $CWD/$BUILD/$SOURCE/initrd-tree || exit 1
         $CWD/$BUILD/$OUTPUT/$TOOLS/mkbootimg \
                             --kernel $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/arm/boot/zImage \

@@ -78,19 +78,19 @@ EOF
     ln -s /usr/include build
     ln -s /usr/include source
 
-    if [ "$BOARD_NAME" == "cubietruck" ]; then
+    if [[ $SOCFAMILY == sun* ]]; then
         cd $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/
-        makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${_BUILD}${PACKAGER}.txz
+        makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${_BUILD}${PACKAGER}.txz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
     cd $CWD/$BUILD/$PKG/kernel-modules/
-    makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-modules-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${_BUILD}${PACKAGER}.txz
+    makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-modules-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${_BUILD}${PACKAGER}.txz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     cd $CWD/$BUILD/$PKG/kernel-headers/
-    makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-headers-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${_BUILD}${PACKAGER}.txz
+    makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-headers-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${_BUILD}${PACKAGER}.txz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     cd $CWD/$BUILD/$PKG/kernel-firmware/
-    makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-firmware-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${_BUILD}${PACKAGER}.txz
+    makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-firmware-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${_BUILD}${PACKAGER}.txz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     cd $CWD/$BUILD/$PKG
 
@@ -200,7 +200,8 @@ if [ -f $TOOLS-$(uname -m).tar.xz ];then
     tar xf $TOOLS-$(uname -m).tar.xz || exit 1
 fi
 echo "------ flash boot loader"
-$TOOLS/upgrade_tool ul \$(ls | grep RK3288UbootLoader) || exit 1
+#$TOOLS/upgrade_tool ul \$(ls | grep RK3288UbootLoader) || exit 1
+$TOOLS/rkflashtool l < \$(ls | grep RK3288UbootLoader) || exit 1
 echo "------ flash parameters"
 $TOOLS/rkflashtool P < parameters.txt || exit 1
 echo "------ flash resource"
