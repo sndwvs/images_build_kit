@@ -13,13 +13,13 @@ build_kernel_pkg() {
 
     if [[ $SOCFAMILY == rk3288 ]] && [[ ! -z $FIRMWARE ]]; then
         # add firmware
-        unzip -o $CWD/bin/$BOARD_NAME/$FIRMWARE -d $CWD/$BUILD/$SOURCE/ || exit 1
-        cp -a $CWD/$BUILD/$SOURCE/hwpacks-master/system/etc/firmware $CWD/$BUILD/$PKG/kernel-modules/lib/ || exit 1  
+        unzip -o $CWD/bin/$BOARD_NAME/$FIRMWARE -d $CWD/$BUILD/$SOURCE/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        cp -a $CWD/$BUILD/$SOURCE/hwpacks-master/system/etc/firmware $CWD/$BUILD/$PKG/kernel-modules/lib/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
     if [[ $SOCFAMILY == sun* ]]; then
         # adding custom firmware
-        unzip -o $CWD/$BUILD/$SOURCE/$FIRMWARE -d $CWD/$BUILD/$PKG/kernel-modules/lib/firmware || exit 1
+        unzip -o $CWD/$BUILD/$SOURCE/$FIRMWARE -d $CWD/$BUILD/$PKG/kernel-modules/lib/firmware >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
         install -Dm644 $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/${ARCH}/boot/zImage "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/zImage"
 
@@ -109,6 +109,7 @@ EOF
     fi
 }
 
+
 build_sunxi_tools() {
     message "" "build" "package ${SUNXI_TOOLS}"
     mkdir -p $CWD/$BUILD/$PKG/${SUNXI_TOOLS}/{sbin,install}
@@ -144,4 +145,87 @@ EOF
     if [ -d $CWD/$BUILD/$PKG/${SUNXI_TOOLS} ];then
         rm -rf $CWD/$BUILD/$PKG/${SUNXI_TOOLS}
     fi
+}
+
+
+add_linux_upgrade_tool() {
+    message "" "add" "$LINUX_UPGRADE_TOOL"
+    # add tool for flash boot loader
+    cp -a $CWD/$BUILD/$SOURCE/$LINUX_UPGRADE_TOOL/upgrade_tool $CWD/$BUILD/$OUTPUT/$TOOLS/
+    cp -a $CWD/$BUILD/$SOURCE/$LINUX_UPGRADE_TOOL/config.ini $CWD/$BUILD/$OUTPUT/$TOOLS/
+}
+
+
+build_parameters() {
+    message "" "create" "parameters"
+    # add parameters for flash
+    install -m644 -D "$CWD/config/boards/$BOARD_NAME/parameters.txt" "$CWD/$BUILD/$OUTPUT/$FLASH/parameters.txt"
+    sed -i "s#mmcblk[0-9]p[0-9]#$ROOT_DISK#" "$CWD/$BUILD/$OUTPUT/$FLASH/parameters.txt"
+}
+
+
+build_flash_script() {
+    message "" "create" "flash script"
+    cat <<EOF >"$CWD/$BUILD/$OUTPUT/$FLASH/flash.sh"
+#!/bin/sh
+
+if [ "$EUID" -ne 0 ];then
+    echo "Please run as root"
+    exit
+fi
+
+case "\$1" in
+    -r )
+    shift
+    XFCE="false"
+    ;;
+    --xfce )
+    shift
+    XFCE="true"
+    ;;
+    *)
+    echo -e "Options:"
+    echo -e "\t-r"
+    echo -e "\t\tflash mini rootfs image without xfce"
+
+    echo -e "\t--xfce"
+    echo -e "\t\tflash image with xfce\n"
+    exit
+    ;;
+esac
+
+
+if [ -f $TOOLS-$(uname -m).tar.xz ];then
+    echo "------ unpack $TOOLS"
+    tar xf $TOOLS-$(uname -m).tar.xz || exit 1
+fi
+echo "------ flash boot loader"
+$TOOLS/upgrade_tool ul \$(ls | grep RK3288UbootLoader) || exit 1
+echo "------ flash parameters"
+$TOOLS/rkflashtool P < parameters.txt || exit 1
+echo "------ flash resource"
+$TOOLS/rkflashtool w resource < resource.img || exit 1
+echo "------ flash boot"
+$TOOLS/rkflashtool w boot < boot.img || exit 1
+if [ "\$XFCE" = "true" ]; then
+    echo "------ flash linuxroot $ROOTFS_XFCE.img"
+    $TOOLS/rkflashtool w linuxroot < $ROOTFS_XFCE.img || exit 1
+else
+    echo "------ flash linuxroot $ROOTFS.img"
+    $TOOLS/rkflashtool w linuxroot < $ROOTFS.img || exit 1
+fi
+echo "------ reboot device"
+$TOOLS/rkflashtool b RK320A || exit 1
+EOF
+    chmod 755 "$CWD/$BUILD/$OUTPUT/$FLASH/flash.sh"
+    if [ "$KERNEL_SOURCE" == "next" ]; then
+        sed -i 's#resource#kernel#g' "$CWD/$BUILD/$OUTPUT/$FLASH/flash.sh"
+    fi
+}
+
+
+create_tools_pack(){
+    message "" "create" "tools pack"
+    cd $CWD/$BUILD/$OUTPUT/ || exit 1
+    tar cJf $CWD/$BUILD/$OUTPUT/$FLASH/$TOOLS-$(uname -m).tar.xz $TOOLS || exit 1
 }

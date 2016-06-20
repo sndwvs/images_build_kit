@@ -32,12 +32,14 @@ download (){
         wget -c --no-check-certificate $URL_LINUX_UPGRADE_TOOL/$LINUX_UPGRADE_TOOL.zip -O $CWD/$BUILD/$SOURCE/$LINUX_UPGRADE_TOOL.zip >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         unzip -o $CWD/$BUILD/$SOURCE/$LINUX_UPGRADE_TOOL.zip -d $CWD/$BUILD/$SOURCE/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-#        message "" "download" "$URL_XTOOLS_OLD"
-#        if [[ ! -z $XTOOLS_OLD ]] && [[ -d $CWD/$BUILD/$SOURCE/$XTOOLS_OLD ]]; then
-#            cd $CWD/$BUILD/$SOURCE/$XTOOLS_OLD && git pull origin HEAD >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-#        else
-#            git clone $URL_XTOOLS_OLD $CWD/$BUILD/$SOURCE/$XTOOLS_OLD >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-#        fi
+        if [[ ! -z $XTOOLS_OLD ]]; then
+            message "" "download" "$URL_XTOOLS_OLD"
+            if [[ -d $CWD/$BUILD/$SOURCE/$XTOOLS_OLD ]]; then
+                cd $CWD/$BUILD/$SOURCE/$XTOOLS_OLD && git pull origin HEAD >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            else
+                git clone $URL_XTOOLS_OLD $CWD/$BUILD/$SOURCE/$XTOOLS_OLD >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            fi
+        fi
 
         message "" "download" "$RK2918_TOOLS"
         if [[ -d $CWD/$BUILD/$SOURCE/$RK2918_TOOLS ]]; then
@@ -62,13 +64,18 @@ download (){
 
         message "" "download" "$LINUX_SOURCE"
         if [[ $KERNEL_SOURCE == next ]]; then
-            if [ -d $CWD/$BUILD/$SOURCE/$LINUX_SOURCE ]; then
-                cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE && git reset --hard >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-            else
-                git clone $URL_LINUX_SOURCE/$LINUX_SOURCE $CWD/$BUILD/$SOURCE/$LINUX_SOURCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-            fi
-            message "" "extract" "$KERNEL_BRANCH"
-            cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE && git checkout $KERNEL_BRANCH >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+#            if [ -d $CWD/$BUILD/$SOURCE/$LINUX_SOURCE ]; then
+#                cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE && git reset --hard >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+#            else
+#                git clone $URL_LINUX_SOURCE/$LINUX_SOURCE $CWD/$BUILD/$SOURCE/$LINUX_SOURCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+#            fi
+#            message "" "extract" "$KERNEL_BRANCH"
+#            cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE && git checkout $KERNEL_BRANCH >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
+            wget -c --no-check-certificate $URL_LINUX_SOURCE/$LINUX_SOURCE.tar.xz -O $CWD/$BUILD/$SOURCE/$LINUX_SOURCE.tar.xz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
+            message "" "extract" "$LINUX_SOURCE"
+            tar xpf $CWD/$BUILD/$SOURCE/$LINUX_SOURCE.tar.xz -C "$CWD/$BUILD/$SOURCE/" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
     fi
 

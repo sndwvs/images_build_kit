@@ -147,54 +147,8 @@ compile_kernel (){
     make $CTHREADS O=$(pwd) ARCH=$ARCH CROSS_COMPILE=$CROSS INSTALL_HDR_PATH=$CWD/$BUILD/$PKG/kernel-headers/usr headers_install >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
-add_linux_upgrade_tool (){
-    message "" "add" "$LINUX_UPGRADE_TOOL"
-    # add tool for flash boot loader
-    cp -a $CWD/$BUILD/$SOURCE/$LINUX_UPGRADE_TOOL/upgrade_tool $CWD/$BUILD/$OUTPUT/$TOOLS/
-    cp -a $CWD/$BUILD/$SOURCE/$LINUX_UPGRADE_TOOL/config.ini $CWD/$BUILD/$OUTPUT/$TOOLS/
-}
 
-build_parameters (){
-    message "" "create" "parameters"
-    if [[ "$KERNEL_SOURCE" == "next" ]]; then
-        # add parameters for flash
-        cat <<EOF >"$CWD/$BUILD/$OUTPUT/$FLASH/parameters.txt"
-FIRMWARE_VER:5.0.0
-MACHINE_MODEL:rk3288
-MACHINE_ID:007
-MANUFACTURER:RK3288
-MAGIC: 0x5041524B
-ATAG: 0x60000800
-MACHINE: 3288
-CHECK_MASK: 0x80
-PWR_HLD: 0,0,A,0,1
-#KERNEL_IMG: 0x62008000
-#FDT_NAME: rk-kernel.dtb
-#RECOVER_KEY: 1,1,0,20,0
-CMDLINE:console=ttyS2,115200 console=tty0 earlyprintk root=/dev/$ROOT_DISK ro rootwait rootfstype=ext4 init=/sbin/init initrd=0x62000000,0x00800000 mtdparts=rk29xxnand:0x00008000@0x00002000(kernel),0x00008000@0x0000A000(boot),-@0x00012000(linuxroot)
-EOF
-    else
-        # add parameters for flash
-        cat <<EOF >"$CWD/$BUILD/$OUTPUT/$FLASH/parameters.txt"
-FIRMWARE_VER:4.4.2
-MACHINE_MODEL:rk30sdk
-MACHINE_ID:007
-MANUFACTURER:RK30SDK
-MAGIC: 0x5041524B
-ATAG: 0x60000800
-MACHINE: 3066
-CHECK_MASK: 0x80
-PWR_HLD: 0,0,A,0,1
-#KERNEL_IMG: 0x62008000
-#FDT_NAME: rk-kernel.dtb
-#RECOVER_KEY: 1,1,0,20,0
-CMDLINE:console=ttyS2 console=tty0 earlyprintk root=/dev/$ROOT_DISK rw rootfstype=ext4 init=/sbin/init initrd=0x62000000,0x00800000 mtdparts=rk29xxnand:0x00008000@0x00002000(resource),0x00008000@0x0000A000(boot),-@0x00012000(linuxroot)
-EOF
-    fi
-}
-
-
-build_kernel(){
+build_kernel() {
     message "" "create" "kernel"
     # create resource for flash
     cd $CWD/$BUILD/$OUTPUT/$FLASH
@@ -203,7 +157,7 @@ build_kernel(){
 }
 
 
-build_resource (){
+build_resource() {
     message "" "create" "resource"
     # create resource for flash
     cd $CWD/$BUILD/$OUTPUT/$FLASH
@@ -211,7 +165,7 @@ build_resource (){
 }
 
 
-build_boot (){
+build_boot() {
     message "" "create" "boot initrd"
     # create boot for flash
     tar xf $CWD/bin/initrd-tree.tar.xz -C $CWD/$BUILD/$SOURCE/
@@ -235,71 +189,6 @@ build_boot (){
     fi
 }
 
-
-build_flash_script (){
-    message "" "create" "flash script"
-    cat <<EOF >"$CWD/$BUILD/$OUTPUT/$FLASH/flash.sh"
-#!/bin/sh
-
-if [ "$EUID" -ne 0 ];then
-    echo "Please run as root"
-    exit
-fi
-
-case "\$1" in
-    -r )
-    shift
-    XFCE="false"
-    ;;
-    --xfce )
-    shift
-    XFCE="true"
-    ;;
-    *)
-    echo -e "Options:"
-    echo -e "\t-r"
-    echo -e "\t\tflash mini rootfs image without xfce"
-
-    echo -e "\t--xfce"
-    echo -e "\t\tflash image with xfce\n"
-    exit
-    ;;
-esac
-
-
-if [ -f $TOOLS-$(uname -m).tar.xz ];then
-    echo "------ unpack $TOOLS"
-    tar xf $TOOLS-$(uname -m).tar.xz || exit 1
-fi
-echo "------ flash boot loader"
-$TOOLS/upgrade_tool ul \$(ls | grep RK3288UbootLoader) || exit 1
-echo "------ flash parameters"
-$TOOLS/rkflashtool P < parameters.txt || exit 1
-echo "------ flash resource"
-$TOOLS/rkflashtool w resource < resource.img || exit 1
-echo "------ flash boot"
-$TOOLS/rkflashtool w boot < boot.img || exit 1
-if [ "\$XFCE" = "true" ]; then
-    echo "------ flash linuxroot $ROOTFS_XFCE.img"
-    $TOOLS/rkflashtool w linuxroot < $ROOTFS_XFCE.img || exit 1
-else
-    echo "------ flash linuxroot $ROOTFS.img"
-    $TOOLS/rkflashtool w linuxroot < $ROOTFS.img || exit 1
-fi
-echo "------ reboot device"
-$TOOLS/rkflashtool b RK320A || exit 1
-EOF
-    chmod 755 "$CWD/$BUILD/$OUTPUT/$FLASH/flash.sh"
-    if [ "$KERNEL_SOURCE" == "next" ]; then
-        sed -i 's#resource#kernel#g' "$CWD/$BUILD/$OUTPUT/$FLASH/flash.sh"
-    fi
-}
-
-create_tools_pack(){
-    message "" "create" "tools pack"
-    cd $CWD/$BUILD/$OUTPUT/ || exit 1
-    tar cJf $CWD/$BUILD/$OUTPUT/$FLASH/$TOOLS-$(uname -m).tar.xz $TOOLS || exit 1
-}
 
 
 

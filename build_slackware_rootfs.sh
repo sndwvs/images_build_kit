@@ -18,6 +18,7 @@ get_name_rootfs() {
     fi
 }
 
+
 clean_rootfs() {
     image_type=$1
 
@@ -32,10 +33,12 @@ clean_rootfs() {
     fi
 }
 
+
 download_rootfs() {
     message "" "download" "$ROOTFS_NAME"
     wget -c --no-check-certificate $URL_ROOTFS/$ROOTFS_NAME.tar.xz -O $CWD/$BUILD/$SOURCE/$ROOTFS_NAME.tar.xz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
+
 
 prepare_rootfs() {
     message "" "prepare" "$ROOTFS"
@@ -46,6 +49,7 @@ prepare_rootfs() {
     installpkg --root $CWD/$BUILD/$SOURCE/$ROOTFS $CWD/$BUILD/$PKG/*${KERNEL_VERSION}*.txz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
+
 setting_fstab() {
     if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/fstab | grep $ROOT_DISK) ]];then
         message "" "setting" "fstab"
@@ -54,6 +58,7 @@ setting_fstab() {
     fi
 }
 
+
 setting_debug() {
     message "" "setting" "uart debugging"
     sed 's/#\(ttyS[1-2]\)/\1/' -i "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/securetty"
@@ -61,8 +66,9 @@ setting_debug() {
         -i "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/inittab"
 }
 
-setting_motd (){
-    message "" "setting" "motd"
+
+setting_motd() {
+    message "" "setting" "motd message"
 
     case "$BOARD_NAME" in
 		firefly)
@@ -98,7 +104,7 @@ EOF
     esac
 }
 
-setting_rc_local (){
+setting_rc_local() {
     message "" "setting" "rc.local"
     cat <<EOF >"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local"
 #!/bin/sh
@@ -143,56 +149,17 @@ EOF
 
 }
 
-setting_wifi (){
+
+setting_wifi() {
     message "" "setting" "wifi"
-cat <<EOF >"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.wifi"
-#!/bin/sh
-
-wifi_start() {
-    if [ -e /sys/class/rkwifi/power ] ; then
-        echo "Enable wifi"
-        echo 1 > /sys/class/rkwifi/power
-        sleep 2
-        echo 1 > /sys/class/rkwifi/driver
-        /etc/rc.d/rc.inet1 wlan0_start
-    else
-        echo "No wifi driver"
-    fi
-}
-
-wifi_stop() {
-    if [ -e /sys/class/rkwifi/power ] ; then
-        echo "Disable wifi"
-        /etc/rc.d/rc.inet1 wlan0_stop
-        echo 0 > /sys/class/rkwifi/driver
-        sleep 2
-        echo 0 > /sys/class/rkwifi/power
-    else
-        echo "No wifi driver"
-    fi
-
-}
-
-case "\$1" in
-    'start')
-    wifi_start
-    ;;
-    'stop')
-    wifi_stop
-    ;;
-    *)
-    echo "Usage: \$0 {start|stop}"
-esac
-EOF
-#   chmod 755 "$CWD/$BUILD/$SOURCE/${ROOTFS}-$BOARD_NAME-build-$VERSION/etc/rc.d/rc.wifi"
-
+    install -m755 -D "$CWD/bin/$BOARD_NAME/rc.wifi" "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.wifi"
 
     # fix wifi driver
     sed -i "s#wext#nl80211#" $CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.inet1.conf
 
-    if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local | grep wifi) ]];then
-    # add start wifi boot
-    cat <<EOF >>"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local"
+    if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local | grep wifi) ]]; then
+        # add start wifi boot
+        cat <<EOF >>"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local"
 
 if [ -x /etc/rc.d/rc.wifi ] ; then
   . /etc/rc.d/rc.wifi \$command
@@ -201,73 +168,35 @@ EOF
     fi
 }
 
-setting_firstboot (){
-    if [[ ! -x $CWD/$BUILD/$SOURCE/$ROOTFS/firstboot ]];then
-    message "" "setting" "firstboot"
-    # add start wifi boot
-    cat <<EOF >>"$CWD/$BUILD/$SOURCE/$ROOTFS/firstboot"
-#!/bin/sh
 
-case "\$1" in
-  'start')
-    if [ -e /firstboot ]; then
-        if [ ! -f /swap ]; then
-        echo -e "\e[0;37mResizing partition SD card\x1B[0m"
-        device="/dev/"\$(lsblk -idn -o NAME | grep mmc)
-        (( echo d; echo p; echo n; echo p; echo 1; echo; echo; echo w; ) | fdisk \$device )>/dev/null 2>&1
-        #PARTITIONS=\$((\$(fdisk -l \$device | grep \$device | wc -l)-1))
-        #((echo d; echo n; echo p; echo \$PARTITIONS; echo; echo; echo w;) | fdisk \$device)>/dev/null
-        #((echo d; echo \$PARTITIONS; echo n; echo p; echo ; echo ; echo ; echo w;) | fdisk \$device)>/dev/null
-  
-        # change root password
-                usermod -p  '$(openssl passwd -1 password)' root
-
-        echo -e "\e[0;37mCreating 128Mb emergency swap area\x1B[0m"
-        dd if=/dev/zero of=/swap bs=1024 count=131072 status=noxfer >/dev/null 2>&1
-        chown root:root /swap
-        chmod 0600 /swap
-        mkswap /swap >/dev/null 2>&1
-        swapon /swap >/dev/null 2>&1
-        echo "/swap none swap sw 0 0" >> /etc/fstab
-        echo 'vm.swappiness=0' >> /etc/sysctl.conf
-
-        sleep 2
-        shutdown -r now
-        fi
-
-        echo -e "\e[0;37mResizing SD card file-system\x1B[0m"
-        /sbin/resize2fs -p /dev/$ROOT_DISK >/dev/null
-
-        rm -f /firstboot 2>&1>/dev/null
+setting_firstboot() {
+    if [[ ! -x $CWD/$BUILD/$SOURCE/$ROOTFS/tmp/firstboot ]]; then
+        message "" "setting" "firstboot"
+        # add start wifi boot
+        install -m755 -D "$CWD/bin/firstboot" "$CWD/$BUILD/$SOURCE/$ROOTFS/tmp/firstboot"
     fi
-    ;;
-   'stop')
-    echo -e "\e[0;37mResizing in next start\x1B[0m"
-        ;;
-   *)
-        echo "Usage: \$0 {start|stop}" >&2
-        exit 1
-    ;;
-esac
 
-EOF
-    fi
-    chmod 755 "$CWD/$BUILD/$SOURCE/$ROOTFS/firstboot"
+    # add root password
+    sed -i "s#password#$(openssl passwd -1 password)#" "$CWD/$BUILD/$SOURCE/$ROOTFS/tmp/firstboot"
 
-    if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local | grep firstboot) ]];then
-    cat <<EOF >>"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local"
+    # resize fs
+    sed -i "s#mmcblk[0-9]p[0-9]#$ROOT_DISK#" "$CWD/$BUILD/$SOURCE/$ROOTFS/tmp/firstboot"
 
-if [ -x /firstboot ]; then
-  . /firstboot \$command
+    if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local | grep firstboot) ]]; then
+        cat <<EOF >>"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local"
+
+if [ -x /tmp/firstboot ]; then
+  . /tmp/firstboot \$command
 fi
 EOF
     fi
 }
 
-setting_dhcpcd (){
-    if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/dhcpcd.conf | grep nolink) ]];then
+
+setting_dhcpcd() {
+    if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/dhcpcd.conf | grep nolink) ]]; then
         message "" "setting" "dhcpcd.conf"
-    cat <<EOF >>"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/dhcpcd.conf"
+        cat <<EOF >>"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/dhcpcd.conf"
 noarp
 nolink
 
@@ -275,7 +204,8 @@ EOF
     fi
 }
 
-create_img (){
+
+create_img() {
     if [ "$1" = "xfce" ]; then
         IMAGE="$ROOTFS_XFCE"
     else
@@ -286,9 +216,9 @@ create_img (){
 
     message "" "create" "image size $ROOTFS_SIZE"
 
-    if [ "$BOARD_NAME" == "firefly" ];then
+    if [[ $SOCFAMILY == rk3288 ]];then
         $CWD/$BUILD/$OUTPUT/$TOOLS/mkrootfs $CWD/$BUILD/$SOURCE/$IMAGE ${ROOTFS_SIZE} >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    elif [ "$BOARD_NAME" == "cubietruck" ]; then
+    elif [[ $SOCFAMILY == sun* ]]; then
 
         dd if=/dev/zero of=$CWD/$BUILD/$SOURCE/$IMAGE.img bs=1 count=0 seek=$ROOTFS_SIZE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
@@ -335,7 +265,8 @@ create_img (){
     message "" "done" "image $IMAGE"
 }
 
-setting_settings (){
+
+setting_settings() {
     if [[ ! -f "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.settings" ]];then
         message "" "setting" "rc.settings"
 
@@ -382,7 +313,8 @@ EOF
     fi
 }
 
-download_pkg (){
+
+download_pkg() {
     # get parameters
     for _in in "$@";do
         let "count=$count+1"
@@ -411,6 +343,7 @@ download_pkg (){
     category=''
     _URL_DISTR=''
 }
+
 
 install_pkg(){
     if [[ $1 == mini ]]; then
@@ -445,6 +378,7 @@ install_pkg(){
     packages=''
 }
 
+
 setting_default_theme_xfce() {
     if [[ ! -d "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/skel/.config/xfce4" ]];then
         message "" "setting" "default settings xfce"
@@ -453,6 +387,7 @@ setting_default_theme_xfce() {
     fi
 }
 
+
 setting_default_start_x() {
     sed "s#id:3#id:4#" -i $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/inittab
 
@@ -460,7 +395,7 @@ setting_default_start_x() {
     ln -sf $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/X11/xinit/xinitrc.xfce \
        -r $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/X11/xinit/xinitrc
 
-    if [ "$BOARD_NAME" == "firefly" ]; then
+    if [[ $SOCFAMILY == rk3288 ]]; then
         if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.local | grep fbset) ]];then
             # add start fbset for DefaultDepth 24
             cat <<EOF >>"$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.local"
@@ -473,102 +408,21 @@ EOF
     fi
 }
 
+
 setting_for_desktop() {
     # correcting the sound output through the alsa
     if [ ! -x "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.pulseaudio" ]; then
         chmod 755 "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.pulseaudio"
     fi
 
-    # adjustment for vdpau
-    sed -i 's#sunxi_ve_mem_reserve=0#sunxi_ve_mem_reserve=128#' "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/boot/boot.cmd"
-    $CWD/$BUILD/$SOURCE/$BOOT_LOADER/tools/mkimage -C none -A arm -T script -d $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/boot/boot.cmd \
-    "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/boot/boot.scr" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    if [[ $SOCFAMILY == sun* ]]; then
+        # adjustment for vdpau
+        sed -i 's#sunxi_ve_mem_reserve=0#sunxi_ve_mem_reserve=128#' "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/boot/boot.cmd"
+        $CWD/$BUILD/$SOURCE/$BOOT_LOADER/tools/mkimage -C none -A arm -T script -d $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/boot/boot.cmd \
+        "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/boot/boot.scr" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
 }
 
-build_video_driver_pkg() {
-    message "" "create" "pakage $VIDEO_DRIVER"
-
-    mkdir -p $CWD/$BUILD/$PKG/$VIDEO_DRIVER/etc/{X11,rc.d,udev/rules.d} $CWD/$BUILD/$PKG/$VIDEO_DRIVER/usr/lib
-    tar --strip-components=1 -xzf $CWD/$BUILD/$SOURCE/$VIDEO_DRIVER.tar.gz -C $CWD/$BUILD/$PKG/$VIDEO_DRIVER/usr/lib
-    find $CWD/$BUILD/$PKG/$VIDEO_DRIVER/usr/lib -exec chmod 755 {} \; -exec chown root:root {} \;
-
-    cat <<EOF >$CWD/$BUILD/$PKG/$VIDEO_DRIVER/etc/X11/xorg.conf
-
-Section "Device"
-    Identifier  "Mali FBDEV"
-#   Driver      "armsoc"
-    Driver      "fbdev"
-    Option      "fbdev"         "/dev/fb0"
-    Option      "Fimg2DExa"     "false"
-    Option      "DRI2"          "true"
-    Option      "DRI2_PAGE_FLIP"    "false"
-    Option      "DRI2_WAIT_VSYNC"   "true"
-#   Option      "Fimg2DExaSolid"    "false"
-#   Option      "Fimg2DExaCopy"     "false"
-#   Option      "Fimg2DExaComposite"    "false"
-#        Option          "SWcursorLCD"           "false"
-#   Option      "Debug"         "true"
-EndSection
-
-
-Section "ServerFlags"
-    Option     "NoTrapSignals" "true"
-    Option     "DontZap" "false"
-
-    # Disable DPMS timeouts.
-#    Option     "StandbyTime" "0"
-#    Option     "SuspendTime" "0"
-#    Option     "OffTime" "0"
-
-    # Disable screen saver timeout.
-#    Option     "BlankTime" "0"
-EndSection
-
-Section "Monitor"
-    Identifier "DefaultMonitor"
-EndSection
-
-Section "Device"
-    Identifier "DefaultDevice"
-#    Option     "monitor-LVDS1" "DefaultMonitor"
-EndSection
-Section "Screen"
-    Identifier  "DefaultScreen"
-    Device      "Mali FBDEV"
-    DefaultDepth    24
-
-EndSection
-
-Section "ServerLayout"
-    Identifier "DefaultLayout"
-    Screen     "DefaultScreen"
-EndSection
-EOF
-
-    cat <<EOF >$CWD/$BUILD/$PKG/$VIDEO_DRIVER/etc/rc.d/rc.fbset
-#!/bin/bash
-
-if [ -x /usr/sbin/fbset ];then
-    /usr/sbin/fbset -a -nonstd 1 -depth 32 -rgba "8/0,8/8,8/16,8/24"
-fi
-EOF
-
-    chmod 755 $CWD/$BUILD/$PKG/$VIDEO_DRIVER/etc/rc.d/rc.fbset
-
-# fix permission
-    cat <<EOF >$CWD/$BUILD/$PKG/$VIDEO_DRIVER/etc/udev/rules.d/50-mali.rules
-KERNEL=="fb*", MODE="0660", GROUP="video"
-KERNEL=="mali*", MODE="0660", GROUP="video"
-EOF
-
-    cd $CWD/$BUILD/$PKG/$VIDEO_DRIVER
-    makepkg  -l n -c n $CWD/$BUILD/$PKG/$VIDEO_DRIVER-${_ARCH}-${_BUILD}${_PACKAGER}.txz
-}
-
-install_video_driver_pkg() {
-    message "" "install" "$VIDEO_DRIVER"
-    installpkg --root $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE $CWD/$BUILD/$PKG/$VIDEO_DRIVER-* >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-}
 
 setting_move_to_nand() {
     message "" "setting" "data move to nand"
@@ -606,8 +460,18 @@ EOF
     fi
 }
 
-setting_first_login (){
+
+setting_first_login() {
     message "" "setting" "first login"
     install -m755 -D "$CWD/bin/check_first_login.sh" "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/profile.d/check_first_login.sh"
     touch "$CWD/$BUILD/$SOURCE/$ROOTFS/root/.never_logged"
 }
+
+
+setting_issue() {
+    message "" "setting" "issue message"
+    install -m644 -D "$CWD/config/issue" "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/issue"
+}
+
+
+

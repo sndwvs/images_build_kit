@@ -47,24 +47,34 @@ for arg in $result; do
     fi
 done
 
+options+=("clean" "clean sources, remove binaries and image" "off")
+options+=("download" "download source and use pre-built binaries" "on")
+options+=("compile" "build binaries locally" "on")
+options+=("mini-image" "create basic image" "on")
+options+=("tools" "create and pack tools" "on")
+options+=("xfce-image" "create image with xfce" "off")
+
+case $BOARD_NAME in
+    cubietruck)
+                options+=("hdmi" "video mode hdmi (defaul vga)" "off")
+            ;;
+esac
 
 # Duplicate file descriptor 1 on descriptor 3
 exec 3>&1
 
-result=$(dialog --title "build for $BOARD_NAME" \
-       --checklist "select build options" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
-"clean" "clean sources, remove binaries and image" "off" \
-"download" "download source and use pre-built binaries" "on" \
-"compile" "build binaries locally" "on" \
-"mini-image" "create basic image" "on" \
-"tools" "create and pack tools" "on" \
-"xfce-image" "create image with xfce" "off" \
-"hdmi" "video mode hdmi (defaul vga)" "off" \
-2>&1 1>&3)
+while true; do
+    result=$(dialog --title "build for $BOARD_NAME" \
+           --checklist "select build options" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
+           "${options[@]}" \
+    2>&1 1>&3)
+    if [[ ! -z $result ]]; then break; fi
+done
 
 exit_status=$?
 # Close file descriptor 3
 exec 3>&-
+
 
 for arg in $result; do
     if [ "$arg" == "download" ]; then
@@ -156,11 +166,6 @@ if [[ $COMPILE_BINARIES == true ]]; then
     build_kernel_pkg
 fi
 
-if [[ $TOOLS_PACK == true && $SOCFAMILY == rk3288 ]]; then
-    build_flash_script
-    create_tools_pack
-fi
-
 for image_type in ${CREATE_IMAGE[@]}; do
 
     get_name_rootfs $image_type
@@ -172,16 +177,18 @@ for image_type in ${CREATE_IMAGE[@]}; do
         setting_fstab
         setting_debug
         setting_motd
+        setting_issue
         setting_rc_local
         setting_dhcpcd
         setting_firstboot
         setting_settings
         setting_first_login
-        if [[ $KERNEL_SOURCE != "next" && $SOCFAMILY == rk3288 ]]; then
-            setting_wifi
-        elif [[ $SOCFAMILY == rk3288 ]]; then
-            setting_move_to_nand
-        fi
+        setting_wifi
+#        if [[ $KERNEL_SOURCE != "next" && $SOCFAMILY == rk3288 ]]; then
+#            setting_wifi
+#        elif [[ $SOCFAMILY == rk3288 ]]; then
+#            setting_move_to_nand
+#        fi
         download_pkg $URL_DISTR "$image_type" ${CATEGORY_PKG[@]}
         install_pkg "$image_type" ${CATEGORY_PKG[@]}
         create_img
@@ -189,7 +196,7 @@ for image_type in ${CREATE_IMAGE[@]}; do
 
     if [[ $image_type == xfce ]]; then
         message "" "create" "$ROOTFS_XFCE"
-        cp -fr $CWD/$BUILD/$SOURCE/$ROOTFS/ $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        rsync -ar --del $CWD/$BUILD/$SOURCE/$ROOTFS/ $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         download_pkg $URL_DISTR "$image_type" ${CATEGORY_PKG[@]}
         install_pkg "$image_type" ${CATEGORY_PKG[@]}
 
@@ -203,3 +210,11 @@ for image_type in ${CREATE_IMAGE[@]}; do
         create_img xfce
     fi
 done
+
+if [[ $TOOLS_PACK == true && $SOCFAMILY == rk3288 ]]; then
+    build_flash_script
+    create_tools_pack
+fi
+
+
+
