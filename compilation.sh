@@ -118,7 +118,6 @@ compile_kernel (){
 
     if [[ $SOCFAMILY == rk3288 ]]; then
         if [ "$KERNEL_SOURCE" != "next" ]; then
-            CROSS=$CROSS_OLD
             # fix firmware /system /lib
             find drivers/net/wireless/rockchip_wlan/rkwifi/ -type f -exec \
             sed -i "s#\/system\/etc\/firmware\/#\/lib\/firmware\/#" {} \;
