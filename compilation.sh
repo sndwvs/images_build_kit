@@ -70,7 +70,7 @@ compile_boot_loader (){
     make ARCH=$ARCH $BOOT_LOADER_CONFIG CROSS_COMPILE=$CROSS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     if [[ $SOCFAMILY == rk3288 ]]; then
-        if [[ $KERNEL_SOURCE == next ]]; then
+#        if [[ $KERNEL_SOURCE == next ]]; then
             # u-boot-firefly-rk3288 2016.03 package contains backports
             # of EFI support patches and fails to boot the kernel on the Firefly.
             sed 's/^\(CONFIG_EFI_LOADER=y\)/# CONFIG_EFI_LOADER is not set/' -i .config >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
@@ -79,9 +79,9 @@ compile_boot_loader (){
             tools/mkimage -n rk3288 -T rkimage -d \
             spl/u-boot-spl-dtb.bin out && \
             cat out | openssl rc4 -K 7c4e0304550509072d2c7b38170d1711 > "RK3288UbootLoader${BOOT_LOADER_VERSION}.bin"
-        else
-            make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS_OLD >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        fi
+#        else
+#            make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS_OLD >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+#        fi
         find -name "RK3288UbootLoader*" -exec install -D {} $CWD/$BUILD/$OUTPUT/$FLASH/{} \;
     fi
 
