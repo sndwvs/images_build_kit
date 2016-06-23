@@ -160,7 +160,8 @@ build_parameters() {
     message "" "create" "parameters"
     # add parameters for flash
     install -m644 -D "$CWD/config/boards/$BOARD_NAME/parameters.txt" "$CWD/$BUILD/$OUTPUT/$FLASH/parameters.txt"
-    sed -i "s#mmcblk[0-9]p[0-9]#$ROOT_DISK#" "$CWD/$BUILD/$OUTPUT/$FLASH/parameters.txt"
+    sed -i -e "s#mmcblk[0-9]p[0-9]#$ROOT_DISK#" "$CWD/$BUILD/$OUTPUT/$FLASH/parameters.txt" \
+           -e "s#kernel#resource#" "$CWD/$BUILD/$OUTPUT/$FLASH/parameters.txt"
 }
 
 
@@ -220,8 +221,8 @@ echo "------ reboot device"
 #$TOOLS/rkflashtool b RK320A || exit 1
 EOF
     chmod 755 "$CWD/$BUILD/$OUTPUT/$FLASH/flash.sh"
-    if [ "$KERNEL_SOURCE" == "next" ]; then
-        sed -i 's#resource#kernel#g' "$CWD/$BUILD/$OUTPUT/$FLASH/flash.sh"
+    if [[ $KERNEL_SOURCE != next ]]; then
+        sed -i 's#kernel#resource#g' "$CWD/$BUILD/$OUTPUT/$FLASH/flash.sh"
     fi
 }
 

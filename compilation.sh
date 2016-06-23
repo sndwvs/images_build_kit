@@ -151,7 +151,7 @@ build_kernel() {
     message "" "create" "kernel"
     # create resource for flash
     cd $CWD/$BUILD/$OUTPUT/$FLASH
-    cat $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/arm/boot/zImage $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/arm/boot/dts/rk3288-firefly.dtb > $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/zImage-dtb || exit 1
+    cat $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/arm/boot/zImage $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/arm/boot/dts/$SOCFAMILY-$BOARD_NAME.dtb > $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/zImage-dtb || exit 1
     $CWD/$BUILD/$OUTPUT/$TOOLS/mkkrnlimg -a $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/zImage-dtb kernel.img || exit 1
 }
 
@@ -160,7 +160,7 @@ build_resource() {
     message "" "create" "resource"
     # create resource for flash
     cd $CWD/$BUILD/$OUTPUT/$FLASH
-    $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/resource_tool $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/logo.bmp $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/arm/boot/dts/firefly-rk3288.dtb || exit 1
+    $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/resource_tool $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/logo.bmp $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/arm/boot/dts/$BOARD_NAME-$SOCFAMILY.dtb || exit 1
 }
 
 
@@ -169,23 +169,28 @@ build_boot() {
     # create boot for flash
     tar xf $CWD/bin/initrd-tree.tar.xz -C $CWD/$BUILD/$SOURCE/
     cd $CWD/$BUILD/$SOURCE/
+
+    sed -i "s#mmcblk[0-9]p[0-9]#$ROOT_DISK#" "$CWD/$BUILD/$SOURCE/initrd-tree/rootdev"
+
+    find $CWD/$BUILD/$SOURCE/initrd-tree/ ! -path "./.git*" | cpio -H newc -ov > initrd.img
+
     if [[ $KERNEL_SOURCE == next ]]; then
-        find $CWD/$BUILD/$SOURCE/initrd-tree/ ! -path "./.git*" | cpio -H newc -ov > initrd.img
         $CWD/$BUILD/$OUTPUT/$TOOLS/mkkrnlimg -a initrd.img $CWD/$BUILD/$OUTPUT/$FLASH/boot.img
 
         if [ -e $CWD/$BUILD/$SOURCE/initrd.img ];then
             rm $CWD/$BUILD/$SOURCE/initrd.img
         fi
     else
-        $CWD/$BUILD/$OUTPUT/$TOOLS/mkcpiogz $CWD/$BUILD/$SOURCE/initrd-tree || exit 1
         $CWD/$BUILD/$OUTPUT/$TOOLS/mkbootimg \
                             --kernel $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/arm/boot/zImage \
-                            --ramdisk $CWD/$BUILD/$SOURCE/initrd-tree.cpio.gz \
+                            --ramdisk $CWD/$BUILD/$SOURCE/initrd.img \
                             -o $CWD/$BUILD/$OUTPUT/$FLASH/boot.img >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        if [ -e $CWD/$BUILD/$SOURCE/initrd-tree.cpio.gz ];then
-            rm $CWD/$BUILD/$SOURCE/initrd-tree.cpio.gz
-        fi
     fi
+
+    if [ -e $CWD/$BUILD/$SOURCE/initrd.img ];then
+        rm $CWD/$BUILD/$SOURCE/initrd.img
+    fi
+
 }
 
 
