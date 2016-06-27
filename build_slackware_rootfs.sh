@@ -64,6 +64,12 @@ setting_debug() {
     sed 's/#\(ttyS[1-2]\)/\1/' -i "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/securetty"
     sed 's/#\(s\([1-2]\)\)\(.*\)\(ttyS[0-1]\)\(.*\)\(9600\)/\1\3ttyS\2 115200/' \
         -i "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/inittab"
+    if [[ $SOCFAMILY == rk3288 ]] && [[ $KERNEL_SOURCE != next ]]; then
+	sed '/vt100/{n;/^$/i f0:12345:respawn:/sbin/agetty 115200 ttyFIQ0 vt100
+	     }' -i "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/inittab"
+    	sed '/#ttyS3/{n;/^#/i ttyFIQ0
+	     }' -i "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/securetty"
+    fi
 }
 
 
@@ -216,16 +222,13 @@ create_img() {
 
     message "" "create" "image size $ROOTFS_SIZE"
 
-    if [[ $SOCFAMILY == rk3288 ]];then
-        $CWD/$BUILD/$OUTPUT/$TOOLS/mkrootfs $CWD/$BUILD/$SOURCE/$IMAGE ${ROOTFS_SIZE} >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    elif [[ $SOCFAMILY == sun* ]]; then
+    dd if=/dev/zero of=$CWD/$BUILD/$SOURCE/$IMAGE.img bs=1 count=0 seek=$ROOTFS_SIZE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-        dd if=/dev/zero of=$CWD/$BUILD/$SOURCE/$IMAGE.img bs=1 count=0 seek=$ROOTFS_SIZE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    LOOP=$(losetup -f)
 
-        LOOP=$(losetup -f)
+    losetup $LOOP $CWD/$BUILD/$SOURCE/$IMAGE.img || exit 1
 
-        losetup $LOOP $CWD/$BUILD/$SOURCE/$IMAGE.img || exit 1
-
+    if [[ $SOCFAMILY == sun* ]]; then
         message "" "save" "$BOOT_LOADER"
         dd if="$CWD/$BUILD/$SOURCE/$BOOT_LOADER/$BOOT_LOADER_BIN" of=$LOOP bs=1024 seek=8 status=noxfer >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
@@ -245,20 +248,22 @@ create_img() {
 
         # 2048 (start) x 512 (block size) = where to mount partition
         losetup -o 1048576 $LOOP $CWD/$BUILD/$SOURCE/$IMAGE.img >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
-        message "" "create" "filesystem"
-        mkfs.ext4 -F -m 0 -L linuxroot $LOOP >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
-        message "" "create" "mount point and mount image"
-        mkdir -p $CWD/$BUILD/$SOURCE/image
-        mount $LOOP $CWD/$BUILD/$SOURCE/image
-        cp -a $CWD/$BUILD/$SOURCE/$IMAGE/* $CWD/$BUILD/$SOURCE/image
-        umount $CWD/$BUILD/$SOURCE/image
-        rm -rf $CWD/$BUILD/$SOURCE/image
-        losetup -d $LOOP
     fi
 
-    if [ -f $CWD/$BUILD/$SOURCE/$IMAGE.img ];then
+    message "" "create" "filesystem"
+    mkfs.ext4 -F -m 0 -L linuxroot $LOOP >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
+    message "" "create" "mount point and mount image"
+    mkdir -p $CWD/$BUILD/$SOURCE/image
+    mount $LOOP $CWD/$BUILD/$SOURCE/image
+    rsync -a "$CWD/$BUILD/$SOURCE/$IMAGE/" "$CWD/$BUILD/$SOURCE/image/"
+    umount $CWD/$BUILD/$SOURCE/image
+    if [[ -d $CWD/$BUILD/$SOURCE/image ]]; then
+        rm -rf $CWD/$BUILD/$SOURCE/image
+    fi
+    losetup -d $LOOP
+
+    if [[ -f $CWD/$BUILD/$SOURCE/$IMAGE.img ]]; then
         mv $CWD/$BUILD/$SOURCE/$IMAGE.img $CWD/$BUILD/$OUTPUT/$FLASH
     fi
 
