@@ -33,8 +33,9 @@ fi
 #---------------------------------------------
 # rootfs configuration
 #---------------------------------------------
-URL_ROOTFS="ftp://ftp.arm.slackware.com/slackwarearm/slackwarearm-devtools/minirootfs/roots/"
-ROOTFS_NAME=$(wget -q -O - $URL_ROOTFS | grep -oP "(slack-current[\.\-\+\d\w]+.tar.xz)" | head -n1 | cut -d '.' -f1)
+#URL_ROOTFS="ftp://ftp.arm.slackware.com/slackwarearm/slackwarearm-devtools/minirootfs/roots/"
+URL_ROOTFS="http://dl.fail.pp.ua/slackware/minirootfs/"
+ROOTFS_NAME=$(wget -q -O - $URL_ROOTFS | grep -oP "(slack-current[\.\-\+\d\w]+.tar.xz)" | sort -ur | head -n1 | cut -d '.' -f1)
 ROOTFS_VERSION=$(date +%Y%m%d)
 
 #---------------------------------------------

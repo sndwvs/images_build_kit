@@ -85,6 +85,10 @@ get_config() {
 #---------------------------------------------
 patching_kernel_source() {
     local dir="$CWD/patch/kernel/$SOCFAMILY-$KERNEL_SOURCE"
+    if [[ ! -d $dir ]]; then
+        exit 0
+    fi
+
     cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     for file in $(ls $dir/ | grep patch); do
              names+=($(basename -a $file)) || exit 1

@@ -2,7 +2,7 @@
 
 
 
-if [ -z $CWD ];then
+if [ -z $CWD ]; then
     exit
 fi
 
@@ -10,10 +10,10 @@ compile_rk2918 (){
     message "" "compiling" "$RK2918_TOOLS"
     PROGRAMS="afptool img_unpack img_maker mkkrnlimg"
     cd $CWD/$BUILD/$SOURCE/$RK2918_TOOLS
-    make $CTHREADS || exit 1
+    make $CTHREADS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     for p in $PROGRAMS;do
-        echo "copy program: $p"
+        message "" "copy" "program: $p"
         mv $p $CWD/$BUILD/$OUTPUT/$TOOLS/ || exit 1
     done
 }
@@ -22,8 +22,8 @@ compile_rkflashtool (){
     message "" "compiling" "$RKFLASH_TOOLS"
     PROGRAMS="rkcrc rkflashtool rkmisc rkpad rkparameters rkparametersblock rkunpack rkunsign"
     cd $CWD/$BUILD/$SOURCE/$RKFLASH_TOOLS
-    make clean || exit 1
-    make $CTHREADS || exit 1
+    make clean >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make $CTHREADS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     for p in $PROGRAMS;do
         message "" "copy" "program: $p"
@@ -35,8 +35,8 @@ compile_mkbooting (){
     message "" "compiling" "$MKBOOTIMG_TOOLS"
     PROGRAMS="afptool img_maker mkbootimg unmkbootimg mkrootfs mkupdate mkcpiogz unmkcpiogz"
     cd $CWD/$BUILD/$SOURCE/$MKBOOTIMG_TOOLS
-    make clean || exit 1
-    make $CTHREADS || exit 1
+    make clean >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make $CTHREADS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     for p in $PROGRAMS;do
         message "" "copy" "program: $p"
@@ -50,18 +50,18 @@ compile_sunxi_tools (){
     git checkout $SUNXI_TOOLS_VERSION >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     # for host
-    make -s clean && make -s all clean && make -s fex2bin && make -s bin2fex || exit 1
+    make -s clean && make -s all clean && make -s fex2bin && make -s bin2fex >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     # for destination
-    make -s clean && make -s all clean && make $CTHREADS 'fex2bin' CC=${CROSS}gcc || exit 1
-    make $CTHREADS 'bin2fex' CC=${CROSS}gcc && make $CTHREADS 'nand-part' CC=${CROSS}gcc || exit 1
+    make -s clean && make -s all clean && make $CTHREADS 'fex2bin' CC=${CROSS}gcc >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make $CTHREADS 'bin2fex' CC=${CROSS}gcc && make $CTHREADS 'nand-part' CC=${CROSS}gcc >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 compile_boot_loader (){
     message "" "compiling" "$BOOT_LOADER"
     cd $CWD/$BUILD/$SOURCE/$BOOT_LOADER >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    make ARCH=$ARCH CROSS_COMPILE=$CROSS clean || exit 1
+    make ARCH=$ARCH CROSS_COMPILE=$CROSS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     if [[ ! -z $BOOT_LOADER_VERSION ]]; then
         git checkout $BOOT_LOADER_VERSION >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
