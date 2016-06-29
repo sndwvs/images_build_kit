@@ -61,7 +61,7 @@ compile_boot_loader (){
     message "" "compiling" "$BOOT_LOADER"
     cd $CWD/$BUILD/$SOURCE/$BOOT_LOADER >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    make ARCH=$ARCH CROSS_COMPILE=$CROSS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make ARCH=$ARCH CROSS_COMPILE=$CROSS clean >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     if [[ ! -z $BOOT_LOADER_VERSION ]]; then
         git checkout $BOOT_LOADER_VERSION >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
