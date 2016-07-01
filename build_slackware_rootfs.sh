@@ -337,7 +337,7 @@ download_pkg() {
             if [[ ! -z ${packages} ]];then
                 for _pkg in $packages;do
                     PKG_NAME=$(wget -q -O - ${_URL_DISTR}/${category} | grep -oP "${category}/$_pkg-+([^-]+)-+([^-]+)-+([^-]+)(t?z)" | sort -ur | head -n1)
-                    message "" "download" "package $category/$PKG_NAME"
+                    message "" "download" "package $PKG_NAME"
                     wget -c -nc -nd -np ${_URL_DISTR}/$PKG_NAME -P $CWD/$BUILD/$PKG/${category}/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
                 done
             fi
