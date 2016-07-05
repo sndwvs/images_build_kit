@@ -1,12 +1,9 @@
-# README #
+# **README** #
 
 project site http://fail.pp.ua
 
-# FAQ #
+# **FAQ** #
 
-login: root  
-password: password  
+login: **root**  
+password: **password**  
 
-unprivileged user:  
-login: user  
-password: password
