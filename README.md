@@ -1,6 +1,6 @@
 # **README** #
 
-project site http://fail.pp.ua
+project site: **http://fail.pp.ua**
 
 # **FAQ** #
 
