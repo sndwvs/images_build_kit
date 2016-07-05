@@ -1,0 +1,694 @@
+diff -urN linux-4.6/arch/arm/boot/dts/rk3288-firefly.dtsi linux-4.6-firefly/arch/arm/boot/dts/rk3288-firefly.dtsi
+--- linux-4.6/arch/arm/boot/dts/rk3288-firefly.dtsi	2016-05-19 19:36:59.051678467 +0800
++++ linux-4.6-firefly/arch/arm/boot/dts/rk3288-firefly.dtsi	2016-05-19 19:29:46.000000000 +0800
+@@ -104,7 +104,7 @@
+ 		compatible = "gpio-leds";
+ 
+ 		work {
+-			gpios = <&gpio8 1 GPIO_ACTIVE_LOW>;
++			gpios = <&gpio8 2 GPIO_ACTIVE_LOW>;
+ 			label = "firefly:blue:user";
+ 			linux,default-trigger = "rc-feedback";
+ 			pinctrl-names = "default";
+@@ -112,13 +112,68 @@
+ 		};
+ 
+ 		power {
+-			gpios = <&gpio8 2 GPIO_ACTIVE_LOW>;
++			gpios = <&gpio8 1 GPIO_ACTIVE_LOW>;
+ 			label = "firefly:green:power";
+ 			linux,default-trigger = "default-on";
+ 			pinctrl-names = "default";
+ 			pinctrl-0 = <&power_led>;
+ 		};
+ 	};
++        
++        wireless-wlan {
++		compatible = "wlan-platdata";
++		wifi_chip_type = "ap6335";
++		sdio_vref = <1800>; //1800mv or 3300mv
++		rockchip,grf = <&grf>;
++
++		//keep_wifi_power_on;
++		//power_ctrl_by_pmu;
++		//power_pmu_regulator = "act_ldo3";
++		//power_pmu_enable_level = <1>; //1->HIGH, 0->LOW
++
++		//vref_ctrl_enable;
++		//vref_ctrl_gpio = <&gpio0 GPIO_A2 GPIO_ACTIVE_HIGH>;
++		//vref_pmu_regulator = "act_ldo3";
++		//vref_pmu_enable_level = <1>; //1->HIGH, 0->LOW
++
++		WIFI,poweren_gpio = <&gpio4 28 GPIO_ACTIVE_HIGH>;
++		WIFI,host_wake_irq = <&gpio4 30 GPIO_ACTIVE_HIGH>;
++		//WIFI,reset_gpio = <&gpio0 GPIO_A2 GPIO_ACTIVE_LOW>;
++
++		status = "okay";
++        };
++	
++	wireless-bluetooth {
++		compatible = "bluetooth-platdata";
++
++		//wifi-bt-power-toggle;
++		uart_rts_gpios = <&gpio4 19 GPIO_ACTIVE_LOW>;
++		pinctrl-names = "default","rts_gpio";
++		pinctrl-0 = <&uart0_rts>;
++		pinctrl-1 = <&uart0_rts_gpio>;
++
++		BT,power_gpio = <&gpio4 27 GPIO_ACTIVE_HIGH>;
++		BT,reset_gpio = <&gpio4 29 GPIO_ACTIVE_HIGH>;
++		BT,wake_gpio = <&gpio4 26 GPIO_ACTIVE_HIGH>;
++		BT,wake_host_irq = <&gpio4 31 GPIO_ACTIVE_LOW>;
++
++
++		status = "okay";
++	};
++	
++	rockchip-es8323 {
++		compatible = "rockchip-es8323";
++                rockchip,audio-codec = <&es8323>;
++                rockchip,i2s-controller = <&i2s>;
++                format = "i2s";
++		dais {
++			dai0 {
++				audio-codec = <&es8323>;
++				audio-controller = <&i2s>;
++				format = "i2s";
++			};
++		};
++	};
+ 
+ 	vbat_wl: vcc_sys: vsys-regulator {
+ 		compatible = "regulator-fixed";
+@@ -389,6 +444,17 @@
+ 
+ &i2c2 {
+ 	status = "okay";
++	es8323: es8323@10 {
++	    compatible = "es8323";
++		reg = <0x10>;
++		spk-con-gpio = <&gpio0 10 GPIO_ACTIVE_HIGH>;
++		hp-det-gpio = <&gpio7 15 GPIO_ACTIVE_HIGH>;
++		hp-mic-only = <1>;
++		clocks = <&cru SCLK_I2S0>, <&cru HCLK_I2S0>;
++		clock-names = "i2s_clk","i2s_hclk";
++		pinctrl-names = "default";
++		pinctrl-0 = <&i2s0_bus>;
++	};
+ };
+ 
+ &i2c4 {
+@@ -453,11 +519,11 @@
+ 
+ 	leds {
+ 		power_led: power-led {
+-			rockchip,pins = <8 2 RK_FUNC_GPIO &pcfg_pull_none>;
++			rockchip,pins = <8 1 RK_FUNC_GPIO &pcfg_pull_none>;
+ 		};
+ 
+ 		work_led: work-led {
+-			rockchip,pins = <8 1 RK_FUNC_GPIO &pcfg_pull_none>;
++			rockchip,pins = <8 2 RK_FUNC_GPIO &pcfg_pull_none>;
+ 		};
+ 	};
+ 
+@@ -501,6 +567,12 @@
+ 			rockchip,pins = <0 12 RK_FUNC_GPIO &pcfg_pull_none>;
+ 		};
+ 	};
++	
++	uart0 {
++	      uart0_rts_gpio: uart0-rts-gpio {
++			rockchip,pins = <4 19 RK_FUNC_GPIO &pcfg_pull_none>;
++	      };
++	};
+ };
+ 
+ &saradc {
+@@ -514,6 +586,11 @@
+ 	disable-wp;
+ 	non-removable;
+ 	num-slots = <1>;
++        cap-sd-highspeed;
++        supports-highspeed;
++        supports-sdio;
++        ignore-pm-notify;
++	keep-power-in-suspend;
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&sdio0_bus4>, <&sdio0_cmd>, <&sdio0_clk>;
+ 	vmmc-supply = <&vbat_wl>;
+@@ -549,7 +626,8 @@
+ 
+ &uart0 {
+ 	pinctrl-names = "default";
+-	pinctrl-0 = <&uart0_xfer>, <&uart0_cts>, <&uart0_rts>;
++	pinctrl-0 = <&uart0_xfer>, <&uart0_cts>;
++//	dma-names = "tx", "rx";
+ 	status = "okay";
+ };
+ 
+@@ -598,3 +676,7 @@
+ &wdt {
+ 	status = "okay";
+ };
++
++&i2s {
++  status = "okay";
++};
+diff -urN linux-4.6/arch/arm/configs/firefly-openwrt_defconfig linux-4.6-firefly/arch/arm/configs/firefly-openwrt_defconfig
+diff -urN linux-4.6/block/partition-generic.c linux-4.6-firefly/block/partition-generic.c
+--- linux-4.6/block/partition-generic.c	2016-05-19 19:36:59.238683878 +0800
++++ linux-4.6-firefly/block/partition-generic.c	2016-05-19 19:30:15.000000000 +0800
+@@ -65,6 +65,17 @@
+ 
+ EXPORT_SYMBOL(__bdevname);
+ 
++#if CONFIG_MMC_DW_ROCKCHIP
++static ssize_t part_volname_show(struct device *dev,
++				   struct device_attribute *attr, char *buf)
++{
++	struct hd_struct *p = dev_to_part(dev);
++
++	return sprintf(buf, "%s\n", (p->info && p->info->volname[0]) \
++				   ? (char *)p->info->volname : "");
++}
++#endif
++
+ static ssize_t part_partition_show(struct device *dev,
+ 				   struct device_attribute *attr, char *buf)
+ {
+@@ -168,6 +179,9 @@
+ }
+ #endif
+ 
++#if CONFIG_MMC_DW_ROCKCHIP
++static DEVICE_ATTR(volname, S_IRUGO, part_volname_show, NULL);
++#endif
+ static DEVICE_ATTR(partition, S_IRUGO, part_partition_show, NULL);
+ static DEVICE_ATTR(start, S_IRUGO, part_start_show, NULL);
+ static DEVICE_ATTR(size, S_IRUGO, part_size_show, NULL);
+@@ -183,6 +197,9 @@
+ #endif
+ 
+ static struct attribute *part_attrs[] = {
++#if CONFIG_MMC_DW_ROCKCHIP
++        &dev_attr_volname.attr,
++#endif    
+ 	&dev_attr_partition.attr,
+ 	&dev_attr_start.attr,
+ 	&dev_attr_size.attr,
+diff -urN linux-4.6/block/partitions/check.c linux-4.6-firefly/block/partitions/check.c
+--- linux-4.6/block/partitions/check.c	2016-01-11 07:01:32.000000000 +0800
++++ linux-4.6-firefly/block/partitions/check.c	2016-05-19 19:30:49.000000000 +0800
+@@ -35,6 +35,9 @@
+ #include "karma.h"
+ #include "sysv68.h"
+ #include "cmdline.h"
++#if CONFIG_MMC_DW_ROCKCHIP
++#include "mtdpart.h"
++#endif
+ 
+ int warn_no_part = 1; /*This is ugly: should make genhd removable media aware*/
+ 
+@@ -43,6 +46,9 @@
+ 	 * Probe partition formats with tables at disk address 0
+ 	 * that also have an ADFS boot block at 0xdc0.
+ 	 */
++#if CONFIG_MMC_DW_ROCKCHIP
++	mtdpart_partition,
++#endif
+ #ifdef CONFIG_ACORN_PARTITION_ICS
+ 	adfspart_check_ICS,
+ #endif
+diff -urN linux-4.6/block/partitions/Makefile linux-4.6-firefly/block/partitions/Makefile
+--- linux-4.6/block/partitions/Makefile	2016-01-11 07:01:32.000000000 +0800
++++ linux-4.6-firefly/block/partitions/Makefile	2016-05-19 19:30:50.000000000 +0800
+@@ -20,3 +20,6 @@
+ obj-$(CONFIG_EFI_PARTITION) += efi.o
+ obj-$(CONFIG_KARMA_PARTITION) += karma.o
+ obj-$(CONFIG_SYSV68_PARTITION) += sysv68.o
++
++#added for emmc in Rockchip project.
++obj-$(CONFIG_MMC_DW_ROCKCHIP) += mtdpart.o 
+diff -urN linux-4.6/block/partitions/mtdpart.c linux-4.6-firefly/block/partitions/mtdpart.c
+--- linux-4.6/block/partitions/mtdpart.c	1970-01-01 08:00:00.000000000 +0800
++++ linux-4.6-firefly/block/partitions/mtdpart.c	2016-05-19 19:30:50.000000000 +0800
+@@ -0,0 +1,363 @@
++#include <linux/kernel.h>
++#include <linux/slab.h>
++#include <linux/bootmem.h>
++
++#include "check.h"
++#include "mtdpart.h"
++
++/* error message prefix */
++#define ERRP "mtd: "
++
++/* debug macro */
++#if 0
++#define dbg(x) do { printk("DEBUG-CMDLINE-PART: "); printk x; } while(0)
++#else
++#define dbg(x)
++#endif
++
++#define SECTOR_1G	0x200000	// 0x200000 * 512 = 1G
++#define FROM_OFFSET	0x2000		// 4MB
++
++/* special size referring to all the remaining space in a partition */
++#define SIZE_REMAINING UINT_MAX
++#define OFFSET_CONTINUOUS UINT_MAX
++
++struct mtd_partition{
++	char *name;
++	sector_t from;
++	sector_t size;
++};
++struct cmdline_mtd_partition {
++	struct cmdline_mtd_partition *next;
++	char *mtd_id;
++	int num_parts;
++	struct mtd_partition *parts;
++};
++
++/* mtdpart_setup() parses into here */
++static struct cmdline_mtd_partition *partitions;
++
++/* the command line passed to mtdpart_setupd() */
++static char *cmdline;
++static int cmdline_parsed = 0;
++
++/*
++ * Parse one partition definition for an MTD. Since there can be many
++ * comma separated partition definitions, this function calls itself
++ * recursively until no more partition definitions are found. Nice side
++ * effect: the memory to keep the mtd_partition structs and the names
++ * is allocated upon the last definition being found. At that point the
++ * syntax has been verified ok.
++ */
++static struct mtd_partition * newpart(char *s,
++                                      char **retptr,
++                                      int *num_parts,
++                                      int this_part,
++                                      unsigned char **extra_mem_ptr,
++                                      int extra_mem_size)
++{
++	struct mtd_partition *parts;
++	sector_t size;
++	sector_t from = OFFSET_CONTINUOUS;
++	char *name;
++	int name_len;
++	unsigned char *extra_mem;
++	char delim;
++
++	/* fetch the partition size */
++	if (*s == '-')
++	{	/* assign all remaining space to this partition */
++		size = SIZE_REMAINING;
++		s++;
++	}
++	else
++	{
++		size = memparse(s, &s);
++		if (size < (PAGE_SIZE)>>9)
++		{
++			printk(KERN_ERR ERRP "partition size too small (%llx)\n", size);
++			return NULL;
++		}
++	}
++
++	/* fetch partition name */
++	delim = 0;
++        /* check for from */
++        if (*s == '@')
++	{
++                s++;
++                from = memparse(s, &s);
++        }
++        /* now look for name */
++	if (*s == '(')
++	{
++		delim = ')';
++	}
++
++	if (delim)
++	{
++		char *p;
++
++	    	name = ++s;
++		p = strchr(name, delim);
++		if (!p)
++		{
++			printk(KERN_ERR ERRP "no closing %c found in partition name\n", delim);
++			return NULL;
++		}
++		name_len = p - name;
++		s = p + 1;
++	}
++	else
++	{
++	    	name = NULL;
++		name_len = 13; /* Partition_000 */
++	}
++
++	/* record name length for memory allocation later */
++	extra_mem_size += name_len + 1;
++
++	/* test if more partitions are following */
++	if (*s == ',')
++	{
++		if (size == SIZE_REMAINING)
++		{
++			printk(KERN_ERR ERRP "no partitions allowed after a fill-up partition\n");
++			return NULL;
++		}
++		/* more partitions follow, parse them */
++		parts = newpart(s + 1, &s, num_parts, this_part + 1,
++				&extra_mem, extra_mem_size);
++		if (!parts)
++			return NULL;
++	}
++	else
++	{	/* this is the last partition: allocate space for all */
++		int alloc_size;
++
++		*num_parts = this_part + 1;
++		alloc_size = *num_parts * sizeof(struct mtd_partition) +
++			     extra_mem_size;
++		parts = kzalloc(alloc_size, GFP_KERNEL);
++		if (!parts)
++		{
++			printk(KERN_ERR ERRP "out of memory\n");
++			return NULL;
++		}
++		extra_mem = (unsigned char *)(parts + *num_parts);
++	}
++	/* enter this partition (from will be calculated later if it is zero at this point) */
++	parts[this_part].size = size;
++	parts[this_part].from = from;
++	if (name)
++	{
++		strlcpy(extra_mem, name, name_len + 1);
++	}
++	else
++	{
++		sprintf(extra_mem, "Partition_%03d", this_part);
++	}
++	parts[this_part].name = extra_mem;
++	extra_mem += name_len + 1;
++
++	dbg(("partition %d: name <%s>, from %llx, size %llx\n",
++	     this_part,
++	     parts[this_part].name,
++	     parts[this_part].from,
++	     parts[this_part].size));
++
++	/* return (updated) pointer to extra_mem memory */
++	if (extra_mem_ptr)
++	  *extra_mem_ptr = extra_mem;
++
++	/* return (updated) pointer command line string */
++	*retptr = s;
++
++	/* return partition table */
++	return parts;
++}
++
++/*
++ * Parse the command line.
++ */
++static int mtdpart_setup_real(char *s)
++{
++	cmdline_parsed = 1;
++
++	for( ; s != NULL; )
++	{
++		struct cmdline_mtd_partition *this_mtd;
++		struct mtd_partition *parts;
++	    	int mtd_id_len;
++		int num_parts;
++		char *p, *mtd_id;
++
++	    	mtd_id = s;
++		/* fetch <mtd-id> */
++		if (!(p = strchr(s, ':')))
++		{
++			dbg(( "no mtd-id\n"));
++			return 0;
++		}
++		mtd_id_len = p - mtd_id;
++
++		dbg(("parsing <%s>\n", p+1));
++
++		/*
++		 * parse one mtd. have it reserve memory for the
++		 * struct cmdline_mtd_partition and the mtd-id string.
++		 */
++		parts = newpart(p + 1,		/* cmdline */
++				&s,		/* out: updated cmdline ptr */
++				&num_parts,	/* out: number of parts */
++				0,		/* first partition */
++				(unsigned char**)&this_mtd, /* out: extra mem */
++				mtd_id_len + 1 + sizeof(*this_mtd) +
++				sizeof(void*)-1 /*alignment*/);
++		if(!parts)
++		{
++			/*
++			 * An error occurred. We're either:
++			 * a) out of memory, or
++			 * b) in the middle of the partition spec
++			 * Either way, this mtd is hosed and we're
++			 * unlikely to succeed in parsing any more
++			 */
++			 return 0;
++		 }
++
++		/* align this_mtd */
++		this_mtd = (struct cmdline_mtd_partition *)
++			ALIGN((unsigned long)this_mtd, sizeof(void*));
++		/* enter results */
++		this_mtd->parts = parts;
++		this_mtd->num_parts = num_parts;
++		this_mtd->mtd_id = (char*)(this_mtd + 1);
++		strlcpy(this_mtd->mtd_id, mtd_id, mtd_id_len + 1);
++
++		/* link into chain */
++		this_mtd->next = partitions;
++		partitions = this_mtd;
++
++		dbg(("mtdid=<%s> num_parts=<%d>\n",
++		     this_mtd->mtd_id, this_mtd->num_parts));
++
++		/* EOS - we're done */
++		if (*s == 0)
++			break;
++#if 0
++		/* does another spec follow? */
++		if (*s != ';')
++		{
++			printk(KERN_ERR ERRP "bad character after partition (%c)\n", *s);
++			return 0;
++		}
++#endif
++		s++;
++	}
++	return 1;
++}
++
++/*
++ * Main function to be called from the MTD mapping driver/device to
++ * obtain the partitioning information. At this point the command line
++ * arguments will actually be parsed and turned to struct mtd_partition
++ * information. It returns partitions for the requested mtd device, or
++ * the first one in the chain if a NULL mtd_id is passed in.
++ */
++static int parse_cmdline_partitions(sector_t n,
++                             	    struct mtd_partition **pparts,
++                             	    unsigned long origin)
++{
++	unsigned long from;
++	int i;
++	struct cmdline_mtd_partition *part;
++	const char *mtd_id = "rk29xxnand";
++
++	/* parse command line */
++	if (!cmdline_parsed)
++		mtdpart_setup_real(cmdline);
++
++	for(part = partitions; part; part = part->next)
++	{
++		if ((!mtd_id) || (!strcmp(part->mtd_id, mtd_id)))
++		{
++			for(i = 0, from = 0; i < part->num_parts; i++)
++			{
++				if (part->parts[i].from == OFFSET_CONTINUOUS)
++				  part->parts[i].from = from;
++				else
++				  from = part->parts[i].from;
++				if (part->parts[i].size == SIZE_REMAINING)
++				  part->parts[i].size = n - from - FROM_OFFSET;
++				if (from + part->parts[i].size > n)
++				{
++					printk(KERN_WARNING ERRP
++					       "%s: partitioning exceeds flash size, truncating\n",
++					       part->mtd_id);
++					part->parts[i].size = n - from;
++					part->num_parts = i;
++				}
++				from += part->parts[i].size;
++			}
++			*pparts = kmemdup(part->parts,
++					sizeof(*part->parts) * part->num_parts,
++					GFP_KERNEL);
++			if (!*pparts)
++				return -ENOMEM;
++			return part->num_parts;
++		}
++	}
++	return 0;
++}
++
++static void rk_emmc_fix(void)
++{
++	const char mode_emmc[] = " androidboot.mode=emmc";
++	const char charger_emmc[] = " androidboot.charger.emmc=1";
++	char *new_command_line;
++	size_t saved_command_line_len = strlen(saved_command_line);
++
++	if (strstr(saved_command_line, "androidboot.mode=charger")) {
++		new_command_line = kzalloc(saved_command_line_len + strlen(charger_emmc) + 1, GFP_KERNEL);
++		sprintf(new_command_line, "%s%s", saved_command_line, charger_emmc);
++	} else {
++		new_command_line = kzalloc(saved_command_line_len + strlen(mode_emmc) + 1, GFP_KERNEL);
++		sprintf(new_command_line, "%s%s", saved_command_line, mode_emmc);
++	}
++	saved_command_line = new_command_line;
++}
++
++int mtdpart_partition(struct parsed_partitions *state)
++{
++	int num_parts = 0, i;
++	sector_t n = get_capacity(state->bdev->bd_disk);
++	struct mtd_partition *parts = NULL;
++
++	if(n < SECTOR_1G)
++		return 0;
++	
++        //only used to eMMC-disk
++        if(!state->bdev->bd_disk->is_emmc)
++        	return 0;
++
++	cmdline = strstr(saved_command_line, "mtdparts=") + 9;
++	
++	num_parts = parse_cmdline_partitions(n, &parts, 0);
++	if(num_parts < 0)
++		return num_parts;
++
++	for(i = 0; i < num_parts; i++){
++		put_partition(state, i+1, parts[i].from + FROM_OFFSET, parts[i].size);
++		strcpy(state->parts[i+1].info.volname, parts[i].name);
++		printk(KERN_INFO "%10s: 0x%09llx -- 0x%09llx (%llu MB)\n", 
++				parts[i].name,
++				parts[i].from * 512,
++				(parts[i].from + parts[i].size) * 512,
++				parts[i].size / 2048);
++	}
++
++	rk_emmc_fix();
++
++	return 1;
++}
+diff -urN linux-4.6/block/partitions/mtdpart.h linux-4.6-firefly/block/partitions/mtdpart.h
+--- linux-4.6/block/partitions/mtdpart.h	1970-01-01 08:00:00.000000000 +0800
++++ linux-4.6-firefly/block/partitions/mtdpart.h	2016-05-19 19:30:50.000000000 +0800
+@@ -0,0 +1,5 @@
++/*
++ *  fs/partitions/mtdpart.h
++ */
++
++int mtdpart_partition(struct parsed_partitions *state);
+diff -urN linux-4.6/drivers/mmc/card/block.c linux-4.6-firefly/drivers/mmc/card/block.c
+--- linux-4.6/drivers/mmc/card/block.c	2016-05-19 19:36:59.636695395 +0800
++++ linux-4.6-firefly/drivers/mmc/card/block.c	2016-05-19 19:30:50.000000000 +0800
+@@ -2551,7 +2551,10 @@
+ 	if (IS_ERR(md))
+ 		return PTR_ERR(md);
+ 
+-	string_get_size((u64)get_capacity(md->disk), 512, STRING_UNITS_2,
++#if CONFIG_MMC_DW_ROCKCHIP
++        md->disk->is_emmc = (card->type == MMC_TYPE_MMC);
++#endif
++        string_get_size((u64)get_capacity(md->disk), 512, STRING_UNITS_2,
+ 			cap_str, sizeof(cap_str));
+ 	pr_info("%s: %s %s %s %s\n",
+ 		md->disk->disk_name, mmc_card_id(card), mmc_card_name(card),
+diff -urN linux-4.6/drivers/mmc/core/host.c linux-4.6-firefly/drivers/mmc/core/host.c
+--- linux-4.6/drivers/mmc/core/host.c	2016-05-19 19:36:59.637695424 +0800
++++ linux-4.6-firefly/drivers/mmc/core/host.c	2016-05-19 19:30:50.000000000 +0800
+@@ -35,6 +35,7 @@
+ 
+ static DEFINE_IDR(mmc_host_idr);
+ static DEFINE_SPINLOCK(mmc_host_lock);
++static struct mmc_host *sdio_host;
+ 
+ static void mmc_host_classdev_release(struct device *dev)
+ {
+@@ -297,7 +298,9 @@
+ 			host->dsr);
+ 		host->dsr_req = 0;
+ 	}
+-
++        
++        if (of_property_read_bool(np, "supports-sdio")) 
++            sdio_host = host;
+ 	return mmc_pwrseq_alloc(host);
+ }
+ 
+@@ -437,3 +440,35 @@
+ }
+ 
+ EXPORT_SYMBOL(mmc_free_host);
++
++int mmc_host_rescan(struct mmc_host *host, int val, int is_cap_sdio_irq)
++{
++	if (NULL != sdio_host) {
++		if (!host)
++			host = sdio_host;
++		else
++			pr_info("%s: mmc_host_rescan pass in host from argument!\n",
++				mmc_hostname(host));
++	} else {
++		pr_err("sdio: host isn't  initialization successfully.\n");
++		return -ENOMEDIUM;
++	}
++
++	pr_info("%s:mmc host rescan start!\n", mmc_hostname(host));
++
++	/*  0: oob  1:cap-sdio-irq */
++	if (is_cap_sdio_irq == 1) {
++		host->caps |= MMC_CAP_SDIO_IRQ;
++	} else if (is_cap_sdio_irq == 0) {
++		host->caps &= ~MMC_CAP_SDIO_IRQ;
++	} else {
++		dev_err(&host->class_dev, "sdio: host doesn't identify oob or sdio_irq mode!\n");
++		return -ENOMEDIUM;
++	}
++	host->rescan_entered  =0;        
++	mmc_detect_change(host, 20);
++
++
++	return 0;
++}
++EXPORT_SYMBOL(mmc_host_rescan);
+diff -urN linux-4.6/include/linux/genhd.h linux-4.6-firefly/include/linux/genhd.h
+--- linux-4.6/include/linux/genhd.h	2016-05-19 19:36:51.446458404 +0800
++++ linux-4.6-firefly/include/linux/genhd.h	2016-05-19 19:34:29.000000000 +0800
+@@ -215,6 +215,9 @@
+ #endif	/* CONFIG_BLK_DEV_INTEGRITY */
+ 	int node_id;
+ 	struct badblocks *bb;
++#if CONFIG_MMC_DW_ROCKCHIP
++        bool is_emmc;
++#endif
+ };
+ 
+ static inline struct gendisk *part_to_disk(struct hd_struct *part)

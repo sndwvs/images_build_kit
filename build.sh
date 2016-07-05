@@ -5,132 +5,215 @@
 #---------------------------------------------
 # environment
 #---------------------------------------------
+set -e
 CWD=$(pwd)
 
 
+TTY_X=$(($(stty size | cut -f2 -d " ")-10)) # determine terminal width
+TTY_Y=$(($(stty size | cut -f1 -d " ")-10)) # determine terminal height
+
+# Duplicate file descriptor 1 on descriptor 3
+exec 3>&1
+
+while true; do
+    BOARD_NAME=$(dialog --title "build rootfs" \
+           --radiolist "selected your board" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
+    "cubietruck" "Allwinner Tech SoC A20 ARM® Cortex™-A7" "off" \
+    "firefly" "Rockchip RK3288 Cortex-A17 quad core@ 1.8GHz" "off" \
+    "orange_pi_plus_2e" "Allwinner Tech SoC H3 ARM® Cortex™-A7" "off" \
+    2>&1 1>&3)
+
+    if [ ! -e $BOARD_NAME ]; then
+        break
+    fi
+done
+
+# kernel source
+result=$(dialog --title "build for $BOARD_NAME" \
+       --radiolist "select kernel source" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
+"legacy" "legacy kernel-source" "off" \
+"next" "mainline kernel-source" "on" \
+2>&1 1>&3)
+
+exit_status=$?
+# Close file descriptor 3
+exec 3>&-
+
+for arg in $result; do
+    if [ "$arg" == "legacy" ]; then
+            KERNEL_SOURCE=$arg
+    elif [ "$arg" == "next" ]; then
+            KERNEL_SOURCE=$arg
+    fi
+done
+
+options+=("clean" "clean sources, remove binaries and image" "off")
+options+=("download" "download source and use pre-built binaries" "on")
+options+=("compile" "build binaries locally" "on")
+options+=("mini-image" "create basic image" "on")
+options+=("tools" "create and pack tools" "on")
+options+=("xfce-image" "create image with xfce" "off")
+
+case $BOARD_NAME in
+    cubietruck)
+                options+=("hdmi" "video mode hdmi (defaul vga)" "off")
+            ;;
+esac
+
+# Duplicate file descriptor 1 on descriptor 3
+exec 3>&1
+
+while true; do
+    result=$(dialog --title "build for $BOARD_NAME" \
+           --checklist "select build options" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
+           "${options[@]}" \
+    2>&1 1>&3)
+    if [[ ! -z $result ]]; then break; fi
+done
+
+exit_status=$?
+# Close file descriptor 3
+exec 3>&-
+
+
+for arg in $result; do
+    if [ "$arg" == "download" ]; then
+            DOWNLOAD_SOURCE_BINARIES="true"
+    elif [ "$arg" == "clean" ]; then
+            CLEAN="true"
+    elif [ "$arg" == "compile" ]; then
+            COMPILE_BINARIES="true"
+    elif [ "$arg" == "mini-image" ]; then
+            CREATE_IMAGE=($(echo $arg | cut -f1 -d '-'))
+    elif [ "$arg" == "tools" ]; then
+            TOOLS_PACK="true"
+    elif [ "$arg" == "xfce-image" ]; then
+            CREATE_IMAGE+=($(echo $arg | cut -f1 -d '-'))
+    elif [ "$arg" == "hdmi" ]; then
+            HDMI=$arg
+    fi
+done
+
+#---------------------------------------------
+# clean terminal
+#---------------------------------------------
+reset
 
 #---------------------------------------------
 # configuration
 #---------------------------------------------
-source $CWD/configuration.sh
-source $CWD/compilation.sh
-source $CWD/build_slackware_rootfs.sh
+source $CWD/overall.sh || exit 1
+source $CWD/configuration.sh || exit 1
+source $CWD/downloads.sh || exit 1
+source $CWD/compilation.sh || exit 1
+source $CWD/build_packages.sh || exit 1
+source $CWD/build_slackware_rootfs.sh || exit 1
 
 
 
-# commandline arguments processing
-while [ "x$1" != "x" ]
-do
-    case "$1" in
-	-d | --download )
-	    shift
-	    DOWNLOAD_SOURCE_BINARIES="true"
-	    ;;
-	-p | --patch )
-	    shift
-	    APPLY_PATCH="true"
-	    ;;
-	--clean )
-	    shift
-	    clean_sources
-	    exit -1
-	    ;;
-	-c | --compile )
-	    shift
-	    COMPILE_BINARIES="true"
-	    ;;
-	-i | --create-image )
-	    shift
-	    CREATE_IMAGE="true"
-	    ;;
-	-t | --tools )
-	    shift
-	    TOOLS_PACK="true"
-	    ;;
-	--xfce )
-	    shift
-	    XFCE="true"
-	    ;;
 
-	-h | --help )
-	    echo -e "Usage: run as root: $0 <options>"
-	    echo -e "Options:"
-	    echo -e "\t--clean"
-	    echo -e "\t\tclean sources, remove binaries and image"
-
-	    echo -e "\t-d | --download"
-	    echo -e "\t\tdownload source and use pre-built binaries"
-
-	    echo -e "\t-p | --patch"
-	    echo -e "\t\tpatch the kernel configuration"
-
-	    echo -e "\t-c | --compile"
-	    echo -e "\t\tbuild binaries locally"
-
-	    echo -e "\t-i | --create-image (default)"
-	    echo -e "\t\tgenerate image"
-
-	    echo -e "\t-t | --tools"
-	    echo -e "\t\tcreate and pack tools"
-
-	    echo -e "\t--xfce"
-	    echo -e "\t\tcreate image with xfce"
-
-	    exit 0
-	    ;;
-    esac
-done
-
+#---------------------------------------------
+# clear log
+#---------------------------------------------
+if [[ -f $CWD/$BUILD/$SOURCE/$LOG ]]; then
+    rm $CWD/$BUILD/$SOURCE/$LOG
+fi
 
 #---------------------------------------------
 # main script
 #---------------------------------------------
-prepare_dest
+if [[ $CLEAN == true ]]; then
+    clean_sources
+fi
 
-if [ "$DOWNLOAD_SOURCE_BINARIES" = "true" ]; then
+if [[ ! -e $BOARD_NAME ]]; then
+    prepare_dest
+fi
+
+if [[ $DOWNLOAD_SOURCE_BINARIES == true ]]; then
     download
 fi
 
-if [ "$COMPILE_BINARIES" = "true" ]; then
-    compile_rk2918
-    compile_rkflashtool
-    compile_mkbooting
-    compile_boot_loader
-    compile_kernel
-    build_pkg
-    add_linux_upgrade_tool
-    build_parameters
-    build_resource
-    build_boot
+#---------------------------------------------
+# start build
+#---------------------------------------------
+if [[ $COMPILE_BINARIES == true ]]; then
+    if [[ $SOCFAMILY == rk3288 ]]; then
+        compile_rk2918
+        compile_rkflashtool
+        compile_mkbooting
+        add_linux_upgrade_tool
+        compile_boot_loader
+        patching_kernel_source
+        compile_kernel
+        build_parameters
+        if [[ $KERNEL_SOURCE == next ]]; then
+            build_kernel
+        else
+            build_resource
+        fi
+        build_boot
+    fi
+
+    if [[ $SOCFAMILY == sun* ]]; then
+        patching_kernel_source
+        compile_sunxi_tools
+        build_sunxi_tools
+        compile_boot_loader
+        compile_kernel
+    fi
+
+    build_kernel_pkg
 fi
 
-if [ "$TOOLS_PACK" = "true" ]; then
+for image_type in ${CREATE_IMAGE[@]}; do
+
+    get_name_rootfs $image_type
+    clean_rootfs $image_type
+
+    if [[ $image_type == mini ]]; then
+        download_rootfs
+        prepare_rootfs
+        setting_fstab
+        setting_debug
+        setting_motd
+        setting_issue
+        setting_rc_local
+        setting_dhcpcd
+        setting_firstboot
+        setting_settings
+        setting_first_login
+        setting_wifi
+#        if [[ $KERNEL_SOURCE != "next" && $SOCFAMILY == rk3288 ]]; then
+#            setting_wifi
+#        elif [[ $SOCFAMILY == rk3288 ]]; then
+#            setting_move_to_nand
+#        fi
+        download_pkg $URL_DISTR "$image_type" ${CATEGORY_PKG[@]}
+        install_pkg "$image_type" ${CATEGORY_PKG[@]}
+        create_img
+    fi
+
+    if [[ $image_type == xfce ]]; then
+        message "" "create" "$ROOTFS_XFCE"
+        rsync -ar --del $CWD/$BUILD/$SOURCE/$ROOTFS/ $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        download_pkg $URL_DISTR "$image_type" ${CATEGORY_PKG[@]}
+        install_pkg "$image_type" ${CATEGORY_PKG[@]}
+
+        # install extra packages
+        download_pkg $URL_DISTR_EXTRA 'extra' ${CATEGORY_PKG[@]}
+        install_pkg 'extra' ${CATEGORY_PKG[@]}
+
+        setting_default_theme_xfce
+        setting_default_start_x
+        setting_for_desktop
+        create_img xfce
+    fi
+done
+
+if [[ $TOOLS_PACK == true && $SOCFAMILY == rk3288 ]]; then
     build_flash_script
     create_tools_pack
-fi
-
-if [ "$CREATE_IMAGE" = "true" ]; then
-    clean_rootfs
-    download_rootfs
-    prepare
-    setting_fstab
-    setting_motd
-    setting_rc_local
-    setting_wifi
-    setting_dhcpcd
-    setting_firstboot
-    if [ "$XFCE" = "true" ]; then
-	cp -fr $CWD/$BUILD/$SOURCE/${ROOTFS}-build-${VERSION}/ $CWD/$BUILD/$SOURCE/${ROOTFS_XFCE}-build-${VERSION} || exit 1
-	download_pkg
-	install_pkg
-	setting_default_theme_xfce
-	setting_default_start_x
-	download_video_driver
-	build_video_driver_pkg
-	install_video_driver_pkg
-	create_img xfce
-    fi
-    create_img
 fi
 
 

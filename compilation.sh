@@ -2,316 +2,197 @@
 
 
 
-if [ -z $CWD ];then
+if [ -z $CWD ]; then
     exit
 fi
 
-#---------------------------------------------
-# create dir
-#---------------------------------------------
-download (){
-	echo "------ Download $LINUX_UPGRADE_TOOL"
-	wget -c --no-check-certificate $URL_LINUX_UPGRADE_TOOL/$LINUX_UPGRADE_TOOL.zip -O $CWD/$BUILD/$SOURCE/$LINUX_UPGRADE_TOOL.zip || exit 1
-	unzip -o $CWD/$BUILD/$SOURCE/$LINUX_UPGRADE_TOOL.zip -d $CWD/$BUILD/$SOURCE/ || exit 1
-
-	echo "------ Download $URL_XTOOLS_OLD"
-	if [ -d $CWD/$BUILD/$SOURCE/$XTOOLS_OLD ]; then
-	    cd $CWD/$BUILD/$SOURCE/$XTOOLS_OLD && git pull origin HEAD && cd $CWD
-	else
-	    git clone $URL_XTOOLS_OLD $CWD/$BUILD/$SOURCE/$XTOOLS_OLD || exit 1
-	fi
-
-	echo "------ Download $XTOOLS"
-	wget -c --no-check-certificate $URL_XTOOLS -O $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz || exit 1
-	tar xvf $CWD/$BUILD/$SOURCE/$XTOOLS.tar.?z* -C $CWD/$BUILD/$SOURCE/ || exit 1
-
-	echo "------ Download $RK2918_TOOLS"
-	if [ -d $CWD/$BUILD/$SOURCE/$RK2918_TOOLS ]; then
-	    cd $CWD/$BUILD/$SOURCE/$RK2918_TOOLS && git pull origin HEAD && cd $CWD
-	else
-	    git clone $URL_RK2918_TOOLS/$RK2918_TOOLS $CWD/$BUILD/$SOURCE/$RK2918_TOOLS || exit 1
-	fi
-
-	echo "------ Download $RKFLASH_TOOLS"
-	if [ -d $CWD/$BUILD/$SOURCE/$RKFLASH_TOOLS ]; then
-	    cd $CWD/$BUILD/$SOURCE/$RKFLASH_TOOLS && git pull origin HEAD && cd $CWD
-	else
-	    git clone $URL_RKFLASH_TOOLS/$RKFLASH_TOOLS $CWD/$BUILD/$SOURCE/$RKFLASH_TOOLS || exit 1
-	fi
-	
-	echo "------ Download $MKBOOTIMG_TOOLS"
-	if [ -d $CWD/$BUILD/$SOURCE/$MKBOOTIMG_TOOLS ]; then
-	    cd $CWD/$BUILD/$SOURCE/$MKBOOTIMG_TOOLS && git pull origin HEAD && cd $CWD
-	else
-	    git clone $URL_MKBOOTIMG_TOOLS/$MKBOOTIMG_TOOLS $CWD/$BUILD/$SOURCE/$MKBOOTIMG_TOOLS || exit 1
-	fi
-
-	echo "------ Download $BOOT_LOADER"
-	if [ -d $CWD/$BUILD/$SOURCE/$BOOT_LOADER ]; then
-	    cd $CWD/$BUILD/$SOURCE/$BOOT_LOADER && git pull origin HEAD && cd $CWD
-	else
-	    git clone $URL_BOOT_LOADER_SOURCE/$BOOT_LOADER $CWD/$BUILD/$SOURCE/$BOOT_LOADER || exit 1
-	fi
-
-	echo "------ Download $LINUX_SOURCE"
-	if [ -d $CWD/$BUILD/$SOURCE/$LINUX_SOURCE ]; then
-	    cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE && git pull origin HEAD && cd $CWD
-	else
-	    git clone $URL_LINUX_SOURCE/$LINUX_SOURCE $CWD/$BUILD/$SOURCE/$LINUX_SOURCE || exit 1
-	fi
-
-        if [ ! -f $CWD/$BUILD/$SOURCE/$FIRMWARE ]; then
-            echo "------ Download $FIRMWARE"
-            wget -c --no-check-certificate $URL_FIRMWARE/$FIRMWARE -O $CWD/$BUILD/$SOURCE/$FIRMWARE || exit 1
-        fi
-}
-
-kernel_version (){
-	local VER
-	VER=$(cat $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/Makefile | grep VERSION | head -1 | awk '{print $(NF)}')
-	VER=$VER.$(cat $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/Makefile | grep PATCHLEVEL | head -1 | awk '{print $(NF)}')
-	VER=$VER.$(cat $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/Makefile | grep SUBLEVEL | head -1 | awk '{print $(NF)}')
-	EXTRAVERSION=$(cat $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/Makefile | grep EXTRAVERSION | head -1 | awk '{print $(NF)}')
-	if [ "$EXTRAVERSION" != "=" ]; then VER=$VER$EXTRAVERSION; fi
-	echo "------ Get kernel version $VER"
-	eval "$1=\$VER"
-}
-
 compile_rk2918 (){
-	echo "------ Compiling $RK2918_TOOLS"
-	PROGRAMS="afptool img_unpack img_maker mkkrnlimg"
-	cd $CWD/$BUILD/$SOURCE/$RK2918_TOOLS
-	make $CTHREADS || exit 1
+    message "" "compiling" "$RK2918_TOOLS"
+    PROGRAMS="afptool img_unpack img_maker mkkrnlimg"
+    cd $CWD/$BUILD/$SOURCE/$RK2918_TOOLS
+    make $CTHREADS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-	for p in $PROGRAMS;do
-		echo "copy program: $p"
-		mv $p $CWD/$BUILD/$OUTPUT/$TOOLS/ || exit 1
-	done
+    for p in $PROGRAMS;do
+        message "" "copy" "program: $p"
+        mv $p $CWD/$BUILD/$OUTPUT/$TOOLS/ || exit 1
+    done
 }
 
 compile_rkflashtool (){
-	echo "------ Compiling $RKFLASH_TOOLS"
-	PROGRAMS="rkcrc rkflashtool rkmisc rkpad rkparameters rkparametersblock rkunpack rkunsign"
-	cd $CWD/$BUILD/$SOURCE/$RKFLASH_TOOLS
-	make clean || exit 1
-	make $CTHREADS || exit 1
+    message "" "compiling" "$RKFLASH_TOOLS"
+    PROGRAMS="rkcrc rkflashtool rkmisc rkpad rkparameters rkparametersblock rkunpack rkunsign"
+    cd $CWD/$BUILD/$SOURCE/$RKFLASH_TOOLS
+    make clean >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make $CTHREADS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-	for p in $PROGRAMS;do
-		echo "copy program: $p"
-		cp $p $CWD/$BUILD/$OUTPUT/$TOOLS/ || exit 1
-	done
+    for p in $PROGRAMS;do
+        message "" "copy" "program: $p"
+        cp $p $CWD/$BUILD/$OUTPUT/$TOOLS/ || exit 1
+    done
 }
 
 compile_mkbooting (){
-	echo "------ Compiling $MKBOOTIMG_TOOLS"
-	PROGRAMS="afptool img_maker mkbootimg unmkbootimg mkrootfs mkupdate mkcpiogz unmkcpiogz"
-	cd $CWD/$BUILD/$SOURCE/$MKBOOTIMG_TOOLS
-	make clean || exit 1
-	make $CTHREADS || exit 1
+    message "" "compiling" "$MKBOOTIMG_TOOLS"
+    PROGRAMS="afptool img_maker mkbootimg unmkbootimg mkrootfs mkupdate mkcpiogz unmkcpiogz"
+    cd $CWD/$BUILD/$SOURCE/$MKBOOTIMG_TOOLS
+    make clean >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make $CTHREADS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-	for p in $PROGRAMS;do
-		echo "copy program: $p"
-		cp $p $CWD/$BUILD/$OUTPUT/$TOOLS/ || exit 1
-	done
+    for p in $PROGRAMS;do
+        message "" "copy" "program: $p"
+        cp $p $CWD/$BUILD/$OUTPUT/$TOOLS/ || exit 1
+    done
+}
+
+compile_sunxi_tools (){
+    message "" "compiling" "$SUNXI_TOOLS"
+    cd $CWD/$BUILD/$SOURCE/$SUNXI_TOOLS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    git checkout $SUNXI_TOOLS_VERSION >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
+    # for host
+    make -s clean && make -s all clean && make -s fex2bin && make -s bin2fex >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
+    # for destination
+    make -s clean && make -s all clean && make $CTHREADS 'fex2bin' CC=${CROSS}gcc >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make $CTHREADS 'bin2fex' CC=${CROSS}gcc && make $CTHREADS 'nand-part' CC=${CROSS}gcc >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 compile_boot_loader (){
-	echo "------ Compiling $BOOT_LOADER"
-	cd $CWD/$BUILD/$SOURCE/$BOOT_LOADER
-	make ARCH=arm CROSS_COMPILE=$CROSS_OLD clean || exit 1
-	make ARCH=arm $BOOT_LOADER_CONFIG CROSS_COMPILE=$CROSS_OLD || exit 1
-	make $CTHREADS ARCH=arm CROSS_COMPILE=$CROSS_OLD || exit 1
-	find -name "RK3288UbootLoader*" -exec install -D {} $CWD/$BUILD/$OUTPUT/$FLASH/{} \;
+    message "" "compiling" "$BOOT_LOADER"
+    cd $CWD/$BUILD/$SOURCE/$BOOT_LOADER >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
+    make ARCH=$ARCH CROSS_COMPILE=$CROSS clean >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
+    if [[ ! -z $BOOT_LOADER_VERSION ]]; then
+        git checkout $BOOT_LOADER_VERSION >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
+
+    make ARCH=$ARCH $BOOT_LOADER_CONFIG CROSS_COMPILE=$CROSS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
+    if [[ $SOCFAMILY == rk3288 ]]; then
+#        if [[ $KERNEL_SOURCE == next ]]; then
+            # u-boot-firefly-rk3288 2016.03 package contains backports
+            # of EFI support patches and fails to boot the kernel on the Firefly.
+            sed 's/^\(CONFIG_EFI_LOADER=y\)/# CONFIG_EFI_LOADER is not set/' -i .config >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            # create RK3288UbootLoader.bin
+            tools/mkimage -n rk3288 -T rkimage -d \
+            spl/u-boot-spl-dtb.bin out && \
+            cat out | openssl rc4 -K 7c4e0304550509072d2c7b38170d1711 > "RK3288UbootLoader${BOOT_LOADER_VERSION}.bin"
+#        else
+#            make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS_OLD >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+#        fi
+        find -name "RK3288UbootLoader*" -exec install -D {} $CWD/$BUILD/$OUTPUT/$FLASH/{} \;
+    fi
+
+    if [[ $SOCFAMILY == sun* ]]; then
+        if [ "$KERNEL_SOURCE" != "next" ] ; then
+            # patch mainline uboot configuration to boot with old kernels
+            if [ "$(cat $CWD/$BUILD/$SOURCE/$BOOT_LOADER/.config | grep CONFIG_ARMV7_BOOT_SEC_DEFAULT=y)" == "" ]; then
+                echo "CONFIG_ARMV7_BOOT_SEC_DEFAULT=y" >> $CWD/$BUILD/$SOURCE/$BOOT_LOADER/.config
+                echo "CONFIG_OLD_SUNXI_KERNEL_COMPAT=y" >> $CWD/$BUILD/$SOURCE/$BOOT_LOADER/.config
+            fi
+        fi
+        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
 }
 
 compile_kernel (){
-	if [ -d "$CWD/$BUILD/$SOURCE/$LINUX_SOURCE" ]; then
-		echo "------ Compiling kernel"
-		cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE
+    message "" "compiling" "$LINUX_SOURCE"
+    cd "$CWD/$BUILD/$SOURCE/$LINUX_SOURCE" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-		# fix firmware /system /lib
-		find drivers/net/wireless/rockchip_wlan/rkwifi/ -type f -exec \
-		    sed -i "s#\/system\/etc\/firmware\/#\/lib\/firmware\/#" {} \;
+    if [[ $SOCFAMILY == sun* ]]; then
+        # Attempting to run 'firmware_install' with CONFIG_USB_SERIAL_TI=y when
+        # using make 3.82 results in an error
+        # make[2]: *** No rule to make target `/lib/firmware/./', needed by
+        # `/lib/firmware/ti_3410.fw'.  Stop.
+        if [[ $(grep '$(INSTALL_FW_PATH)/$$(dir %)' scripts/Makefile.fwinst) ]];then
+            sed -i 's:$(INSTALL_FW_PATH)/$$(dir %):$$(dir $(INSTALL_FW_PATH)/%):' scripts/Makefile.fwinst
+        fi
+    fi
 
-		# fix kernel version
-		sed -i "/SUBLEVEL = 0/d" Makefile
+    # delete previous creations
+    make CROSS_COMPILE=$CROSS clean || exit 1
+    # use proven config
+    install -D $CWD/config/kernel/$LINUX_CONFIG $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/.config || (message "err" "details" && exit 1) || exit 1
 
-		# delete previous creations
-		make CROSS_COMPILE=$CROSS clean || exit 1
+    if [[ $SOCFAMILY == rk3288 ]]; then
+        if [ "$KERNEL_SOURCE" != "next" ]; then
+            # fix firmware /system /lib
+            find drivers/net/wireless/rockchip_wlan/rkwifi/ -type f -exec \
+            sed -i "s#\/system\/etc\/firmware\/#\/lib\/firmware\/#" {} \;
 
-		make $CTHREADS ARCH=arm CROSS_COMPILE=$CROSS firefly-rk3288-linux_defconfig || exit 1
+            # fix kernel version
+            sed -i "/SUBLEVEL = 0/d" Makefile
+        fi
 
-		if [ "$APPLY_PATCH" = "true" ]; then
-		    echo "$KERNEL_CONFIG_PATCH" | patch -p0 -b || exit 1
-		fi
+#        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS menuconfig  || exit 1
+        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS zImage modules || (message "err" "details" && exit 1) || exit 1
+        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS $DEVICE_TREE_BLOB || (message "err" "details" && exit 1) || exit 1
+    fi
 
-#		make $CTHREADS ARCH=arm CROSS_COMPILE=$CROSS menuconfig  || exit 1
+    if [[ $SOCFAMILY == sun* ]]; then
+#        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS menuconfig  || exit 1
+        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS oldconfig
+        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS zImage modules || (message "err" "details" && exit 1) || exit 1
 
-		# this way of compilation is much faster. We can use multi threading here but not later
-		make $CTHREADS ARCH=arm CROSS_COMPILE=$CROSS zImage modules || exit 1
-		make $CTHREADS ARCH=arm CROSS_COMPILE=$CROSS firefly-rk3288.dtb || exit 1
-	
-		make $CTHREADS O=$(pwd) ARCH=arm CROSS_COMPILE=$CROSS INSTALL_MOD_PATH=$CWD/$BUILD/$PKG/kernel-modules modules_install || exit 1
-		make $CTHREADS O=$(pwd) ARCH=arm CROSS_COMPILE=$CROSS INSTALL_MOD_PATH=$CWD/$BUILD/$PKG/kernel-modules firmware_install || exit 1
-		make $CTHREADS O=$(pwd) ARCH=arm CROSS_COMPILE=$CROSS INSTALL_HDR_PATH=$CWD/$BUILD/$PKG/kernel-headers/usr headers_install || exit 1
-	else
-		echo "ERROR: Source file $1 does not exists. Check fetch_from_github configuration."
-		exit
-	fi
-	sync
-}
+        if [[ "$KERNEL_SOURCE" == "next" ]]; then
+            make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS $DEVICE_TREE_BLOB || (message "err" "details" && exit 1) || exit 1
+        fi
+    fi
 
-build_pkg (){
-	kernel_version _VERSION
-	_ARCH="arm"
-	_BUILD=1
-	_PACKAGER="mara"
-
-	# clean-up unnecessary files generated during install
-	find "$CWD/$BUILD/$PKG/kernel-modules" "$CWD/$BUILD/$PKG/kernel-headers" \( -name .install -o -name ..install.cmd \) -delete
-
-	echo "------ Create kernel pakages"
-	# split install_modules -> firmware
-	install -dm755 "$CWD/$BUILD/$PKG/kernel-firmware/lib"
-	if [ -d $CWD/$BUILD/$PKG/kernel-modules/lib/firmware ];then
-		mv $CWD/$BUILD/$PKG/kernel-modules/lib/firmware "$CWD/$BUILD/$PKG/kernel-firmware/lib"
-	fi
-
-	# add firmware
-	unzip -o $CWD/$BUILD/$SOURCE/$FIRMWARE -d $CWD/$BUILD/$SOURCE/ || exit 1
-	cp -a $CWD/$BUILD/$SOURCE/overlay-master/overlay-rksdk/files-overlay-rk3288/system/etc/firmware $CWD/$BUILD/$PKG/kernel-firmware/lib/
-
-
-	cd $CWD/$BUILD/$PKG/kernel-modules/
-
-	install -dm755 "$CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/"
-	echo -e "#!/bin/sh\n" > $CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/rc.modules
-	for mod in $MODULES;do
-		echo "/sbin/modprobe $mod" >> $CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/rc.modules
-	done
-	chmod 755 $CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/rc.modules
-	cd $CWD/$BUILD/$PKG/kernel-modules/lib/modules/$_VERSION*
-	rm build source
-	ln -s /usr/include build
-	ln -s /usr/include source
-        cd $CWD/$BUILD/$PKG/kernel-modules/
-        makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-modules-${_VERSION}-${_ARCH}-${_BUILD}${_PACKAGER}.txz
-	
-	cd $CWD/$BUILD/$PKG/kernel-headers/
-	makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-headers-${_VERSION}-${_ARCH}-${_BUILD}${_PACKAGER}.txz
-	
-	cd $CWD/$BUILD/$PKG/kernel-firmware/
-	makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-firmware-${_VERSION}-${_ARCH}-${_BUILD}${_PACKAGER}.txz
-}
-
-add_linux_upgrade_tool (){
-	echo "------ Add $LINUX_UPGRADE_TOOL"
-	# add tool for flash boot loader
-	cp -a $CWD/$BUILD/$SOURCE/$LINUX_UPGRADE_TOOL/upgrade_tool $CWD/$BUILD/$OUTPUT/$TOOLS/
-	cp -a $CWD/$BUILD/$SOURCE/$LINUX_UPGRADE_TOOL/config.ini $CWD/$BUILD/$OUTPUT/$TOOLS/
-}
-
-build_parameters (){
-	echo "------ Create parameters"
-	# add parameters for flash
-	cat <<EOF >"$CWD/$BUILD/$OUTPUT/$FLASH/parameters.txt"
-FIRMWARE_VER:4.4.2
-MACHINE_MODEL:rk30sdk
-MACHINE_ID:007
-MANUFACTURER:RK30SDK
-MAGIC: 0x5041524B
-ATAG: 0x60000800
-MACHINE: 3066
-CHECK_MASK: 0x80
-PWR_HLD: 0,0,A,0,1
-#KERNEL_IMG: 0x62008000
-#FDT_NAME: rk-kernel.dtb
-#RECOVER_KEY: 1,1,0,20,0
-CMDLINE:console=tty0 console=tty0 earlyprintk root=/dev/$ROOT_DISK rw rootfstype=ext4 init=/sbin/init initrd=0x62000000,0x00800000 mtdparts=rk29xxnand:0x00008000@0x00002000(resource),0x00008000@0x0000A000(boot),-@0x00012000(linuxroot)
-EOF
-}
-
-build_resource (){
-	echo "------ Create resource"
-	# create resource for flash
-	cd $CWD/$BUILD/$OUTPUT/$FLASH
-	$CWD/$BUILD/$SOURCE/$LINUX_SOURCE/resource_tool $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/logo.bmp $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/arm/boot/dts/firefly-rk3288.dtb || exit 1
-}
-
-build_boot (){
-	echo "------ Create boot"
-	# create boot for flash
-	tar xf $CWD/initrd-tree.tar.xz -C $CWD/$BUILD/$SOURCE/
-	cd $CWD/$BUILD/$SOURCE/
-	$CWD/$BUILD/$OUTPUT/$TOOLS/mkcpiogz $CWD/$BUILD/$SOURCE/initrd-tree || exit 1
-	$CWD/$BUILD/$OUTPUT/$TOOLS/mkbootimg --kernel $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/arm/boot/zImage --ramdisk $CWD/$BUILD/$SOURCE/initrd-tree.cpio.gz -o $CWD/$BUILD/$OUTPUT/$FLASH/boot.img || exit 1
-	if [ -e $CWD/$BUILD/$SOURCE/initrd-tree.cpio.gz ];then
-		rm $CWD/$BUILD/$SOURCE/initrd-tree.cpio.gz
-	fi
+    make $CTHREADS O=$(pwd) ARCH=$ARCH CROSS_COMPILE=$CROSS INSTALL_MOD_PATH=$CWD/$BUILD/$PKG/kernel-modules modules_install >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make $CTHREADS O=$(pwd) ARCH=$ARCH CROSS_COMPILE=$CROSS INSTALL_MOD_PATH=$CWD/$BUILD/$PKG/kernel-modules firmware_install >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make $CTHREADS O=$(pwd) ARCH=$ARCH CROSS_COMPILE=$CROSS INSTALL_HDR_PATH=$CWD/$BUILD/$PKG/kernel-headers/usr headers_install >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 
-build_flash_script (){
-	echo "------ Create flash script"
-	cat <<EOF >"$CWD/$BUILD/$OUTPUT/$FLASH/flash.sh"
-#!/bin/sh
-
-if [ "$EUID" -ne 0 ];then
-    echo "Please run as root"
-    exit
-fi
-
-case "\$1" in
-    -r )
-    shift
-    XFCE="false"
-    ;;
-    --xfce )
-    shift
-    XFCE="true"
-    ;;
-    *)
-    echo -e "Options:"
-    echo -e "\t-r"
-    echo -e "\t\tflash mini rootfs image without xfce"
-
-    echo -e "\t--xfce"
-    echo -e "\t\tflash image with xfce\n"
-    exit
-    ;;
-esac
-
-
-if [ -f $TOOLS-$(uname -m).tar.xz ];then
-    echo "------ unpack $TOOLS"
-    tar xf $TOOLS-$(uname -m).tar.xz || exit 1
-fi
-echo "------ flash boot loader"
-$TOOLS/upgrade_tool ul \$(ls | grep RK3288UbootLoader) || exit 1
-echo "------ flash parameters"
-$TOOLS/rkflashtool P < parameters.txt || exit 1
-echo "------ flash resource"
-$TOOLS/rkflashtool w resource < resource.img || exit 1
-echo "------ flash boot"
-$TOOLS/rkflashtool w boot < boot.img || exit 1
-if [ "\$XFCE" = "true" ]; then
-    echo "------ flash linuxroot ${ROOTFS_XFCE}-build-${VERSION}.img"
-    $TOOLS/rkflashtool w linuxroot < ${ROOTFS_XFCE}-build-${VERSION}.img || exit 1
-else
-    echo "------ flash linuxroot ${ROOTFS}-build-${VERSION}.img"
-    $TOOLS/rkflashtool w linuxroot < ${ROOTFS}-build-${VERSION}.img || exit 1
-fi
-echo "------ reboot device"
-$TOOLS/rkflashtool b RK320A || exit 1
-EOF
-chmod 755 "$CWD/$BUILD/$OUTPUT/$FLASH/flash.sh"
+build_kernel() {
+    message "" "create" "kernel"
+    # create resource for flash
+    cd $CWD/$BUILD/$OUTPUT/$FLASH
+    cat $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/arm/boot/zImage $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/arm/boot/dts/$SOCFAMILY-$BOARD_NAME.dtb > $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/zImage-dtb || exit 1
+    $CWD/$BUILD/$OUTPUT/$TOOLS/mkkrnlimg -a $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/zImage-dtb kernel.img || exit 1
 }
 
-create_tools_pack(){
-	echo "------ Create tools pack"
-	cd $CWD/$BUILD/$OUTPUT/ || exit 1
-	tar cJf $CWD/$BUILD/$OUTPUT/$FLASH/$TOOLS-$(uname -m).tar.xz $TOOLS || exit 1
+
+build_resource() {
+    message "" "create" "resource"
+    # create resource for flash
+    cd $CWD/$BUILD/$OUTPUT/$FLASH
+    $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/resource_tool $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/logo.bmp $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/arm/boot/dts/$BOARD_NAME-$SOCFAMILY.dtb || exit 1
 }
+
+
+build_boot() {
+    message "" "create" "boot initrd"
+    # create boot for flash
+    tar xf $CWD/bin/initrd-tree.tar.xz -C $CWD/$BUILD/$SOURCE/
+    cd $CWD/$BUILD/$SOURCE/
+
+    sed -i "s#mmcblk[0-9]p[0-9]#$ROOT_DISK#" "$CWD/$BUILD/$SOURCE/initrd-tree/rootdev"
+
+    find $CWD/$BUILD/$SOURCE/initrd-tree/ ! -path "./.git*" | cpio -H newc -ov > initrd.img
+
+    if [[ $KERNEL_SOURCE == next ]]; then
+        $CWD/$BUILD/$OUTPUT/$TOOLS/mkkrnlimg -a initrd.img $CWD/$BUILD/$OUTPUT/$FLASH/boot.img
+
+        if [ -e $CWD/$BUILD/$SOURCE/initrd.img ];then
+            rm $CWD/$BUILD/$SOURCE/initrd.img
+        fi
+    else
+        $CWD/$BUILD/$OUTPUT/$TOOLS/mkbootimg \
+                            --kernel $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/arm/boot/zImage \
+                            --ramdisk $CWD/$BUILD/$SOURCE/initrd.img \
+                            -o $CWD/$BUILD/$OUTPUT/$FLASH/boot.img >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
+
+    if [ -e $CWD/$BUILD/$SOURCE/initrd.img ];then
+        rm $CWD/$BUILD/$SOURCE/initrd.img
+    fi
+
+}
+
 
 
 

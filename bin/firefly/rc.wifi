@@ -1,0 +1,37 @@
+#!/bin/sh
+
+wifi_start() {
+    if [ -e /sys/class/rkwifi/power ]; then
+        echo "Enable wifi"
+        echo 1 > /sys/class/rkwifi/power
+        sleep 2
+        echo 1 > /sys/class/rkwifi/driver
+        /etc/rc.d/rc.inet1 wlan0_start
+    else
+        echo "No wifi driver"
+    fi
+}
+
+wifi_stop() {
+    if [ -e /sys/class/rkwifi/power ]; then
+        echo "Disable wifi"
+        /etc/rc.d/rc.inet1 wlan0_stop
+        echo 0 > /sys/class/rkwifi/driver
+        sleep 2
+        echo 0 > /sys/class/rkwifi/power
+    else
+        echo "No wifi driver"
+    fi
+
+}
+
+case "$1" in
+    'start')
+        wifi_start
+    ;;
+    'stop')
+        wifi_stop
+    ;;
+    *)
+        echo "Usage: $0 {start|stop}"
+esac

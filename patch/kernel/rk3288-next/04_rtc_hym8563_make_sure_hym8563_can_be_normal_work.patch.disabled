@@ -1,0 +1,128 @@
+diff --git a/drivers/rtc/rtc-hym8563.c b/drivers/rtc/rtc-hym8563.c
+index 097325d..ea37fdf 100644
+--- a/drivers/rtc/rtc-hym8563.c
++++ b/drivers/rtc/rtc-hym8563.c
+@@ -83,6 +83,8 @@
+ 
+ #define HYM8563_TMR_CNT		0x0f
+ 
++#define HYM8563_RTC_SECTION_LEN	0x07
++
+ struct hym8563 {
+ 	struct i2c_client	*client;
+ 	struct rtc_device	*rtc;
+@@ -527,9 +529,77 @@ static int hym8563_resume(struct device *dev)
+ 
+ static SIMPLE_DEV_PM_OPS(hym8563_pm_ops, hym8563_suspend, hym8563_resume);
+ 
++static int hym8563_set_time(struct i2c_client *client, struct rtc_time *tm)
++{
++	u8 regs[HYM8563_RTC_SECTION_LEN] = {0};
++	u8 mon_day;
++	int ret = 0;
++
++	dev_dbg(&client->dev, "%s -- %4d-%02d-%02d(%d) %02d:%02d:%02d\n", __func__,
++		1900 + tm->tm_year, tm->tm_mon + 1, tm->tm_mday, tm->tm_wday,
++		tm->tm_hour, tm->tm_min, tm->tm_sec);
++
++	mon_day = rtc_month_days((tm->tm_mon), tm->tm_year + 1900);
++
++	if (tm->tm_sec >= 60 || tm->tm_sec < 0)
++		regs[0x00] = bin2bcd(0x00);
++	else
++		regs[0x00] = bin2bcd(tm->tm_sec);
++
++	if (tm->tm_min >= 60 || tm->tm_min < 0)
++		regs[0x01] = bin2bcd(0x00);
++	else
++		regs[0x01] = bin2bcd(tm->tm_min);
++
++	if (tm->tm_hour >= 24 || tm->tm_hour < 0)
++		regs[0x02] = bin2bcd(0x00);
++	else
++		regs[0x02] = bin2bcd(tm->tm_hour);
++
++	if ((tm->tm_mday) > mon_day)
++		regs[0x03] = bin2bcd(mon_day);
++	else if ((tm->tm_mday) > 0)
++		regs[0x03] = bin2bcd(tm->tm_mday);
++	else if ((tm->tm_mday) <= 0)
++		regs[0x03] = bin2bcd(0x01);
++
++	if (tm->tm_year >= 200)
++		regs[0x06] = bin2bcd(99);
++	else if (tm->tm_year >= 100)
++		regs[0x06] = bin2bcd(tm->tm_year - 100);
++	else if (tm->tm_year >= 0) {
++		regs[0x06] = bin2bcd(tm->tm_year);
++		regs[0x05] |= 0x80;
++	} else {
++		regs[0x06] = bin2bcd(0);
++		regs[0x05] |= 0x80;
++	}
++
++	regs[0x04] = bin2bcd(tm->tm_wday);
++	regs[0x05] = (regs[0x05] & 0x80) | (bin2bcd(tm->tm_mon + 1) & 0x7F);
++
++	ret = i2c_smbus_write_byte_data(client, HYM8563_SEC, *regs);
++	if (ret < 0) {
++		dev_err(&client->dev, "%s: error writing i2c data %d\n",
++			__func__, ret);
++		return ret;
++	}
++
++	return 0;
++}
++
+ static int hym8563_probe(struct i2c_client *client,
+ 			 const struct i2c_device_id *id)
+ {
++	struct rtc_time tm_read, tm = {
++		.tm_sec = 0,
++		.tm_min = 0,
++		.tm_hour = 12,
++		.tm_mday = 1,
++		.tm_mon = 0,
++		.tm_year = 111,
++		.tm_wday = 6,
++	};
+ 	struct hym8563 *hym8563;
+ 	int ret;
+ 
+@@ -562,6 +632,7 @@ static int hym8563_probe(struct i2c_client *client,
+ 
+ 	/* check state of calendar information */
+ 	ret = i2c_smbus_read_byte_data(client, HYM8563_SEC);
++
+ 	if (ret < 0)
+ 		return ret;
+ 
+@@ -569,6 +640,28 @@ static int hym8563_probe(struct i2c_client *client,
+ 	dev_dbg(&client->dev, "rtc information is %s\n",
+ 		hym8563->valid ? "valid" : "invalid");
+ 
++	if (!hym8563->valid) {
++		ret = hym8563_set_time(client, &tm);
++		if (ret < 0) {
++			dev_err(&client->dev, "rtc set time failed, %d\n", ret);
++			return ret;
++		}
++
++		hym8563->valid = true;
++	}
++
++	/* read current time */
++	ret = hym8563_rtc_read_time(&client->dev, &tm_read);
++	if (ret < 0) {
++		dev_err(&client->dev, "rtc read time failed, %d\n", ret);
++		return ret;
++	}
++
++	dev_dbg(&client->dev, "tm_sec = %d, tm_min = %d, tm_hour = %d,tm_mday = %d\n",
++		tm_read.tm_sec, tm_read.tm_min, tm_read.tm_hour, tm_read.tm_mday);
++	dev_dbg(&client->dev, "tm_mon = %d, tm_year = %d, tm_wday = %d\n",
++		tm_read.tm_mon, tm_read.tm_year, tm_read.tm_wday);
++
+ 	hym8563->rtc = devm_rtc_device_register(&client->dev, client->name,
+ 						&hym8563_rtc_ops, THIS_MODULE);
+ 	if (IS_ERR(hym8563->rtc))
