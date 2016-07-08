@@ -110,10 +110,5 @@ download (){
             message "" "extract" "$LINUX_SOURCE"
             tar xpf $CWD/$BUILD/$SOURCE/$LINUX_SOURCE.tar.xz -C "$CWD/$BUILD/$SOURCE/" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
-
-        if [[ ! -f "$CWD/$BUILD/$SOURCE/$FIRMWARE" && ! -z "$FIRMWARE" ]]; then
-            message "" "download" "$FIRMWARE"
-            wget -c --no-check-certificate $URL_FIRMWARE/$FIRMWARE -O $CWD/$BUILD/$SOURCE/$FIRMWARE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        fi
     fi
 }

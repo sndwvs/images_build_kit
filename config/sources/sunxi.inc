@@ -1,5 +1,7 @@
 
-case $KERNEL_SOURCE in
+FIRMWARE="firmware-overlay"
+
+case "$KERNEL_SOURCE" in
     next)
             URL_LINUX_SOURCE="http://mirror.yandex.ru/pub/linux/kernel/v4.x"
             LINUX_SOURCE="linux-$(wget --no-check-certificate -qO- https://www.kernel.org/finger_banner | grep 'The latest stable' | awk '{print $NF}' | head -n1)"
