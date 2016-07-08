@@ -34,9 +34,11 @@ build_kernel_pkg() {
                 install -Dm644 $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/${ARCH}/boot/dts/$DEVICE_TREE_BLOB "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/$DEVICE_TREE_BLOB" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
                 touch "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/.next"
         else
-
-            install -Dm644 "$CWD/config/boards/$BOARD_NAME/script-hdmi.bin" "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/script-hdmi.bin"
-            install -Dm644 "$CWD/config/boards/$BOARD_NAME/script-vga.bin" "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/script-vga.bin"
+            # hdmi | screen0_output_type = 3, vga | screen0_output_type = 4
+            install -m644 -D "$CWD/config/boards/$BOARD_NAME/$BOARD_NAME.fex" "$CWD/$BUILD/$SUNXI_TOOLS/host/$BOARD_NAME.fex"
+            $CWD/$BUILD/$SUNXI_TOOLS/host/fex2bin "$CWD/$BUILD/$SUNXI_TOOLS/host/$BOARD_NAME.fex" "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/script-hdmi.bin"
+            sed -i 's#screen0_output_type = 3#screen0_output_type = 4#' "$CWD/$BUILD/$SUNXI_TOOLS/host/$BOARD_NAME.fex"
+            $CWD/$BUILD/$SUNXI_TOOLS/host/fex2bin "$CWD/$BUILD/$SUNXI_TOOLS/host/$BOARD_NAME.fex" "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/script-vga.bin"
 
             cd "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/"
             if [ -e $HDMI ];then
