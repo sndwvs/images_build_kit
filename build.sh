@@ -58,6 +58,9 @@ case $BOARD_NAME in
     cubietruck)
                 options+=("hdmi" "video mode hdmi (defaul vga)" "off")
             ;;
+    orange_pi_plus_2e)
+                options+=("hdmi-to-dvi" "video mode via hdmi-to-dvi adapter" "off")
+            ;;
 esac
 
 # Duplicate file descriptor 1 on descriptor 3
@@ -90,9 +93,16 @@ for arg in $result; do
     elif [ "$arg" == "xfce-image" ]; then
             CREATE_IMAGE+=($(echo $arg | cut -f1 -d '-'))
     elif [ "$arg" == "hdmi" ]; then
-            HDMI=$arg
+            VIDEO_OUTPUT=$arg
+    elif [ "$arg" == "hdmi-to-dvi" ]; then
+            VIDEO_OUTPUT=$arg
     fi
 done
+
+# set default
+if [[ -e $VIDEO_OUTPUT ]]; then
+    VIDEO_OUTPUT="vga"
+fi
 
 #---------------------------------------------
 # clean terminal

@@ -37,23 +37,24 @@ build_kernel_pkg() {
         else
             install -m644 -D "$CWD/config/boards/$BOARD_NAME/$BOARD_NAME.fex" "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/$BOARD_NAME.fex"
 
-            # vga | screen0_output_type = 4
-            sed 's#screen0_output_type = [0-9]#screen0_output_type = 4#' "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/$BOARD_NAME.fex" \
-                > "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/script-vga.bin"
-
-            # hdmi | screen0_output_type = 3
-            sed 's#screen0_output_type = [0-9]#screen0_output_type = 3#' "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/$BOARD_NAME.fex" \
-                > "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/script-hdmi.bin"
-
-            # add entries necessary for HDMI-to-DVI adapters
-            sed -e 's#screen0_output_type = [0-9]#screen0_output_type = 3#' \
-                -e '/\[hdmi_para\]/a hdcp_enable = 0\nhdmi_cts_compatibility = 1' "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/$BOARD_NAME.fex" \
-                > "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/script-hdmi-to-dvi.bin"
+            case "$VIDEO_OUTPUT" in
+                vga)
+                    # vga | screen0_output_type = 4
+                    sed -i 's#screen0_output_type = [0-9]#screen0_output_type = 4#' "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/$BOARD_NAME.fex"
+                    ;;
+                hdmi)
+                        # hdmi | screen0_output_type = 3
+                    sed -i 's#screen0_output_type = [0-9]#screen0_output_type = 3#' "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/$BOARD_NAME.fex"
+                    ;;
+                hdmi-to-dvi)
+                        # add entries necessary for HDMI-to-DVI adapters
+                        sed -i -e 's#screen0_output_type = [0-9]#screen0_output_type = 3#' \
+                        -e '/\[hdmi_para\]/a hdcp_enable = 0\nhdmi_cts_compatibility = 1' "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/$BOARD_NAME.fex"
+                    ;;
+        esac
 
             $CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/fex2bin "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/$BOARD_NAME.fex" "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/script-$VIDEO_OUTPUT.bin"
-            cd "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot"
-            ln -sf "script-$VIDEO_OUTPUT.bin" "script.bin"
-            cd "$CWD"
+            pushd "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot" && ln -sf "script-$VIDEO_OUTPUT.bin" "script.bin" && popd "$CWD"
 
             install -dm755 "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/install/"
             cat > "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/install/doinst.sh" << EOF
