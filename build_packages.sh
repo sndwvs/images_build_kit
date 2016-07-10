@@ -35,22 +35,23 @@ build_kernel_pkg() {
                 install -Dm644 $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/${ARCH}/boot/dts/$DEVICE_TREE_BLOB "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/$DEVICE_TREE_BLOB" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
                 touch "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/.next"
         else
-            install -m644 -D "$CWD/config/boards/$BOARD_NAME/$BOARD_NAME.fex" "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/$BOARD_NAME.fex"
 
             # vga | screen0_output_type = 4
-            sed 's#screen0_output_type = [0-9]#screen0_output_type = 4#' "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/$BOARD_NAME.fex" \
-                > "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/script-vga.bin"
+            sed 's#screen0_output_type = [0-9]#screen0_output_type = 4#' "$CWD/config/boards/$BOARD_NAME/$BOARD_NAME.fex" \
+                > "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/script-vga.fex"
+            $CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/fex2bin "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/script-vga.fex" "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/script-vga.bin"
 
             # hdmi | screen0_output_type = 3
-            sed 's#screen0_output_type = [0-9]#screen0_output_type = 3#' "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/$BOARD_NAME.fex" \
-                > "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/script-hdmi.bin"
+            sed 's#screen0_output_type = [0-9]#screen0_output_type = 3#' "$CWD/config/boards/$BOARD_NAME/$BOARD_NAME.fex" \
+                > "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/script-hdmi.fex"
+            $CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/fex2bin "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/script-hdmi.fex" "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/script-hdmi.bin"
 
             # add entries necessary for HDMI-to-DVI adapters
             sed -e 's#screen0_output_type = [0-9]#screen0_output_type = 3#' \
-                -e '/\[hdmi_para\]/a hdcp_enable = 0\nhdmi_cts_compatibility = 1' "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/$BOARD_NAME.fex" \
-                > "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/script-hdmi-to-dvi.bin"
+                -e '/\[hdmi_para\]/a hdcp_enable = 0\nhdmi_cts_compatibility = 1' "$CWD/config/boards/$BOARD_NAME/$BOARD_NAME.fex" \
+                > "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/script-hdmi-to-dvi.fex"
+            $CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/fex2bin "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/script-hdmi-to-dvi.fex" "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/script-hdmi-to-dvi.bin"
 
-            $CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/fex2bin "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/$BOARD_NAME.fex" "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/script-$VIDEO_OUTPUT.bin"
             cd "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot"
             ln -sf "script-$VIDEO_OUTPUT.bin" "script.bin"
             cd "$CWD"
