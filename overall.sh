@@ -81,15 +81,30 @@ get_config() {
 }
 
 #---------------------------------------------
-# kernel patching process
+# patching process
 #---------------------------------------------
-patching_kernel_source() {
-    local dir="$CWD/patch/kernel/$SOCFAMILY-$KERNEL_SOURCE"
+patching_source() {
+
+    local dir
+    local PATCH_SOURCE
+    local names=()
+
+    case "$1" in
+        kernel)
+                dir="$CWD/patch/kernel/$SOCFAMILY-$KERNEL_SOURCE"
+                PATCH_SOURCE="$CWD/$BUILD/$SOURCE/$LINUX_SOURCE"
+            ;;
+        u-boot)
+                local dir="$CWD/patch/$BOOT_LOADER"
+                PATCH_SOURCE="$CWD/$BUILD/$SOURCE/$BOOT_LOADER"
+            ;;
+    esac
+
     if [[ ! -d $dir ]]; then
         return 0
     fi
 
-    cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    cd $PATCH_SOURCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     for file in $(ls $dir/ | grep patch); do
              names+=($(basename -a $file)) || exit 1
     done

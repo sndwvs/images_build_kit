@@ -148,14 +148,16 @@ fi
 # start build
 #---------------------------------------------
 if [[ $COMPILE_BINARIES == true ]]; then
+        patching_source "u-boot"
+        compile_boot_loader
+        patching_source "kernel"
+        compile_kernel
+
     if [[ $SOCFAMILY == rk3288 ]]; then
         compile_rk2918
         compile_rkflashtool
         compile_mkbooting
         add_linux_upgrade_tool
-        compile_boot_loader
-        patching_kernel_source
-        compile_kernel
         build_parameters
         if [[ $KERNEL_SOURCE == next ]]; then
             build_kernel
@@ -166,11 +168,8 @@ if [[ $COMPILE_BINARIES == true ]]; then
     fi
 
     if [[ $SOCFAMILY == sun* ]]; then
-        patching_kernel_source
         compile_sunxi_tools
         build_sunxi_tools
-        compile_boot_loader
-        compile_kernel
     fi
 
     build_kernel_pkg
