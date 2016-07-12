@@ -12,17 +12,17 @@ if ext4load mmc 0 0x00000000 /boot/.next
 then
 # sunxi mainline kernel
 #--------------------------------------------------------------------------------------------------------------------------------
-ext4load mmc 0 0x49000000 /boot/dtb/${fdtfile}
-ext4load mmc 0 0x46000000 /boot/zImage
+ext4load mmc 0 ${fdt_addr_r} /boot/dtb/${fdtfile}
+ext4load mmc 0 ${kernel_addr_r} /boot/zImage
 env set fdt_high ffffffff
-bootz 0x46000000 - 0x49000000
+bootz ${kernel_addr_r} - ${fdt_addr_r}
 #--------------------------------------------------------------------------------------------------------------------------------
 else
 # sunxi legacy kernel
 #--------------------------------------------------------------------------------------------------------------------------------
-ext4load mmc 0 0x43000000 /boot/script.bin
-ext4load mmc 0 0x48000000 /boot/zImage
-bootz 0x48000000
+ext4load mmc 0 ${fdt_addr_r} /boot/script.bin
+ext4load mmc 0 ${kernel_addr_r} /boot/zImage
+bootz ${kernel_addr_r}
 #--------------------------------------------------------------------------------------------------------------------------------
 fi
 # Recompile with:
