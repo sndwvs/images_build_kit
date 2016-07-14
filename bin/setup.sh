@@ -49,6 +49,8 @@ msginfo() {
     sleep 2
     # Close file descriptor 3
     exec 3>&-
+
+    sleep 2
 }
 
 #---------------------------------------------
@@ -175,9 +177,8 @@ umount $OUTPUT
 
 rmdir $OUTPUT
 
-msg "WARNING" "remove the memory card and restart the system"
-
-sleep 2
+#msg "WARNING" "remove the memory card and restart the system"
+msginfo "\nremove the memory card and restart the system"
 
 
 

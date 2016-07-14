@@ -14,6 +14,9 @@ case "$1" in
                     # change root password
                     usermod -p 'password' root
 
+                    # request to change password
+                    chage -d 0 root
+
                     echo -e "\e[0;37mCreating 128Mb emergency swap area\x1B[0m"
                     dd if=/dev/zero of=/swap bs=1024 count=131072 status=noxfer >/dev/null 2>&1
                     chown root:root /swap
