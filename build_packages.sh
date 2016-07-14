@@ -36,10 +36,12 @@ build_kernel_pkg() {
                 touch "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/.next"
         else
 
-            # vga | screen0_output_type = 4
-            sed 's#screen0_output_type = [0-9]#screen0_output_type = 4#' "$CWD/config/boards/$BOARD_NAME/$BOARD_NAME.fex" \
-                > "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/script-vga.fex"
-            $CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/fex2bin "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/script-vga.fex" "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/script-vga.bin"
+            if [[ $BOARD_NAME == cubietruck ]]; then
+                # vga | screen0_output_type = 4
+                sed 's#screen0_output_type = [0-9]#screen0_output_type = 4#' "$CWD/config/boards/$BOARD_NAME/$BOARD_NAME.fex" \
+                    > "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/script-vga.fex"
+                $CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/fex2bin "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/script-vga.fex" "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/script-vga.bin"
+            fi
 
             # hdmi | screen0_output_type = 3
             sed 's#screen0_output_type = [0-9]#screen0_output_type = 3#' "$CWD/config/boards/$BOARD_NAME/$BOARD_NAME.fex" \
