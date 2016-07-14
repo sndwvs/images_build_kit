@@ -2,10 +2,15 @@
 
 set -e
 
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root" 1>&2
+   exit 1
+fi
 
 #---------------------------------------------
 # configuration
 #---------------------------------------------
+ROOT_DISK=$(lsblk -in |  grep "/$" | cut -d '-' -f2 | cut -d ' ' -f1 | sed 's/^\([a-z]*\)\([0-9]*\)\(\w*\)/\1\2/')
 DIRS=("/bin" "/boot" "/dev" "/etc" "/lib" "/media" "/opt" "/root" "/run" "/sbin" "/tmp" "/var")
 #DIRS=("/bin" "/boot" "/dev" "/etc" "/home" "/lib" "/media" "/mnt" "/opt" "/root" "/run" "/sbin" "/srv" "/swap" "/tmp" "/usr" "/var")
 OUTPUT="./set"
@@ -81,7 +86,9 @@ get_disks() {
     local options
 
     for disk in "${disks[@]}"; do
-        options+=("$disk" "select disk for install")
+        if [[ ! $disk* =~ $ROOT_DISK ]]; then
+            options+=("$disk" "select disk for install")
+        fi
     done
 
     menu "system configuration" "\nselect disk" options[@] OUT
@@ -143,13 +150,10 @@ transfer() {
     ) | dialog --title "Transfer system" --gauge "Copy files..." 6 60
 }
 
-
 options+=("1" "system moving on the emmc")
 options+=("2" "system moving on the nand")
 #options+=("3" "system moving on the sata")
 
-
-#msg "trye title" "test\nrr4\t"
 menu "system configuration" "\nselect one of the items" options[@] OUT
 
 case "$OUT" in
@@ -174,4 +178,4 @@ exit
 umount $OUTPUT
 rmdir $OUTPUT
 
-msg "WARNING" "reboot your systen now"
+msg "WARNING" "remove the memory card and restart the system"
