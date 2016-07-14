@@ -198,6 +198,7 @@ for image_type in ${CREATE_IMAGE[@]}; do
 #        elif [[ $SOCFAMILY == rk3288 ]]; then
 #            setting_move_to_nand
 #        fi
+        setting_move_to_internal
         download_pkg $URL_DISTR "$image_type" ${CATEGORY_PKG[@]}
         install_pkg "$image_type" ${CATEGORY_PKG[@]}
         create_img

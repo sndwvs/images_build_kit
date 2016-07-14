@@ -19,7 +19,11 @@ install_boot_script() {
 
     # orangepi h3 fix
     if [[ $SOCFAMILY == sun8i ]]; then
-        sed -i -e '1s/^/gpio set PL10\ngpio set PG11\nsetenv machid 1029\nsetenv bootm_boot_mode sec\n/' \
+        # u-boot default is nonsec. Legacy requires sec, mainline requires nonsec for SMP
+        local boot_mode=nonsec
+
+        if [[ $KERNEL_SOURCE == legacy ]] && boot_mode=sec
+        sed -i -e "1s/^/gpio set PL10\ngpio set PG11\nsetenv machid 1029\nsetenv bootm_boot_mode $boot_mode\n/" \
             -e 's/\ disp.screen0_output_mode=1920x1080p60//' -e 's/\ hdmi.audio=EDID:0//' \
             "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd"
     fi

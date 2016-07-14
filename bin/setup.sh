@@ -11,10 +11,8 @@ fi
 # configuration
 #---------------------------------------------
 ROOT_DISK=$(lsblk -in |  grep "/$" | cut -d '-' -f2 | cut -d ' ' -f1 | sed 's/^\([a-z]*\)\([0-9]*\)\(\w*\)/\1\2/')
-DIRS=("/bin" "/boot" "/dev" "/etc" "/lib" "/media" "/opt" "/root" "/run" "/sbin" "/tmp" "/var")
-#DIRS=("/bin" "/boot" "/dev" "/etc" "/home" "/lib" "/media" "/mnt" "/opt" "/root" "/run" "/sbin" "/srv" "/swap" "/tmp" "/usr" "/var")
-OUTPUT="./set"
-#OUTPUT="/prepare"
+DIRS=("/bin" "/boot" "/dev" "/etc" "/home" "/lib" "/media" "/mnt" "/opt" "/root" "/run" "/sbin" "/srv" "/swap" "/tmp" "/usr" "/var")
+OUTPUT="/prepare"
 
 
 #---------------------------------------------
@@ -147,11 +145,11 @@ transfer() {
             echo "XXX"
             printf '%.0f\n' ${procent}
         done
-    ) | dialog --title "Transfer system" --gauge "Copy files..." 6 60
+    ) | dialog --title "Transfer system" --gauge "Copy system..." 6 60
 }
 
-options+=("1" "system moving on the emmc")
-options+=("2" "system moving on the nand")
+options+=("1" "system moving on the emmc or nand")
+#options+=("2" "system moving on the nand")
 #options+=("3" "system moving on the sata")
 
 menu "system configuration" "\nselect one of the items" options[@] OUT
@@ -162,20 +160,23 @@ case "$OUT" in
 #    3)  get_disks DISK ;;
 esac
 
-#echo $DISK
-#msg "WARNING" "create partition on disk\n\n/dev/$DISK"
-
 msginfo "\nwait is disk preparation..."
 
 prepare_disk "$DISK" OUT
+
 DISK=$OUT
 
 mount /dev/$DISK $OUTPUT
-exit
+
 transfer
-exit
 
 umount $OUTPUT
+
 rmdir $OUTPUT
 
 msg "WARNING" "remove the memory card and restart the system"
+
+sleep 2
+
+
+

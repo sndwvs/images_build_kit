@@ -433,16 +433,17 @@ setting_for_desktop() {
 }
 
 
-setting_move_to_nand() {
+setting_move_to_internal() {
     message "" "setting" "data move to nand"
-    install -m755 -D "$CWD/bin/$BOARD_NAME/setup.sh" "$CWD/$BUILD/$SOURCE/$ROOTFS/root/setup.sh"
+#    install -m755 -D "$CWD/bin/$BOARD_NAME/setup.sh" "$CWD/$BUILD/$SOURCE/$ROOTFS/root/setup.sh"
+    install -m755 -D "$CWD/bin/setup.sh" "$CWD/$BUILD/$SOURCE/$ROOTFS/root/setup.sh"
 
     if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/issue 2>&1 | grep setup.sh) ]];then
         cat <<EOF >$CWD/$BUILD/$SOURCE/$ROOTFS/etc/issue
 
 [0;36m=======================================================================[0;39m
 
-if you want to transfer the system to SD card to internal memory (eMMC),
+if you want to transfer the system to SD card to internal memory (eMMC or NAND),
 follow [1;36msetup[0;39m
 
 login: root
