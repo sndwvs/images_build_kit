@@ -109,12 +109,12 @@ prepare_disk() {
     fi
 
     # clear partition
-    #dd if=/dev/zero of=/dev/$DISK bs=1M count=10 >/dev/null 2>&1
+    dd if=/dev/zero of=/dev/$DISK bs=1M count=10 >/dev/null 2>&1
 
     # save u-boot
-    #dd if=/boot/u-boot-sunxi-with-spl.bin of=/dev/$DISK bs=1024 seek=8 status=noxfer >/dev/null 2>&1
+    dd if=/boot/u-boot-sunxi-with-spl.bin of=/dev/$DISK bs=1024 seek=8 status=noxfer >/dev/null 2>&1
 
-    #echo -e "\nn\np\n1\n2048\n\nw" | fdisk "/dev/$DISK" >/dev/null 2>&1
+    echo -e "\nn\np\n1\n2048\n\nw" | fdisk "/dev/$DISK" >/dev/null 2>&1
 
     if [[ $DISK =~ mmc* ]] ;then
         DISK=${DISK}p1
@@ -122,7 +122,8 @@ prepare_disk() {
         DISK=${DISK}1
     fi
 
-    #echo y | mkfs.ext4 "/dev/$DISK" >/dev/null 2>&1
+    echo y | mkfs.ext4 "/dev/$DISK" >/dev/null 2>&1
+
     eval "$2=\$DISK"
 }
 
