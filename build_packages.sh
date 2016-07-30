@@ -83,7 +83,7 @@ EOF
         install -dm755 "$CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/"
         echo -e "#!/bin/sh\n" > $CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/rc.modules
         for mod in $MODULES;do
-            echo "/sbin/modprobe $mod" >> $CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/rc.modules
+            echo "/sbin/modprobe $mod" >> $CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/rc.modules.local
         done
         chmod 755 $CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/rc.modules
     fi
