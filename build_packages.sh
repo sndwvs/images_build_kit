@@ -79,12 +79,15 @@ EOF
 
     cd $CWD/$BUILD/$PKG/kernel-modules/
 
-    install -dm755 "$CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/"
-    echo -e "#!/bin/sh\n" > $CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/rc.modules
-    for mod in $MODULES;do
-        echo "/sbin/modprobe $mod" >> $CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/rc.modules
-    done
-    chmod 755 $CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/rc.modules
+    if [[ ! -z $MODULES ]]; then
+        install -dm755 "$CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/"
+        echo -e "#!/bin/sh\n" > $CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/rc.modules
+        for mod in $MODULES;do
+            echo "/sbin/modprobe $mod" >> $CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/rc.modules
+        done
+        chmod 755 $CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/rc.modules
+    fi
+
     cd $CWD/$BUILD/$PKG/kernel-modules/lib/modules/${KERNEL_VERSION}*
     rm build source
     ln -s /usr/include build

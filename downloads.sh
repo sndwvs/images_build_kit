@@ -22,7 +22,7 @@ download (){
 
     message "" "download" "$BOOT_LOADER"
     if [ -d $CWD/$BUILD/$SOURCE/$BOOT_LOADER ]; then
-        cd $CWD/$BUILD/$SOURCE/$BOOT_LOADER $CWD/$BUILD/$SOURCE/$BOOT_LOADER && git pull origin HEAD >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        cd $CWD/$BUILD/$SOURCE/$BOOT_LOADER $CWD/$BUILD/$SOURCE/$BOOT_LOADER && ( git reset --hard && git pull origin HEAD ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     else
         git clone $URL_BOOT_LOADER_SOURCE/${BOOT_LOADER}.git $CWD/$BUILD/$SOURCE/$BOOT_LOADER >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
@@ -96,11 +96,11 @@ download (){
         fi
 
         message "" "download" "$LINUX_SOURCE"
-        if [[ $KERNEL_SOURCE != next ]];then
+        if [[ $SOCFAMILY == sun8* ]] || [[ $KERNEL_SOURCE != next ]]; then
             if [ -d $CWD/$BUILD/$SOURCE/$LINUX_SOURCE ]; then
-                cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE && git pull origin HEAD >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+                cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE && git pull origin $KERNEL_BRANCH >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             else
-                git clone $URL_LINUX_SOURCE/$LINUX_SOURCE $CWD/$BUILD/$SOURCE/$LINUX_SOURCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+                git clone -b $KERNEL_BRANCH --depth 1 $URL_LINUX_SOURCE/$LINUX_SOURCE $CWD/$BUILD/$SOURCE/$LINUX_SOURCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             fi
             message "" "extract" "$KERNEL_BRANCH"
             cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE && git checkout $KERNEL_BRANCH >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1

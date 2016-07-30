@@ -340,7 +340,7 @@ download_pkg() {
             eval packages=\$${_in}${suffix}
             if [[ ! -z ${packages} ]];then
                 for _pkg in $packages;do
-                    PKG_NAME=$(wget -q -O - ${_URL_DISTR}/${category}/ | cut -f2 -d '>' | cut -f1 -d '<' | egrep -om1 "(^$(echo $_pkg | sed 's/+/\\\+/g'))-+.*(t.z)")
+                    PKG_NAME=$(wget -O - ${_URL_DISTR}/${category}/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 | cut -f2 -d '>' | cut -f1 -d '<' | egrep -om1 "(^$(echo $_pkg | sed 's/+/\\\+/g'))-+.*(t.z)") || (message "err" "details" && exit 1) || exit 1
                     message "" "download" "package $category/$PKG_NAME"
                     wget -c -nc -nd -np ${_URL_DISTR}/${category}/$PKG_NAME -P $CWD/$BUILD/$PKG/${category}/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
                 done
