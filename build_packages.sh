@@ -175,8 +175,10 @@ build_parameters() {
     message "" "create" "parameters"
     # add parameters for flash
     install -m644 -D "$CWD/config/boards/$BOARD_NAME/parameters.txt" "$CWD/$BUILD/$OUTPUT/$FLASH/parameters.txt"
-    sed -i -e "s#mmcblk[0-9]p[0-9]#$ROOT_DISK#" "$CWD/$BUILD/$OUTPUT/$FLASH/parameters.txt" \
-           -e "s#kernel#resource#" "$CWD/$BUILD/$OUTPUT/$FLASH/parameters.txt"
+    if [[ $KERNEL_SOURCE != next ]]; then
+        sed -i -e "s#mmcblk[0-9]p[0-9]#$ROOT_DISK#" "$CWD/$BUILD/$OUTPUT/$FLASH/parameters.txt" \
+               -e "s#kernel#resource#" "$CWD/$BUILD/$OUTPUT/$FLASH/parameters.txt"
+    fi
 }
 
 
@@ -219,8 +221,8 @@ fi
 #$TOOLS/upgrade_tool ul \$(ls | grep RK3288UbootLoader) || exit 1
 echo "------ flash parameters"
 $TOOLS/rkflashtool P < parameters.txt || exit 1
-echo "------ flash resource"
-$TOOLS/rkflashtool w resource < resource.img || exit 1
+echo "------ flash kernel"
+$TOOLS/rkflashtool w kernel < kernel.img || exit 1
 echo "------ flash boot"
 $TOOLS/rkflashtool w boot < boot.img || exit 1
 if [ "\$XFCE" = "true" ]; then
