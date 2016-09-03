@@ -156,7 +156,7 @@ build_kernel() {
     message "" "create" "kernel"
     # create resource for flash
     cd $CWD/$BUILD/$OUTPUT/$FLASH
-    cat $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/arm/boot/zImage $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/arm/boot/dts/$SOCFAMILY-$BOARD_NAME.dtb > $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/zImage-dtb || exit 1
+    cat $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/arm/boot/zImage $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/arm/boot/dts/$DEVICE_TREE_BLOB > $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/zImage-dtb || exit 1
     $CWD/$BUILD/$OUTPUT/$TOOLS/mkkrnlimg -a $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/zImage-dtb kernel.img || exit 1
 }
 
@@ -165,7 +165,7 @@ build_resource() {
     message "" "create" "resource"
     # create resource for flash
     cd $CWD/$BUILD/$OUTPUT/$FLASH
-    $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/resource_tool $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/logo.bmp $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/arm/boot/dts/$BOARD_NAME-$SOCFAMILY.dtb || exit 1
+    $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/resource_tool $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/logo.bmp $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/arm/boot/dts/$DEVICE_TREE_BLOB || exit 1
 }
 
 
