@@ -78,7 +78,7 @@ download (){
 #            tar xpf $CWD/$BUILD/$SOURCE/$LINUX_SOURCE.tar.xz -C "$CWD/$BUILD/$SOURCE/" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         else
             if [ -d $CWD/$BUILD/$SOURCE/$LINUX_SOURCE ]; then
-                cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE && git pull origin HEAD >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+                cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE && ( git checkout -f master && git reset --hard ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             else
                 git clone -b $KERNEL_BRANCH --depth 1 $URL_LINUX_SOURCE/$LINUX_SOURCE $CWD/$BUILD/$SOURCE/$LINUX_SOURCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             fi

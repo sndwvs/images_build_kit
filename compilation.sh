@@ -122,14 +122,14 @@ compile_kernel (){
     install -D $CWD/config/kernel/$LINUX_CONFIG $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/.config || (message "err" "details" && exit 1) || exit 1
 
     if [[ $SOCFAMILY == rk3288 ]]; then
-        if [ "$KERNEL_SOURCE" != "next" ]; then
+#        if [ "$KERNEL_SOURCE" != "next" ]; then
             # fix firmware /system /lib
-            find drivers/net/wireless/rockchip_wlan/rkwifi/ -type f -exec \
-            sed -i "s#\/system\/etc\/firmware\/#\/lib\/firmware\/#" {} \;
+#            find drivers/net/wireless/rockchip_wlan/rkwifi/ -type f -exec \
+#            sed -i "s#\/system\/etc\/firmware\/#\/lib\/firmware\/#" {} \;
 
             # fix kernel version
-            sed -i "/SUBLEVEL = 0/d" Makefile
-        fi
+#            sed -i "/SUBLEVEL = 0/d" Makefile
+#        fi
 
 #        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS menuconfig  || exit 1
         make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS zImage modules || (message "err" "details" && exit 1) || exit 1
