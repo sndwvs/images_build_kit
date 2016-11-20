@@ -117,7 +117,7 @@ compile_kernel (){
     fi
 
     # delete previous creations
-    make CROSS_COMPILE=$CROSS clean || exit 1
+    [[ $SOCFAMILY != rk3288 ]] && make CROSS_COMPILE=$CROSS clean || exit 1
     # use proven config
     install -D $CWD/config/kernel/$LINUX_CONFIG $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/.config || (message "err" "details" && exit 1) || exit 1
 
