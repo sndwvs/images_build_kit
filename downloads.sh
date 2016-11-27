@@ -11,14 +11,14 @@ fi
 #---------------------------------------------
 download (){
 
-    message "" "download" "$XTOOLS"
-    if [ -f "$CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz" ]; then
+    if ! $(echo "$MD5_XTOOLS  $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz" | md5sum --status -c -) ; then
+        message "" "download" "$XTOOLS"
         rm $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    fi
-    wget -c --no-check-certificate $URL_XTOOLS -O $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        wget -c --no-check-certificate $URL_XTOOLS -O $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    message "" "extract" "$XTOOLS"
-    tar xpf $CWD/$BUILD/$SOURCE/$XTOOLS.tar.?z* -C "$CWD/$BUILD/$SOURCE/" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        message "" "extract" "$XTOOLS"
+        tar xpf $CWD/$BUILD/$SOURCE/$XTOOLS.tar.?z* -C "$CWD/$BUILD/$SOURCE/" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
 
     message "" "download" "$BOOT_LOADER"
     if [ -d $CWD/$BUILD/$SOURCE/$BOOT_LOADER ]; then
@@ -65,9 +65,9 @@ download (){
         message "" "download" "$LINUX_SOURCE"
         if [[ $KERNEL_SOURCE == next ]]; then
             if [ -d $CWD/$BUILD/$SOURCE/$LINUX_SOURCE ]; then
-                cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE && git reset --hard >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+                cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE && ( git reset --hard && git pull origin $KERNEL_BRANCH ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             else
-                git clone $URL_LINUX_SOURCE/$LINUX_SOURCE $CWD/$BUILD/$SOURCE/$LINUX_SOURCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+                git clone -b $KERNEL_BRANCH --depth 1 $URL_LINUX_SOURCE/$LINUX_SOURCE $CWD/$BUILD/$SOURCE/$LINUX_SOURCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             fi
             message "" "extract" "$KERNEL_BRANCH"
             cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE && git checkout $KERNEL_BRANCH >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1

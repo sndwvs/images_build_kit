@@ -24,10 +24,13 @@ BOOT_LOADER_BRANCH="" #>v2016.03
 XTOOLS="x-tools7h"
 if [[ $SOCFAMILY == sun* ]] && [[ $KERNEL_SOURCE != next ]]; then
     URL_XTOOLS="https://archlinuxarm.org/builder/xtools/5.3.0-5/$XTOOLS.tar.xz"
-elif [[ $SOCFAMILY == rk3288 ]] && [[ $KERNEL_SOURCE != next ]]; then
+    MD5_XTOOLS=""
+elif [[ $SOCFAMILY == rk3288 ]]; then
     URL_XTOOLS="https://archlinuxarm.org/builder/xtools/4.9.2-4/$XTOOLS.tar.xz"
+    MD5_XTOOLS="ccbfa040c1949dad6d32505fa9d973b9"
 else
     URL_XTOOLS="http://archlinuxarm.org/builder/xtools/$XTOOLS.tar.xz"
+    MD5_XTOOLS=""
 fi
 
 #---------------------------------------------
