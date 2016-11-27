@@ -110,7 +110,7 @@ patching_source() {
     done
 
     for file in "${names[@]}"; do
-        if [[ $(echo "$file" | grep -v "disable") ]]; then
+        if [[ $(echo "$file" | grep -v ".disabled") ]]; then
             # detect and remove files which patch will create
             LANGUAGE=english patch --batch --dry-run -p1 -N < $dir/${file} | grep create \
                     | awk '{print $NF}' | sed -n 's/,//p' | xargs -I % sh -c 'rm %'
