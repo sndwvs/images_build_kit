@@ -117,7 +117,10 @@ compile_kernel (){
     fi
 
     # delete previous creations
-    [[ $SOCFAMILY != rk3288 ]] && make CROSS_COMPILE=$CROSS clean || exit 1
+    [[ $SOCFAMILY != rk3288 || $KERNEL_SOURCE != next ]] \
+        && message "" "clean" "$LINUX_SOURCE" \
+        && make CROSS_COMPILE=$CROSS clean
+
     # use proven config
     install -D $CWD/config/kernel/$LINUX_CONFIG $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/.config || (message "err" "details" && exit 1) || exit 1
 
@@ -130,6 +133,9 @@ compile_kernel (){
             # fix kernel version
 #            sed -i "/SUBLEVEL = 0/d" Makefile
 #        fi
+
+        # fix build firmware
+        rsync -ar --ignore-existing $CWD/bin/$FIRMWARE/brcm/ -d $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/firmware/brcm >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
 #        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS menuconfig  || exit 1
         make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS zImage modules || (message "err" "details" && exit 1) || exit 1
