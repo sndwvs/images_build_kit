@@ -12,9 +12,10 @@ build_kernel_pkg() {
     kernel_version KERNEL_VERSION
 
     if [[ $SOCFAMILY == rk3288 ]] && [[ ! -z $FIRMWARE ]]; then
-        # add firmware
-        unzip -o $CWD/bin/$BOARD_NAME/$FIRMWARE -d $CWD/$BUILD/$SOURCE/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        cp -a $CWD/$BUILD/$SOURCE/hwpacks-master/system/etc/firmware $CWD/$BUILD/$PKG/kernel-modules/lib/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        # adding custom firmware
+#        unzip -o $CWD/bin/$BOARD_NAME/$FIRMWARE -d $CWD/$BUILD/$SOURCE/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+#        cp -a $CWD/$BUILD/$SOURCE/hwpacks-master/system/etc/firmware $CWD/$BUILD/$PKG/kernel-modules/lib/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        cp -a $CWD/bin/$FIRMWARE/* -d $CWD/$BUILD/$PKG/kernel-modules/lib/firmware/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
     if [[ $SOCFAMILY == sun* ]]; then
@@ -175,10 +176,8 @@ build_parameters() {
     message "" "create" "parameters"
     # add parameters for flash
     install -m644 -D "$CWD/config/boards/$BOARD_NAME/parameters.txt" "$CWD/$BUILD/$OUTPUT/$FLASH/parameters.txt"
-    if [[ $KERNEL_SOURCE != next ]]; then
-        sed -i -e "s#mmcblk[0-9]p[0-9]#$ROOT_DISK#" "$CWD/$BUILD/$OUTPUT/$FLASH/parameters.txt" \
-               -e "s#kernel#resource#" "$CWD/$BUILD/$OUTPUT/$FLASH/parameters.txt"
-    fi
+    sed -i -e "s#mmcblk[0-9]p[0-9]#$ROOT_DISK#" "$CWD/$BUILD/$OUTPUT/$FLASH/parameters.txt" \
+           -e "s#kernel#resource#" "$CWD/$BUILD/$OUTPUT/$FLASH/parameters.txt"
 }
 
 
