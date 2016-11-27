@@ -16,22 +16,23 @@ get_config
 #---------------------------------------------
 URL_BOOT_LOADER_SOURCE="http://git.denx.de"
 BOOT_LOADER="u-boot"
-BOOT_LOADER_BRANCH="" #>v2016.03
+BOOT_LOADER_BRANCH="" #>v2016.07
 
 #---------------------------------------------
 # xtools configuration
 #---------------------------------------------
 XTOOLS="x-tools7h"
 if [[ $SOCFAMILY == sun* ]] && [[ $KERNEL_SOURCE != next ]]; then
-    URL_XTOOLS="https://archlinuxarm.org/builder/xtools/5.3.0-5/$XTOOLS.tar.xz"
-    MD5_XTOOLS=""
+    VERSION_XTOOLS="5.3.0-5"
+    MD5_XTOOLS="43562de45d89d1d7de9193c44b2e6909"
 elif [[ $SOCFAMILY == rk3288 ]]; then
-    URL_XTOOLS="https://archlinuxarm.org/builder/xtools/4.9.2-4/$XTOOLS.tar.xz"
+    VERSION_XTOOLS="4.9.2-4"
     MD5_XTOOLS="ccbfa040c1949dad6d32505fa9d973b9"
 else
-    URL_XTOOLS="http://archlinuxarm.org/builder/xtools/$XTOOLS.tar.xz"
-    MD5_XTOOLS=""
+    VERSION_XTOOLS="6.1.1-4"
+    MD5_XTOOLS="2e78ef5e1241bfb8e35e2fc3132d68f1"
 fi
+URL_XTOOLS="https://archlinuxarm.org/builder/xtools/$VERSION_XTOOLS/$XTOOLS.tar.xz"
 
 #---------------------------------------------
 # rootfs configuration
