@@ -11,25 +11,37 @@ build_kernel_pkg() {
     # get kernel version
     kernel_version KERNEL_VERSION
 
+    # adding custom firmware
+    cp -a $CWD/bin/$FIRMWARE/* -d $CWD/$BUILD/$PKG/kernel-modules/lib/firmware/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
+    # install kernel
+    install -Dm644 $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/${ARCH}/boot/zImage "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/zImage"
+
+    touch "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/.verbose"
+
     if [[ $SOCFAMILY == rk3288 ]] && [[ ! -z $FIRMWARE ]]; then
         # adding custom firmware
 #        unzip -o $CWD/bin/$BOARD_NAME/$FIRMWARE -d $CWD/$BUILD/$SOURCE/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 #        cp -a $CWD/$BUILD/$SOURCE/hwpacks-master/system/etc/firmware $CWD/$BUILD/$PKG/kernel-modules/lib/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         cp -a $CWD/bin/$FIRMWARE/* -d $CWD/$BUILD/$PKG/kernel-modules/lib/firmware/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
+        install -Dm644 $CWD/config/boot_scripts/$SOCFAMILY-boot.cmd "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd"
+        # add device tree
+        install -Dm644 $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/${ARCH}/boot/dts/$DEVICE_TREE_BLOB "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/$DEVICE_TREE_BLOB" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        touch "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/.next"
+
+        # compile boot script
+        $CWD/$BUILD/$SOURCE/$BOOT_LOADER/tools/mkimage -C none -A arm -T script -d $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.scr" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
     if [[ $SOCFAMILY == sun* ]]; then
-        # adding custom firmware
-        cp -a $CWD/bin/$FIRMWARE/* -d $CWD/$BUILD/$PKG/kernel-modules/lib/firmware/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
-        install -Dm644 $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/arch/${ARCH}/boot/zImage "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/zImage"
 
         # sunxi.inc
         install_boot_script
 
-        touch "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/.verbose"
-
+        # compile boot script
         $CWD/$BUILD/$SOURCE/$BOOT_LOADER/tools/mkimage -C none -A arm -T script -d $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.scr" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
         install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER/$BOOT_LOADER_BIN" "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/$BOOT_LOADER_BIN"
 
         if [[ $KERNEL_SOURCE == next ]];then
@@ -94,10 +106,8 @@ EOF
     ln -s /usr/include build
     ln -s /usr/include source
 
-    if [[ $SOCFAMILY == sun* ]]; then
-        cd $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/
-        makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${_BUILD}${PACKAGER}.txz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    fi
+    cd $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/
+    makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${_BUILD}${PACKAGER}.txz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     cd $CWD/$BUILD/$PKG/kernel-modules/
     makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-modules-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${_BUILD}${PACKAGER}.txz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
@@ -172,74 +182,23 @@ add_linux_upgrade_tool() {
 }
 
 
-build_parameters() {
-    message "" "create" "parameters"
-    # add parameters for flash
-    install -m644 -D "$CWD/config/boards/$BOARD_NAME/parameters.txt" "$CWD/$BUILD/$OUTPUT/$FLASH/parameters.txt"
-    sed -i -e "s#mmcblk[0-9]p[0-9]#$ROOT_DISK#" "$CWD/$BUILD/$OUTPUT/$FLASH/parameters.txt" \
-           -e "s#kernel#resource#" "$CWD/$BUILD/$OUTPUT/$FLASH/parameters.txt"
+build_flash_script() {
+    message "" "create" "flash script"
+    install -Dm755 "$CWD/bin/${BOARD_NAME}/flash.sh" "$CWD/$BUILD/$OUTPUT/$FLASH/flash.sh" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    sed -e "s/\(\${ROOTFS}\)/$ROOTFS/g" \
+        -e "s/\(\${ROOTFS_XFCE}\)/$ROOTFS_XFCE/g" \
+        -e "s/\(\$TOOLS\)/$TOOLS/g" \
+    -i "$CWD/$BUILD/$OUTPUT/$FLASH/flash.sh" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 
-build_flash_script() {
-    message "" "create" "flash script"
-    cat <<EOF >"$CWD/$BUILD/$OUTPUT/$FLASH/flash.sh"
-#!/bin/sh
-
-if [ "$EUID" -ne 0 ];then
-    echo "Please run as root"
-    exit
-fi
-
-case "\$1" in
-    -r )
-    shift
-    XFCE="false"
-    ;;
-    --xfce )
-    shift
-    XFCE="true"
-    ;;
-    *)
-    echo -e "Options:"
-    echo -e "\t-r"
-    echo -e "\t\tflash mini rootfs image without xfce"
-
-    echo -e "\t--xfce"
-    echo -e "\t\tflash image with xfce\n"
-    exit
-    ;;
-esac
-
-
-if [ -f $TOOLS-$(uname -m).tar.xz ];then
-    echo "------ unpack $TOOLS"
-    tar xf $TOOLS-$(uname -m).tar.xz || exit 1
-fi
-#echo "------ flash boot loader"
-#$TOOLS/upgrade_tool ul \$(ls | grep RK3288UbootLoader) || exit 1
-echo "------ flash parameters"
-$TOOLS/rkflashtool P < parameters.txt || exit 1
-echo "------ flash kernel"
-$TOOLS/rkflashtool w kernel < kernel.img || exit 1
-echo "------ flash boot"
-$TOOLS/rkflashtool w boot < boot.img || exit 1
-if [ "\$XFCE" = "true" ]; then
-    echo "------ flash linuxroot $ROOTFS_XFCE.img"
-    $TOOLS/rkflashtool w linuxroot < $ROOTFS_XFCE.img || exit 1
-else
-    echo "------ flash linuxroot $ROOTFS.img"
-    $TOOLS/rkflashtool w linuxroot < $ROOTFS.img || exit 1
-fi
-echo "------ flash boot loader"
-$TOOLS/rkflashtool l < \$(ls | grep RK3288UbootLoader) || exit 1
-echo "------ reboot device"
-#$TOOLS/rkflashtool b RK320A || exit 1
-EOF
-    chmod 755 "$CWD/$BUILD/$OUTPUT/$FLASH/flash.sh"
-    if [[ $KERNEL_SOURCE != next ]]; then
-        sed -i 's#kernel#resource#g' "$CWD/$BUILD/$OUTPUT/$FLASH/flash.sh"
-    fi
+create_bootloader_pack(){
+    message "" "create" "bootloader pack"
+    cd $CWD/$BUILD/$OUTPUT/ || exit 1
+    install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER/u-boot-dtb.bin" "$CWD/$BUILD/$OUTPUT/boot/u-boot-dtb.bin" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER/u-boot.img" "$CWD/$BUILD/$OUTPUT/boot/u-boot.img" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    install -Dm644 "$CWD/$BUILD/$SOURCE/$RKBIN/rk32/rk3288_boot.bin" "$CWD/$BUILD/$OUTPUT/boot/rk3288_boot.bin" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    tar cJf $CWD/$BUILD/$OUTPUT/$FLASH/boot.tar.xz boot || exit 1
 }
 
 

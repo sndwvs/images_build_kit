@@ -158,13 +158,7 @@ if [[ $COMPILE_BINARIES == true ]]; then
         compile_rkflashtool
         compile_mkbooting
         add_linux_upgrade_tool
-        build_parameters
-        if [[ $KERNEL_SOURCE == next ]]; then
-            build_kernel
-        else
-            build_resource
-        fi
-        build_boot
+        create_bootloader_pack
     fi
 
     if [[ $SOCFAMILY == sun* ]]; then

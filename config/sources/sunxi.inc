@@ -15,7 +15,7 @@ SUNXI_TOOLS_VERSION="v1.2"
 BOOT_LOADER_BIN="u-boot-sunxi-with-spl.bin"
 
 install_boot_script() {
-    install -Dm644 $CWD/config/boot.cmd "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd"
+    install -Dm644 $CWD/config/boot_scripts/boot.cmd "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd"
 
     # orangepi h3 fix
     if [[ $SOCFAMILY == sun8i ]]; then

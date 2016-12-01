@@ -22,7 +22,7 @@ download (){
 
     message "" "download" "$BOOT_LOADER"
     if [ -d $CWD/$BUILD/$SOURCE/$BOOT_LOADER ]; then
-        cd $CWD/$BUILD/$SOURCE/$BOOT_LOADER && ( git checkout -f master && git reset --hard ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        cd $CWD/$BUILD/$SOURCE/$BOOT_LOADER && ( git checkout -f ${SUNXI_TOOLS_VERSION:-master} && git reset --hard ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     else
         git clone $URL_BOOT_LOADER_SOURCE/${BOOT_LOADER}.git $CWD/$BUILD/$SOURCE/$BOOT_LOADER >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
@@ -60,6 +60,13 @@ download (){
             cd $CWD/$BUILD/$SOURCE/$MKBOOTIMG_TOOLS && git pull origin HEAD >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         else
             git clone $URL_TOOLS/$MKBOOTIMG_TOOLS $CWD/$BUILD/$SOURCE/$MKBOOTIMG_TOOLS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        fi
+
+        message "" "download" "$RKBIN"
+        if [ -d $CWD/$BUILD/$SOURCE/$RKBIN ]; then
+            cd $CWD/$BUILD/$SOURCE/$RKBIN && ( git checkout -f master && git reset --hard ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        else
+            git clone $URL_RKBIN/${RKBIN}.git $CWD/$BUILD/$SOURCE/$RKBIN >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
 
         message "" "download" "$LINUX_SOURCE"
