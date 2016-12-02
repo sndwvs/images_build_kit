@@ -490,6 +490,8 @@ setting_issue() {
 
 
 setting_alsa() {
+    [[ ! -z "$1" ]] && local ROOTFS="$1"
+
     message "" "setting" "default alsa"
     chmod -644 "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.pulseaudio" || exit 1
     chmod -755 "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.alsa" || exit 1

@@ -209,7 +209,7 @@ for image_type in ${CREATE_IMAGE[@]}; do
         setting_default_theme_xfce
         setting_default_start_x
         setting_for_desktop
-        setting_alsa
+        setting_alsa "$ROOTFS_XFCE"
         create_img xfce
     fi
 done
