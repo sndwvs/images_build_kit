@@ -188,8 +188,6 @@ for image_type in ${CREATE_IMAGE[@]}; do
         setting_first_login
         setting_wifi
 #        if [[ $KERNEL_SOURCE != "next" && $SOCFAMILY == rk3288 ]]; then
-#            setting_wifi
-#        elif [[ $SOCFAMILY == rk3288 ]]; then
 #            setting_move_to_nand
 #        fi
         setting_move_to_internal
@@ -211,6 +209,7 @@ for image_type in ${CREATE_IMAGE[@]}; do
         setting_default_theme_xfce
         setting_default_start_x
         setting_for_desktop
+        setting_alsa
         create_img xfce
     fi
 done
