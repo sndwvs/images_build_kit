@@ -167,7 +167,7 @@ setting_wifi() {
     fi
 
     message "" "setting" "wifi"
-    install -m755 -D "$CWD/bin/$BOARD_NAME/rc.wifi" "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.wifi"
+#    install -m755 -D "$CWD/bin/$BOARD_NAME/rc.wifi" "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.wifi"
 
     # fix wifi driver
     sed -i "s#wext#nl80211#" $CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.inet1.conf
