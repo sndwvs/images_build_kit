@@ -185,6 +185,7 @@ for image_type in ${CREATE_IMAGE[@]}; do
         setting_dhcpcd
         setting_firstboot
         setting_settings
+        setting_sysctl
         setting_first_login
         setting_wifi
 #        if [[ $KERNEL_SOURCE != "next" && $SOCFAMILY == rk3288 ]]; then

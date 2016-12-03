@@ -59,7 +59,7 @@ setting_fstab() {
     if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/fstab | grep $ROOT_DISK) ]];then
         message "" "setting" "fstab"
         sed -i "s:# tmpfs:tmpfs:" $CWD/$BUILD/$SOURCE/$ROOTFS/etc/fstab
-        echo "/dev/$ROOT_DISK    /          ext4    defaults,noatime,nodiratime,commit=600,errors=remount-ro       0       1" >> $CWD/$BUILD/$SOURCE/$ROOTFS/etc/fstab || exit 1
+        echo "/dev/$ROOT_DISK    /          ext4    noatime,nodiratime,commit=600,data=writeback,errors=remount-ro       0       1" >> $CWD/$BUILD/$SOURCE/$ROOTFS/etc/fstab || exit 1
     fi
 }
 
@@ -262,6 +262,11 @@ create_img() {
     message "" "create" "filesystem"
     mkfs.ext4 -F -m 0 -L linuxroot $LOOP >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
+    message "" "tune" "filesystem"
+    tune2fs -o journal_data_writeback $LOOP >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    tune2fs -O ^has_journal $LOOP >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    e2fsck -f $LOOP >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
     message "" "create" "mount point and mount image"
     mkdir -p $CWD/$BUILD/$SOURCE/image
     mount $LOOP $CWD/$BUILD/$SOURCE/image
@@ -425,9 +430,9 @@ EOF
 
 setting_for_desktop() {
     # correcting the sound output through the alsa
-    if [ ! -x "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.pulseaudio" ]; then
-        chmod 755 "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.pulseaudio"
-    fi
+    #if [ ! -x "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.pulseaudio" ]; then
+    #    chmod 755 "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.pulseaudio"
+    #fi
 
     if [[ $SOCFAMILY == sun* ]]; then
         # adjustment for vdpau
@@ -496,6 +501,15 @@ setting_alsa() {
     chmod 644 "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.pulseaudio" || exit 1
     chmod 755 "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.alsa" || exit 1
     mv "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/asound.conf" "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/asound.conf.new" || exit 1
+}
+
+
+setting_sysctl() {
+    message "" "setting" "sysctl"
+    cat <<EOF >$CWD/$BUILD/$SOURCE/$ROOTFS/etc/sysctl.d/ext4_tune.conf
+vm.dirty_writeback_centisecs = 100
+vm.dirty_expire_centisecs = 100
+EOF
 }
 
 

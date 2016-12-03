@@ -33,7 +33,7 @@ case "$1" in
                     mkswap /swap >/dev/null 2>&1
                     swapon /swap >/dev/null 2>&1
                     echo "/swap none swap sw 0 0" >> /etc/fstab
-                    echo 'vm.swappiness=0' >> /etc/sysctl.conf
+                    echo "vm.swappiness = 0" >> /etc/sysctl.d/swap.conf
 
                     rm -f /tmp/{firstboot,part} 2>&1>/dev/null
                 fi
