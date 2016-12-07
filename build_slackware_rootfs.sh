@@ -513,4 +513,10 @@ EOF
 }
 
 
+setting_udev() {
+    message "" "setting" "udev"
+    install -m644 -D "$CWD/config/90-usb-power.rules" "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/udev/rules.d/90-usb-power.rules"
+}
+
+
 
