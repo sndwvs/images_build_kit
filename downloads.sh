@@ -22,7 +22,7 @@ download (){
 
     message "" "download" "$BOOT_LOADER"
     if [ -d $CWD/$BUILD/$SOURCE/$BOOT_LOADER ]; then
-        cd $CWD/$BUILD/$SOURCE/$BOOT_LOADER && ( git checkout -f ${SUNXI_TOOLS_VERSION:-master} && git reset --hard ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        cd $CWD/$BUILD/$SOURCE/$BOOT_LOADER && ( git checkout -f ${BOOT_LOADER_BRANCH:-master} && git reset --hard ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     else
         git clone $URL_BOOT_LOADER_SOURCE/${BOOT_LOADER}.git $CWD/$BUILD/$SOURCE/$BOOT_LOADER >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
