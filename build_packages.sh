@@ -98,7 +98,7 @@ EOF
         for mod in $MODULES;do
             echo "/sbin/modprobe $mod" >> $CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/rc.modules.local
         done
-        chmod 755 $CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/rc.modules
+        chmod 755 $CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/rc.modules.local
     fi
 
     cd $CWD/$BUILD/$PKG/kernel-modules/lib/modules/${KERNEL_VERSION}*
