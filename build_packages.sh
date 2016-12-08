@@ -94,7 +94,7 @@ EOF
 
     if [[ ! -z $MODULES ]]; then
         install -dm755 "$CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/"
-        echo -e "#!/bin/sh\n" > $CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/rc.modules
+        echo -e "#!/bin/sh\n" > $CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/rc.modules.local
         for mod in $MODULES;do
             echo "/sbin/modprobe $mod" >> $CWD/$BUILD/$PKG/kernel-modules/etc/rc.d/rc.modules.local
         done
