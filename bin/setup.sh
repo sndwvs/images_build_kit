@@ -124,7 +124,12 @@ prepare_disk() {
         DISK=${DISK}1
     fi
 
-    echo y | mkfs.ext4 "/dev/$DISK" >/dev/null 2>&1
+    echo y | mkfs.ext4 -F -m 0 -L linuxroot "/dev/$DISK" >/dev/null 2>&1
+
+    # tune filesystem
+    tune2fs -o journal_data_writeback "/dev/$DISK" >/dev/null 2>&1
+    tune2fs -O ^has_journal "/dev/$DISK" >/dev/null 2>&1
+    e2fsck -yf "/dev/$DISK" >/dev/null 2>&1
 
     eval "$2=\$DISK"
 }
