@@ -14,6 +14,7 @@ case "$1" in
                     echo "vm.swappiness = 0" >> /etc/sysctl.d/swap.conf
 
                     rm -f /tmp/{firstboot,part} 2>&1>/dev/null
+                    exit 0
                 fi
 
                 if [[ ! -f /tmp/part ]]; then
@@ -35,7 +36,6 @@ case "$1" in
 
                     sleep 2
                     shutdown -r now
-                    exit 0
                 fi
             fi
         ;;
