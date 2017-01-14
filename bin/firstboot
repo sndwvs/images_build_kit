@@ -3,6 +3,19 @@
 case "$1" in
   'start')
             if [[ -e /tmp/firstboot ]]; then
+                if [ -f /tmp/part ]; then
+                    echo -e "\e[0;37mCreating 128Mb emergency swap area\x1B[0m"
+                    dd if=/dev/zero of=/swap bs=1024 count=131072 status=noxfer >/dev/null 2>&1
+                    chown root:root /swap
+                    chmod 0600 /swap
+                    mkswap /swap >/dev/null 2>&1
+                    swapon /swap >/dev/null 2>&1
+                    echo "/swap none swap sw 0 0" >> /etc/fstab
+                    echo "vm.swappiness = 0" >> /etc/sysctl.d/swap.conf
+
+                    rm -f /tmp/{firstboot,part} 2>&1>/dev/null
+                fi
+
                 if [[ ! -f /tmp/part ]]; then
                     echo -e "\e[0;37mResizing partition SD card\x1B[0m"
                     device="/dev/"$(lsblk -in |  grep "/$" | cut -d '-' -f2 | cut -d ' ' -f1 | sed 's/^\([a-z]*\)\([0-9]*\)\(\w*\)/\1\2/')
@@ -23,19 +36,6 @@ case "$1" in
                     sleep 2
                     shutdown -r now
                     exit 0
-                fi
-
-                if [ -f /tmp/part ]; then
-                    echo -e "\e[0;37mCreating 128Mb emergency swap area\x1B[0m"
-                    dd if=/dev/zero of=/swap bs=1024 count=131072 status=noxfer >/dev/null 2>&1
-                    chown root:root /swap
-                    chmod 0600 /swap
-                    mkswap /swap >/dev/null 2>&1
-                    swapon /swap >/dev/null 2>&1
-                    echo "/swap none swap sw 0 0" >> /etc/fstab
-                    echo "vm.swappiness = 0" >> /etc/sysctl.d/swap.conf
-
-                    rm -f /tmp/{firstboot,part} 2>&1>/dev/null
                 fi
             fi
         ;;
