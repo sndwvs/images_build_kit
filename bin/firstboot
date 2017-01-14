@@ -3,7 +3,14 @@
 case "$1" in
   'start')
             if [[ -e /tmp/firstboot ]]; then
+
+                # check root disk
+                device=$(lsblk -in | grep "/$" | cut -d '-' -f2 | cut -d ' ' -f1 | sed 's/^\([a-z]*\)\([0-9]*\)\(\w*\)/\1\2/')
+
                 if [ -f /tmp/part ]; then
+                    echo -e "\e[0;37mResizing SD card file-system\x1B[0m"
+                    /sbin/resize2fs -p /dev/${device}p1 >/dev/null
+
                     echo -e "\e[0;37mCreating 128Mb emergency swap area\x1B[0m"
                     dd if=/dev/zero of=/swap bs=1024 count=131072 status=noxfer >/dev/null 2>&1
                     chown root:root /swap
@@ -12,24 +19,22 @@ case "$1" in
                     swapon /swap >/dev/null 2>&1
                     echo "/swap none swap sw 0 0" >> /etc/fstab
                     echo "vm.swappiness = 0" >> /etc/sysctl.d/swap.conf
+                    # apply parameter
+                    sysctl -qw vm.swappiness=0
 
                     rm -f /tmp/{firstboot,part} 2>&1>/dev/null
                     exit 0
                 fi
 
                 if [[ ! -f /tmp/part ]]; then
-                    echo -e "\e[0;37mResizing partition SD card\x1B[0m"
-                    device="/dev/"$(lsblk -in |  grep "/$" | cut -d '-' -f2 | cut -d ' ' -f1 | sed 's/^\([a-z]*\)\([0-9]*\)\(\w*\)/\1\2/')
-                    (( echo d; echo p; echo n; echo p; echo 1; echo; echo; echo w; ) | fdisk $device )>/dev/null 2>&1
-                    #PARTITIONS=$(($(fdisk -l $device | grep $device | wc -l)-1))
-                    #((echo d; echo n; echo p; echo $PARTITIONS; echo; echo; echo w;) | fdisk $device)>/dev/null
-                    #((echo d; echo $PARTITIONS; echo n; echo p; echo ; echo ; echo ; echo w;) | fdisk $device)>/dev/null
-
                     # change root password
                     usermod -p 'password' root
 
-                    echo -e "\e[0;37mResizing SD card file-system\x1B[0m"
-                    /sbin/resize2fs -p /dev/mmcblk0p1 >/dev/null
+                    echo -e "\e[0;37mResizing partition SD card\x1B[0m"
+                    (( echo d; echo p; echo n; echo p; echo 1; echo; echo; echo w; ) | fdisk /dev/$device )>/dev/null 2>&1
+                    #PARTITIONS=$(($(fdisk -l $device | grep /dev/$device | wc -l)-1))
+                    #((echo d; echo n; echo p; echo $PARTITIONS; echo; echo; echo w;) | fdisk /dev/$device)>/dev/null
+                    #((echo d; echo $PARTITIONS; echo n; echo p; echo ; echo ; echo ; echo w;) | fdisk /dev/$device)>/dev/null
 
                     # add part one
                     touch /tmp/part
