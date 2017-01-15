@@ -47,7 +47,6 @@ compile_mkbooting (){
 compile_sunxi_tools (){
     message "" "compiling" "$SUNXI_TOOLS"
     cd $CWD/$BUILD/$SOURCE/$SUNXI_TOOLS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    git checkout ${SUNXI_TOOLS_VERSION:-master} >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     # for host
     make -s clean >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
@@ -55,7 +54,7 @@ compile_sunxi_tools (){
     make -s fex2bin >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     make -s bin2fex >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     mkdir -p "host"
-    cp -a {fexc,fex2bin,bin2fex} "host/"
+    cp -a {sunxi-fexc,fex2bin,bin2fex} "host/"
 
     # for destination
     make -s clean >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1

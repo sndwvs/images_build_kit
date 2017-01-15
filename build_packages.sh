@@ -162,7 +162,7 @@ sunxi-tools:
 sunxi-tools:
 EOF
 
-    find "$CWD/$BUILD/$SOURCE/${SUNXI_TOOLS}" \( -name bin2fex -o -name fex2bin -o -name fexc -o -name nand-part \) \
+    find "$CWD/$BUILD/$SOURCE/${SUNXI_TOOLS}" \( -name bin2fex -o -name fex2bin -o -name sunxi-fexc -o -name sunxi-nand-part \) \
          -exec cp -P {} $CWD/$BUILD/$PKG/${SUNXI_TOOLS}/sbin/. \;
 
     cd $CWD/$BUILD/$PKG/${SUNXI_TOOLS}/
