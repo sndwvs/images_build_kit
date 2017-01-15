@@ -521,7 +521,7 @@ setting_udev() {
 
 setting_h3dmode() {
     message "" "setting" "h3dmode"
-    install -m644 -D "$CWD/scripts/h3dmode" "$CWD/$BUILD/$SOURCE/$ROOTFS/sbin/h3dmode"
+    install -m755 -D "$CWD/scripts/h3dmode" "$CWD/$BUILD/$SOURCE/$ROOTFS/sbin/h3dmode"
 }
 
 
