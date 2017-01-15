@@ -162,11 +162,12 @@ sunxi-tools:
 sunxi-tools:
 EOF
 
-    find "$CWD/$BUILD/$SOURCE/${SUNXI_TOOLS}" \( -name bin2fex -o -name fex2bin -o -name sunxi-fexc -o -name sunxi-nand-part \) \
-         -exec cp -P {} $CWD/$BUILD/$PKG/${SUNXI_TOOLS}/sbin/. \;
+    cp -P $CWD/$BUILD/$SOURCE/${SUNXI_TOOLS}/{bin2fex,fex2bin,sunxi-fexc,sunxi-nand-part} \
+          $CWD/$BUILD/$PKG/${SUNXI_TOOLS}/sbin/
 
     cd $CWD/$BUILD/$PKG/${SUNXI_TOOLS}/
-    makepkg -l n -c n $CWD/$BUILD/$PKG/${SUNXI_TOOLS}-git_$(date +%Y%m%d)_$(cat $CWD/$BUILD/$SOURCE/${SUNXI_TOOLS}/.git/packed-refs | grep refs/remotes/origin/master | cut -b1-7)-${ARCH}-${_BUILD}${PACKAGER}.txz
+    makepkg -l n -c n $CWD/$BUILD/$PKG/${SUNXI_TOOLS}-git_$(date +%Y%m%d)_$(cat $CWD/$BUILD/$SOURCE/${SUNXI_TOOLS}/.git/packed-refs | grep refs/remotes/origin/master | cut -b1-7)-${ARCH}-${_BUILD}${PACKAGER}.txz \
+    >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     if [ -d $CWD/$BUILD/$PKG/${SUNXI_TOOLS} ];then
         rm -rf $CWD/$BUILD/$PKG/${SUNXI_TOOLS}
