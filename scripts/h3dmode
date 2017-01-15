@@ -1,0 +1,101 @@
+#!/bin/sh
+
+export LC_ALL=C
+
+# Make sure only root can run our script
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root" 1>&2
+   exit 1
+fi
+
+SCRIPT_BIN="script.bin"
+SCRIPT_FEX="script.fex"
+BOOT="/boot"
+TMP="/tmp"
+
+usage() {
+    MSG=$(cat <<EOF
+***************************************************
+select the type of resolution from the column \e[0;37mmode\x1B[0m
+***************************************************
+
+-------------------------------------------
+mode    |   hdmi    |   vga
+-------------------------------------------
+  \e[0;37m0\x1B[0m      480i        1680*1050
+  \e[0;37m1\x1B[0m      576i        1440*900
+  \e[0;37m2\x1B[0m      480p        1360*768
+  \e[0;37m3\x1B[0m      576p        1280*1024
+  \e[0;37m4\x1B[0m      720p50      1024*768
+  \e[0;37m5\x1B[0m      720p60      800*600
+  \e[0;37m6\x1B[0m      1080i50     640*480
+  \e[0;37m7\x1B[0m      1080i60
+  \e[0;37m8\x1B[0m      1080p24
+  \e[0;37m9\x1B[0m      1080p50
+  \e[0;37m10\x1B[0m         1080p60     1920*1080
+  \e[0;37m11\x1B[0m         pal         1280*720
+  \e[0;37m14\x1B[0m         ntsc
+-------------------------------------------
+EOF
+    )
+
+    echo -e "$MSG"
+}
+
+change_resolution() {
+
+    # decode fex file
+    if [[ -f "$BOOT/$SCRIPT_BIN" ]]; then
+        fex 0
+    fi
+
+    if [[ -f "$TMP/$SCRIPT_FEX" ]]; then
+        sed -i "s#screen0_output_mode = [0-9]*#screen0_output_mode = $1#" \
+               "$TMP/$SCRIPT_FEX" 2>/dev/null
+    fi
+    
+    [[ $? -ne 0 ]] && error_msg "apply changes in fex file: $TMP/$SCRIPT_FEX"
+
+    # encode fex file
+    if [[ -f "$BOOT/$SCRIPT_BIN" ]]; then
+        fex 1
+    fi
+    
+    ok_msg
+}
+
+fex() {
+    if [[ $1 == 0 ]]; then
+        bin2fex "$BOOT/$SCRIPT_BIN" "$TMP/$SCRIPT_FEX" 2>/dev/null
+    fi
+
+    [[ $? -ne 0 ]] && error_msg "decode bin file: $BOOT/$SCRIPT_BIN"
+    
+    if [[ $1 == 1 ]]; then
+        fex2bin "$TMP/$SCRIPT_FEX" "$BOOT/$SCRIPT_BIN" 2>/dev/null
+        rm "$TMP/$SCRIPT_FEX"
+    fi
+    
+    [[ $? -ne 0 ]] && error_msg "encode fex file: $TMP/$SCRIPT_FEX"
+
+}
+
+error_msg() {
+    echo -e "\e[0;37merror\x1B[0m $1"
+    exit 1
+}
+
+ok_msg() {
+    echo -e "resolution change is made,for the entry \ninto force required to restart the system"
+}
+
+
+case "$1" in
+    1|2|3|4|5|6|7|8|9|10|11|14)
+        change_resolution "$1"
+    ;;
+    *)
+        usage
+        exit 1
+    ;;
+esac

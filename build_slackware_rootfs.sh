@@ -188,7 +188,7 @@ setting_firstboot() {
     if [[ ! -x $CWD/$BUILD/$SOURCE/$ROOTFS/tmp/firstboot ]]; then
         message "" "setting" "firstboot"
         # add start wifi boot
-        install -m755 -D "$CWD/bin/firstboot" "$CWD/$BUILD/$SOURCE/$ROOTFS/tmp/firstboot"
+        install -m755 -D "$CWD/scripts/firstboot" "$CWD/$BUILD/$SOURCE/$ROOTFS/tmp/firstboot"
     fi
 
     # add root password
@@ -446,7 +446,7 @@ setting_for_desktop() {
 setting_move_to_internal() {
     message "" "setting" "data move to nand"
 #    install -m755 -D "$CWD/bin/$BOARD_NAME/setup.sh" "$CWD/$BUILD/$SOURCE/$ROOTFS/root/setup.sh"
-    install -m755 -D "$CWD/bin/setup.sh" "$CWD/$BUILD/$SOURCE/$ROOTFS/root/setup.sh"
+    install -m755 -D "$CWD/scripts/setup.sh" "$CWD/$BUILD/$SOURCE/$ROOTFS/root/setup.sh"
 
     if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/issue 2>&1 | grep setup.sh) ]];then
         cat <<EOF >$CWD/$BUILD/$SOURCE/$ROOTFS/etc/issue
@@ -483,7 +483,7 @@ EOF
 
 setting_first_login() {
     message "" "setting" "first login"
-    install -m755 -D "$CWD/bin/check_first_login.sh" "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/profile.d/check_first_login.sh"
+    install -m755 -D "$CWD/scripts/check_first_login.sh" "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/profile.d/check_first_login.sh"
     touch "$CWD/$BUILD/$SOURCE/$ROOTFS/root/.never_logged"
 }
 
@@ -516,6 +516,12 @@ EOF
 setting_udev() {
     message "" "setting" "udev"
     install -m644 -D "$CWD/config/91-usb-power.rules" "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/udev/rules.d/91-usb-power.rules"
+}
+
+
+setting_h3dmode() {
+    message "" "setting" "h3dmode"
+    install -m644 -D "$CWD/scripts/h3dmode" "$CWD/$BUILD/$SOURCE/$ROOTFS/sbin/h3dmode"
 }
 
 
