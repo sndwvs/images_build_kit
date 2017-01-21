@@ -6,6 +6,7 @@ if [ "$EUID" -ne 0 ];then
 fi
 
 DEVICE=$(lsusb -d 2207:320a)
+[[ -z $DEVICE ]] && echo "disk (ums device) not detected for installation" && exit 0
 DISK=$(dmesg | sed -n '/UMS/{n;p;}' | head -n1 | grep -oP '\[([a-z]*)\]' | sed "s/\W//g")
 
 case "$1" in
