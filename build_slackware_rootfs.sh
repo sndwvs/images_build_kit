@@ -335,32 +335,19 @@ EOF
 
 download_pkg() {
     # get parameters
-    for _in in "$@";do
-        let "count=$count+1"
-        if [[ $count = 1 ]];then
-            _URL_DISTR=${_in}
-        elif [[ $count = 2 ]];then
-            if [[ -z ${_in} ]];then
-                suffix=${_in}
-            else
-                suffix='_'${_in}
-            fi
-        elif [[ $count -ge 2 ]];then
-            category=${_in}
-            eval packages=\$${_in}${suffix}
-            if [[ ! -z ${packages} ]];then
-                for _pkg in $packages;do
-                    PKG_NAME=$(wget -q -O - ${_URL_DISTR}/${category}/ | cut -f2 -d '>' | cut -f1 -d '<' | egrep -om1 "(^$(echo $_pkg | sed 's/+/\\\+/g'))-+.*(t.z)")
-                    message "" "download" "package $category/$PKG_NAME"
-                    wget -c -nc -nd -np ${_URL_DISTR}/${category}/$PKG_NAME -P $CWD/$BUILD/$PKG/${category}/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-                done
-            fi
+    local url=$1
+    local type=$2
+    eval packages=\$${type}
+
+    for pkg in ${packages}; do
+        category=$(echo $pkg | cut -f1 -d "/")
+        pkg=$(echo $pkg | cut -f2 -d "/")
+        if [[ ! -z ${pkg} ]];then
+           PKG_NAME=$(wget -q -O - ${url}/${category}/ | cut -f2 -d '>' | cut -f1 -d '<' | egrep -om1 "(^$(echo $pkg | sed 's/+/\\\+/g'))-+.*(t.z)")
+           message "" "download" "package $category/$PKG_NAME"
+           wget -c -nc -nd -np ${url}/${category}/$PKG_NAME -P $CWD/$BUILD/$PKG/${category}/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
     done
-    # clean
-    count=''
-    category=''
-    _URL_DISTR=''
 }
 
 
@@ -371,30 +358,17 @@ install_pkg(){
         local ROOTFS="$ROOTFS_XFCE"
     fi
 
-    # get parameters
-    for _in in "$@";do
-        let "count=$count+1"
-        if [[ $count = 1 ]];then
-            if [[ -z ${_in} ]];then
-                suffix=${_in}
-            else
-                suffix='_'${_in}
-            fi
-        elif [[ $count -gt 1 ]];then
-            category=${_in}
-            eval packages=\$${_in}${suffix}
-            if [[ ! -z ${packages} ]];then
-                for _pkg in $packages;do
-                    message "" "install" "package $category/${_pkg}"
-                    installpkg --root $CWD/$BUILD/$SOURCE/$ROOTFS $CWD/$BUILD/$PKG/$category/${_pkg}* >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-                done
-            fi
+    local type=$1
+    eval packages=\$${type}
+
+    for pkg in ${packages}; do
+        category=$(echo $pkg | cut -f1 -d "/")
+        pkg=$(echo $pkg | cut -f2 -d "/")
+        if [[ ! -z ${pkg} ]];then
+            message "" "install" "package $category/${pkg}"
+            installpkg --root $CWD/$BUILD/$SOURCE/$ROOTFS $CWD/$BUILD/$PKG/$category/${pkg}* >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
     done
-    # clean
-    count=''
-    category=''
-    packages=''
 }
 
 

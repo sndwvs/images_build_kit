@@ -194,20 +194,24 @@ for image_type in ${CREATE_IMAGE[@]}; do
 #        fi
         setting_move_to_internal
         [[ $KERNEL_SOURCE == legacy && $SOCFAMILY == sun* ]] && setting_h3dmode
-        download_pkg $URL_DISTR "$image_type" ${CATEGORY_PKG[@]}
-        install_pkg "$image_type" ${CATEGORY_PKG[@]}
+        download_pkg $URL_DISTR "$image_type"
+        install_pkg "$image_type"
         create_img
     fi
 
     if [[ $image_type == xfce ]]; then
         message "" "create" "$ROOTFS_XFCE"
         rsync -ar --del $CWD/$BUILD/$SOURCE/$ROOTFS/ $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        download_pkg $URL_DISTR "$image_type" ${CATEGORY_PKG[@]}
-        install_pkg "$image_type" ${CATEGORY_PKG[@]}
+        download_pkg $URL_DISTR "$image_type"
+        install_pkg "$image_type"
 
         # install extra packages
-        download_pkg $URL_DISTR_EXTRA 'extra' ${CATEGORY_PKG[@]}
-        install_pkg 'extra' ${CATEGORY_PKG[@]}
+        download_pkg $URL_DISTR_EXTRA 'extra'
+        install_pkg 'extra'
+
+        # install extra board packages
+        download_pkg $URL_DISTR_EXTRA $BOARD_NAME
+        install_pkg $BOARD_NAME
 
         setting_default_theme_xfce
         setting_default_start_x
