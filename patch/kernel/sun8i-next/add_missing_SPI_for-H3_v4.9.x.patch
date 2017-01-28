@@ -54,7 +54,7 @@ index cc2a8b4..70b2607 100644
  		};
  
 +		spi0: spi@01c68000 {
-+			compatible = "allwinner,sun6i-a31-spi";
++			compatible = "allwinner,sun8i-h3-spi";
 +			reg = <0x01c68000 0x1000>;
 +			interrupts = <GIC_SPI 65 IRQ_TYPE_LEVEL_HIGH>;
 +			pinctrl-names = "default";
@@ -70,7 +70,7 @@ index cc2a8b4..70b2607 100644
 +		};
 +
 +		spi1: spi@01c69000 {
-+			compatible = "allwinner,sun6i-a31-spi";
++			compatible = "allwinner,sun8i-h3-spi";
 +			reg = <0x01c69000 0x1000>;
 +			interrupts = <GIC_SPI 66 IRQ_TYPE_LEVEL_HIGH>;
 +			pinctrl-names = "default";
