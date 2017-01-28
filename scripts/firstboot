@@ -17,7 +17,7 @@ case "$1" in
                     chmod 0600 /swap
                     mkswap /swap >/dev/null 2>&1
                     swapon /swap >/dev/null 2>&1
-                    echo "/swap none swap sw 0 0" >> /etc/fstab
+                    echo "/swap none swap defaults,pri=5 0 0" >> /etc/fstab
                     echo "vm.swappiness = 0" >> /etc/sysctl.d/swap.conf
                     # apply parameter
                     sysctl -qw vm.swappiness=0
