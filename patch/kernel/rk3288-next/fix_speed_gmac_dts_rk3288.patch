@@ -1,0 +1,11 @@
+--- a/arch/arm/boot/dts/rk3288.dtsi	2017-02-01 21:15:52.835850684 +0200
++++ b/arch/arm/boot/dts/rk3288.dtsi	2017-02-01 21:16:00.727850330 +0200
+@@ -624,7 +624,7 @@
+ 			"aclk_mac", "pclk_mac";
+ 		resets = <&cru SRST_MAC>;
+ 		reset-names = "stmmaceth";
+-		max-speed = <100>;
++		max-speed = <1000>;
+ 		status = "disabled";
+ 	};
+ 
