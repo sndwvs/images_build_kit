@@ -1,0 +1,39 @@
+From 8230c2ecb9ff19b8277167ef5f0e22cb08b6ae84 Mon Sep 17 00:00:00 2001
+From: zouxf <zxf@t-tchip.com.cn>
+Date: Wed, 21 Sep 2016 16:54:46 +0800
+Subject: [PATCH] DTS: fix firefly wifi support
+
+---
+ arch/arm/boot/dts/rk3288-firefly.dtsi | 11 +----------
+ 1 file changed, 1 insertion(+), 10 deletions(-)
+
+diff --git a/arch/arm/boot/dts/rk3288-firefly.dtsi b/arch/arm/boot/dts/rk3288-firefly.dtsi
+index b6b5446..b2c5fd6 100644
+--- a/arch/arm/boot/dts/rk3288-firefly.dtsi
++++ b/arch/arm/boot/dts/rk3288-firefly.dtsi
+@@ -243,15 +243,6 @@
+ 		BT,wake_host_irq = <&gpio4 31 GPIO_ACTIVE_HIGH>;
+ 		status = "okay";
+ 	};
+-
+-	wireless-wlan {
+-		compatible = "wlan-platdata";
+-		rockchip,grf = <&grf>;
+-		wifi_chip_type = "ap6335";
+-		sdio_vref = <1800>;
+-		WIFI,host_wake_irq = <&gpio4 30 GPIO_ACTIVE_HIGH>;
+-		status = "okay";
+-	};
+ };
+ 
+ &cpu0 {
+@@ -591,7 +582,7 @@
+ 	pinctrl-0 = <&sdio0_bus4 &sdio0_cmd &sdio0_clk &sdio0_int>;
+ 	sd-uhs-sdr104;
+ 	supports-sdio;
+-	vmmc-supply = <&vbat_wl>;
++	//vmmc-supply = <&vbat_wl>;
+ 	vqmmc-supply = <&vccio_wl>;
+ 	status = "okay";
+ };
+
