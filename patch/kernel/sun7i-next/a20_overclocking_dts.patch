@@ -1,0 +1,16 @@
+diff --git a/arch/arm/boot/dts/sun7i-a20.dtsi b/arch/arm/boot/dts/sun7i-a20.dtsi
+index e02eb72..7266c9a 100644
+--- a/arch/arm/boot/dts/sun7i-a20.dtsi
++++ b/arch/arm/boot/dts/sun7i-a20.dtsi
+@@ -102,6 +102,11 @@
+                        clock-latency = <244144>; /* 8 32k periods */
+                        operating-points = <
+                                /* kHz    uV */
++                                1200000 1500000
++                                1152000 1500000
++                                1104000 1450000
++                                1056000 1450000
++                                1008000 1450000
+                                960000  1400000
+                                912000  1400000
+                                864000  1300000
