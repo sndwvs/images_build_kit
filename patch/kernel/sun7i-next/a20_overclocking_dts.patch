@@ -18,20 +18,12 @@ diff --git a/arch/arm/boot/dts/sun7i-a20-cubietruck.dts b/arch/arm/boot/dts/sun7
 index e43267c..6ed1719 100644
 --- a/arch/arm/boot/dts/sun7i-a20-cubietruck.dts
 +++ b/arch/arm/boot/dts/sun7i-a20-cubietruck.dts
-@@ -285,14 +285,14 @@
+@@ -285,7 +285,7 @@
  &reg_dcdc2 {
  	regulator-always-on;
  	regulator-min-microvolt = <1000000>;
 -	regulator-max-microvolt = <1450000>;
 +	regulator-max-microvolt = <1500000>;
  	regulator-name = "vdd-cpu";
- };
- 
- &reg_dcdc3 {
- 	regulator-always-on;
- 	regulator-min-microvolt = <1000000>;
--	regulator-max-microvolt = <1400000>;
-+	regulator-max-microvolt = <1450000>;
- 	regulator-name = "vdd-int-dll";
  };
  
