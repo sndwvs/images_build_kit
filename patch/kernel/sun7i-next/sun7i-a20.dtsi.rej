@@ -1,6 +1,7 @@
-diff --git a/arch/arm/boot/dts/sun7i-a20.dtsi b/arch/arm/boot/dts/sun7i-a20.dtsi
+diff --git a/sun7i-a20.dtsi b/sun7i-a20.dtsi.orig
 index 94cf5a1..70b4a46 100644
---- a/arch/arm/boot/dts/sun7i-a20.dtsi
+--- a/sun7i-a20.dtsi
++++ b/sun7i-a20.dtsi.orig
 @@ -107,6 +107,11 @@
  			clock-latency = <244144>; /* 8 32k periods */
  			operating-points = <
