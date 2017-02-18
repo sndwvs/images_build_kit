@@ -198,7 +198,7 @@ create_bootloader_pack(){
     cd $CWD/$BUILD/$OUTPUT/ || exit 1
     install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER/u-boot-dtb.bin" "$CWD/$BUILD/$OUTPUT/boot/u-boot-dtb.bin" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER/u-boot.img" "$CWD/$BUILD/$OUTPUT/boot/u-boot.img" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    install -Dm644 "$CWD/$BUILD/$SOURCE/$RKBIN/rk32/rk3288_boot.bin" "$CWD/$BUILD/$OUTPUT/boot/rk3288_boot.bin" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    install -Dm644 "$CWD/$BUILD/$SOURCE/$RKBIN/rk32/RK3288UbootLoader_V2.30.06.bin" "$CWD/$BUILD/$OUTPUT/boot/RK3288UbootLoader_V2.30.06.bin" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     tar cJf $CWD/$BUILD/$OUTPUT/$FLASH/boot.tar.xz boot || exit 1
 }
 

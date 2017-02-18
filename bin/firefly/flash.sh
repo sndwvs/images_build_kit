@@ -51,7 +51,7 @@ fi
 # flash boot loader
 if [[ "$BOOT" = "true" && ! -z $DEVICE ]]; then
     echo "------ flash boot loader"
-    $TOOLS/upgrade_tool db     boot/rk3288_boot.bin || exit 1
+    $TOOLS/upgrade_tool db     boot/RK3288UbootLoader_V2.30.06.bin || exit 1
     $TOOLS/upgrade_tool wl 64  boot/u-boot-dtb.bin || exit 1
     $TOOLS/upgrade_tool wl 256 boot/u-boot.img || exit 1
     $TOOLS/upgrade_tool rd || exit 1
