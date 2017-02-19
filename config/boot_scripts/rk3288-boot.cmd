@@ -4,7 +4,7 @@ setenv verbosity 8
 else
 setenv verbosity 1
 fi
-setenv bootargs 'console=ttyS2,115200n8 console=tty1 earlyprintk root=/dev/mmcblk2p1 ro rootwait rootfstype=ext4 init=/sbin/init loglevel=${verbosity}'
+setenv bootargs "console=ttyS2,115200n8 console=tty1 earlyprintk root=/dev/mmcblk2p1 ro rootwait rootfstype=ext4 init=/sbin/init loglevel=${verbosity}"
 #--------------------------------------------------------------------------------------------------------------------------------
 # Boot loader script to boot with different boot methods for old and new kernel
 #--------------------------------------------------------------------------------------------------------------------------------
