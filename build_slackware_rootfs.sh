@@ -80,39 +80,8 @@ setting_debug() {
 
 setting_motd() {
     message "" "setting" "motd message"
-
-    case "$BOARD_NAME" in
-		firefly)
-		cat <<EOF >"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/motd"
- ____  ____  ____  ____  ____  __   _  _    ____  _  _  ___  ___   ___  ___
-( ___)(_  _)(  _ \( ___)( ___)(  ) ( \/ )  (  _ \( )/ )(__ )(__ \ ( _ )( _ ) 
- )__)  _)(_  )   / )__)  )__)  )(__ \  /    )   / )  (  (_ \ / _/ / _ \/ _ \ 
-(__)  (____)(_)\_)(____)(__)  (____)(__)   (_)\_)(_)\_)(___/(____)\___/\___/ 
-Slackware
-
-EOF
-		;;
-		cubietruck)
-	        cat <<EOF >"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/motd"
-  ___  __  __  ____  ____  ____  ____  _____    __    ____  ____  
- / __)(  )(  )(  _ \(_  _)( ___)(  _ \(  _  )  /__\  (  _ \(  _ \ 
-( (__  )(__)(  ) _ < _)(_  )__)  ) _ < )(_)(  /(__)\  )   / )(_) )
- \___)(______)(____/(____)(____)(____/(_____)(__)(__)(_)\_)(____/ 
-Slackware
-
-EOF
-		;;
-		orange_pi_plus_2e)
-	        cat <<EOF >"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/motd"
- _____  ____    __    _  _  ___  ____    ____  ____    ____  __    __  __  ___    ___   ____ 
-(  _  )(  _ \  /__\  ( \( )/ __)( ___)  (  _ \(_  _)  (  _ \(  )  (  )(  )/ __)  (__ \ ( ___)
- )(_)(  )   / /(__)\  )  (( (_-. )__)    )___/ _)(_    )___/ )(__  )(__)( \__ \   / _/  )__) 
-(_____)(_)\_)(__)(__)(_)\_)\___/(____)  (__)  (____)  (__)  (____)(______)(___/  (____)(____)
-Slackware
-
-EOF
-		;;
-    esac
+    # http://patorjk.com/ font: rectangles
+    [[ -f "$CWD/config/motd.$BOARD_NAME" ]] && install -m644 -D "$CWD/config/motd.$BOARD_NAME" "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/motd"
 }
 
 setting_rc_local() {
