@@ -35,15 +35,15 @@ message() {
 kernel_version() {
     local VER
 
-    if [[ ! -f $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/Makefile ]]; then
+    if [[ ! -f $CWD/$BUILD/$SOURCE/$KERNEL_DIR/Makefile ]]; then
         echo "no get kernel version" >> $CWD/$BUILD/$SOURCE/$LOG
         (message "err" "details" && exit 1) || exit 1
     fi
 
-    VER=$(cat $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/Makefile | grep VERSION | head -1 | awk '{print $(NF)}')
-    VER=$VER.$(cat $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/Makefile | grep PATCHLEVEL | head -1 | awk '{print $(NF)}')
-    VER=$VER.$(cat $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/Makefile | grep SUBLEVEL | head -1 | awk '{print $(NF)}')
-    EXTRAVERSION=$(cat $CWD/$BUILD/$SOURCE/$LINUX_SOURCE/Makefile | grep EXTRAVERSION | head -1 | awk '{print $(NF)}')
+    VER=$(cat $CWD/$BUILD/$SOURCE/$KERNEL_DIR/Makefile | grep VERSION | head -1 | awk '{print $(NF)}')
+    VER=$VER.$(cat $CWD/$BUILD/$SOURCE/$KERNEL_DIR/Makefile | grep PATCHLEVEL | head -1 | awk '{print $(NF)}')
+    VER=$VER.$(cat $CWD/$BUILD/$SOURCE/$KERNEL_DIR/Makefile | grep SUBLEVEL | head -1 | awk '{print $(NF)}')
+    EXTRAVERSION=$(cat $CWD/$BUILD/$SOURCE/$KERNEL_DIR/Makefile | grep EXTRAVERSION | head -1 | awk '{print $(NF)}')
     if [ "$EXTRAVERSION" != "=" ]; then VER=$VER$EXTRAVERSION; fi
 #    message "" "get" "kernel version $VER"
     eval "$1=\$VER"
@@ -92,7 +92,7 @@ patching_source() {
     case "$1" in
         kernel)
                 dir="$CWD/patch/kernel/$SOCFAMILY-$KERNEL_SOURCE"
-                PATCH_SOURCE="$CWD/$BUILD/$SOURCE/$LINUX_SOURCE"
+                PATCH_SOURCE="$CWD/$BUILD/$SOURCE/$KERNEL_DIR"
             ;;
         u-boot)
                 local dir="$CWD/patch/$BOOT_LOADER"
