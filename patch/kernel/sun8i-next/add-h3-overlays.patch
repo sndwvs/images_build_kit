@@ -1,0 +1,341 @@
+diff --git a/arch/arm/boot/dts/overlay/Makefile b/arch/arm/boot/dts/overlay/Makefile
+new file mode 100644
+index 00000000..3047c5a6
+--- /dev/null
++++ b/arch/arm/boot/dts/overlay/Makefile
+@@ -0,0 +1,23 @@
++ifeq ($(CONFIG_OF_CONFIGFS),y)
++
++dtbo-$(CONFIG_MACH_SUN8I) += \
++	sun8i-h3-analog-codec.dtbo \
++	sun8i-h3-crypto.dtbo \
++	sun8i-h3-i2c0.dtbo \
++	sun8i-h3-spi0-spidev.dtbo \
++	sun8i-h3-spi1-spidev.dtbo \
++	sun8i-h3-uart1.dtbo \
++	sun8i-h3-uart2.dtbo \
++	sun8i-h3-uart3.dtbo \
++	sun8i-h3-usbhost0.dtbo \
++	sun8i-h3-usbhost2.dtbo \
++	sun8i-h3-usbhost3.dtbo \
++	sun8i-h3-w1.dtbo
++
++targets += dtbs dtbs_install
++targets += $(dtbo-y)
++
++endif
++
++always		:= $(dtbo-y)
++clean-files	:= *.dtbo
+diff --git a/arch/arm/boot/dts/overlay/sun8i-h3-analog-codec.dts b/arch/arm/boot/dts/overlay/sun8i-h3-analog-codec.dts
+new file mode 100644
+index 00000000..ddcd8e84
+--- /dev/null
++++ b/arch/arm/boot/dts/overlay/sun8i-h3-analog-codec.dts
+@@ -0,0 +1,16 @@
++/dts-v1/ /plugin/;
++
++/ {
++	compatible = "allwinner,sun8i-h3";
++
++	fragment@0 {
++		target = <&codec>;
++		__overlay__ {
++			allwinner,audio-routing =
++				"Line Out", "LINEOUT",
++				"MIC1", "Mic",
++				"Mic",  "MBIAS";
++			status = "okay";
++		};
++	};
++};
+diff --git a/arch/arm/boot/dts/overlay/sun8i-h3-crypto.dts b/arch/arm/boot/dts/overlay/sun8i-h3-crypto.dts
+new file mode 100644
+index 00000000..6b9ea6b8
+--- /dev/null
++++ b/arch/arm/boot/dts/overlay/sun8i-h3-crypto.dts
+@@ -0,0 +1,12 @@
++/dts-v1/ /plugin/;
++
++/ {
++	compatible = "allwinner,sun8i-h3";
++
++	fragment@0 {
++		target = <&crypto>;
++		 __overlay__ {
++			status = "okay";
++		};
++	};
++};
+diff --git a/arch/arm/boot/dts/overlay/sun8i-h3-i2c0.dts b/arch/arm/boot/dts/overlay/sun8i-h3-i2c0.dts
+new file mode 100644
+index 00000000..f6d287ec
+--- /dev/null
++++ b/arch/arm/boot/dts/overlay/sun8i-h3-i2c0.dts
+@@ -0,0 +1,18 @@
++/dts-v1/ /plugin/;
++
++/ {
++	compatible = "allwinner,sun8i-h3";
++
++	fragment@0 {
++		target-path = "/aliases";
++		__overlay__ {
++			i2c0 = "/soc/i2c@01c2ac00";
++		};
++	};
++	fragment@1 {
++		target = <&i2c0>;
++		__overlay__ {
++			status = "okay";
++		};
++	};
++};
+diff --git a/arch/arm/boot/dts/overlay/sun8i-h3-spi0-spidev.dts b/arch/arm/boot/dts/overlay/sun8i-h3-spi0-spidev.dts
+new file mode 100644
+index 00000000..dd8ec87a
+--- /dev/null
++++ b/arch/arm/boot/dts/overlay/sun8i-h3-spi0-spidev.dts
+@@ -0,0 +1,25 @@
++/dts-v1/ /plugin/;
++
++/ {
++	compatible = "allwinner,sun8i-h3";
++
++	fragment@0 {
++		target-path = "/aliases";
++		__overlay__ {
++			spi0 = "/soc/spi@01c68000";
++		};
++	};
++	fragment@1 {
++		target = <&spi0>;
++		__overlay__ {
++			status = "okay";
++			#address-cells = <1>;
++			#size-cells = <0>;
++			spidev@0 {
++				compatible = "spidev";
++				reg = <0>;
++				spi-max-frequency = <1000000>;
++			};
++		};
++	};
++};
+diff --git a/arch/arm/boot/dts/overlay/sun8i-h3-spi1-spidev.dts b/arch/arm/boot/dts/overlay/sun8i-h3-spi1-spidev.dts
+new file mode 100644
+index 00000000..65ace688
+--- /dev/null
++++ b/arch/arm/boot/dts/overlay/sun8i-h3-spi1-spidev.dts
+@@ -0,0 +1,25 @@
++/dts-v1/ /plugin/;
++
++/ {
++	compatible = "allwinner,sun8i-h3";
++
++	fragment@0 {
++		target-path = "/aliases";
++		__overlay__ {
++			spi1 = "/soc/spi@01c69000";
++		};
++	};
++	fragment@1 {
++		target = <&spi1>;
++		__overlay__ {
++			status = "okay";
++			#address-cells = <1>;
++			#size-cells = <0>;
++			spidev@0 {
++				compatible = "spidev";
++				reg = <0>;
++				spi-max-frequency = <1000000>;
++			};
++		};
++	};
++};
+diff --git a/arch/arm/boot/dts/overlay/sun8i-h3-uart1.dts b/arch/arm/boot/dts/overlay/sun8i-h3-uart1.dts
+new file mode 100644
+index 00000000..00084c0c
+--- /dev/null
++++ b/arch/arm/boot/dts/overlay/sun8i-h3-uart1.dts
+@@ -0,0 +1,20 @@
++/dts-v1/ /plugin/;
++
++/ {
++	compatible = "allwinner,sun8i-h3";
++
++	fragment@0 {
++		target-path = "/aliases";
++		__overlay__ {
++			serial1 = "/soc/serial@01c28400";
++		};
++	};
++	fragment@1 {
++		target = <&uart1>;
++		 __overlay__ {
++			pinctrl-names = "default";
++			pinctrl-0 = <&uart1_pins>, <&uart1_rts_cts_pins>;
++			status = "okay";
++		};
++	};
++};
+diff --git a/arch/arm/boot/dts/overlay/sun8i-h3-uart2.dts b/arch/arm/boot/dts/overlay/sun8i-h3-uart2.dts
+new file mode 100644
+index 00000000..eb9aa917
+--- /dev/null
++++ b/arch/arm/boot/dts/overlay/sun8i-h3-uart2.dts
+@@ -0,0 +1,20 @@
++/dts-v1/ /plugin/;
++
++/ {
++	compatible = "allwinner,sun8i-h3";
++
++	fragment@0 {
++		target-path = "/aliases";
++		__overlay__ {
++			serial2 = "/soc/serial@01c28800";
++		};
++	};
++	fragment@1 {
++		target = <&uart2>;
++		 __overlay__ {
++			pinctrl-names = "default";
++			pinctrl-0 = <&uart2_pins>;
++			status = "okay";
++		};
++	};
++};
+diff --git a/arch/arm/boot/dts/overlay/sun8i-h3-uart3.dts b/arch/arm/boot/dts/overlay/sun8i-h3-uart3.dts
+new file mode 100644
+index 00000000..f93fd205
+--- /dev/null
++++ b/arch/arm/boot/dts/overlay/sun8i-h3-uart3.dts
+@@ -0,0 +1,20 @@
++/dts-v1/ /plugin/;
++
++/ {
++	compatible = "allwinner,sun8i-h3";
++
++	fragment@0 {
++		target-path = "/aliases";
++		__overlay__ {
++			serial3 = "/soc/serial@01c28c00";
++		};
++	};
++	fragment@1 {
++		target = <&uart3>;
++		 __overlay__ {
++			pinctrl-names = "default";
++			pinctrl-0 = <&uart3_pins>;
++			status = "okay";
++		};
++	};
++};
+diff --git a/arch/arm/boot/dts/overlay/sun8i-h3-usbhost0.dts b/arch/arm/boot/dts/overlay/sun8i-h3-usbhost0.dts
+new file mode 100644
+index 00000000..6b1b85f0
+--- /dev/null
++++ b/arch/arm/boot/dts/overlay/sun8i-h3-usbhost0.dts
+@@ -0,0 +1,18 @@
++/dts-v1/ /plugin/;
++
++/ {
++	compatible = "allwinner,sun8i-h3";
++
++	fragment@0 {
++		target = <&ehci0>;
++		__overlay__ {
++			status = "okay";
++		};
++	};
++	fragment@1 {
++		target = <&ohci0>;
++		 __overlay__ {
++			status = "okay";
++		};
++	};
++};
+diff --git a/arch/arm/boot/dts/overlay/sun8i-h3-usbhost2.dts b/arch/arm/boot/dts/overlay/sun8i-h3-usbhost2.dts
+new file mode 100644
+index 00000000..385811a7
+--- /dev/null
++++ b/arch/arm/boot/dts/overlay/sun8i-h3-usbhost2.dts
+@@ -0,0 +1,18 @@
++/dts-v1/ /plugin/;
++
++/ {
++	compatible = "allwinner,sun8i-h3";
++
++	fragment@0 {
++		target = <&ehci2>;
++		__overlay__ {
++			status = "okay";
++		};
++	};
++	fragment@1 {
++		target = <&ohci2>;
++		 __overlay__ {
++			status = "okay";
++		};
++	};
++};
+diff --git a/arch/arm/boot/dts/overlay/sun8i-h3-usbhost3.dts b/arch/arm/boot/dts/overlay/sun8i-h3-usbhost3.dts
+new file mode 100644
+index 00000000..dd1f7601
+--- /dev/null
++++ b/arch/arm/boot/dts/overlay/sun8i-h3-usbhost3.dts
+@@ -0,0 +1,18 @@
++/dts-v1/ /plugin/;
++
++/ {
++	compatible = "allwinner,sun8i-h3";
++
++	fragment@0 {
++		target = <&ehci3>;
++		__overlay__ {
++			status = "okay";
++		};
++	};
++	fragment@1 {
++		target = <&ohci3>;
++		 __overlay__ {
++			status = "okay";
++		};
++	};
++};
+diff --git a/arch/arm/boot/dts/overlay/sun8i-h3-w1.dts b/arch/arm/boot/dts/overlay/sun8i-h3-w1.dts
+new file mode 100644
+index 00000000..afd60dde
+--- /dev/null
++++ b/arch/arm/boot/dts/overlay/sun8i-h3-w1.dts
+@@ -0,0 +1,30 @@
++/dts-v1/ /plugin/;
++
++/ {
++	compatible = "allwinner,sun8i-h3";
++
++	fragment@0 {
++		target-path = "/";
++		__overlay__ {
++			w1: onewire@0 {
++				compatible = "w1-gpio";
++				pinctrl-names = "default";
++				pinctrl-0 = <&w1_pins>;
++				gpios = <&pio 3 14 0>; /* PD14 */
++				status = "okay";
++			};
++		};
++	};
++
++	fragment@1 {
++		target = <&pio>;
++		__overlay__ {
++			w1_pins: w1_pins {
++				allwinner,pins = "PD14";
++				allwinner,function = "gpio_in";
++				allwinner,drive = <0>;
++				allwinner,pull = <0>;
++			};
++		};
++	};
++};
