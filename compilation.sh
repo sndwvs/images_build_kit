@@ -97,7 +97,7 @@ compile_boot_loader (){
 }
 
 compile_kernel (){
-    message "" "compiling" "$LINUX_SOURCE"
+    message "" "compiling" "$KERNEL_DIR"
     cd "$CWD/$BUILD/$SOURCE/$KERNEL_DIR" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     if [[ $SOCFAMILY == sun* ]]; then
@@ -112,7 +112,7 @@ compile_kernel (){
 
     # delete previous creations
     [[ $SOCFAMILY != rk3288 || $KERNEL_SOURCE != next ]] \
-        && message "" "clean" "$LINUX_SOURCE" \
+        && message "" "clean" "$KERNEL_DIR" \
         && make CROSS_COMPILE=$CROSS clean
 
     # use proven config
