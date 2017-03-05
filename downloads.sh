@@ -71,26 +71,26 @@ download (){
 
         message "" "download" "$LINUX_SOURCE"
         if [[ $KERNEL_SOURCE == next ]]; then
-            if [ -d $CWD/$BUILD/$SOURCE/$LINUX_SOURCE ]; then
-                cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE && ( git checkout -f ${KERNEL_BRANCH:-master} && git reset --hard && git pull origin ${KERNEL_BRANCH:-master} ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            if [ -d $CWD/$BUILD/$SOURCE/$KERNEL_DIR ]; then
+                cd $CWD/$BUILD/$SOURCE/$KERNEL_DIR && ( git checkout -f ${KERNEL_BRANCH:-master} && git reset --hard && git pull origin ${KERNEL_BRANCH:-master} ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             else
-                git clone -b $KERNEL_BRANCH --depth 1 $URL_LINUX_SOURCE/$LINUX_SOURCE $CWD/$BUILD/$SOURCE/$LINUX_SOURCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+                git clone -b $KERNEL_BRANCH --depth 1 $URL_LINUX_SOURCE/$LINUX_SOURCE $CWD/$BUILD/$SOURCE/$KERNEL_DIR >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             fi
             message "" "extract" "$KERNEL_BRANCH"
-            cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE && git checkout $KERNEL_BRANCH >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            cd $CWD/$BUILD/$SOURCE/$KERNEL_DIR && git checkout $KERNEL_BRANCH >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
 #            wget -c --no-check-certificate $URL_LINUX_SOURCE/$LINUX_SOURCE.tar.xz -O $CWD/$BUILD/$SOURCE/$LINUX_SOURCE.tar.xz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
 #            message "" "extract" "$LINUX_SOURCE"
 #            tar xpf $CWD/$BUILD/$SOURCE/$LINUX_SOURCE.tar.xz -C "$CWD/$BUILD/$SOURCE/" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         else
-            if [ -d $CWD/$BUILD/$SOURCE/$LINUX_SOURCE ]; then
-                cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE && ( git checkout -f ${KERNEL_BRANCH:-master} && git reset --hard && git pull origin ${KERNEL_BRANCH:-master} ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            if [ -d $CWD/$BUILD/$SOURCE/$KERNEL_DIR ]; then
+                cd $CWD/$BUILD/$SOURCE/$KERNEL_DIR && ( git checkout -f ${KERNEL_BRANCH:-master} && git reset --hard && git pull origin ${KERNEL_BRANCH:-master} ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             else
-                git clone -b $KERNEL_BRANCH --depth 1 $URL_LINUX_SOURCE/$LINUX_SOURCE $CWD/$BUILD/$SOURCE/$LINUX_SOURCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+                git clone -b $KERNEL_BRANCH --depth 1 $URL_LINUX_SOURCE/$LINUX_SOURCE $CWD/$BUILD/$SOURCE/$KERNEL_DIR >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             fi
             message "" "extract" "$KERNEL_BRANCH"
-            cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE && git checkout $KERNEL_BRANCH >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            cd $CWD/$BUILD/$SOURCE/$KERNEL_DIR && git checkout $KERNEL_BRANCH >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
     fi
 
@@ -104,18 +104,20 @@ download (){
 
         message "" "download" "$LINUX_SOURCE"
         if [[ $SOCFAMILY == sun8* ]] || [[ $KERNEL_SOURCE != next ]]; then
-            if [ -d $CWD/$BUILD/$SOURCE/$LINUX_SOURCE ]; then
-                cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE && ( git checkout -f ${KERNEL_BRANCH:-master} && git reset --hard && git pull origin ${KERNEL_BRANCH:-master} ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            if [ -d $CWD/$BUILD/$SOURCE/$KERNEL_DIR ]; then
+                cd $CWD/$BUILD/$SOURCE/$KERNEL_DIR && ( git checkout -f ${KERNEL_BRANCH:-master} && git reset --hard && git pull origin ${KERNEL_BRANCH:-master} ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             else
-                git clone -b $KERNEL_BRANCH --depth 1 $URL_LINUX_SOURCE/$LINUX_SOURCE $CWD/$BUILD/$SOURCE/$LINUX_SOURCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+                git clone -b $KERNEL_BRANCH --depth 1 $URL_LINUX_SOURCE/$LINUX_SOURCE $CWD/$BUILD/$SOURCE/$KERNEL_DIR >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             fi
             message "" "extract" "$KERNEL_BRANCH"
-            cd $CWD/$BUILD/$SOURCE/$LINUX_SOURCE && git checkout $KERNEL_BRANCH >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            cd $CWD/$BUILD/$SOURCE/$KERNEL_DIR && git checkout $KERNEL_BRANCH >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         else
             wget -c --no-check-certificate $URL_LINUX_SOURCE/$LINUX_SOURCE.tar.xz -O $CWD/$BUILD/$SOURCE/$LINUX_SOURCE.tar.xz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
+            [[ ! -d "$CWD/$BUILD/$SOURCE/$KERNEL_DIR" ]] && "$CWD/$BUILD/$SOURCE/$KERNEL_DIR" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
             message "" "extract" "$LINUX_SOURCE"
-            tar xpf $CWD/$BUILD/$SOURCE/$LINUX_SOURCE.tar.xz -C "$CWD/$BUILD/$SOURCE/" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            tar --strip-components=1 -xpf $CWD/$BUILD/$SOURCE/$LINUX_SOURCE.tar.xz -C "$CWD/$BUILD/$SOURCE/$KERNEL_DIR" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
     fi
 }
