@@ -100,9 +100,7 @@ for arg in $result; do
 done
 
 # set default
-if [[ -e $VIDEO_OUTPUT ]]; then
-    VIDEO_OUTPUT="vga"
-fi
+[[ -z $VIDEO_OUTPUT ]] && VIDEO_OUTPUT="vga"
 
 #---------------------------------------------
 # clean terminal
