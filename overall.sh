@@ -85,41 +85,56 @@ get_config() {
 #---------------------------------------------
 patching_source() {
 
-    local dir
+    local dirs
     local PATCH_SOURCE
     local names=()
 
     case "$1" in
         kernel)
-                dir="$CWD/patch/kernel/$SOCFAMILY-$KERNEL_SOURCE"
+                dirs="$CWD/patch/kernel/$SOCFAMILY-$KERNEL_SOURCE"
                 PATCH_SOURCE="$CWD/$BUILD/$SOURCE/$KERNEL_DIR"
             ;;
         u-boot)
-                local dir="$CWD/patch/$BOOT_LOADER"
+                local dirs=(
+                            "$CWD/patch/$BOOT_LOADER"
+                            "$CWD/patch/$BOOT_LOADER/sunxi"
+                            "$CWD/patch/$BOOT_LOADER/sunxi/$KERNEL_SOURCE"
+                            "$CWD/patch/$BOOT_LOADER/$SOCFAMILY"
+                            "$CWD/patch/$BOOT_LOADER/$SOCFAMILY/$KERNEL_SOURCE"
+                        )
                 PATCH_SOURCE="$CWD/$BUILD/$SOURCE/$BOOT_LOADER"
             ;;
     esac
 
-    if [[ ! -d $dir ]]; then
-        return 0
-    fi
 
-    cd $PATCH_SOURCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    for file in $(ls $dir/ | grep patch); do
-             names+=($(basename -a $file)) || exit 1
+    # required for "for" command
+    shopt -s nullglob dotglob
+    for dir in "${dirs[@]}"; do
+        for file in ${dir%%:*}/*.patch; do
+            names+=($(basename $file)) || exit 1
+        done
     done
 
-    for file in "${names[@]}"; do
-        if [[ $(echo "$file" | grep -v ".disabled") ]]; then
-            # detect and remove files which patch will create
-            LANGUAGE=english patch --batch --dry-run -p1 -N < $dir/${file} | grep create \
-                    | awk '{print $NF}' | sed -n 's/,//p' | xargs -I % sh -c 'rm %'
+    # remove duplicates
+    local names_s=($(echo "${names[@]}" | sed 's/\s/\n/g' | LC_ALL=C sort -u | sed 's/\n/\s/g'))
 
-            patch --batch --silent -p1 -N < $dir/${file} >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-            if [[ $? -eq 0 ]]; then
-                message "" "patching" "succeeded $file"
+    [[ -z $names_s ]] && return 0
+
+    pushd $PATCH_SOURCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
+    for file in "${names_s[@]}"; do
+        for dir in "${dirs[@]}"; do
+            if [[ -f "${dir}/${file}" ]]; then
+                # detect and remove files which patch will create
+                LANGUAGE=english patch --batch --dry-run -p1 -N < "${dir}/${file}" | grep create \
+                        | awk '{print $NF}' | sed -n 's/,//p' | xargs -I % sh -c 'rm %'
+
+                patch --batch --silent -p1 -N < "${dir}/${file}" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+                if [[ $? -eq 0 ]]; then
+                    message "" "patching" "succeeded $file"
+                fi
             fi
-        fi
+        done
     done
 }
 
