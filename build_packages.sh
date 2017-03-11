@@ -25,25 +25,16 @@ build_kernel_pkg() {
 
         # u-boot
         install -Dm644 $CWD/config/boot_scripts/boot-$SOCFAMILY.cmd "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd"
-        install -Dm644 $CWD/config/boot_scripts/uEnv-$SOCFAMILY.txt "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/uEnv.txt"
 
         # add device tree
         install -Dm644 $CWD/$BUILD/$SOURCE/$KERNEL_DIR/arch/${ARCH}/boot/dts/$DEVICE_TREE_BLOB "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/$DEVICE_TREE_BLOB" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         touch "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/.next"
-
-        # compile boot script
-        $CWD/$BUILD/$SOURCE/$BOOT_LOADER/tools/mkimage -C none -A arm -T script -d $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.scr" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
     if [[ $SOCFAMILY == sun* ]]; then
 
         # u-boot
         install -Dm644 $CWD/config/boot_scripts/boot-sunxi.cmd "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd"
-        install -Dm644 $CWD/config/boot_scripts/uEnv-$SOCFAMILY.txt "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/uEnv.txt"
-
-        # compile boot script
-        $CWD/$BUILD/$SOURCE/$BOOT_LOADER/tools/mkimage -C none -A arm -T script -d $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.scr" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
         install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER/$BOOT_LOADER_BIN" "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/$BOOT_LOADER_BIN"
 
         if [[ $KERNEL_SOURCE == next ]];then
@@ -79,6 +70,14 @@ rm boot/.next 2> /dev/null
 EOF
         fi
     fi
+
+    # compile boot script
+    $CWD/$BUILD/$SOURCE/$BOOT_LOADER/tools/mkimage -C none -A arm -T script -d $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.scr" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
+    # u-boot
+    install -Dm644 $CWD/config/boot_scripts/uEnv-$SOCFAMILY.txt "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/uEnv.txt"
+    # change root disk if disk not default
+    [[ -n ${ROOT_DISK##*mmcblk0p1} ]] && echo "rootdev=/dev/$ROOT_DISK" >> "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/uEnv.txt"
 
     # clean-up unnecessary files generated during install
     find "$CWD/$BUILD/$PKG/kernel-modules" "$CWD/$BUILD/$PKG/kernel-headers" \( -name .install -o -name ..install.cmd \) -delete
