@@ -15,10 +15,10 @@ download (){
         message "" "download" "$XTOOLS"
         [[ -f $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz ]] && rm $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         wget -c --no-check-certificate $URL_XTOOLS -O $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
-        message "" "extract" "$XTOOLS"
-        tar xpf $CWD/$BUILD/$SOURCE/$XTOOLS.tar.?z* -C "$CWD/$BUILD/$SOURCE/" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
+
+    message "" "extract" "$XTOOLS"
+    [[ -f $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz ]] && tar xpf $CWD/$BUILD/$SOURCE/$XTOOLS.tar.?z* -C "$CWD/$BUILD/$SOURCE/" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     message "" "download" "$BOOT_LOADER"
     if [ -d $CWD/$BUILD/$SOURCE/$BOOT_LOADER ]; then

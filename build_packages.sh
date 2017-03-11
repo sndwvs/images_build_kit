@@ -17,8 +17,6 @@ build_kernel_pkg() {
     # install kernel
     install -Dm644 $CWD/$BUILD/$SOURCE/$KERNEL_DIR/arch/${ARCH}/boot/zImage "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/zImage"
 
-    touch "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/.verbose"
-
     if [[ $SOCFAMILY == rk3288 ]] && [[ ! -z $FIRMWARE ]]; then
         # adding custom firmware
 #        unzip -o $CWD/bin/$BOARD_NAME/$FIRMWARE -d $CWD/$BUILD/$SOURCE/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
