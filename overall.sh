@@ -53,29 +53,44 @@ kernel_version() {
 # get config
 #---------------------------------------------
 get_config() {
-    local dirs=("$CWD/config/environment" "$CWD/config/boards/$BOARD_NAME" "$CWD/config/sources/$SOCFAMILY" "$CWD/config/packages")
+    local dirs=(    "$CWD/config/environment"
+                    "$CWD/config/boards/$BOARD_NAME"
+                    "$CWD/config/sources/$SOCFAMILY"
+                    "$CWD/config/packages"
+                )
     for dir in "${dirs[@]}"; do
         for file in ${dir}/*.conf; do
+            _file=$(basename ${file})
             if $(echo "${dir}" | grep -q "environment"); then
-                message "" "add" "configuration file $(basename $file)"
+                message "" "add" "configuration file $_file"
                 source "$file" || exit 1
             fi
-            if $(echo "$file" | grep -q "$BOARD_NAME"); then
-                message "" "add" "configuration file $(basename $file)"
+            if [[ -n ${BOARD_NAME} && ! ${_file%%${BOARD_NAME}*} ]]; then
+                message "" "add" "configuration file $_file"
                 source "$file" || exit 1
             fi
-            if [[ ! -z $SOCFAMILY ]]; then
-                if $(echo "$file" | grep -q "$SOCFAMILY"); then
-                    message "" "add" "configuration file $(basename $file)"
-                    source "$file" || exit 1
-                fi
+            if [[ -n ${SOCFAMILY} && ! ${_file%%${SOCFAMILY}*} ]]; then
+                message "" "add" "configuration file $_file"
+                source "$file" || exit 1
             fi
+            #---- packages
             for image_type in ${CREATE_IMAGE[@]}; do
-                if $(echo "$file" | grep -q "$image_type"); then
-                     message "" "add" "configuration file $(basename $file)"
+                if [[ $image_type = xfce && $file = *extra* ]]; then
+                    if [[ -n ${BOARD_NAME} && ! ${_file%%*-${BOARD_NAME}*} ]]; then
+                         message "" "add" "configuration file $_file"
+                         source "$file" || exit 1
+                    fi
+
+                    [[ $file = *extra* ]] && source "$file" && \
+                                            message "" "add" "configuration file $(basename $file)"
+
+                fi
+                if [[ ! ${_file%%*-${image_type}*} ]]; then
+                     message "" "add" "configuration file $_file"
                      source "$file" || exit 1
                 fi
             done
+            #---- packages
         done
     done
 }
