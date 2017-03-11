@@ -1,2 +1,3 @@
 verbosity=1
 console=both
+machid=1029
