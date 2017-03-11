@@ -42,7 +42,7 @@ if test -e ${devtype} 0 "${prefix}.next"; then
 	load ${devtype} 0 ${fdt_addr_r} ${prefix}dtb/${fdtfile}
 	fdt addr ${fdt_addr_r}
 	fdt resize
-	bootz ${kernel_addr_r} ${fdt_addr_r}
+	bootz ${kernel_addr_r} - ${fdt_addr_r}
 else
 	echo "Found legacy kernel configuration"
 	load ${devtype} 0 ${fdt_addr_r} ${prefix}script.bin
