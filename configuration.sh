@@ -16,7 +16,7 @@ get_config
 #---------------------------------------------
 URL_BOOT_LOADER_SOURCE="http://git.denx.de"
 BOOT_LOADER="u-boot"
-BOOT_LOADER_BRANCH="" #>v2016.07
+BOOT_LOADER_BRANCH="" #>v2017.01
 
 #---------------------------------------------
 # xtools configuration
