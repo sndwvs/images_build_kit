@@ -4522,30 +4522,6 @@ index aab5221d6c2e..aac0ce8aeb0b 100644
  	req->dtd_count = 0;
  
  	ret = usb_gadget_map_request(&ep->udc->gadget, &req->req, ep_is_in(ep));
-diff --git a/drivers/usb/host/xhci-plat.c b/drivers/usb/host/xhci-plat.c
-index 4fe7c9b56bc0..19cb32a65161 100644
---- a/drivers/usb/host/xhci-plat.c
-+++ b/drivers/usb/host/xhci-plat.c
-@@ -162,9 +162,6 @@ static int xhci_plat_probe(struct platform_device *pdev)
- 			(pdata && pdata->usb3_lpm_capable))
- 		xhci->quirks |= XHCI_LPM_SUPPORT;
- 
--	if (HCC_MAX_PSA(xhci->hcc_params) >= 4)
--		xhci->shared_hcd->can_do_streams = 1;
--
- 	hcd->usb_phy = devm_usb_get_phy_by_phandle(&pdev->dev, "usb-phy", 0);
- 	if (IS_ERR(hcd->usb_phy)) {
- 		ret = PTR_ERR(hcd->usb_phy);
-@@ -181,6 +178,9 @@ static int xhci_plat_probe(struct platform_device *pdev)
- 	if (ret)
- 		goto disable_usb_phy;
- 
-+	if (HCC_MAX_PSA(xhci->hcc_params) >= 4)
-+		xhci->shared_hcd->can_do_streams = 1;
-+
- 	ret = usb_add_hcd(xhci->shared_hcd, irq, IRQF_SHARED);
- 	if (ret)
- 		goto dealloc_usb2_hcd;
 diff --git a/drivers/usb/musb/da8xx.c b/drivers/usb/musb/da8xx.c
 index b03d3b867fca..9a9c82a4d35d 100644
 --- a/drivers/usb/musb/da8xx.c
