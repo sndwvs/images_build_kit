@@ -9,8 +9,13 @@ setenv fdt_file "rk3288-firefly.dtb"
 setenv console "both"
 setenv verbosity "1"
 
-itest.b ${devnum} == 0 && echo "U-boot loaded from SD"
-itest.b ${devnum} == 1 && echo "U-boot loaded from eMMC"
+if mmc dev 1; then
+	setenv rootdev "/dev/mmcblk0p1"
+	setenv devnum "1"
+fi
+
+itest.b ${devnum} == 0 && echo "U-boot loaded from eMMC"
+itest.b ${devnum} == 1 && echo "U-boot loaded from SD"
 
 if load ${devtype} ${devnum}:1 ${load_addr} ${prefix}uEnv.txt; then
 	env import -t ${load_addr} ${filesize}
