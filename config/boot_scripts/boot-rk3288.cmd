@@ -9,7 +9,10 @@ setenv fdt_file "rk3288-firefly.dtb"
 setenv console "both"
 setenv verbosity "1"
 
-if mmc dev 1; then
+# boot from eMMC
+part uuid mmc 1 part_exists
+
+if test -n ${part_exists}; then
 	setenv rootdev "/dev/mmcblk0p1"
 	setenv devnum "1"
 fi
@@ -24,7 +27,7 @@ fi
 if test "${console}" = "display" || test "${console}" = "both"; then setenv consoleargs "console=ttyS2,115200n8"; fi
 if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "${consoleargs} earlyprintk console=tty1"; fi
 
-setenv bootargs "consoleblank=0 scandelay root=${rootdev} ro rootwait rootfstype=ext4 init=/sbin/init ${consoleargs} loglevel=${verbosity} ${extraargs}"
+setenv bootargs "consoleblank=0 root=${rootdev} ro rootwait rootfstype=ext4 init=/sbin/init ${consoleargs} loglevel=${verbosity} ${extraargs}"
 
 load ${devtype} ${devnum}:1 ${fdt_addr_r} ${prefix}dtb/${fdt_file}
 load ${devtype} ${devnum}:1 ${kernel_addr_r} ${prefix}zImage
