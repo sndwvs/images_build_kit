@@ -28,10 +28,6 @@ download (){
     fi
 
     if [[ $SOCFAMILY == rk3288 ]]; then
-        message "" "download" "$LINUX_UPGRADE_TOOL"
-        wget -c --no-check-certificate $URL_LINUX_UPGRADE_TOOL/$LINUX_UPGRADE_TOOL.zip -O $CWD/$BUILD/$SOURCE/$LINUX_UPGRADE_TOOL.zip >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        unzip -o $CWD/$BUILD/$SOURCE/$LINUX_UPGRADE_TOOL.zip -d $CWD/$BUILD/$SOURCE/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
         if [[ ! -z $XTOOLS_OLD ]]; then
             message "" "download" "$XTOOLS_OLD"
             if [[ -d $CWD/$BUILD/$SOURCE/$XTOOLS_OLD ]]; then
