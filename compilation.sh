@@ -79,8 +79,7 @@ compile_boot_loader (){
             -i .config >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         # create bootloader
-        tools/mkimage -n rk3288 -T rksd -d spl/u-boot-spl-dtb.bin $BOOT_LOADER_BIN
-        cat u-boot-dtb.bin >> $BOOT_LOADER_BIN
+        create_uboot
     fi
 
     if [[ $SOCFAMILY == sun* ]]; then
