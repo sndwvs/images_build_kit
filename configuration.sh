@@ -21,18 +21,21 @@ BOOT_LOADER_BRANCH="" #>v2017.01
 #---------------------------------------------
 # xtools configuration
 #---------------------------------------------
-XTOOLS="x-tools7h"
+URL_XTOOLS="https://releases.linaro.org/components/toolchain/binaries"
+XTOOLS_ARM_SUFFIX="arm-linux-gnueabihf"
+XTOOLS_ARM64_SUFFIX="aarch64-linux-gnu"
+XTOOLS_PREFIX="gcc-linaro"
 if [[ $KERNEL_SOURCE != next ]]; then
-    VERSION_XTOOLS="5.3.0-5"
-    MD5_XTOOLS="43562de45d89d1d7de9193c44b2e6909"
-#elif [[ $SOCFAMILY == rk3288 ]]; then
-#    VERSION_XTOOLS="4.9.2-4"
-#    MD5_XTOOLS="ccbfa040c1949dad6d32505fa9d973b9"
+    BASE_VERSION_XTOOLS="5.4-2017.05"
+    VERSION_XTOOLS="5.4.1-2017.05"
 else
-    VERSION_XTOOLS="6.2.1-1"
-    MD5_XTOOLS="58766cfb988135f761d9f4c2c0d5c4e4"
+    BASE_VERSION_XTOOLS="6.3-2017.05"
+    VERSION_XTOOLS="6.3.1-2017.05"
 fi
-URL_XTOOLS="https://archlinuxarm.org/builder/xtools/$VERSION_XTOOLS/$XTOOLS.tar.xz"
+ARM_XTOOLS="$XTOOLS_PREFIX-$VERSION_XTOOLS-$(uname -m)_$XTOOLS_ARM_SUFFIX"
+ARM64_XTOOLS="$XTOOLS_PREFIX-$VERSION_XTOOLS-$(uname -m)_$XTOOLS_ARM64_SUFFIX"
+URL_ARM_XTOOLS="$URL_XTOOLS/$BASE_VERSION_XTOOLS/$XTOOLS_ARM_SUFFIX/$ARM_XTOOLS"
+URL_ARM64_XTOOLS="$URL_XTOOLS/$BASE_VERSION_XTOOLS/$XTOOLS_ARM64_SUFFIX/$ARM64_XTOOLS"
 
 #---------------------------------------------
 # rootfs configuration
@@ -45,9 +48,9 @@ ROOTFS_VERSION=$(date +%Y%m%d)
 #---------------------------------------------
 # cross compilation
 #---------------------------------------------
-export PATH=$PATH:$CWD/$BUILD/${SOURCE}/$XTOOLS_OLD/bin:$CWD/$BUILD/${SOURCE}/$XTOOLS/arm-unknown-linux-gnueabihf/bin:$CWD/$BUILD/$OUTPUT/$TOOLS/
-CROSS_OLD="arm-eabi-"
-CROSS="arm-unknown-linux-gnueabihf-"
+export PATH=$PATH:$CWD/$BUILD/${SOURCE}/$ARM_XTOOLS/bin:$CWD/$BUILD/${SOURCE}/$ARM_XTOOLS/$XTOOLS_ARM_SUFFIX/bin:$CWD/$BUILD/${SOURCE}/$ARM64_XTOOLS/bin:$CWD/$BUILD/${SOURCE}/$ARM64_XTOOLS/$XTOOLS_ARM64_SUFFIX/bin:$CWD/$BUILD/$OUTPUT/$TOOLS/
+CROSS="$XTOOLS_ARM_SUFFIX-"
+CROSS64="$XTOOLS_ARM64_SUFFIX-"
 
 #---------------------------------------------
 # packages
