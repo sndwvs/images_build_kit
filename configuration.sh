@@ -16,7 +16,7 @@ get_config
 #---------------------------------------------
 URL_BOOT_LOADER_SOURCE="http://git.denx.de"
 BOOT_LOADER="u-boot"
-BOOT_LOADER_BRANCH="" #>v2017.01
+BOOT_LOADER_BRANCH="" #>v2017.05
 
 #---------------------------------------------
 # xtools configuration
@@ -28,6 +28,8 @@ XTOOLS_PREFIX="gcc-linaro"
 if [[ $KERNEL_SOURCE != next ]]; then
     BASE_VERSION_XTOOLS="5.4-2017.05"
     VERSION_XTOOLS="5.4.1-2017.05"
+#    BASE_VERSION_XTOOLS="4.9-2017.01"
+#    VERSION_XTOOLS="4.9.4-2017.01"
 else
     BASE_VERSION_XTOOLS="6.3-2017.05"
     VERSION_XTOOLS="6.3.1-2017.05"
@@ -48,9 +50,9 @@ ROOTFS_VERSION=$(date +%Y%m%d)
 #---------------------------------------------
 # cross compilation
 #---------------------------------------------
-export PATH=$PATH:$CWD/$BUILD/${SOURCE}/$ARM_XTOOLS/bin:$CWD/$BUILD/${SOURCE}/$ARM_XTOOLS/$XTOOLS_ARM_SUFFIX/bin:$CWD/$BUILD/${SOURCE}/$ARM64_XTOOLS/bin:$CWD/$BUILD/${SOURCE}/$ARM64_XTOOLS/$XTOOLS_ARM64_SUFFIX/bin:$CWD/$BUILD/$OUTPUT/$TOOLS/
-CROSS="$XTOOLS_ARM_SUFFIX-"
-CROSS64="$XTOOLS_ARM64_SUFFIX-"
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin:$CWD/$BUILD/${SOURCE}/$ARM_XTOOLS/bin:$CWD/$BUILD/${SOURCE}/$ARM64_XTOOLS/bin:$CWD/$BUILD/$OUTPUT/$TOOLS/
+export CROSS="${XTOOLS_ARM_SUFFIX}-"
+export CROSS64="${XTOOLS_ARM64_SUFFIX}-"
 
 #---------------------------------------------
 # packages
