@@ -19,7 +19,7 @@ while true; do
     BOARD_NAME=$(dialog --title "build rootfs" \
            --radiolist "selected your board" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
     "cubietruck" "Allwinner Tech SoC A20 ARM® Cortex™-A7" "off" \
-    "firefly" "Rockchip RK3288 Cortex-A17 quad core@ 1.8GHz" "off" \
+    "firefly_rk3288" "Rockchip RK3288 Cortex-A17 quad core@ 1.8GHz" "off" \
     "orange_pi_plus_2e" "Allwinner Tech SoC H3 ARM® Cortex™-A7" "off" \
     2>&1 1>&3)
 
