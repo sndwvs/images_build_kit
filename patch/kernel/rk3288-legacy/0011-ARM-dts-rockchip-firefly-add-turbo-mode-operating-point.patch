@@ -27,49 +27,41 @@ picked. It's obvious that it's a sign issue somewhere in the kernel
 but this one was not found yet.
 
 Signed-off-by: Myy <myy@miouyouyou.fr>
----
---- a/arch/arm/boot/dts/rk3288-firefly.dtsi	2017-02-21 19:59:53.047620647 +0200
-+++ a/arch/arm/boot/dts/rk3288-firefly.dtsi	2017-02-21 20:49:06.029666968 +0200
-@@ -236,10 +236,114 @@
- 		WIFI,host_wake_irq = <&gpio4 30 GPIO_ACTIVE_HIGH>;
- 		status = "okay";
- 	};
-+
-+	cpu0_opp_table: opp_table0 {
-+		compatible = "operating-points-v2";
-+		opp-shared;
-+
-+		opp@600000000 {
-+			opp-hz = /bits/ 64 <600000000>;
-+			opp-microvolt = <900000>;
-+		};
-+		opp@816000000 {
-+			opp-hz = /bits/ 64 <816000000>;
-+			opp-microvolt = <1000000>;
-+		};
-+		opp@1008000000 {
-+			opp-hz = /bits/ 64 <1008000000>;
-+			opp-microvolt = <1050000>;
-+		};
-+		opp@1200000000 {
-+			opp-hz = /bits/ 64 <1200000000>;
-+			opp-microvolt = <1100000>;
-+		};
-+		opp@1416000000 {
-+			opp-hz = /bits/ 64 <1416000000>;
-+			opp-microvolt = <1200000>;
-+		};
+
+diff -Naur a/arch/arm/boot/dts/rk3288-firefly.dtsi b/arch/arm/boot/dts/rk3288-firefly.dtsi
+--- a/arch/arm/boot/dts/rk3288-firefly.dtsi	2017-06-25 01:25:48.272282361 +0300
++++ b/arch/arm/boot/dts/rk3288-firefly.dtsi	2017-06-25 01:32:54.180298688 +0300
+@@ -296,6 +296,7 @@
+ 
+ &cpu0 {
+ 	cpu0-supply = <&vdd_cpu>;
++	operating-points-v2 = <&cpu0_opp_table>;
+ };
+ 
+ &edp {
+diff -Naur a/arch/arm/boot/dts/rk3288.dtsi b/arch/arm/boot/dts/rk3288.dtsi
+--- a/arch/arm/boot/dts/rk3288.dtsi	2017-06-25 01:28:23.821288324 +0300
++++ b/arch/arm/boot/dts/rk3288.dtsi	2017-06-25 01:36:01.179305856 +0300
+@@ -175,15 +175,82 @@
+ 			opp-microvolt = <1200000>;
+ 			clock-latency-ns = <40000>;
+ 		};
+-		opp-1512000000 {
 +		opp@1512000000 {
-+			opp-hz = /bits/ 64 <1512000000>;
+ 			opp-hz = /bits/ 64 <1512000000>;
+-			opp-microvolt = <1300000>;
+-			clock-latency-ns = <40000>;
 +			opp-microvolt = <1250000>;
-+		};
+ 		};
+-		opp-1608000000 {
 +		opp@1608000000 {
-+			opp-hz = /bits/ 64 <1608000000>;
+ 			opp-hz = /bits/ 64 <1608000000>;
 +			opp-microvolt = <1300000>;
 +		};
 +		opp@1704000000 {
 +			opp-hz = /bits/ 64 <1704000000>;
-+			opp-microvolt = <1350000>;
+ 			opp-microvolt = <1350000>;
+-			clock-latency-ns = <40000>;
 +		};
 +		opp@1800000000 {
 +			opp-hz = /bits/ 64 <1800000000>;
@@ -135,13 +127,6 @@ Signed-off-by: Myy <myy@miouyouyou.fr>
 +			opp-hz = /bits/ 64 <2208000000>;
 +			opp-microvolt = <1500000>;
 +			turbo-mode;
-+		};
-+	};
- };
+ 		};
+ 	};
  
- &cpu0 {
- 	cpu0-supply = <&vdd_cpu>;
-+	operating-points-v2 = <&cpu0_opp_table>;
- };
- 
- &emmc {
