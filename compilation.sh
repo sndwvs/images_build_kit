@@ -98,6 +98,11 @@ compile_kernel (){
     message "" "compiling" "$KERNEL_DIR"
     cd "$CWD/$BUILD/$SOURCE/$KERNEL_DIR" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
+    if [[ $ARCH_KERNEL == arm64 ]]; then
+        local ARCH=$ARCH_KERNEL
+        local CROSS=$CROSS64
+    fi
+
     if [[ $SOCFAMILY == sun* ]]; then
         # Attempting to run 'firmware_install' with CONFIG_USB_SERIAL_TI=y when
         # using make 3.82 results in an error

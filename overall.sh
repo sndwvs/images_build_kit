@@ -142,7 +142,7 @@ patching_source() {
             if [[ -f "${dir}/${file}" ]]; then
                 # detect and remove files which patch will create
                 LANGUAGE=english patch --batch --dry-run -p1 -N < "${dir}/${file}" | grep create \
-                        | awk '{print $NF}' | sed -n 's/,//p' | xargs -I % sh -c 'rm %'
+                        | awk '{print $NF}' | sed -n 's/,$//p' | xargs -I % sh -c 'rm %'
 
                 patch --batch --silent -p1 -N < "${dir}/${file}" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
                 if [[ $? -eq 0 ]]; then
