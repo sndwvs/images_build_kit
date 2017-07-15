@@ -103,7 +103,8 @@ compile_kernel (){
     if [[ $ARCH_KERNEL == arm64 ]]; then
         local ARCH=$ARCH_KERNEL
         local CROSS=$CROSS64
-        KERNEL=Image
+        local KERNEL=Image
+        local DEVICE_TREE_BLOB=dtbs
     fi
 
     if [[ $SOCFAMILY == sun* ]]; then
