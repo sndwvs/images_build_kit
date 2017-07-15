@@ -98,9 +98,12 @@ compile_kernel (){
     message "" "compiling" "$KERNEL_DIR"
     cd "$CWD/$BUILD/$SOURCE/$KERNEL_DIR" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
+    local KERNEL=zImage
+
     if [[ $ARCH_KERNEL == arm64 ]]; then
         local ARCH=$ARCH_KERNEL
         local CROSS=$CROSS64
+        KERNEL=Image
     fi
 
     if [[ $SOCFAMILY == sun* ]]; then
@@ -121,7 +124,7 @@ compile_kernel (){
     # use proven config
     install -D $CWD/config/kernel/$LINUX_CONFIG $CWD/$BUILD/$SOURCE/$KERNEL_DIR/.config || (message "err" "details" && exit 1) || exit 1
 
-    if [[ $SOCFAMILY == rk3288 ]]; then
+    if [[ $SOCFAMILY == rk3* ]]; then
 #        if [ "$KERNEL_SOURCE" != "next" ]; then
             # fix firmware /system /lib
 #            find drivers/net/wireless/rockchip_wlan/rkwifi/ -type f -exec \
@@ -135,14 +138,14 @@ compile_kernel (){
         rsync -ar --ignore-existing $CWD/bin/$FIRMWARE/brcm/ -d $CWD/$BUILD/$SOURCE/$KERNEL_DIR/firmware/brcm >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
 #        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS menuconfig  || exit 1
-        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS zImage modules || (message "err" "details" && exit 1) || exit 1
+        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS $KERNEL modules || (message "err" "details" && exit 1) || exit 1
         make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS $DEVICE_TREE_BLOB || (message "err" "details" && exit 1) || exit 1
     fi
 
     if [[ $SOCFAMILY == sun* ]]; then
 #        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS menuconfig  || exit 1
         make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS oldconfig
-        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS zImage modules || (message "err" "details" && exit 1) || exit 1
+        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS $KERNEL modules || (message "err" "details" && exit 1) || exit 1
 
         if [[ "$KERNEL_SOURCE" == "next" ]]; then
             make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS $DEVICE_TREE_BLOB || (message "err" "details" && exit 1) || exit 1
