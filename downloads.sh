@@ -38,7 +38,7 @@ download (){
         git clone $URL_BOOT_LOADER_SOURCE/${BOOT_LOADER}.git $CWD/$BUILD/$SOURCE/$BOOT_LOADER >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
-    if [[ $SOCFAMILY == rk3288 ]]; then
+    if [[ $SOCFAMILY == rk3* ]]; then
         if [[ ! -z $XTOOLS_OLD ]]; then
             message "" "download" "$XTOOLS_OLD"
             if [[ -d $CWD/$BUILD/$SOURCE/$XTOOLS_OLD ]]; then
