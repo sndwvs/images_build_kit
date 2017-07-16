@@ -67,10 +67,11 @@ setting_fstab() {
 setting_debug() {
     message "" "setting" "uart debugging"
     sed 's/#\(ttyS[1-2]\)/\1/' -i "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/securetty"
-    sed 's/#\(s\([1-2]\)\)\(.*\)\(ttyS[0-1]\)\(.*\)\(9600\)/\1\3ttyS\2 115200/' \
+    sed -e 's/^\(s0:\)\(.*\)\(115200\)/\1\2'$SERIAL_CONSOLE_SPEED'/' \
+        -e 's/#\(s\([1-2]\)\)\(.*\)\(ttyS[0-1]\)\(.*\)\(9600\)/\1\3ttyS\2 '$SERIAL_CONSOLE_SPEED'/' \
         -i "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/inittab"
     if [[ $SOCFAMILY == rk3288 ]] && [[ $KERNEL_SOURCE != next ]]; then
-        sed '/vt100/{n;/^$/i f0:12345:respawn:/sbin/agetty 115200 ttyFIQ0 vt100
+        sed '/vt100/{n;/^$/i f0:12345:respawn:/sbin/agetty '$SERIAL_CONSOLE_SPEED' ttyFIQ0 vt100
              }' -i "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/inittab"
         sed '/#ttyS3/{n;/^#/i ttyFIQ0
              }' -i "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/securetty"

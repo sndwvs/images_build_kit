@@ -1,6 +1,8 @@
 
 FIRMWARE="firmware-overlay"
 
+SERIAL_CONSOLE_SPEED=115200
+
 case "$KERNEL_SOURCE" in
     next)
             URL_LINUX_SOURCE="http://mirror.yandex.ru/pub/linux/kernel/v4.x"

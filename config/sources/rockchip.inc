@@ -13,6 +13,8 @@ RKFLASH_TOOLS="rkflashtool"
 #FIRMWARE="master.zip"
 FIRMWARE="firmware-overlay"
 
+SERIAL_CONSOLE_SPEED=115200
+
 case $KERNEL_SOURCE in
     legacy)
             URL_LINUX_SOURCE="https://github.com/rockchip-linux"
