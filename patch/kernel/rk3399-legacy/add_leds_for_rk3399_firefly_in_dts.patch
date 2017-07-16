@@ -1,0 +1,147 @@
+--- a/arch/arm64/boot/dts/rockchip/rk3399-firefly-linux.dts	2017-07-16 18:24:52.598272752 +0300
++++ b/arch/arm64/boot/dts/rockchip/rk3399-firefly-linux.dts	2017-07-16 18:38:49.670235220 +0300
+@@ -247,6 +247,17 @@
+ 		regulator-name = "vcc3v3_pcie";
+ 	};
+ 
++	vcc3v3_3g: vcc3v3-3g-regulator {
++		compatible = "regulator-fixed";
++		enable-active-high;
++		regulator-always-on;
++		regulator-boot-on;
++		gpio = <&gpio0 2 GPIO_ACTIVE_HIGH>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pcie_3g_drv>;
++		regulator-name = "vcc3v3_3g";
++    };
++
+ 	vcc3v3_sys: vcc3v3-sys {
+ 		compatible = "regulator-fixed";
+ 		regulator-name = "vcc3v3_sys";
+@@ -328,6 +339,8 @@
+ 	wireless-bluetooth {
+ 		compatible = "bluetooth-platdata";
+ 		//wifi-bt-power-toggle;
++		clocks = <&rk808 1>;
++        clock-names = "ext_clock";
+ 		uart_rts_gpios = <&gpio2 19 GPIO_ACTIVE_LOW>; /* GPIO2_C3 */
+ 		pinctrl-names = "default", "rts_gpio";
+ 		pinctrl-0 = <&uart0_rts>;
+@@ -338,6 +351,26 @@
+ 		BT,wake_host_irq = <&gpio0 4 GPIO_ACTIVE_HIGH>; /* GPIO0_A4 */
+ 		status = "okay";
+ 	};
++
++    leds {
++       compatible = "gpio-leds";
++       power {
++           label = "firefly:blue:power";
++           linux,default-trigger = "ir-power-click";
++           default-state = "on";
++           gpios = <&gpio2 27 GPIO_ACTIVE_HIGH>;
++           pinctrl-names = "default";
++           pinctrl-0 = <&led_power>;
++       };
++       user {
++           label = "firefly:yellow:user";
++           linux,default-trigger = "ir-user-click";
++           default-state = "off";
++           gpios = <&gpio0 13 GPIO_ACTIVE_HIGH>;
++           pinctrl-names = "default";
++           pinctrl-0 = <&led_user>;
++       };
++   };
+ };
+ 
+ &cpu_l0 {
+@@ -401,7 +434,7 @@
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&rgmii_pins>;
+ 	tx_delay = <0x28>;
+-	rx_delay = <0x11>;
++	rx_delay = <0x1B>;
+ 	status = "okay";
+ };
+ 
+@@ -682,7 +715,7 @@
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&fusb0_int>;
+ 		int-n-gpios = <&gpio1 2 GPIO_ACTIVE_HIGH>;
+-		vbus-5v-gpios = <&gpio2 0 GPIO_ACTIVE_HIGH>;
++		vbus-5v-gpios = <&gpio1 3 GPIO_ACTIVE_HIGH>;
+ 		status = "okay";
+ 	};
+ 
+@@ -812,6 +845,16 @@
+ 		};
+ 	};
+ 
++	leds {
++		led_power: led-power {
++			rockchip,pins = <2 27 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++
++		led_user: led-user {
++			rockchip,pins = <0 13 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++	};
++
+ 	rt5640 {
+ 		rt5640_hpcon: rt5640-hpcon {
+ 			rockchip,pins = <4 21 RK_FUNC_GPIO &pcfg_pull_none>;
+@@ -866,6 +909,21 @@
+ 	status = "disabled";
+ };
+ 
++&route_hdmi {
++	status = "okay";
++	logo,mode = "center";
++};
++
++&cdn_dp {
++    status = "okay";
++    extcon = <&fusb0>;
++    phys = <&tcphy0_dp>;
++};
++
++&dp_in_vopb {
++    status = "disabled";
++};
++
+ &saradc {
+ 	status = "okay";
+ 	vref-supply = <&vccadc_ref>;
+@@ -963,6 +1021,32 @@
+ 	};
+ };
+ 
++&pwm3 {
++	status = "okay";
++	interrupts = <GIC_SPI 61 IRQ_TYPE_LEVEL_HIGH 0>;
++	compatible = "rockchip,remotectl-pwm";
++	remote_pwm_id = <3>;
++	handle_cpu_id = <0>;
++
++    ir_key1{
++        rockchip,usercode = <0xff00>;
++        rockchip,key_table =
++            <0xeb   KEY_POWER>,
++            <0xec   KEY_COMPOSE>,
++            <0xfe   KEY_BACK>,
++            <0xb7   KEY_HOME>,
++            <0xa3   KEY_WWW>,
++            <0xf4   KEY_VOLUMEUP>,
++            <0xa7   KEY_VOLUMEDOWN>,
++            <0xf8   KEY_ENTER>,
++            <0xfc   KEY_UP>,
++            <0xfd   KEY_DOWN>,
++            <0xf1   KEY_LEFT>,
++            <0xe5   KEY_RIGHT>;
++    };
++};
++
++
+ &uart0 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&uart0_xfer &uart0_cts>;
+
