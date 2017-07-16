@@ -70,10 +70,10 @@ setting_debug() {
     sed 's/#\(s\([1-2]\)\)\(.*\)\(ttyS[0-1]\)\(.*\)\(9600\)/\1\3ttyS\2 115200/' \
         -i "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/inittab"
     if [[ $SOCFAMILY == rk3288 ]] && [[ $KERNEL_SOURCE != next ]]; then
-	sed '/vt100/{n;/^$/i f0:12345:respawn:/sbin/agetty 115200 ttyFIQ0 vt100
-	     }' -i "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/inittab"
-    	sed '/#ttyS3/{n;/^#/i ttyFIQ0
-	     }' -i "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/securetty"
+        sed '/vt100/{n;/^$/i f0:12345:respawn:/sbin/agetty 115200 ttyFIQ0 vt100
+             }' -i "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/inittab"
+        sed '/#ttyS3/{n;/^#/i ttyFIQ0
+             }' -i "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/securetty"
     fi
 }
 
@@ -83,6 +83,7 @@ setting_motd() {
     # http://patorjk.com/ font: rectangles
     [[ -f "$CWD/config/motd.$BOARD_NAME" ]] && install -m644 -D "$CWD/config/motd.$BOARD_NAME" "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/motd"
 }
+
 
 setting_rc_local() {
     message "" "setting" "rc.local"

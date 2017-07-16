@@ -11,36 +11,37 @@ build_kernel_pkg() {
     # get kernel version
     kernel_version KERNEL_VERSION
 
+    KERNEL=zImage
+
+    [[ ! -z $ARCH_KERNEL ]] && ARCH=$ARCH_KERNEL && KERNEL=Image
     # adding custom firmware
     cp -a $CWD/bin/$FIRMWARE/* -d $CWD/$BUILD/$PKG/kernel-modules/lib/firmware/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     # install kernel
-    install -Dm644 $CWD/$BUILD/$SOURCE/$KERNEL_DIR/arch/${ARCH}/boot/zImage "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/zImage"
+    install -Dm644 $CWD/$BUILD/$SOURCE/$KERNEL_DIR/arch/${ARCH}/boot/$KERNEL "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/$KERNEL"
 
-    if [[ $SOCFAMILY == rk3288 ]] && [[ ! -z $FIRMWARE ]]; then
-        # adding custom firmware
-#        unzip -o $CWD/bin/$BOARD_NAME/$FIRMWARE -d $CWD/$BUILD/$SOURCE/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-#        cp -a $CWD/$BUILD/$SOURCE/hwpacks-master/system/etc/firmware $CWD/$BUILD/$PKG/kernel-modules/lib/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        cp -a $CWD/bin/$FIRMWARE/* -d $CWD/$BUILD/$PKG/kernel-modules/lib/firmware/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    # adding custom firmware
+#    unzip -o $CWD/bin/$BOARD_NAME/$FIRMWARE -d $CWD/$BUILD/$SOURCE/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+#    cp -a $CWD/$BUILD/$SOURCE/hwpacks-master/system/etc/firmware $CWD/$BUILD/$PKG/kernel-modules/lib/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    [[ ! -z $FIRMWARE ]] && ( cp -a $CWD/bin/$FIRMWARE/* -d $CWD/$BUILD/$PKG/kernel-modules/lib/firmware/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
 
-        # u-boot
-        install -Dm644 $CWD/config/boot_scripts/boot-$SOCFAMILY.cmd "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd"
+    touch "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/.next"
 
-        # add device tree
-        install -Dm644 $CWD/$BUILD/$SOURCE/$KERNEL_DIR/arch/${ARCH}/boot/dts/$DEVICE_TREE_BLOB "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/$DEVICE_TREE_BLOB" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        touch "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/.next"
-    fi
+    # add device tree
+    [[ ! -z $DEVICE_TREE_BLOB && $ARCH == arm ]] && ( install -Dm644 $CWD/$BUILD/$SOURCE/$KERNEL_DIR/arch/${ARCH}/boot/dts/$DEVICE_TREE_BLOB \
+                                                        "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/$DEVICE_TREE_BLOB" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+    [[ $SOCFAMILY == rk33* ]] && ( install -Dm644 $CWD/$BUILD/$SOURCE/$KERNEL_DIR/arch/${ARCH}/boot/dts/rockchip/$DEVICE_TREE_BLOB \
+                                    "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/$DEVICE_TREE_BLOB" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+
+    # u-boot
+    [[ $SOCFAMILY == rk3288 ]] && install -Dm644 $CWD/config/boot_scripts/boot-$SOCFAMILY.cmd "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd"
 
     if [[ $SOCFAMILY == sun* ]]; then
 
         # u-boot
         install -Dm644 $CWD/config/boot_scripts/boot-sunxi.cmd "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd"
 
-        if [[ $KERNEL_SOURCE == next ]];then
-                install -Dm644 $CWD/$BUILD/$SOURCE/$KERNEL_DIR/arch/${ARCH}/boot/dts/$DEVICE_TREE_BLOB "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/$DEVICE_TREE_BLOB" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-                touch "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/.next"
-        else
-
+        if [[ $KERNEL_SOURCE != next ]];then
             if [[ $BOARD_NAME == cubietruck ]]; then
                 # vga | screen0_output_type = 4
                 sed 's#screen0_output_type = [0-9]#screen0_output_type = 4#' "$CWD/config/boards/$BOARD_NAME/$BOARD_NAME.fex" \
@@ -71,7 +72,8 @@ EOF
     fi
 
     # compile boot script
-    $CWD/$BUILD/$SOURCE/$BOOT_LOADER/tools/mkimage -C none -A arm -T script -d $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.scr" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    [[ -f $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd ]] && ( $CWD/$BUILD/$SOURCE/$BOOT_LOADER/tools/mkimage -C none -A arm -T script -d $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd \
+                                                                        "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.scr" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
 
     # u-boot
     [[ -f "$CWD/$BUILD/$SOURCE/$BOOT_LOADER/$BOOT_LOADER_BIN" ]] && install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER/$BOOT_LOADER_BIN" "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/$BOOT_LOADER_BIN"
