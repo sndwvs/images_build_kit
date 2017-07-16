@@ -11,5 +11,5 @@ PWR_HLD: 0,0,A,0,1
 #FDT_NAME: rk-kernel.dtb
 #RECOVER_KEY: 1,1,0,20,0
 #in section; per section 512(0x200) bytes
-CMDLINE: console=tty1 console=ttyS0,1500000n8 root=/dev/mmcblk1p6 ro rootwait loglevel=8 mtdparts=rk29xxnand:0x00002000@0x00002000(uboot),0x00002000@0x00004000(trust),0x00008000@0x00006000(resource),0x0000A000@0x0000E000(kernel),0x00002000@0x00018000(backup),-@0x0001A000(boot)
+CMDLINE: console=ttyS1,1500000n8 root=/dev/mmcblk1p6 ro rootwait loglevel=8 mtdparts=rk29xxnand:0x00002000@0x00002000(uboot),0x00002000@0x00004000(trust),0x00008000@0x00006000(resource),0x0000A000@0x0000E000(kernel),0x00002000@0x00018000(backup),-@0x0001A000(boot)
 

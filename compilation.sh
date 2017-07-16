@@ -126,14 +126,14 @@ compile_kernel (){
     install -D $CWD/config/kernel/$LINUX_CONFIG $CWD/$BUILD/$SOURCE/$KERNEL_DIR/.config || (message "err" "details" && exit 1) || exit 1
 
     if [[ $SOCFAMILY == rk3* ]]; then
-#        if [ "$KERNEL_SOURCE" != "next" ]; then
+        if [ "$KERNEL_SOURCE" != "next" ]; then
             # fix firmware /system /lib
-#            find drivers/net/wireless/rockchip_wlan/rkwifi/ -type f -exec \
-#            sed -i "s#\/system\/etc\/firmware\/#\/lib\/firmware\/#" {} \;
+            find drivers/net/wireless/rockchip_wlan/rkwifi/ -type f -exec \
+            sed -i "s#\/system\/etc\/firmware\/#\/lib\/firmware\/#" {} \;
 
             # fix kernel version
 #            sed -i "/SUBLEVEL = 0/d" Makefile
-#        fi
+        fi
 
         # fix build firmware
         rsync -ar --ignore-existing $CWD/bin/$FIRMWARE/brcm/ -d $CWD/$BUILD/$SOURCE/$KERNEL_DIR/firmware/brcm >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1

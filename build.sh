@@ -183,6 +183,7 @@ for image_type in ${CREATE_IMAGE[@]}; do
     if [[ $image_type == mini ]]; then
         download_rootfs
         prepare_rootfs
+        setting_hostname
         setting_fstab
         setting_debug
         setting_motd

@@ -6,10 +6,11 @@ case "$1" in
 
                 # check root disk
                 device=$(lsblk -in | grep "/$" | cut -d '-' -f2 | cut -d ' ' -f1 | sed 's/^\([a-z]*\)\([0-9]*\)\(\w*\)/\1\2/')
+                partition=$(lsblk -in | grep "/$" | cut -d '-' -f2 | cut -d ' ' -f1 | grep -oP '(?<=\d)p(\d*)')
 
                 if [ -f /tmp/part ]; then
                     echo -e "\e[0;37mResizing SD card file-system\x1B[0m"
-                    /sbin/resize2fs -p /dev/${device}p1 >/dev/null
+                    /sbin/resize2fs -p /dev/${device}${partition} >/dev/null
 
                     echo -e "\e[0;37mCreating 128Mb emergency swap area\x1B[0m"
                     dd if=/dev/zero of=/swap bs=1024 count=131072 status=noxfer >/dev/null 2>&1
@@ -31,7 +32,7 @@ case "$1" in
                     usermod -p 'password' root
 
                     echo -e "\e[0;37mResizing partition SD card\x1B[0m"
-                    (( echo d; echo p; echo n; echo p; echo 1; echo; echo; echo w; ) | fdisk /dev/$device )>/dev/null 2>&1
+                    (( echo d; echo p; echo n; echo p; echo ${partition}; echo; echo; echo w; ) | fdisk /dev/$device )>/dev/null 2>&1
                     #PARTITIONS=$(($(fdisk -l $device | grep /dev/$device | wc -l)-1))
                     #((echo d; echo n; echo p; echo $PARTITIONS; echo; echo; echo w;) | fdisk /dev/$device)>/dev/null
                     #((echo d; echo $PARTITIONS; echo n; echo p; echo ; echo ; echo ; echo w;) | fdisk /dev/$device)>/dev/null
