@@ -162,10 +162,10 @@ if [[ $COMPILE_BINARIES == true ]]; then
         create_bootloader_pack
     fi
 
-    if [[ $SOCFAMILY == rk3399 ]]; then
-        build_kernel_img
-        build_resource_img
-    fi
+#    if [[ $SOCFAMILY == rk3399 ]]; then
+#        build_kernel_img
+#        build_resource_img
+#    fi
 
     if [[ $SOCFAMILY == sun* ]]; then
         compile_sunxi_tools
