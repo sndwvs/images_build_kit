@@ -32,10 +32,8 @@ case "$1" in
                     usermod -p 'password' root
 
                     echo -e "\e[0;37mResizing partition SD card\x1B[0m"
-                    (( echo d; echo p; echo n; echo p; echo ${partition}; echo; echo; echo w; ) | fdisk /dev/$device )>/dev/null 2>&1
-                    #PARTITIONS=$(($(fdisk -l $device | grep /dev/$device | wc -l)-1))
-                    #((echo d; echo n; echo p; echo $PARTITIONS; echo; echo; echo w;) | fdisk /dev/$device)>/dev/null
-                    #((echo d; echo $PARTITIONS; echo n; echo p; echo ; echo ; echo ; echo w;) | fdisk /dev/$device)>/dev/null
+                    offset=$(fdisk -l /dev/${device} | tac | head -n 1 | awk '{print $2}')
+                    (echo -e "\nd\np\nn\np\n$(echo ${partition} | sed 's/[a-z]//')\n${offset}\n\nw" | fdisk /dev/$device)>/dev/null 2>&1
 
                     # add part one
                     touch /tmp/part
