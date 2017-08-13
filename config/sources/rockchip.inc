@@ -6,6 +6,7 @@ RK2918_TOOLS="rk2918_tools"
 
 URL_RKBIN="https://github.com/rockchip-linux"
 RKBIN="rkbin"
+RKBIN_BRANCH="bdf68e257ca5aecbfac1bee4a55c64c97a3022f9"
 
 URL_TOOLS="https://github.com/neo-technologies"
 MKBOOTIMG_TOOLS="rockchip-mkbootimg"
