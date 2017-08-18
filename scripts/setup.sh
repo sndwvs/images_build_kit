@@ -13,7 +13,36 @@ fi
 ROOT_DISK=$(lsblk -in |  grep "/$" | cut -d '-' -f2 | cut -d ' ' -f1 | sed 's/^\([a-z]*\)\([0-9]*\)\(\w*\)/\1\2/')
 DIRS=("/bin" "/boot" "/dev" "/etc" "/home" "/lib" "/media" "/mnt" "/opt" "/root" "/run" "/sbin" "/srv" "/swap" "/tmp" "/usr" "/var")
 OUTPUT="/prepare"
+OFFSET=$(fdisk -l /dev/$ROOT_DISK | tac | head -n 1 | awk '{print $2}')
+PART=1
 
+
+case $(hostname) in
+    *rk3*)
+            START_LOADER=64
+            LOADER=idbloader_mmc.img
+    ;;
+    cubietruck)
+            START_LOADER=8
+    ;;
+    orange_pi_plus_2e)
+            START_LOADER=8
+    ;;
+    *)
+            exit
+    ;;
+
+esac
+
+
+#echo $START_LOADER
+#echo $OFFSET
+#echo $(($OFFSET-1-$START_LOADER))
+
+#dd if=/dev/$ROOT_DISK of=tt skip=$START_LOADER bs=$(($OFFSET-1-$START_LOADER)) count=1 conv=notrunc
+#dd if=tt of=/dev/mmcblk1 seek=$START_LOADER
+#dd if=$LOADER of=/dev/mmcblk1 seek=$START_LOADER
+#exit
 
 #---------------------------------------------
 # selected message
@@ -81,7 +110,7 @@ menu() {
 # selected disk
 #---------------------------------------------
 get_disks() {
-    disks=($(lsblk | awk '{ if ($6 == "disk" && $1 !~ /boot/)  print $1}'))
+    disks=($(lsblk | awk '{ if ($6 == "disk" && $1 !~ /boot|rpmb/)  print $1}'))
 
     local options
 
@@ -106,22 +135,22 @@ get_disks() {
 prepare_disk() {
     local DISK=$1
 
-    if [[ ! -d $OUTPUT ]]; then 
+    if [[ ! -d $OUTPUT ]]; then
         mkdir -p $OUTPUT
     fi
 
     # clear partition
-    dd if=/dev/zero of=/dev/$DISK bs=1M count=10 >/dev/null 2>&1
+    dd if=/dev/zero of=/dev/$DISK bs=1 count=64 seek=446 >/dev/null 2>&1
 
     # save u-boot
-    dd if=/boot/u-boot-sunxi-with-spl.bin of=/dev/$DISK bs=1024 seek=8 status=noxfer >/dev/null 2>&1
+#    dd if=/boot/u-boot-sunxi-with-spl.bin of=/dev/$DISK bs=1024 seek=8 status=noxfer >/dev/null 2>&1
 
-    echo -e "\nn\np\n1\n2048\n\nw" | fdisk "/dev/$DISK" >/dev/null 2>&1
+    echo -e "\nn\np\n${PART}\n${OFFSET}\n\nw" | fdisk "/dev/$DISK" >/dev/null 2>&1
 
     if [[ $DISK =~ mmc* ]] ;then
-        DISK=${DISK}p1
+        DISK=${DISK}p${PART}
     else
-        DISK=${DISK}1
+        DISK=${DISK}${PART}
     fi
 
     echo y | mkfs.ext4 -F -m 0 -L linuxroot "/dev/$DISK" >/dev/null 2>&1
@@ -156,6 +185,15 @@ transfer() {
     ) | dialog --title "Transfer system" --gauge "Copy system..." 6 60
 }
 
+#---------------------------------------------
+# fix fstab/boot partition
+#---------------------------------------------
+fix_config() {
+    [[ ! $(grep "$1" $OUTPUT/boot/uEnv.txt) ]] && ( echo "rootdev=/dev/$1" >> $OUTPUT/boot/uEnv.txt )
+    [[ ! $(grep "^/dev/$1" $OUTPUT/etc/fstab) ]] && sed -i "s#^\/dev\/\([a-z0-9]*\)*#\/dev\/$1    #" $OUTPUT/etc/fstab
+    sed -i '/^if*/,/^$/d' $OUTPUT/etc/issue
+}
+
 options+=("1" "system moving on the emmc or nand")
 #options+=("2" "system moving on the nand")
 #options+=("3" "system moving on the sata")
@@ -178,12 +216,11 @@ mount /dev/$DISK $OUTPUT
 
 transfer
 
+fix_config "$DISK"
+
 umount $OUTPUT
 
 rmdir $OUTPUT
 
-#msg "WARNING" "remove the memory card and restart the system"
 msginfo "\nremove the memory card and restart the system"
-
-
 
