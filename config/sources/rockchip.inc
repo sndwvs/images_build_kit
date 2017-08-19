@@ -45,13 +45,13 @@ create_uboot()
 {
     pushd $CWD/$BUILD/$SOURCE/$BOOT_LOADER >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    if [[ $SOCFAMILY == rk32* ]]; then
-        # U-Boot SPL, with SPL_BACK_TO_BROM option enabled
-        tools/mkimage -n $SOCFAMILY -T rksd -d spl/u-boot-spl-dtb.bin $BOOT_LOADER_BIN >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        cat u-boot-dtb.bin >> $BOOT_LOADER_BIN || exit 1
-    fi
+#    if [[ $SOCFAMILY == rk32* ]]; then
+#        # U-Boot SPL, with SPL_BACK_TO_BROM option enabled
+#        tools/mkimage -n $SOCFAMILY -T rksd -d spl/u-boot-spl-dtb.bin $BOOT_LOADER_BIN >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+#        cat u-boot-dtb.bin >> $BOOT_LOADER_BIN || exit 1
+#    fi
 
-    if [[ $SOCFAMILY == rk33* ]]; then
+    if [[ $SOCFAMILY == rk3* ]]; then
         if [[ $1 == mmc ]];then
             tools/mkimage -n $SOCFAMILY -T rksd -d $CWD/$BUILD/$SOURCE/$RKBIN/${SOCFAMILY:0:4}/$DDR $BOOT_LOADER_BIN >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         else
