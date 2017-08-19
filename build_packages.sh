@@ -201,7 +201,7 @@ create_bootloader_pack(){
     message "" "create" "bootloader pack"
     cd $CWD/$BUILD/$OUTPUT/ || exit 1
     install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER/$BOOT_LOADER_BIN" "$CWD/$BUILD/$OUTPUT/boot/$BOOT_LOADER_BIN" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    install -Dm644 "$CWD/$BUILD/$SOURCE/$RKBIN/rk32/rk3288_ubootloader_v1.01.06.bin" "$CWD/$BUILD/$OUTPUT/boot/rk3288_ubootloader_v1.01.06.bin" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    install -Dm644 "$CWD/$BUILD/$SOURCE/$RKBIN/${SOCFAMILY:0:4}/$BLOB_LOADER" "$CWD/$BUILD/$OUTPUT/boot/$BLOB_LOADER" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     tar cJf $CWD/$BUILD/$OUTPUT/$FLASH/boot.tar.xz boot || exit 1
 }
 
