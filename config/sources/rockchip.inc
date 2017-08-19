@@ -43,21 +43,28 @@ esac
 
 create_uboot()
 {
+    pushd $CWD/$BUILD/$SOURCE/$BOOT_LOADER >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
     if [[ $SOCFAMILY == rk32* ]]; then
         # U-Boot SPL, with SPL_BACK_TO_BROM option enabled
-        tools/mkimage -n $SOCFAMILY -T rksd -d spl/u-boot-spl-dtb.bin $BOOT_LOADER_BIN
-        cat u-boot-dtb.bin >> $BOOT_LOADER_BIN
+        tools/mkimage -n $SOCFAMILY -T rksd -d spl/u-boot-spl-dtb.bin $BOOT_LOADER_BIN >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        cat u-boot-dtb.bin >> $BOOT_LOADER_BIN || exit 1
     fi
 
     if [[ $SOCFAMILY == rk33* ]]; then
-        # U-Boot SPL, with SPL_BACK_TO_BROM option disabled SD
-        dd if=$CWD/$BUILD/$SOURCE/$RKBIN/${SOCFAMILY:0:4}/$DDR of=ddr.bin bs=4 skip=1 >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        tools/mkimage -n $SOCFAMILY -T rksd -d ddr.bin $BOOT_LOADER_BIN >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        [[ $1 == mmc ]] && ( tools/mkimage -n $SOCFAMILY -T rksd -d $CWD/$BUILD/$SOURCE/$RKBIN/${SOCFAMILY:0:4}/$DDR $BOOT_LOADER_BIN >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
-        rm ddr.bin || exit 1
+        if [[ $1 == mmc ]];then
+            tools/mkimage -n $SOCFAMILY -T rksd -d $CWD/$BUILD/$SOURCE/$RKBIN/${SOCFAMILY:0:4}/$DDR $BOOT_LOADER_BIN >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        else
+            # U-Boot SPL, with SPL_BACK_TO_BROM option disabled SD
+            dd if=$CWD/$BUILD/$SOURCE/$RKBIN/${SOCFAMILY:0:4}/$DDR of=ddr.bin bs=4 skip=1 >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            tools/mkimage -n $SOCFAMILY -T rksd -d ddr.bin $BOOT_LOADER_BIN >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            rm ddr.bin || exit 1
+        fi
+
         cat $CWD/$BUILD/$SOURCE/$RKBIN/${SOCFAMILY:0:4}/$MINI_LOADER >> $BOOT_LOADER_BIN || exit 1
         $CWD/$BUILD/$SOURCE/$RKBIN/tools/loaderimage --pack --uboot u-boot.bin uboot.img >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
+    popd >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 
