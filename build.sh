@@ -159,7 +159,6 @@ if [[ $COMPILE_BINARIES == true ]]; then
         compile_rkflashtool
         compile_mkbooting
         add_linux_upgrade_tool
-        create_bootloader_pack
     fi
 
 #    if [[ $SOCFAMILY == rk3399 ]]; then
