@@ -192,11 +192,13 @@ EOF
 
 
 create_img() {
-    if [ "$1" = "xfce" ]; then
+
+    if [[ $1 == xfce ]]; then
         IMAGE="$ROOTFS_XFCE"
     else
         IMAGE="$ROOTFS"
     fi
+
     # +600M for create swap firstrun
     ROOTFS_SIZE=$(expr $(du -sH $CWD/$BUILD/$SOURCE/$IMAGE | awk '{print $1}') / 1024 + 600)"M"
 
