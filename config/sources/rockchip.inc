@@ -43,7 +43,6 @@ esac
 
 create_uboot()
 {
-
     if [[ $SOCFAMILY == rk32* ]]; then
         # U-Boot SPL, with SPL_BACK_TO_BROM option enabled
         tools/mkimage -n $SOCFAMILY -T rksd -d spl/u-boot-spl-dtb.bin $BOOT_LOADER_BIN
@@ -54,13 +53,10 @@ create_uboot()
         # U-Boot SPL, with SPL_BACK_TO_BROM option disabled SD
         dd if=$CWD/$BUILD/$SOURCE/$RKBIN/${SOCFAMILY:0:4}/$DDR of=ddr.bin bs=4 skip=1 >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         tools/mkimage -n $SOCFAMILY -T rksd -d ddr.bin $BOOT_LOADER_BIN >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        [[ $1 == mmc ]] && ( tools/mkimage -n $SOCFAMILY -T rksd -d $CWD/$BUILD/$SOURCE/$RKBIN/${SOCFAMILY:0:4}/$DDR $BOOT_LOADER_BIN >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
         rm ddr.bin || exit 1
         cat $CWD/$BUILD/$SOURCE/$RKBIN/${SOCFAMILY:0:4}/$MINI_LOADER >> $BOOT_LOADER_BIN || exit 1
         $CWD/$BUILD/$SOURCE/$RKBIN/tools/loaderimage --pack --uboot u-boot.bin uboot.img >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
-        # U-Boot SPL, with SPL_BACK_TO_BROM option disabled MMC
-        tools/mkimage -n $SOCFAMILY -T rksd -d $CWD/$BUILD/$SOURCE/$RKBIN/${SOCFAMILY:0:4}/$DDR idbloader_mmc.img >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        cat $CWD/$BUILD/$SOURCE/$RKBIN/${SOCFAMILY:0:4}/$MINI_LOADER >> idbloader_mmc.img || exit 1
     fi
 }
 

@@ -228,8 +228,9 @@ for image_type in ${CREATE_IMAGE[@]}; do
     fi
 done
 
-if [[ $TOOLS_PACK == true && $SOCFAMILY == rk3288 ]]; then
-    build_flash_script
+if [[ $TOOLS_PACK == true && $SOCFAMILY == rk3* ]]; then
+#    build_flash_script
+    create_bootloader_pack
     create_tools_pack
 fi
 
