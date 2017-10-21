@@ -68,7 +68,7 @@ compile_boot_loader (){
     message "" "compiling" "$BOOT_LOADER"
     cd $CWD/$BUILD/$SOURCE/$BOOT_LOADER >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    [[ $ARCH_KERNEL == arm64 ]] && local CROSS=$CROSS64
+    [[ $KARCH == arm64 ]] && local CROSS=$CROSS64
 
     make ARCH=$ARCH CROSS_COMPILE=$CROSS clean >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
@@ -102,8 +102,7 @@ compile_kernel (){
 
     local KERNEL=zImage
 
-    if [[ $ARCH_KERNEL == arm64 ]]; then
-        local ARCH=$ARCH_KERNEL
+    if [[ $KARCH == arm64 ]]; then
         local CROSS=$CROSS64
         local KERNEL=Image
         local DEVICE_TREE_BLOB=dtbs
@@ -140,24 +139,24 @@ compile_kernel (){
         # fix build firmware
         rsync -ar --ignore-existing $CWD/bin/$FIRMWARE/brcm/ -d $CWD/$BUILD/$SOURCE/$KERNEL_DIR/firmware/brcm >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-#        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS menuconfig  || exit 1
-        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS $KERNEL modules || (message "err" "details" && exit 1) || exit 1
-        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS $DEVICE_TREE_BLOB || (message "err" "details" && exit 1) || exit 1
+#        make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS menuconfig  || exit 1
+        make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS $KERNEL modules || (message "err" "details" && exit 1) || exit 1
+        make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS $DEVICE_TREE_BLOB || (message "err" "details" && exit 1) || exit 1
     fi
 
     if [[ $SOCFAMILY == sun* ]]; then
-#        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS menuconfig  || exit 1
-        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS oldconfig
-        make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS $KERNEL modules || (message "err" "details" && exit 1) || exit 1
+#        make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS menuconfig  || exit 1
+        make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS oldconfig
+        make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS $KERNEL modules || (message "err" "details" && exit 1) || exit 1
 
         if [[ "$KERNEL_SOURCE" == "next" ]]; then
-            make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS $DEVICE_TREE_BLOB || (message "err" "details" && exit 1) || exit 1
+            make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS $DEVICE_TREE_BLOB || (message "err" "details" && exit 1) || exit 1
         fi
     fi
 
-    make $CTHREADS O=$(pwd) ARCH=$ARCH CROSS_COMPILE=$CROSS INSTALL_MOD_PATH=$CWD/$BUILD/$PKG/kernel-modules modules_install >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    make $CTHREADS O=$(pwd) ARCH=$ARCH CROSS_COMPILE=$CROSS INSTALL_MOD_PATH=$CWD/$BUILD/$PKG/kernel-modules firmware_install >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    make $CTHREADS O=$(pwd) ARCH=$ARCH CROSS_COMPILE=$CROSS INSTALL_HDR_PATH=$CWD/$BUILD/$PKG/kernel-headers/usr headers_install >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make $CTHREADS O=$(pwd) ARCH=$KARCH CROSS_COMPILE=$CROSS INSTALL_MOD_PATH=$CWD/$BUILD/$PKG/kernel-modules modules_install >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make $CTHREADS O=$(pwd) ARCH=$KARCH CROSS_COMPILE=$CROSS INSTALL_MOD_PATH=$CWD/$BUILD/$PKG/kernel-modules firmware_install >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make $CTHREADS O=$(pwd) ARCH=$KARCH CROSS_COMPILE=$CROSS INSTALL_HDR_PATH=$CWD/$BUILD/$PKG/kernel-headers/usr headers_install >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 

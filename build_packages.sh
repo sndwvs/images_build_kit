@@ -12,13 +12,13 @@ build_kernel_pkg() {
     kernel_version KERNEL_VERSION
 
     KERNEL=zImage
+    [[ $KARCH == arm64 ]] && KERNEL=Image
 
-    [[ ! -z $ARCH_KERNEL ]] && ARCH=$ARCH_KERNEL && KERNEL=Image
     # adding custom firmware
     cp -a $CWD/bin/$FIRMWARE/* -d $CWD/$BUILD/$PKG/kernel-modules/lib/firmware/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     # install kernel
-    install -Dm644 $CWD/$BUILD/$SOURCE/$KERNEL_DIR/arch/${ARCH}/boot/$KERNEL "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/$KERNEL"
+    install -Dm644 $CWD/$BUILD/$SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/$KERNEL "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/$KERNEL"
 
     # adding custom firmware
 #    unzip -o $CWD/bin/$BOARD_NAME/$FIRMWARE -d $CWD/$BUILD/$SOURCE/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
@@ -28,9 +28,9 @@ build_kernel_pkg() {
     touch "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/.next"
 
     # add device tree
-    [[ ! -z $DEVICE_TREE_BLOB && $ARCH == arm ]] && ( install -Dm644 $CWD/$BUILD/$SOURCE/$KERNEL_DIR/arch/${ARCH}/boot/dts/$DEVICE_TREE_BLOB \
+    [[ ! -z $DEVICE_TREE_BLOB && $ARCH == arm ]] && ( install -Dm644 $CWD/$BUILD/$SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/$DEVICE_TREE_BLOB \
                                                         "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/$DEVICE_TREE_BLOB" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
-    [[ $SOCFAMILY == rk33* ]] && ( install -Dm644 $CWD/$BUILD/$SOURCE/$KERNEL_DIR/arch/${ARCH}/boot/dts/rockchip/$DEVICE_TREE_BLOB \
+    [[ $SOCFAMILY == rk33* ]] && ( install -Dm644 $CWD/$BUILD/$SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/rockchip/$DEVICE_TREE_BLOB \
                                     "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/$DEVICE_TREE_BLOB" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
 
     # u-boot
