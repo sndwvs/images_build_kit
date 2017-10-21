@@ -70,6 +70,8 @@ compile_boot_loader (){
 
     [[ $KARCH == arm64 ]] && local CROSS=$CROSS64
 
+    local ARCH=arm
+
     make ARCH=$ARCH CROSS_COMPILE=$CROSS clean >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     make ARCH=$ARCH $BOOT_LOADER_CONFIG CROSS_COMPILE=$CROSS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
