@@ -44,7 +44,7 @@ URL_ARM64_XTOOLS="$URL_XTOOLS/$BASE_VERSION_XTOOLS/$XTOOLS_ARM64_SUFFIX/$ARM64_X
 #---------------------------------------------
 #URL_ROOTFS="ftp://ftp.arm.slackware.com/slackwarearm/slackwarearm-devtools/minirootfs/roots/"
 URL_ROOTFS="http://dl.fail.pp.ua/slackware/minirootfs/"
-ROOTFS_NAME=$(wget -q -O - $URL_ROOTFS | grep -oP "(slack-current[\.\-\+\d\w]+.tar.xz)" | sort -ur | head -n1 | cut -d '.' -f1)
+ROOTFS_NAME=$(wget -q -O - $URL_ROOTFS | grep -oP "(slack-current-${ARCH}[\.\-\+\d\w]+.tar.xz)" | sort -ur | head -n1 | cut -d '.' -f1)
 ROOTFS_VERSION=$(date +%Y%m%d)
 
 #---------------------------------------------
