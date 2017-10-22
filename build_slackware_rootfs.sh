@@ -311,7 +311,7 @@ download_pkg() {
         if [[ ! -z ${pkg} ]];then
            PKG_NAME=$(wget -q -O - ${url}/${category}/ | cut -f2 -d '>' | cut -f1 -d '<' | egrep -om1 "(^$(echo $pkg | sed 's/+/\\\+/g'))-+.*(t.z)")
            message "" "download" "package $category/$PKG_NAME"
-           wget -c -nc -nd -np ${url}/${category}/$PKG_NAME -P $CWD/$BUILD/$PKG/${type}/${category}/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+           wget -c -nc -nd -np ${url}/${category}/$PKG_NAME -P $CWD/$BUILD/$PKG/${type}/${ARCH}/${category}/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
     done
 }
@@ -332,7 +332,7 @@ install_pkg(){
         pkg=$(echo $pkg | cut -f2 -d "/")
         if [[ ! -z ${pkg} ]];then
             message "" "install" "package $category/${pkg}"
-            installpkg --root $CWD/$BUILD/$SOURCE/$ROOTFS $CWD/$BUILD/$PKG/${type}/$category/${pkg}* >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            installpkg --root $CWD/$BUILD/$SOURCE/$ROOTFS $CWD/$BUILD/$PKG/${type}/${ARCH}/$category/${pkg}* >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
     done
 }
