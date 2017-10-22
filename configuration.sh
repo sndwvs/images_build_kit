@@ -58,8 +58,9 @@ export CROSS64="${XTOOLS_ARM64_SUFFIX}-"
 # packages
 #---------------------------------------------
 #URL_DISTR="http://dl.fail.pp.ua/slackware/slackwarearm-14.2/slackware"
-URL_DISTR="http://dl.fail.pp.ua/slackware/slackwarearm-current/slackware"
-URL_DISTR_EXTRA="http://dl.fail.pp.ua/slackware/pkg/arm"
+[[ $ARCH == arm ]] && URL_DISTR="http://dl.fail.pp.ua/slackware/slackwarearm-current/slackware"
+[[ $ARCH == aarch64 ]] && URL_DISTR="http://dl.fail.pp.ua/slackware/slarm64-current/slackware"
+URL_DISTR_EXTRA="http://dl.fail.pp.ua/slackware/pkg/${ARCH}"
 
 #---------------------------------------------
 # claear enviroment
