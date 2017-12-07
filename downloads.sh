@@ -9,27 +9,31 @@ fi
 #---------------------------------------------
 # downloads sources and binares
 #---------------------------------------------
-download (){
 
-    for XTOOLS in $ARM_XTOOLS $ARM64_XTOOLS; do
-        if [[ ! $(echo  $XTOOLS | grep aarch64) ]]; then
-            URL=$URL_ARM_XTOOLS
-        else
-            URL=$URL_ARM64_XTOOLS
-        fi
-        [[ -f $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz.asc ]] && rm $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz.asc > /dev/null
-        wget --no-check-certificate $URL.tar.xz.asc -P $CWD/$BUILD/$SOURCE/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        MD5_XTOOLS=$(awk '{print $1}' $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz.asc)
-        if ! $(echo "$MD5_XTOOLS  $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz" | md5sum --status -c - 2>/dev/null) ; then
-            message "" "download" "$XTOOLS"
-            [[ -f $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz ]] && ( rm $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
-            wget --no-check-certificate $URL.tar.xz -P $CWD/$BUILD/$SOURCE/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-            if [[ ! -d $CWD/$BUILD/$SOURCE/$XTOOLS ]]; then
-                message "" "extract" "$XTOOLS"
-                [[ -f $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz ]] && tar xpf $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz -C "$CWD/$BUILD/$SOURCE/" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+download_xtools() {
+    local c=0
+    for XTOOLS in ${XTOOLS[*]}; do
+        if [[ $(echo $XTOOLS | grep $ARCH) ]]; then
+            [[ -f $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz.asc ]] && rm $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz.asc > /dev/null
+            wget --no-check-certificate ${URL_XTOOLS[$c]}/$XTOOLS.tar.xz.asc -P $CWD/$BUILD/$SOURCE/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            MD5_XTOOLS=$(awk '{print $1}' $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz.asc)
+            if ! $(echo "$MD5_XTOOLS  $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz" | md5sum --status -c - 2>/dev/null) ; then
+                message "" "download" "$XTOOLS"
+                [[ -f $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz ]] && ( rm $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+                wget --no-check-certificate ${URL_XTOOLS[$c]}/$XTOOLS.tar.xz -P $CWD/$BUILD/$SOURCE/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+                if [[ ! -d $CWD/$BUILD/$SOURCE/$XTOOLS ]]; then
+                    message "" "extract" "$XTOOLS"
+                    [[ -f $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz ]] && tar xpf $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz -C "$CWD/$BUILD/$SOURCE/" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+                fi
             fi
         fi
+        ((c+=1))
     done
+}
+
+download() {
+
+    download_xtools
 
     message "" "download" "$BOOT_LOADER"
     if [ -d $CWD/$BUILD/$SOURCE/$BOOT_LOADER ]; then
