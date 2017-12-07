@@ -1,25 +1,23 @@
 diff --git a/arch/arm/boot/dts/sun7i-a20-cubietruck.dts b/arch/arm/boot/dts/sun7i-a20-cubietruck.dts
-index 8da939a..42fd205 100644
+index 83f39b0..283a446 100644
 --- a/arch/arm/boot/dts/sun7i-a20-cubietruck.dts
 +++ b/arch/arm/boot/dts/sun7i-a20-cubietruck.dts
-@@ -56,6 +56,7 @@
- 
- 	aliases {
- 		serial0 = &uart0;
-+		serial2 = &uart2;
- 	};
- 
- 	chosen {
-@@ -307,6 +308,12 @@
- 	status = "okay";
+@@ -210,6 +210,18 @@
+ 	allwinner,pull = <SUN4I_PINCTRL_PULL_UP>;
  };
  
-+&uart2 {
++&nfc {
 +	pinctrl-names = "default";
-+	pinctrl-0 = <&uart2_pins_a>;
++	pinctrl-0 = <&nand_pins_a>, <&nand_cs0_pins_a>, <&nand_rb0_pins_a>;
 +	status = "okay";
++
++	nand@0 {
++		reg = <0>;
++		allwinner,rb = <0>;
++		nand-ecc-mode = "hw";
++	};
 +};
 +
- &usb_otg {
- 	dr_mode = "otg";
+ &ohci0 {
  	status = "okay";
+ };
