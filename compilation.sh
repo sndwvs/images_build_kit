@@ -131,6 +131,10 @@ compile_kernel (){
     # use proven config
     install -D $CWD/config/kernel/$LINUX_CONFIG $CWD/$BUILD/$SOURCE/$KERNEL_DIR/.config || (message "err" "details" && exit 1) || exit 1
 
+    [[ "$KERNEL_SOURCE" != next ]] && local CROSS=$OLD_CROSS
+    gcc_version $CROSS GCC_VERSION
+    message "" "version" "$GCC_VERSION"
+
     if [[ $SOCFAMILY == rk3* ]]; then
         if [ "$KERNEL_SOURCE" != "next" ]; then
             # fix firmware /system /lib
@@ -139,12 +143,7 @@ compile_kernel (){
 
             # fix kernel version
 #            sed -i "/SUBLEVEL = 0/d" Makefile
-
-             local CROSS=$OLD_CROSS
         fi
-
-        gcc_version $CROSS GCC_VERSION
-        message "" "version" "$GCC_VERSION"
 
         # fix build firmware
         rsync -ar --ignore-existing $CWD/bin/$FIRMWARE/brcm/ -d $CWD/$BUILD/$SOURCE/$KERNEL_DIR/firmware/brcm >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
