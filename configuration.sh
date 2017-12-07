@@ -21,23 +21,26 @@ BOOT_LOADER_BRANCH="" #>v2017.05
 #---------------------------------------------
 # xtools configuration
 #---------------------------------------------
-URL_XTOOLS="https://releases.linaro.org/components/toolchain/binaries"
+BASE_URL_XTOOLS="https://releases.linaro.org/components/toolchain/binaries"
 XTOOLS_ARM_SUFFIX="arm-linux-gnueabihf"
 XTOOLS_ARM64_SUFFIX="aarch64-linux-gnu"
 XTOOLS_PREFIX="gcc-linaro"
-if [[ $KERNEL_SOURCE != next ]]; then
-    BASE_VERSION_XTOOLS="5.4-2017.05"
-    VERSION_XTOOLS="5.4.1-2017.05"
-#    BASE_VERSION_XTOOLS="4.9-2017.01"
-#    VERSION_XTOOLS="4.9.4-2017.01"
-else
-    BASE_VERSION_XTOOLS="6.3-2017.05"
-    VERSION_XTOOLS="6.3.1-2017.05"
-fi
-ARM_XTOOLS="$XTOOLS_PREFIX-$VERSION_XTOOLS-$(uname -m)_$XTOOLS_ARM_SUFFIX"
-ARM64_XTOOLS="$XTOOLS_PREFIX-$VERSION_XTOOLS-$(uname -m)_$XTOOLS_ARM64_SUFFIX"
-URL_ARM_XTOOLS="$URL_XTOOLS/$BASE_VERSION_XTOOLS/$XTOOLS_ARM_SUFFIX/$ARM_XTOOLS"
-URL_ARM64_XTOOLS="$URL_XTOOLS/$BASE_VERSION_XTOOLS/$XTOOLS_ARM64_SUFFIX/$ARM64_XTOOLS"
+
+OLD_BASE_VERSION_XTOOLS="5.4-2017.05"
+OLD_VERSION_XTOOLS="5.4.1-2017.05"
+#    OLD_BASE_VERSION_XTOOLS="4.9-2017.01"
+#    OLD_VERSION_XTOOLS="4.9.4-2017.01"
+BASE_VERSION_XTOOLS="6.3-2017.05"
+VERSION_XTOOLS="6.3.1-2017.05"
+
+XTOOLS+=("$XTOOLS_PREFIX-$VERSION_XTOOLS-$(uname -m)_$XTOOLS_ARM_SUFFIX")
+XTOOLS+=("$XTOOLS_PREFIX-$VERSION_XTOOLS-$(uname -m)_$XTOOLS_ARM64_SUFFIX")
+XTOOLS+=("$XTOOLS_PREFIX-$OLD_VERSION_XTOOLS-$(uname -m)_$XTOOLS_ARM_SUFFIX")
+XTOOLS+=("$XTOOLS_PREFIX-$OLD_VERSION_XTOOLS-$(uname -m)_$XTOOLS_ARM64_SUFFIX")
+URL_XTOOLS+=("$BASE_URL_XTOOLS/$BASE_VERSION_XTOOLS/$XTOOLS_ARM_SUFFIX")
+URL_XTOOLS+=("$BASE_URL_XTOOLS/$BASE_VERSION_XTOOLS/$XTOOLS_ARM64_SUFFIX")
+URL_XTOOLS+=("$BASE_URL_XTOOLS/$OLD_BASE_VERSION_XTOOLS/$XTOOLS_ARM_SUFFIX")
+URL_XTOOLS+=("$BASE_URL_XTOOLS/$OLD_BASE_VERSION_XTOOLS/$XTOOLS_ARM64_SUFFIX")
 
 #---------------------------------------------
 # rootfs configuration
@@ -50,9 +53,24 @@ ROOTFS_VERSION=$(date +%Y%m%d)
 #---------------------------------------------
 # cross compilation
 #---------------------------------------------
-export PATH=/bin:/sbin:/usr/bin:/usr/sbin:$CWD/$BUILD/${SOURCE}/$ARM_XTOOLS/bin:$CWD/$BUILD/${SOURCE}/$ARM64_XTOOLS/bin:$CWD/$BUILD/$OUTPUT/$TOOLS/
-export CROSS="${XTOOLS_ARM_SUFFIX}-"
-export CROSS64="${XTOOLS_ARM64_SUFFIX}-"
+for XTOOL in ${XTOOLS[*]}; do
+    if [[ $(echo $XTOOL | grep $ARCH) ]]; then
+        [[ $(echo $XTOOLS_ARM_SUFFIX | grep $ARCH) ]] && XTOOLS_ARM_SUFFIX=$XTOOLS_ARM_SUFFIX
+        [[ $(echo $XTOOLS_ARM64_SUFFIX | grep $ARCH) ]] && XTOOLS_ARM_SUFFIX=$XTOOLS_ARM64_SUFFIX
+        VER=$(echo $XTOOL | cut -f3 -d "-")
+        if [[ $VER > 6 ]]; then
+            export CROSS="$CWD/$BUILD/${SOURCE}/$XTOOL/bin/${XTOOLS_ARM_SUFFIX}-"
+        else
+            export OLD_CROSS="$CWD/$BUILD/${SOURCE}/$XTOOL/bin/${XTOOLS_ARM_SUFFIX}-"
+        fi
+#        echo $XTOOL $VER
+    fi
+done
+
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin:$CWD/$BUILD/$OUTPUT/$TOOLS/
+#export PATH=/bin:/sbin:/usr/bin:/usr/sbin:$CWD/$BUILD/${SOURCE}/$ARM_XTOOLS/bin:$CWD/$BUILD/${SOURCE}/$ARM64_XTOOLS/bin:$CWD/$BUILD/$OUTPUT/$TOOLS/
+#export CROSS="${XTOOLS_ARM_SUFFIX}-"
+#export CROSS64="${XTOOLS_ARM64_SUFFIX}-"
 
 #---------------------------------------------
 # packages
