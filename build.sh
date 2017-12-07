@@ -149,8 +149,6 @@ fi
 message "" "start" "build ARCH $ARCH"
 if [[ $COMPILE_BINARIES == true ]]; then
         patching_source "u-boot"
-        gcc_version GCC_VERSION
-        message "" "version" "$GCC_VERSION"
         compile_boot_loader
         patching_source "kernel"
         compile_kernel

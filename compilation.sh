@@ -68,7 +68,10 @@ compile_boot_loader (){
     message "" "compiling" "$BOOT_LOADER"
     cd $CWD/$BUILD/$SOURCE/$BOOT_LOADER >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    [[ $KARCH == arm64 ]] && local CROSS=$CROSS64
+#    [[ $KARCH == arm64 ]] && local CROSS=$CROSS64
+
+    gcc_version $CROSS GCC_VERSION
+    message "" "version" "$GCC_VERSION"
 
     local ARCH=arm
 
@@ -105,7 +108,7 @@ compile_kernel (){
     local KERNEL=zImage
 
     if [[ $KARCH == arm64 ]]; then
-        local CROSS=$CROSS64
+#        local CROSS=$CROSS64
         local KERNEL=Image
         local DEVICE_TREE_BLOB=dtbs
     fi
@@ -136,7 +139,12 @@ compile_kernel (){
 
             # fix kernel version
 #            sed -i "/SUBLEVEL = 0/d" Makefile
+
+             local CROSS=$OLD_CROSS
         fi
+
+        gcc_version $CROSS GCC_VERSION
+        message "" "version" "$GCC_VERSION"
 
         # fix build firmware
         rsync -ar --ignore-existing $CWD/bin/$FIRMWARE/brcm/ -d $CWD/$BUILD/$SOURCE/$KERNEL_DIR/firmware/brcm >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
