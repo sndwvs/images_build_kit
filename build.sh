@@ -165,7 +165,7 @@ if [[ $COMPILE_BINARIES == true ]]; then
 #        build_resource_img
 #    fi
 
-    if [[ $SOCFAMILY == sun* ]]; then
+    if [[ $SOCFAMILY == sun* && $TOOLS_PACK == true ]]; then
         compile_sunxi_tools
         build_sunxi_tools
     fi
