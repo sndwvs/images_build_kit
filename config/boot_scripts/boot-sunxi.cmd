@@ -19,8 +19,8 @@ itest.b *0x28 == 0x03 && echo "U-boot loaded from SPI"
 
 echo "Boot script loaded from ${devtype}"
 
-if test -e ${devtype} 0 ${load_addr} ${prefix}uEnv.txt; then
-	load ${devtype} 0 ${load_addr} ${prefix}uEnv.txt
+if test -e ${devtype} ${devnum} ${load_addr} ${prefix}uEnv.txt; then
+	load ${devtype} ${devnum} ${load_addr} ${prefix}uEnv.txt
 	env import -t ${load_addr} ${filesize}
 fi
 
@@ -35,17 +35,17 @@ setenv bootargs "root=${rootdev} ro rootwait rootfstype=${rootfstype} ${consolea
 
 if test "${disp_mem_reserves}" = "off"; then setenv bootargs "${bootargs} sunxi_ve_mem_reserve=0 sunxi_g2d_mem_reserve=0 sunxi_fb_mem_reserve=16"; fi
 
-load ${devtype} 0 ${kernel_addr_r} ${prefix}zImage
+load ${devtype} ${devnum} ${kernel_addr_r} ${prefix}zImage
 
-if test -e ${devtype} 0 "${prefix}.next"; then
+if test -e ${devtype} ${devnum} "${prefix}.next"; then
 	echo "Found mainline kernel configuration"
-	load ${devtype} 0 ${fdt_addr_r} ${prefix}dtb/${fdtfile}
+	load ${devtype} ${devnum} ${fdt_addr_r} ${prefix}dtb/${fdtfile}
 	fdt addr ${fdt_addr_r}
 	fdt resize
 	bootz ${kernel_addr_r} - ${fdt_addr_r}
 else
 	echo "Found legacy kernel configuration"
-	load ${devtype} 0 ${fdt_addr_r} ${prefix}script.bin
+	load ${devtype} ${devnum} ${fdt_addr_r} ${prefix}script.bin
 	bootz ${kernel_addr_r}
 fi
 
