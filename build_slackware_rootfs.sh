@@ -474,7 +474,7 @@ setting_h3dmode() {
 
 setting_hostname() {
     message "" "setting" "hostname"
-    echo $BOARD_NAME | sed 's/_/-/' > "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/HOSTNAME"
+    echo $BOARD_NAME | sed 's/_/-/g' > "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/HOSTNAME"
 }
 
 

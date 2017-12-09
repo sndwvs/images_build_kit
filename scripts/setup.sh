@@ -25,7 +25,7 @@ case $(hostname) in
     cubietruck)
             START_LOADER=8
     ;;
-    orange_pi_plus_2e)
+    orange-pi-plus-2e)
             START_LOADER=8
     ;;
     *)
