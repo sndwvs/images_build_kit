@@ -21,6 +21,7 @@ while true; do
     "cubietruck" "Allwinner Tech SoC A20 Cortex-A7 2 core 1.2GHz" "off" \
     "firefly_rk3288" "Rockchip SoC RK3288 Cortex-A17 4 core 1.8GHz" "off" \
     "orange_pi_plus_2e" "Allwinner Tech SoC H3 Cortex-A7 4 core 1.6GHz" "off" \
+    "orange_pi_pc" "Allwinner Tech SoC H3 Cortex-A7 4 core 1.6GHz" "off" \
     "firefly_rk3399" "Rockchip SoC RK3399 Cortex-A72/A53 2/4 core 2.0GHz" "off" \
     2>&1 1>&3)
 
