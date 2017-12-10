@@ -68,8 +68,9 @@ setting_debug() {
     message "" "setting" "uart debugging"
     sed 's/#\(ttyS[1-2]\)/\1/' -i "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/securetty"
     sed -e 's/^\(s0:\)\(.*\)\(115200\)/\1\2'$SERIAL_CONSOLE_SPEED'/' \
-        -e 's/#\(s\([1-2]\)\)\(.*\)\(ttyS[0-1]\)\(.*\)\(9600\)/\1\3ttyS\2 '$SERIAL_CONSOLE_SPEED'/' \
+        \
         -i "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/inittab"
+#        -e 's/#\(s\([1-2]\)\)\(.*\)\(ttyS[0-1]\)\(.*\)\(9600\)/\1\3ttyS\2 '$SERIAL_CONSOLE_SPEED'/' \
     if [[ $SOCFAMILY == rk3288 ]] && [[ $KERNEL_SOURCE != next ]]; then
         sed '/vt100/{n;/^$/i f0:12345:respawn:/sbin/agetty '$SERIAL_CONSOLE_SPEED' ttyFIQ0 vt100
              }' -i "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/inittab"
@@ -82,7 +83,7 @@ setting_debug() {
 setting_motd() {
     message "" "setting" "motd message"
     # http://patorjk.com/ font: rectangles
-    [[ -f "$CWD/config/motd.$BOARD_NAME" ]] && install -m644 -D "$CWD/config/motd.$BOARD_NAME" "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/motd"
+    [[ -f "$CWD/config/boards/$BOARD_NAME/motd" ]] && install -m644 -D "$CWD/config/boards/$BOARD_NAME/motd" "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/motd"
 }
 
 
