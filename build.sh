@@ -60,8 +60,8 @@ case $BOARD_NAME in
     cubietruck)
                 options+=("hdmi" "video mode hdmi (defaul vga)" "off")
             ;;
-    orange_pi_plus_2e)
-                options+=("hdmi-to-dvi" "video mode via hdmi-to-dvi adapter" "off")
+    orange_pi*)
+                options+=("hdmi-to-dvi" "video mode via hdmi-to-dvi adapter (defaul hdmi)" "off")
             ;;
 esac
 
@@ -102,6 +102,7 @@ for arg in $result; do
 done
 
 # set default
+[[ $BOARD_NAME == orange_pi* ]] && VIDEO_OUTPUT="hdmi"
 [[ -z $VIDEO_OUTPUT ]] && VIDEO_OUTPUT="vga"
 
 #---------------------------------------------
