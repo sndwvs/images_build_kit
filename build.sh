@@ -12,17 +12,21 @@ CWD=$(pwd)
 TTY_X=$(($(stty size | cut -f2 -d " ")-10)) # determine terminal width
 TTY_Y=$(($(stty size | cut -f1 -d " ")-10)) # determine terminal height
 
+
+#---------------------------------------------
+# get boards
+#---------------------------------------------
+for board in $CWD/config/boards/*/*.conf ;do
+    BOARDS+=( $(echo $board | rev | cut -d '/' -f1 | cut -d '.' -f2 | rev) "" "off")
+done
+
 # Duplicate file descriptor 1 on descriptor 3
 exec 3>&1
 
 while true; do
     BOARD_NAME=$(dialog --title "build rootfs" \
-           --radiolist "selected your board" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
-    "cubietruck" "Allwinner Tech SoC A20 Cortex-A7 2 core 1.2GHz" "off" \
-    "firefly_rk3288" "Rockchip SoC RK3288 Cortex-A17 4 core 1.8GHz" "off" \
-    "orange_pi_plus_2e" "Allwinner Tech SoC H3 Cortex-A7 4 core 1.6GHz" "off" \
-    "orange_pi_pc" "Allwinner Tech SoC H3 Cortex-A7 4 core 1.6GHz" "off" \
-    "firefly_rk3399" "Rockchip SoC RK3399 Cortex-A72/A53 2/4 core 2.0GHz" "off" \
+                --radiolist "selected your board" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
+                "${BOARDS[@]}" \
     2>&1 1>&3)
 
     if [ ! -e $BOARD_NAME ]; then
@@ -32,9 +36,9 @@ done
 
 # kernel source
 result=$(dialog --title "build for $BOARD_NAME" \
-       --radiolist "select kernel source" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
-"legacy" "legacy kernel-source" "off" \
-"next" "mainline kernel-source" "on" \
+        --radiolist "select kernel source" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
+        "legacy" "legacy kernel-source" "off" \
+        "next" "mainline kernel-source" "on" \
 2>&1 1>&3)
 
 exit_status=$?
