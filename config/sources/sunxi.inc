@@ -7,11 +7,14 @@ IMAGE_OFFSET=2048
 
 case "$KERNEL_SOURCE" in
     next)
-            URL_LINUX_SOURCE="http://mirror.yandex.ru/pub/linux/kernel/v4.x"
-            LINUX_SOURCE="linux-$(wget --no-check-certificate -qO- https://www.kernel.org/finger_banner | grep 'The latest stable' | awk '{print $NF}' | head -n1)"
+            URL_LINUX_SOURCE="https://kernel.googlesource.com/pub/scm/linux/kernel/git/stable"
+            LINUX_SOURCE="linux-stable"
+            KERNEL_BRANCH="linux-4.14.y"
             KERNEL_DIR="linux-$SOCFAMILY-$KERNEL_SOURCE"
     ;;
 esac
+
+ROOT_DISK="mmcblk0p1"
 
 URL_SUNXI_TOOLS="https://github.com/linux-sunxi"
 SUNXI_TOOLS="sunxi-tools"
