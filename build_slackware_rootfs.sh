@@ -134,25 +134,25 @@ EOF
 
 
 setting_wifi() {
-    if [[ ! -f "$CWD/bin/$BOARD_NAME/rc.wifi" ]]; then
-        return 0
-    fi
+#    if [[ ! -f "$CWD/bin/$BOARD_NAME/rc.wifi" ]]; then
+#        return 0
+#    fi
 
     message "" "setting" "wifi"
 #    install -m755 -D "$CWD/bin/$BOARD_NAME/rc.wifi" "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.wifi"
 
     # fix wifi driver
-    sed -i "s#wext#nl80211#" $CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.inet1.conf
+    [[ $SOCFAMILY == rk3288 && $KERNEL_SOURCE != next ]] && sed -i "s#wext#nl80211#" $CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.inet1.conf
 
-    if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local | grep wifi) ]]; then
+#    if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local | grep wifi) ]]; then
         # add start wifi boot
-        cat <<EOF >>"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local"
-
-if [ -x /etc/rc.d/rc.wifi ] ; then
-  . /etc/rc.d/rc.wifi \$command
-fi
-EOF
-    fi
+#        cat <<EOF >>"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local"
+#
+#if [ -x /etc/rc.d/rc.wifi ] ; then
+#  . /etc/rc.d/rc.wifi \$command
+#fi
+#EOF
+#    fi
 }
 
 
