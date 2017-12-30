@@ -142,7 +142,9 @@ setting_wifi() {
 #    install -m755 -D "$CWD/bin/$BOARD_NAME/rc.wifi" "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.wifi"
 
     # fix wifi driver
-    [[ $SOCFAMILY != rk3288 && $KERNEL_SOURCE != next ]] && sed -i "s#wext#nl80211#" $CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.inet1.conf
+    if [[ $SOCFAMILY != rk3288 && $KERNEL_SOURCE != next ]]; then
+        sed -i "s#wext#nl80211#" $CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.inet1.conf >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
 
 #    if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local | grep wifi) ]]; then
         # add start wifi boot
