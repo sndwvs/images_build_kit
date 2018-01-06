@@ -28,7 +28,6 @@ but this one was not found yet.
 
 Signed-off-by: Myy <myy@miouyouyou.fr>
 
-diff -Naur a/arch/arm/boot/dts/rk3288-firefly.dtsi b/arch/arm/boot/dts/rk3288-firefly.dtsi
 --- a/arch/arm/boot/dts/rk3288-firefly.dtsi	2017-06-25 01:25:48.272282361 +0300
 +++ b/arch/arm/boot/dts/rk3288-firefly.dtsi	2017-06-25 01:32:54.180298688 +0300
 @@ -296,6 +296,7 @@
@@ -39,94 +38,103 @@ diff -Naur a/arch/arm/boot/dts/rk3288-firefly.dtsi b/arch/arm/boot/dts/rk3288-fi
  };
  
  &edp {
-diff -Naur a/arch/arm/boot/dts/rk3288.dtsi b/arch/arm/boot/dts/rk3288.dtsi
---- a/arch/arm/boot/dts/rk3288.dtsi	2017-06-25 01:28:23.821288324 +0300
-+++ b/arch/arm/boot/dts/rk3288.dtsi	2017-06-25 01:36:01.179305856 +0300
-@@ -175,15 +175,82 @@
- 			opp-microvolt = <1200000>;
+@@ -374,7 +374,7 @@
+ 		reg = <0x40>;
+ 		regulator-name = "vdd_cpu";
+ 		regulator-min-microvolt = <850000>;
+-		regulator-max-microvolt = <1350000>;
++		regulator-max-microvolt = <1500000>;
+ 		regulator-always-on;
+ 		regulator-boot-on;
+ 		regulator-enable-ramp-delay = <300>;
+@@ -388,7 +388,7 @@
+ 		reg = <0x41>;
+ 		regulator-name = "vdd_gpu";
+ 		regulator-min-microvolt = <850000>;
+-		regulator-max-microvolt = <1350000>;
++		regulator-max-microvolt = <1500000>;
+ 		regulator-always-on;
+ 		regulator-ramp-delay = <6000>;
+ 		vin-supply = <&vcc_sys>;
+--- a/arch/arm/boot/dts/rk3288.dtsi	2018-01-06 19:24:17.370400348 +0200
++++ b/arch/arm/boot/dts/rk3288.dtsi	2018-01-06 19:23:17.719398061 +0200
+@@ -216,6 +216,79 @@
+ 			opp-microvolt = <1350000>;
  			clock-latency-ns = <40000>;
  		};
--		opp-1512000000 {
-+		opp@1512000000 {
- 			opp-hz = /bits/ 64 <1512000000>;
--			opp-microvolt = <1300000>;
--			clock-latency-ns = <40000>;
-+			opp-microvolt = <1250000>;
- 		};
--		opp-1608000000 {
-+		opp@1608000000 {
- 			opp-hz = /bits/ 64 <1608000000>;
-+			opp-microvolt = <1300000>;
-+		};
-+		opp@1704000000 {
-+			opp-hz = /bits/ 64 <1704000000>;
- 			opp-microvolt = <1350000>;
--			clock-latency-ns = <40000>;
-+		};
-+		opp@1800000000 {
-+			opp-hz = /bits/ 64 <1800000000>;
-+			opp-microvolt = <1400000>;
-+		};
-+		/* boot-only frequencies below */
++        /* boot-only frequencies below */
 +		opp@1896000000 {
++			opp-supported-hw = <0x3>;
 +			opp-hz = /bits/ 64 <1896000000>;
-+			opp-microvolt = <1425000>;
++			opp-microvolt = <1375000>;
 +			turbo-mode;
 +		};
 +		opp@1920000000 {
++			opp-supported-hw = <0x3>;
 +			opp-hz = /bits/ 64 <1920000000>;
-+			opp-microvolt = <1425000>;
++			opp-microvolt = <1400000>;
 +			turbo-mode;
 +		};
 +		opp@1992000000 {
++			opp-supported-hw = <0x3>;
 +			opp-hz = /bits/ 64 <1992000000>;
-+			opp-microvolt = <1450000>;
++			opp-microvolt = <1425000>;
 +			turbo-mode;
 +		};
 +		opp@2016000000 {
++			opp-supported-hw = <0x3>;
 +			opp-hz = /bits/ 64 <2016000000>;
-+			opp-microvolt = <1475000>;
++			opp-microvolt = <1450000>;
 +			turbo-mode;
 +		};
 +		opp@2040000000 {
++			opp-supported-hw = <0x3>;
 +			opp-hz = /bits/ 64 <2040000000>;
 +			opp-microvolt = <1475000>;
 +			turbo-mode;
 +		};
 +		opp@2064000000 {
++			opp-supported-hw = <0x3>;
 +			opp-hz = /bits/ 64 <2064000000>;
 +			opp-microvolt = <1475000>;
 +			turbo-mode;
 +		};
 +		opp@2088000000 {
++			opp-supported-hw = <0x3>;
 +			opp-hz = /bits/ 64 <2088000000>;
-+			opp-microvolt = <1500000>;
++			opp-microvolt = <1475000>;
 +			turbo-mode;
 +		};
 +		opp@2112000000 {
++			opp-supported-hw = <0x3>;
 +			opp-hz = /bits/ 64 <2112000000>;
 +			opp-microvolt = <1500000>;
 +			turbo-mode;
 +		};
 +		opp@2136000000 {
++			opp-supported-hw = <0x3>;
 +			opp-hz = /bits/ 64 <2136000000>;
 +			opp-microvolt = <1500000>;
 +			turbo-mode;
 +		};
 +		opp@2160000000 {
++			opp-supported-hw = <0x3>;
 +			opp-hz = /bits/ 64 <2160000000>;
 +			opp-microvolt = <1500000>;
 +			turbo-mode;
 +		};
 +		opp@2184000000 {
++			opp-supported-hw = <0x3>;
 +			opp-hz = /bits/ 64 <2184000000>;
 +			opp-microvolt = <1500000>;
 +			turbo-mode;
 +		};
 +		opp@2208000000 {
++			opp-supported-hw = <0x3>;
 +			opp-hz = /bits/ 64 <2208000000>;
 +			opp-microvolt = <1500000>;
 +			turbo-mode;
- 		};
++ 		};
  	};
  
+ 	amba {
