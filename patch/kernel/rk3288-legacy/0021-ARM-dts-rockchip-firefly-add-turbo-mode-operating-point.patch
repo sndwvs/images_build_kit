@@ -56,83 +56,131 @@ Signed-off-by: Myy <myy@miouyouyou.fr>
  		regulator-always-on;
  		regulator-ramp-delay = <6000>;
  		vin-supply = <&vcc_sys>;
---- a/arch/arm/boot/dts/rk3288.dtsi	2018-01-06 19:24:17.370400348 +0200
-+++ b/arch/arm/boot/dts/rk3288.dtsi	2018-01-06 19:23:17.719398061 +0200
-@@ -216,6 +216,79 @@
- 			opp-microvolt = <1350000>;
+--- a/arch/arm/boot/dts/rk3288.dtsi	2018-01-18 21:28:47.245375089 +0200
++++ b/arch/arm/boot/dts/rk3288.dtsi	2018-01-18 21:26:50.664380317 +0200
+@@ -267,6 +267,127 @@
+ 			opp-microvolt-L2 = <1300000>;
  			clock-latency-ns = <40000>;
  		};
 +        /* boot-only frequencies below */
-+		opp@1896000000 {
++		opp-1896000000 {
 +			opp-supported-hw = <0x3>;
 +			opp-hz = /bits/ 64 <1896000000>;
-+			opp-microvolt = <1375000>;
++			opp-microvolt = <1425000>;
++			opp-microvolt-L0 = <1425000>;
++			opp-microvolt-L1 = <1375000>;
++			opp-microvolt-L2 = <1325000>;
++			clock-latency-ns = <40000>;
 +			turbo-mode;
 +		};
-+		opp@1920000000 {
++		opp-1920000000 {
 +			opp-supported-hw = <0x3>;
 +			opp-hz = /bits/ 64 <1920000000>;
-+			opp-microvolt = <1400000>;
++			opp-microvolt = <1425000>;
++			opp-microvolt-L0 = <1425000>;
++			opp-microvolt-L1 = <1375000>;
++			opp-microvolt-L2 = <1325000>;
++			clock-latency-ns = <40000>;
 +			turbo-mode;
 +		};
-+		opp@1992000000 {
++		opp-1992000000 {
 +			opp-supported-hw = <0x3>;
 +			opp-hz = /bits/ 64 <1992000000>;
 +			opp-microvolt = <1425000>;
++			opp-microvolt-L0 = <1425000>;
++			opp-microvolt-L1 = <1375000>;
++			opp-microvolt-L2 = <1325000>;
++			clock-latency-ns = <40000>;
 +			turbo-mode;
 +		};
-+		opp@2016000000 {
++		opp-2016000000 {
 +			opp-supported-hw = <0x3>;
 +			opp-hz = /bits/ 64 <2016000000>;
 +			opp-microvolt = <1450000>;
++			opp-microvolt-L0 = <1450000>;
++			opp-microvolt-L1 = <1400000>;
++			opp-microvolt-L2 = <1350000>;
++			clock-latency-ns = <40000>;
 +			turbo-mode;
 +		};
-+		opp@2040000000 {
++		opp-2040000000 {
 +			opp-supported-hw = <0x3>;
 +			opp-hz = /bits/ 64 <2040000000>;
-+			opp-microvolt = <1475000>;
++			opp-microvolt = <1450000>;
++			opp-microvolt-L0 = <1450000>;
++			opp-microvolt-L1 = <1400000>;
++			opp-microvolt-L2 = <1350000>;
++			clock-latency-ns = <40000>;
 +			turbo-mode;
 +		};
-+		opp@2064000000 {
++		opp-2064000000 {
 +			opp-supported-hw = <0x3>;
 +			opp-hz = /bits/ 64 <2064000000>;
 +			opp-microvolt = <1475000>;
++			opp-microvolt-L0 = <1475000>;
++			opp-microvolt-L1 = <1425000>;
++			opp-microvolt-L2 = <1375000>;
++			clock-latency-ns = <40000>;
 +			turbo-mode;
 +		};
-+		opp@2088000000 {
++		opp-2088000000 {
 +			opp-supported-hw = <0x3>;
 +			opp-hz = /bits/ 64 <2088000000>;
 +			opp-microvolt = <1475000>;
++			opp-microvolt-L0 = <1475000>;
++			opp-microvolt-L1 = <1425000>;
++			opp-microvolt-L2 = <1375000>;
++			clock-latency-ns = <40000>;
 +			turbo-mode;
 +		};
-+		opp@2112000000 {
++		opp-2112000000 {
 +			opp-supported-hw = <0x3>;
 +			opp-hz = /bits/ 64 <2112000000>;
 +			opp-microvolt = <1500000>;
++			opp-microvolt-L0 = <1500000>;
++			opp-microvolt-L1 = <1450000>;
++			opp-microvolt-L2 = <1400000>;
++			clock-latency-ns = <40000>;
 +			turbo-mode;
 +		};
-+		opp@2136000000 {
++		opp-2136000000 {
 +			opp-supported-hw = <0x3>;
 +			opp-hz = /bits/ 64 <2136000000>;
 +			opp-microvolt = <1500000>;
++			opp-microvolt-L0 = <1500000>;
++			opp-microvolt-L1 = <1450000>;
++			opp-microvolt-L2 = <1400000>;
++			clock-latency-ns = <40000>;
 +			turbo-mode;
 +		};
-+		opp@2160000000 {
++		opp-2160000000 {
 +			opp-supported-hw = <0x3>;
 +			opp-hz = /bits/ 64 <2160000000>;
 +			opp-microvolt = <1500000>;
++			opp-microvolt-L0 = <1500000>;
++			opp-microvolt-L1 = <1450000>;
++			opp-microvolt-L2 = <1400000>;
++			clock-latency-ns = <40000>;
 +			turbo-mode;
 +		};
-+		opp@2184000000 {
++		opp-2184000000 {
 +			opp-supported-hw = <0x3>;
 +			opp-hz = /bits/ 64 <2184000000>;
 +			opp-microvolt = <1500000>;
++			opp-microvolt-L0 = <1500000>;
++			opp-microvolt-L1 = <1450000>;
++			opp-microvolt-L2 = <1400000>;
++			clock-latency-ns = <40000>;
 +			turbo-mode;
 +		};
-+		opp@2208000000 {
++		opp-2208000000 {
 +			opp-supported-hw = <0x3>;
 +			opp-hz = /bits/ 64 <2208000000>;
 +			opp-microvolt = <1500000>;
++			opp-microvolt-L0 = <1500000>;
++			opp-microvolt-L1 = <1450000>;
++			opp-microvolt-L2 = <1400000>;
++			clock-latency-ns = <40000>;
 +			turbo-mode;
 + 		};
  	};
