@@ -24,10 +24,10 @@ shut down :
 [   65.458046] thermal thermal_zone1: critical temperature reached(93 C),shutting down
 [   65.527639] reboot: Power down
 
---- a/arch/arm/boot/dts/rk3288-firefly.dtsi	2017-06-24 12:18:17.654907988 +0300
-+++ b/arch/arm/boot/dts/rk3288-firefly.dtsi	2017-06-24 20:40:35.399715218 +0300
-@@ -325,6 +325,41 @@
- 	status = "okay";
+--- a/arch/arm/boot/dts/rk3288-firefly.dtsi	2018-01-18 21:39:04.444347416 +0200
++++ b/arch/arm/boot/dts/rk3288-firefly.dtsi	2018-01-19 20:15:28.863271797 +0200
+@@ -352,6 +352,41 @@
+ 	//status = "okay";
  };
  
 +&cpu_thermal {
