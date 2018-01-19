@@ -12,6 +12,17 @@ fi
 get_config
 
 #---------------------------------------------
+# mainline kernel source configuration
+#---------------------------------------------
+if [[ $KERNEL_SOURCE == next ]]; then
+    URL_LINUX_SOURCE="https://kernel.googlesource.com/pub/scm/linux/kernel/git/stable"
+    #URL_LINUX_SOURCE='git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git'
+    LINUX_SOURCE="linux-stable"
+    KERNEL_BRANCH="linux-4.14.y"
+    KERNEL_DIR="linux-mainline"
+fi
+
+#---------------------------------------------
 # boot loader configuration
 #---------------------------------------------
 URL_BOOT_LOADER_SOURCE="http://git.denx.de"

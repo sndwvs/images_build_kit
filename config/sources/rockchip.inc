@@ -30,12 +30,6 @@ case $KERNEL_SOURCE in
             KERNEL_BRANCH="release-4.4"
             KERNEL_DIR="linux-$SOCFAMILY-$KERNEL_SOURCE"
     ;;
-    next)
-            URL_LINUX_SOURCE="https://github.com/rockchip-linux"
-            LINUX_SOURCE="kernel"
-            KERNEL_BRANCH="release-4.4"
-            KERNEL_DIR="linux-$SOCFAMILY-$KERNEL_SOURCE"
-    ;;
 esac
 
 
