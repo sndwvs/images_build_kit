@@ -19,7 +19,7 @@ if [[ $KERNEL_SOURCE == next ]]; then
     #URL_LINUX_SOURCE='git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git'
     LINUX_SOURCE="linux-stable"
     KERNEL_BRANCH="linux-4.14.y"
-    KERNEL_DIR="linux-mainline"
+    KERNEL_DIR="linux-$KERNEL_SOURCE"
 fi
 
 #---------------------------------------------
