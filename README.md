@@ -21,6 +21,8 @@ password: **password**
 * Rockchip
     * RK3288
         + [Firefly-RK3288](http://en.t-firefly.com/product/rk3288.html)
-    * RK3288
+    * RK3328
+        + [Rock64 RK3328](http://wiki.pine64.org/index.php/ROCK64_Main_Page#SoC_and_Memory_Specification)
+    * RK3399
         + [Firefly-RK3399](http://en.t-firefly.com/product/rk3399.html)
 
