@@ -21,10 +21,10 @@ download_xtools() {
                 message "" "download" "$XTOOLS"
                 [[ -f $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz ]] && ( rm $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
                 wget --no-check-certificate ${URL_XTOOLS[$c]}/$XTOOLS.tar.xz -P $CWD/$BUILD/$SOURCE/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-                if [[ ! -d $CWD/$BUILD/$SOURCE/$XTOOLS ]]; then
-                    message "" "extract" "$XTOOLS"
-                    [[ -f $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz ]] && tar xpf $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz -C "$CWD/$BUILD/$SOURCE/" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-                fi
+            fi
+            if [[ ! -d $CWD/$BUILD/$SOURCE/$XTOOLS ]]; then
+                message "" "extract" "$XTOOLS"
+                [[ -f $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz ]] && tar xpf $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz -C "$CWD/$BUILD/$SOURCE/" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             fi
         fi
         ((c+=1))

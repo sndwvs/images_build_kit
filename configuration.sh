@@ -103,6 +103,6 @@ clean_sources (){
 # create enviroment
 #---------------------------------------------
 prepare_dest (){
-    mkdir -p $CWD/$BUILD/{$SOURCE/$XTOOLS,$PKG,$OUTPUT/{$TOOLS,$FLASH}} || exit 1
+    mkdir -p $CWD/$BUILD/{$SOURCE/$PKG,$OUTPUT/{$TOOLS,$FLASH}} || exit 1
 }
 
