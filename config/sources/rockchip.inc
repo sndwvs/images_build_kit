@@ -6,7 +6,7 @@ RK2918_TOOLS="rk2918_tools"
 
 URL_RKBIN="https://github.com/rockchip-linux"
 RKBIN="rkbin"
-RKBIN_BRANCH="bdf68e257ca5aecbfac1bee4a55c64c97a3022f9"
+RKBIN_BRANCH=""
 
 URL_TOOLS="https://github.com/neo-technologies"
 MKBOOTIMG_TOOLS="rockchip-mkbootimg"
@@ -46,17 +46,18 @@ create_uboot()
 #    fi
 
     if [[ $SOCFAMILY == rk3* ]]; then
-        if [[ $1 == mmc ]];then
-            tools/mkimage -n $SOCFAMILY -T rksd -d $CWD/$BUILD/$SOURCE/$RKBIN/${SOCFAMILY:0:4}/$DDR $BOOT_LOADER_BIN >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        else
-            # U-Boot SPL, with SPL_BACK_TO_BROM option disabled SD
-            dd if=$CWD/$BUILD/$SOURCE/$RKBIN/${SOCFAMILY:0:4}/$DDR of=ddr.bin bs=4 skip=1 >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-            tools/mkimage -n $SOCFAMILY -T rksd -d ddr.bin $BOOT_LOADER_BIN >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-            rm ddr.bin || exit 1
-        fi
+        # The ddr binary files for ARM64 platforms from Rockchip, likes RK3399 and RK3328 should not skip first 4 bytes.
+        # U-Boot SPL, with SPL_BACK_TO_BROM option disabled SD
+        tools/mkimage -n $SOCFAMILY -T rksd -d $CWD/$BUILD/$SOURCE/$RKBIN/${SOCFAMILY:0:4}/$DDR $BOOT_LOADER_BIN >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
         cat $CWD/$BUILD/$SOURCE/$RKBIN/${SOCFAMILY:0:4}/$MINI_LOADER >> $BOOT_LOADER_BIN || exit 1
-        $CWD/$BUILD/$SOURCE/$RKBIN/tools/loaderimage --pack --uboot u-boot.bin uboot.img >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
+        # u-boot
+        #
+        # Total hours wasted before finding that the new "load address" parameter is not optional: 3
+        # https://github.com/rockchip-linux/build/commit/fff8f5a2d91fd11f8c4f6d605cac704d28baab4d
+        #
+        $CWD/$BUILD/$SOURCE/$RKBIN/tools/loaderimage --pack --uboot u-boot-dtb.bin uboot.img 0x200000 >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
     popd >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
