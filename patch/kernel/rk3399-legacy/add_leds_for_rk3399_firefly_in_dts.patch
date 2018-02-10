@@ -1,5 +1,5 @@
---- a/arch/arm64/boot/dts/rockchip/rk3399-firefly-linux.dts	2017-07-16 18:24:52.598272752 +0300
-+++ b/arch/arm64/boot/dts/rockchip/rk3399-firefly-linux.dts	2017-07-16 18:38:49.670235220 +0300
+--- a/arch/arm64/boot/dts/rockchip/rk3399-firefly-linux.dts     2018-02-10 17:42:19.537490924 +0200
++++ b/arch/arm64/boot/dts/rockchip/rk3399-firefly-linux.dts     2018-02-10 18:02:39.120269260 +0200
 @@ -247,6 +247,17 @@
  		regulator-name = "vcc3v3_pcie";
  	};
@@ -13,7 +13,7 @@
 +		pinctrl-names = "default";
 +		pinctrl-0 = <&pcie_3g_drv>;
 +		regulator-name = "vcc3v3_3g";
-+    };
++	};
 +
  	vcc3v3_sys: vcc3v3-sys {
  		compatible = "regulator-fixed";
@@ -23,7 +23,7 @@
  		compatible = "bluetooth-platdata";
  		//wifi-bt-power-toggle;
 +		clocks = <&rk808 1>;
-+        clock-names = "ext_clock";
++                clock-names = "ext_clock";
  		uart_rts_gpios = <&gpio2 19 GPIO_ACTIVE_LOW>; /* GPIO2_C3 */
  		pinctrl-names = "default", "rts_gpio";
  		pinctrl-0 = <&uart0_rts>;
@@ -32,25 +32,25 @@
  		status = "okay";
  	};
 +
-+    leds {
-+       compatible = "gpio-leds";
-+       power {
-+           label = "firefly:blue:power";
-+           linux,default-trigger = "ir-power-click";
-+           default-state = "on";
-+           gpios = <&gpio2 27 GPIO_ACTIVE_HIGH>;
-+           pinctrl-names = "default";
-+           pinctrl-0 = <&led_power>;
++	leds {
++	   compatible = "gpio-leds";
++	   power {
++	       label = "firefly:blue:power";
++	       linux,default-trigger = "ir-power-click";
++	       default-state = "on";
++	       gpios = <&gpio2 27 GPIO_ACTIVE_HIGH>;
++	       pinctrl-names = "default";
++	       pinctrl-0 = <&led_power>;
++	   };
++	   user {
++	       label = "firefly:yellow:user";
++	       linux,default-trigger = "ir-user-click";
++	       default-state = "off";
++	       gpios = <&gpio0 13 GPIO_ACTIVE_HIGH>;
++	       pinctrl-names = "default";
++	       pinctrl-0 = <&led_user>;
++	   };
 +       };
-+       user {
-+           label = "firefly:yellow:user";
-+           linux,default-trigger = "ir-user-click";
-+           default-state = "off";
-+           gpios = <&gpio0 13 GPIO_ACTIVE_HIGH>;
-+           pinctrl-names = "default";
-+           pinctrl-0 = <&led_user>;
-+       };
-+   };
  };
  
  &cpu_l0 {
@@ -63,7 +63,33 @@
  	status = "okay";
  };
  
-@@ -682,7 +715,7 @@
+@@ -465,8 +498,10 @@
+ 		reg = <0x1b>;
+ 		interrupt-parent = <&gpio1>;
+ 		interrupts = <21 IRQ_TYPE_LEVEL_LOW>;
++		pmic,stby-gpio = <&gpio1 24 GPIO_ACTIVE_LOW>;
++		pmic,hold-gpio = <&gpio1 13 GPIO_ACTIVE_HIGH>;
+ 		pinctrl-names = "default";
+-		pinctrl-0 = <&pmic_int_l &pmic_dvs2>;
++		pinctrl-0 = <&pmic_int_l &pmic_dvs2 &pmic_stby &pmic_hold>;
+ 		rockchip,system-power-controller;
+ 		wakeup-source;
+ 		#clock-cells = <1>;
+@@ -557,11 +592,11 @@
+ 				regulator-always-on;
+ 				regulator-boot-on;
+ 				regulator-min-microvolt = <1800000>;
+-				regulator-max-microvolt = <1800000>;
++				regulator-max-microvolt = <3300000>;
+ 				regulator-name = "vcc1v8_pmu";
+ 				regulator-state-mem {
+ 					regulator-on-in-suspend;
+-					regulator-suspend-microvolt = <1800000>;
++					regulator-suspend-microvolt = <3300000>;
+ 				};
+ 			};
+ 
+@@ -682,7 +717,7 @@
  		pinctrl-names = "default";
  		pinctrl-0 = <&fusb0_int>;
  		int-n-gpios = <&gpio1 2 GPIO_ACTIVE_HIGH>;
@@ -72,7 +98,24 @@
  		status = "okay";
  	};
  
-@@ -812,6 +845,16 @@
+@@ -796,6 +831,16 @@
+ 			rockchip,pins =
+ 			<1 14 RK_FUNC_GPIO &pcfg_pull_down>;
+ 		};
++
++		pmic_stby: pmic-stby {
++			rockchip,pins =
++				<1 24 RK_FUNC_GPIO &pcfg_pull_up>;
++		};
++
++		pmic_hold: pmic-hold{
++			rockchip,pins =
++				<1 13 RK_FUNC_GPIO &pcfg_pull_up>;
++		};
+ 	};
+ 
+ 	sdio-pwrseq {
+@@ -812,6 +857,16 @@
  		};
  	};
  
@@ -89,7 +132,7 @@
  	rt5640 {
  		rt5640_hpcon: rt5640-hpcon {
  			rockchip,pins = <4 21 RK_FUNC_GPIO &pcfg_pull_none>;
-@@ -866,6 +909,21 @@
+@@ -866,6 +921,21 @@
  	status = "disabled";
  };
  
@@ -99,19 +142,19 @@
 +};
 +
 +&cdn_dp {
-+    status = "okay";
-+    extcon = <&fusb0>;
-+    phys = <&tcphy0_dp>;
++        status = "disabled";
++        extcon = <&fusb0>;
++        phys = <&tcphy0_dp>;
 +};
 +
 +&dp_in_vopb {
-+    status = "disabled";
++        status = "disabled";
 +};
 +
  &saradc {
  	status = "okay";
  	vref-supply = <&vccadc_ref>;
-@@ -963,6 +1021,32 @@
+@@ -963,6 +1033,31 @@
  	};
  };
  
@@ -140,8 +183,26 @@
 +    };
 +};
 +
-+
  &uart0 {
  	pinctrl-names = "default";
  	pinctrl-0 = <&uart0_xfer &uart0_cts>;
-
+@@ -973,6 +1068,12 @@
+ 	status = "okay";
+ };
+ 
++&uart4 {
++	current-speed = <9600>;
++	no-loopback-test;
++	status = "okay";
++};
++
+ &usbdrd3_0 {
+ 	status = "okay";
+ 	extcon = <&fusb0>;
+@@ -1025,4 +1126,6 @@
+ 
+ &vpu {
+ 	status = "okay";
++	/* 0 means ion, 1 means drm */
++	//allocator = <0>;
+ };
