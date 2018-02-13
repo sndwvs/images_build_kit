@@ -6,7 +6,7 @@ if [ -z $CWD ]; then
     exit
 fi
 
-compile_rk2918 (){
+compile_rk2918() {
     message "" "compiling" "$RK2918_TOOLS"
     PROGRAMS="afptool img_unpack img_maker mkkrnlimg"
     cd $CWD/$BUILD/$SOURCE/$RK2918_TOOLS
@@ -18,7 +18,7 @@ compile_rk2918 (){
     done
 }
 
-compile_rkflashtool (){
+compile_rkflashtool() {
     message "" "compiling" "$RKFLASH_TOOLS"
     PROGRAMS="rkcrc rkflashtool rkmisc rkpad rkparameters rkparametersblock rkunpack rkunsign"
     cd $CWD/$BUILD/$SOURCE/$RKFLASH_TOOLS
@@ -31,7 +31,7 @@ compile_rkflashtool (){
     done
 }
 
-compile_mkbooting (){
+compile_mkbooting() {
     message "" "compiling" "$MKBOOTIMG_TOOLS"
     PROGRAMS="afptool img_maker mkbootimg unmkbootimg mkrootfs mkupdate mkcpiogz unmkcpiogz"
     cd $CWD/$BUILD/$SOURCE/$MKBOOTIMG_TOOLS
@@ -44,7 +44,7 @@ compile_mkbooting (){
     done
 }
 
-compile_sunxi_tools (){
+compile_sunxi_tools() {
     message "" "compiling" "$SUNXI_TOOLS"
     cd $CWD/$BUILD/$SOURCE/$SUNXI_TOOLS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
@@ -64,7 +64,7 @@ compile_sunxi_tools (){
     make $CTHREADS 'sunxi-nand-part' CC=${CROSS}gcc >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
-compile_boot_loader (){
+compile_boot_loader() {
     message "" "compiling" "$BOOT_LOADER"
     cd $CWD/$BUILD/$SOURCE/$BOOT_LOADER >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
@@ -101,7 +101,22 @@ compile_boot_loader (){
     fi
 }
 
-compile_kernel (){
+compile_atf() {
+    message "" "compiling" "$ATF_SOURCE"
+    cd $CWD/$BUILD/$SOURCE/$ATF_SOURCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
+    make realclean >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
+    if [[ $SOCFAMILY == rk3399 ]]; then
+        CFLAGS='-gdwarf-2' \
+        CROSS_COMPILE=$CROSS \
+        M0_CROSS_COMPILE=$CROSS32 \
+        make PLAT=rk3399 DEBUG=0 bl31
+    fi
+}
+
+
+compile_kernel() {
     message "" "compiling" "$KERNEL_DIR"
     cd "$CWD/$BUILD/$SOURCE/$KERNEL_DIR" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 

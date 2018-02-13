@@ -42,6 +42,15 @@ download() {
         git clone $URL_BOOT_LOADER_SOURCE/${BOOT_LOADER}.git $CWD/$BUILD/$SOURCE/$BOOT_LOADER >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
+    if [[ ! -n $ATF ]]; then
+        message "" "download" "$ATF_SOURCE"
+        if [ -d $CWD/$BUILD/$SOURCE/$ATF_SOURCE ]; then
+            cd $CWD/$BUILD/$SOURCE/$ATF_SOURCE && ( git checkout -f ${ATF_BRANCH} && git reset --hard && git pull origin ${ATF_BRANCH} ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        else
+            git clone -b $ATF_BRANCH --depth 1 $URL_ATF/$ATF_SOURCE $CWD/$BUILD/$SOURCE/$ATF_SOURCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        fi
+    fi
+
     if [[ $SOCFAMILY == rk3* ]]; then
         if [[ ! -z $XTOOLS_OLD ]]; then
             message "" "download" "$XTOOLS_OLD"

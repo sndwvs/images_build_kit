@@ -21,6 +21,9 @@ IMAGE_OFFSET=32768
 BOOT_LOADER_BIN="idbloader.img"
 
 
+URL_ATF="https://github.com/ARM-software"
+ATF_SOURCE="arm-trusted-firmware"
+ATF_BRANCH=${ATF_BRANCH:-master}
 
 
 case $KERNEL_SOURCE in

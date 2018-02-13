@@ -66,15 +66,26 @@ ROOTFS_VERSION=$(date +%Y%m%d)
 #---------------------------------------------
 for XTOOL in ${XTOOLS[*]}; do
     if [[ $(echo $XTOOL | grep $ARCH) ]]; then
-        [[ $(echo $XTOOLS_ARM_SUFFIX | grep $ARCH) ]] && XTOOLS_ARM_SUFFIX=$XTOOLS_ARM_SUFFIX
-        [[ $(echo $XTOOLS_ARM64_SUFFIX | grep $ARCH) ]] && XTOOLS_ARM_SUFFIX=$XTOOLS_ARM64_SUFFIX
+        [[ $(echo $XTOOLS_ARM_SUFFIX | grep $ARCH) ]] && _XTOOLS_ARM_SUFFIX=$XTOOLS_ARM_SUFFIX
+        [[ $(echo $XTOOLS_ARM64_SUFFIX | grep $ARCH) ]] && _XTOOLS_ARM_SUFFIX=$XTOOLS_ARM64_SUFFIX
         VER=$(echo $XTOOL | cut -f3 -d "-")
         if [[ $VER > 6 ]]; then
-            export CROSS="$CWD/$BUILD/${SOURCE}/$XTOOL/bin/${XTOOLS_ARM_SUFFIX}-"
+            export CROSS="$CWD/$BUILD/${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
         else
-            export OLD_CROSS="$CWD/$BUILD/${SOURCE}/$XTOOL/bin/${XTOOLS_ARM_SUFFIX}-"
+            export OLD_CROSS="$CWD/$BUILD/${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
         fi
-#        echo $XTOOL $VER
+        echo $XTOOL $VER
+    fi
+
+    if [[ $ARCH != arm ]] && [[ $(echo $XTOOL | grep arm) ]]; then
+        [[ $(echo $XTOOLS_ARM_SUFFIX | grep arm) ]] && _XTOOLS_ARM_SUFFIX=$XTOOLS_ARM_SUFFIX
+        VER=$(echo $XTOOL | cut -f3 -d "-")
+        if [[ $VER > 6 ]]; then
+            export CROSS32="$CWD/$BUILD/${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
+        else
+            export OLD_CROSS32="$CWD/$BUILD/${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
+        fi
+        echo $XTOOL $VER
     fi
 done
 

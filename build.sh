@@ -94,6 +94,8 @@ for arg in $result; do
             COMPILE_BINARIES="true"
     elif [ "$arg" == "mini-image" ]; then
             CREATE_IMAGE=($(echo $arg | cut -f1 -d '-'))
+            # compile atf
+            [[ $SOCFAMILY == rk33* ]] && ATF="true"
     elif [ "$arg" == "tools" ]; then
             TOOLS_PACK="true"
     elif [ "$arg" == "xfce-image" ]; then
