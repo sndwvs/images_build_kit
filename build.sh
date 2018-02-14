@@ -85,26 +85,33 @@ exit_status=$?
 exec 3>&-
 
 
-for arg in $result; do
-    if [ "$arg" == "download" ]; then
-            DOWNLOAD_SOURCE_BINARIES="true"
-    elif [ "$arg" == "clean" ]; then
-            CLEAN="true"
-    elif [ "$arg" == "compile" ]; then
-            COMPILE_BINARIES="true"
-    elif [ "$arg" == "mini-image" ]; then
-            CREATE_IMAGE=($(echo $arg | cut -f1 -d '-'))
-            # compile atf
-            [[ $SOCFAMILY == rk33* ]] && ATF="true"
-    elif [ "$arg" == "tools" ]; then
-            TOOLS_PACK="true"
-    elif [ "$arg" == "xfce-image" ]; then
-            CREATE_IMAGE+=($(echo $arg | cut -f1 -d '-'))
-    elif [ "$arg" == "hdmi" ]; then
-            VIDEO_OUTPUT=$arg
-    elif [ "$arg" == "hdmi-to-dvi" ]; then
-            VIDEO_OUTPUT=$arg
-    fi
+for arg in ${result[*]}; do
+    case "$arg" in
+        download)
+                    DOWNLOAD_SOURCE_BINARIES="true"
+                ;;
+           clean)
+                    CLEAN="true"
+                ;;
+         compile)
+                    COMPILE_BINARIES="true"
+                ;;
+           mini*)
+                    CREATE_IMAGE=($(echo $arg | cut -f1 -d '-'))
+                ;;
+           tools)
+                    TOOLS_PACK="true"
+                ;;
+      xfce-image)
+                    CREATE_IMAGE+=($(echo $arg | cut -f1 -d '-'))
+                ;;
+            hdmi)
+                    VIDEO_OUTPUT=$arg
+                ;;
+        hdmi-to-dvi)
+                    VIDEO_OUTPUT=$arg
+                ;;
+    esac
 done
 
 # set default
@@ -136,6 +143,9 @@ if [[ -f $CWD/$BUILD/$SOURCE/$LOG ]]; then
     rm $CWD/$BUILD/$SOURCE/$LOG
 fi
 
+# compile atf
+[[ ! -z $CREATE_IMAGE && $SOCFAMILY == rk33* ]] && ATF="true"
+
 #---------------------------------------------
 # main script
 #---------------------------------------------
@@ -150,7 +160,6 @@ fi
 if [[ $DOWNLOAD_SOURCE_BINARIES == true ]]; then
     download
 fi
-
 #---------------------------------------------
 # start build
 #---------------------------------------------
@@ -158,6 +167,7 @@ message "" "start" "build ARCH $ARCH"
 if [[ $COMPILE_BINARIES == true ]]; then
         patching_source "u-boot"
         compile_boot_loader
+        [[ ! -z $ATF ]] && compile_atf
         patching_source "kernel"
         compile_kernel
 

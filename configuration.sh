@@ -74,7 +74,7 @@ for XTOOL in ${XTOOLS[*]}; do
         else
             export OLD_CROSS="$CWD/$BUILD/${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
         fi
-        echo $XTOOL $VER
+#        echo $XTOOL $VER
     fi
 
     if [[ $ARCH != arm ]] && [[ $(echo $XTOOL | grep arm) ]]; then
@@ -85,7 +85,7 @@ for XTOOL in ${XTOOLS[*]}; do
         else
             export OLD_CROSS32="$CWD/$BUILD/${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
         fi
-        echo $XTOOL $VER
+#        echo $XTOOL $VER
     fi
 done
 

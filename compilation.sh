@@ -111,7 +111,7 @@ compile_atf() {
         CFLAGS='-gdwarf-2' \
         CROSS_COMPILE=$CROSS \
         M0_CROSS_COMPILE=$CROSS32 \
-        make PLAT=rk3399 DEBUG=0 bl31
+        make PLAT=rk3399 DEBUG=0 bl31 >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 }
 
