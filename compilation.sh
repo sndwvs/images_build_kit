@@ -124,7 +124,7 @@ compile_kernel() {
     local KERNEL=zImage
 
     if [[ $KARCH == arm64 ]]; then
-#        local CROSS=$CROSS64
+        [[ $SOCFAMILY == rk33* ]] && local CROSS=$OLD_CROSS
         local KERNEL=Image
         local DEVICE_TREE_BLOB=dtbs
     fi
