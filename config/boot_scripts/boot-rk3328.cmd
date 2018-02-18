@@ -26,8 +26,8 @@ if load ${devtype} ${devnum}:1 ${load_addr} ${prefix}uEnv.txt; then
     env import -t ${load_addr} ${filesize}
 fi
 
-if test "${console}" = "display" || test "${console}" = "both"; then setenv consoleargs "console=tty1"; fi
-if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "${consoleargs} console=ttyFIQ0,1500000"; fi
+if test "${console}" = "display" || test "${console}" = "both"; then setenv consoleargs "console=ttyFIQ0,1500000n8"; fi
+if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "${consoleargs} console=tty1"; fi
 
 setenv bootargs "root=${rootdev} ro rootwait rootfstype=${rootfstype} init=/sbin/init ${consoleargs} panic=10 consoleblank=0 loglevel=${verbosity} ${extraargs}"
 
