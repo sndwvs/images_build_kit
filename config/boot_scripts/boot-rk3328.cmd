@@ -7,7 +7,7 @@ setenv load_addr "0x44000000"
 # default values
 setenv rootdev "/dev/mmcblk0p1"
 setenv fdt_file "rk3328-rock64.dtb"
-setenv verbosity "1"
+setenv verbosity "4"
 setenv console "both"
 setenv rootfstype "ext4"
 

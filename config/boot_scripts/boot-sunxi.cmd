@@ -6,7 +6,7 @@
 setenv load_addr "0x44000000"
 # default values
 setenv rootdev "/dev/mmcblk0p1"
-setenv verbosity "1"
+setenv verbosity "4"
 setenv console "both"
 setenv disp_mem_reserves "off"
 setenv disp_mode "1920x1080p60"

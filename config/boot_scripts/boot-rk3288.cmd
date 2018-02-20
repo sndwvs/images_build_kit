@@ -7,7 +7,7 @@ setenv load_addr "0x00000000"
 setenv rootdev "/dev/mmcblk2p1"
 setenv fdt_file "rk3288-firefly.dtb"
 setenv console "both"
-setenv verbosity "1"
+setenv verbosity "4"
 
 # boot from eMMC
 part uuid mmc 1 part_exists

@@ -1,2 +1,2 @@
-verbosity=1
+verbosity=4
 console=both
