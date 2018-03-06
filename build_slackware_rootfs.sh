@@ -396,8 +396,14 @@ setting_for_desktop() {
 
 setting_move_to_internal() {
     message "" "setting" "data move to nand"
-#    install -m755 -D "$CWD/bin/$BOARD_NAME/setup.sh" "$CWD/$BUILD/$SOURCE/$ROOTFS/root/setup.sh"
     install -m755 -D "$CWD/scripts/setup.sh" "$CWD/$BUILD/$SOURCE/$ROOTFS/root/setup.sh"
+
+    # u-boot
+    install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER/$BOOT_LOADER_BIN" "$CWD/$BUILD/$ROOTFS/boot/$BOOT_LOADER_BIN" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    if [[ $SOCFAMILY == rk33* ]]; then
+	install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER/uboot.img" "$CWD/$BUILD/$ROOTFS/boot/uboot.img" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
+    [[ ! -z $ATF ]] && install -Dm644 "$CWD/$BUILD/$SOURCE/$ATF_SOURCE/trust.img" "$CWD/$BUILD/$ROOTFS/boot/trust.img" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/issue 2>&1 | grep setup.sh) ]];then
         cat <<EOF >$CWD/$BUILD/$SOURCE/$ROOTFS/etc/issue
