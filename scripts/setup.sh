@@ -18,15 +18,18 @@ PART=1
 
 
 case $(hostname) in
-    *rk3*)
-            START_LOADER=64
-            LOADER=idbloader_mmc.img
+    *rk33|rock64)
+            OFFSET_LOADER="64:16384:24576"
+            LOADER="idbloader.img:uboot.img:trust.img"
     ;;
-    cubietruck)
-            START_LOADER=8
+    *rk32*)
+            OFFSET_LOADER="64"
+            LOADER="idbloader.img"
     ;;
-    orange-pi-plus-2e)
-            START_LOADER=8
+    cubietruck|orange-pi-plus-2e)
+            OFFSET_LOADER="8"
+            LOADER=u-boot-sunxi-with-spl.bin
+            BS=1024
     ;;
     *)
             exit
@@ -34,15 +37,6 @@ case $(hostname) in
 
 esac
 
-
-#echo $START_LOADER
-#echo $OFFSET
-#echo $(($OFFSET-1-$START_LOADER))
-
-#dd if=/dev/$ROOT_DISK of=tt skip=$START_LOADER bs=$(($OFFSET-1-$START_LOADER)) count=1 conv=notrunc
-#dd if=tt of=/dev/mmcblk1 seek=$START_LOADER
-#dd if=$LOADER of=/dev/mmcblk1 seek=$START_LOADER
-#exit
 
 #---------------------------------------------
 # selected message
@@ -139,11 +133,35 @@ prepare_disk() {
         mkdir -p $OUTPUT
     fi
 
+    SPL_LOADER=$(echo $LOADER | cut -d ':' -f1)
+    UBOOT_LOADER=$(echo $LOADER | cut -d ':' -f2)
+    TRUST_LOADER=$(echo $LOADER | cut -d ':' -f3)
+
+    SPL_OFFSET_LOADER=$(echo $OFFSET_LOADER | cut -d ':' -f1)
+    UBOOT_OFFSET_LOADER=$(echo $OFFSET_LOADER | cut -d ':' -f2)
+    TRUST_OFFSET_LOADER=$(echo $OFFSET_LOADER | cut -d ':' -f3)
+
     # clear partition
-    dd if=/dev/zero of=/dev/$DISK bs=1 count=64 seek=446 >/dev/null 2>&1
+    if [[ ! -z $SPL_OFFSET_LOADER ]]; then
+        dd if=/dev/zero of=/dev/$DISK bs=1 count=$SPL_OFFSET_LOADER seek=446 >/dev/null 2>&1
+    fi
 
     # save u-boot
-#    dd if=/boot/u-boot-sunxi-with-spl.bin of=/dev/$DISK bs=1024 seek=8 status=noxfer >/dev/null 2>&1
+    if [[ ! -z $SPL_LOADER && ! -z $BS ]]; then
+        dd if=/boot/$SPL_LOADER of=/dev/$DISK bs=$BS seek=$SPL_OFFSET_LOADER status=noxfer >/dev/null 2>&1
+    fi
+
+    if [[ ! -z $SPL_LOADER && -z $BS ]]; then
+        dd if=/boot/$SPL_LOADER of=/dev/$DISK seek=$SPL_OFFSET_LOADER status=noxfer >/dev/null 2>&1
+    fi
+
+    if [[ ! -z $UBOOT_LOADER ]]; then
+        dd if=/boot/$UBOOT_LOADER of=/dev/$DISK seek=$UBOOT_OFFSET_LOADER status=noxfer >/dev/null 2>&1
+    fi
+
+    if [[ ! -z $TRUST_LOADER ]]; then
+        dd if=/boot/$TRUST_LOADER of=/dev/$DISK seek=$TRUST_OFFSET_LOADER status=noxfer >/dev/null 2>&1
+    fi
 
     echo -e "\nn\np\n${PART}\n${OFFSET}\n\nw" | fdisk "/dev/$DISK" >/dev/null 2>&1
 
