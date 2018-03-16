@@ -1,1 +1,4 @@
-uEnv-rk3288.txt
+verbosity=4
+console=both
+ethaddr=8e:49:1c:45:8c:8c
+eth1addr=8e:49:1c:45:8c:8c
