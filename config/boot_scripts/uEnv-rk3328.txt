@@ -1,4 +1,4 @@
 verbosity=4
 console=both
-ethaddr=8e:49:1c:45:8c:8c
+ethaddr=8e:49:1c:45:8c:8a
 eth1addr=8e:49:1c:45:8c:8c
