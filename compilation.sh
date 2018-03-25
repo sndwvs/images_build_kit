@@ -147,7 +147,7 @@ compile_kernel() {
     # use proven config
     install -D $CWD/config/kernel/$LINUX_CONFIG $CWD/$BUILD/$SOURCE/$KERNEL_DIR/.config || (message "err" "details" && exit 1) || exit 1
 
-#    [[ "$KERNEL_SOURCE" != next ]] && local CROSS=$OLD_CROSS
+    [[ "$KERNEL_SOURCE" != next && $SOCFAMILY == sun* ]] && local CROSS=$OLD_CROSS
     gcc_version $CROSS GCC_VERSION
     message "" "version" "$GCC_VERSION"
 
