@@ -62,10 +62,10 @@ options+=("xfce-image" "create image with xfce" "off")
 
 case $BOARD_NAME in
     cubietruck)
-                options+=("hdmi" "video mode hdmi (defaul vga)" "off")
+                options+=("hdmi" "video mode hdmi (default vga)" "off")
             ;;
     orange_pi*)
-                options+=("hdmi-to-dvi" "video mode via hdmi-to-dvi adapter (defaul hdmi)" "off")
+                options+=("hdmi-to-dvi" "video mode via hdmi-to-dvi adapter (default hdmi)" "off")
             ;;
 esac
 
