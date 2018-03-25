@@ -142,7 +142,7 @@ compile_kernel() {
     # delete previous creations
     [[ $SOCFAMILY != rk3288 || $KERNEL_SOURCE != next ]] \
         && message "" "clean" "$KERNEL_DIR" \
-        && make CROSS_COMPILE=$CROSS clean
+        && make CROSS_COMPILE=$CROSS clean >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     # use proven config
     install -D $CWD/config/kernel/$LINUX_CONFIG $CWD/$BUILD/$SOURCE/$KERNEL_DIR/.config || (message "err" "details" && exit 1) || exit 1
@@ -165,7 +165,8 @@ compile_kernel() {
         rsync -ar --ignore-existing $CWD/bin/$FIRMWARE/brcm/ -d $CWD/$BUILD/$SOURCE/$KERNEL_DIR/firmware/brcm >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
 #        make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS menuconfig  || exit 1
-        make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS $KERNEL modules || (message "err" "details" && exit 1) || exit 1
+        make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS $KERNEL modules | tee $CWD/$BUILD/$SOURCE/$LOG
+        [[ ${PIPESTATUS[0]} != 0 ]] && ( message "err" "details" && exit 1 )
         make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS $DEVICE_TREE_BLOB || (message "err" "details" && exit 1) || exit 1
     fi
 
