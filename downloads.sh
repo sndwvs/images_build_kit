@@ -42,7 +42,7 @@ download() {
         git clone $URL_BOOT_LOADER_SOURCE/${BOOT_LOADER}.git $CWD/$BUILD/$SOURCE/$BOOT_LOADER >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
-    if [[ ! -n $ATF ]]; then
+    if [[ ! -z $ATF ]]; then
         message "" "download" "$ATF_SOURCE"
         if [ -d $CWD/$BUILD/$SOURCE/$ATF_SOURCE ]; then
             cd $CWD/$BUILD/$SOURCE/$ATF_SOURCE && ( git checkout -f ${ATF_BRANCH} && git reset --hard && git pull origin ${ATF_BRANCH} ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
@@ -119,7 +119,7 @@ download() {
         if [ -d $CWD/$BUILD/$SOURCE/$SUNXI_TOOLS ];then
             cd $CWD/$BUILD/$SOURCE/$SUNXI_TOOLS && ( git checkout -f ${SUNXI_TOOLS_BRANCH:-master} && git reset --hard && git pull origin ${SUNXI_TOOLS_BRANCH:-master} ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         else
-            git clone $URL_SUNXI_TOOLS/$SUNXI_TOOLS $CWD/$BUILD/$SOURCE/$SUNXI_TOOLS 2>&1 || (message "err" "details" && exit 1) || exit 1
+            git clone $URL_SUNXI_TOOLS/$SUNXI_TOOLS $CWD/$BUILD/$SOURCE/$SUNXI_TOOLS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
 
         message "" "download" "$KERNEL_DIR"
