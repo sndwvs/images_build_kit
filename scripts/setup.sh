@@ -21,14 +21,16 @@ case $(hostname) in
     *rk33|rock64)
             OFFSET_LOADER="64:16384:24576"
             LOADER="idbloader.img:uboot.img:trust.img"
+            FIX_BOOT_DISK=1
     ;;
     *rk32*)
-            OFFSET_LOADER="64"
-            LOADER="idbloader.img"
+            OFFSET_LOADER="64::"
+            LOADER="idbloader.img::"
+            FIX_BOOT_DISK=1
     ;;
     cubietruck|orange-pi-plus-2e)
-            OFFSET_LOADER="8"
-            LOADER=u-boot-sunxi-with-spl.bin
+            OFFSET_LOADER="8::"
+            LOADER="u-boot-sunxi-with-spl.bin::"
             BS=1024
     ;;
     *)
@@ -142,9 +144,7 @@ prepare_disk() {
     TRUST_OFFSET_LOADER=$(echo $OFFSET_LOADER | cut -d ':' -f3)
 
     # clear partition
-    if [[ ! -z $SPL_OFFSET_LOADER ]]; then
-        dd if=/dev/zero of=/dev/$DISK bs=1 count=$SPL_OFFSET_LOADER seek=446 >/dev/null 2>&1
-    fi
+    dd if=/dev/zero of=/dev/$DISK bs=1k count=446 status=noxfer >/dev/null 2>&1
 
     # save u-boot
     if [[ ! -z $SPL_LOADER && ! -z $BS ]]; then
@@ -207,8 +207,10 @@ transfer() {
 # fix fstab/boot partition
 #---------------------------------------------
 fix_config() {
-    [[ ! $(grep "$1" $OUTPUT/boot/uEnv.txt) ]] && ( echo "rootdev=/dev/$1" >> $OUTPUT/boot/uEnv.txt )
-    [[ ! $(grep "^/dev/$1" $OUTPUT/etc/fstab) ]] && sed -i "s#^\/dev\/\([a-z0-9]*\)*#\/dev\/$1    #" $OUTPUT/etc/fstab
+    if [[ ! -z $FIX_BOOT_DISK ]]; then
+        [[ ! $(grep "$1" $OUTPUT/boot/uEnv.txt) ]] && ( echo "rootdev=/dev/$1" >> $OUTPUT/boot/uEnv.txt )
+        [[ ! $(grep "^/dev/$1" $OUTPUT/etc/fstab) ]] && sed -i "s#^\/dev\/\([a-z0-9]*\)*#\/dev\/$1    #" $OUTPUT/etc/fstab
+    fi
     sed -i '/^if*/,/^$/d' $OUTPUT/etc/issue
 }
 
