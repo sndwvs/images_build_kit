@@ -28,7 +28,6 @@ build_kernel_pkg() {
 #    cp -a $CWD/$BUILD/$SOURCE/hwpacks-master/system/etc/firmware $CWD/$BUILD/$PKG/kernel-modules/lib/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     [[ ! -z $FIRMWARE ]] && ( cp -a $CWD/bin/$FIRMWARE/* -d $CWD/$BUILD/$PKG/kernel-modules/lib/firmware/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
 
-    touch "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/.next"
 
     # add device tree
     [[ ! -z $DEVICE_TREE_BLOB && $ARCH == arm ]] && ( install -Dm644 $CWD/$BUILD/$SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/$DEVICE_TREE_BLOB \
@@ -66,11 +65,6 @@ build_kernel_pkg() {
             cd "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot"
             ln -sf "script-$VIDEO_OUTPUT.bin" "script.bin"
             cd "$CWD"
-
-            install -dm755 "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/install/"
-            cat > "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/install/doinst.sh" << EOF
-rm boot/.next 2> /dev/null
-EOF
         fi
     fi
 
@@ -79,9 +73,9 @@ EOF
                                                                         "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.scr" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
 
     # u-boot
-    [[ -f "$CWD/config/boot_scripts/uEnv-$SOCFAMILY.txt" ]] && install -Dm644 $CWD/config/boot_scripts/uEnv-$SOCFAMILY.txt "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/uEnv.txt"
+    [[ -f "$CWD/config/boot_scripts/uEnv-$SOCFAMILY.txt" ]] && install -Dm644 $CWD/config/boot_scripts/uEnv-$SOCFAMILY.txt "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/uEnv.txt.new"
     # change root disk if disk not default
-    [[ -n ${ROOT_DISK##*mmcblk0p1} ]] && echo "rootdev=/dev/$ROOT_DISK" >> "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/uEnv.txt"
+    [[ -n ${ROOT_DISK##*mmcblk0p1} ]] && echo "rootdev=/dev/$ROOT_DISK" >> "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/uEnv.txt.new"
 
     # clean-up unnecessary files generated during install
     find "$CWD/$BUILD/$PKG/kernel-modules" "$CWD/$BUILD/$PKG/kernel-headers" \( -name .install -o -name ..install.cmd \) -delete
@@ -93,7 +87,6 @@ EOF
         cp -af "$CWD/$BUILD/$PKG/kernel-modules/lib/firmware" "$CWD/$BUILD/$PKG/kernel-firmware/lib"
         rm -rf "$CWD/$BUILD/$PKG/kernel-modules/lib/firmware"
     fi
-
 
     cd $CWD/$BUILD/$PKG/kernel-modules/
 
@@ -111,33 +104,48 @@ EOF
     ln -s /usr/include build
     ln -s /usr/include source
 
+
+    # create kernel package
     cd $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/
+    install -m644 -D "$CWD/packages/kernel/slack-desc.kernel-template" "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/install/slack-desc"
+    sed -i "s:%PACKAGE_NAME%:kernel-${SOCFAMILY}:g" "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/install/slack-desc"
+    install -m644 -D "$CWD/packages/kernel/doinst.sh.kernel" "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/install/doinst.sh"
+    if [[ $KERNEL_SOURCE = next ]]; then
+        touch "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/.next"
+    else
+        echo "rm boot/.next 2> /dev/null" >> "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/install/doinst.sh"
+    fi
     makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
+    # create kernel-modules package
     cd $CWD/$BUILD/$PKG/kernel-modules/
+    install -m644 -D "$CWD/packages/kernel/slack-desc.kernel-modules" "$CWD/$BUILD/$PKG/kernel-modules/install/slack-desc"
     makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-modules-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
+    # create kernel-headers package
     cd $CWD/$BUILD/$PKG/kernel-headers/
+    install -m644 -D "$CWD/packages/kernel/slack-desc.kernel-headers" "$CWD/$BUILD/$PKG/kernel-headers/install/slack-desc"
     makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-headers-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
+    # create kernel-firmware package
     cd $CWD/$BUILD/$PKG/kernel-firmware/
+    install -m644 -D "$CWD/packages/kernel/slack-desc.kernel-firmware" "$CWD/$BUILD/$PKG/kernel-firmware/install/slack-desc"
     makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-firmware-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     cd $CWD/$BUILD/$PKG
 
     # clear kernel packages directories
-    if [ -d "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}" ]; then
+    [[ -d "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}" ]] && \
         rm -rf "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    fi
-    if [ -d "$CWD/$BUILD/$PKG/kernel-modules" ]; then
+
+    [[ -d "$CWD/$BUILD/$PKG/kernel-modules" ]] && \
         rm -rf "$CWD/$BUILD/$PKG/kernel-modules" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    fi
-    if [ -d "$CWD/$BUILD/$PKG/kernel-headers" ]; then
+
+    [[ -d "$CWD/$BUILD/$PKG/kernel-headers" ]] && \
         rm -rf "$CWD/$BUILD/$PKG/kernel-headers" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    fi
-    if [ -d "$CWD/$BUILD/$PKG/kernel-firmware" ]; then
+
+    [[ -d "$CWD/$BUILD/$PKG/kernel-firmware" ]] && \
         rm -rf "$CWD/$BUILD/$PKG/kernel-firmware" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    fi
 }
 
 
@@ -145,27 +153,7 @@ build_sunxi_tools() {
     message "" "build" "package ${SUNXI_TOOLS}"
     mkdir -p $CWD/$BUILD/$PKG/${SUNXI_TOOLS}/{sbin,install}
 
-    cat <<EOF >"$CWD/$BUILD/$PKG/${SUNXI_TOOLS}/install/slack-desc"
-# HOW TO EDIT THIS FILE:
-# The "handy ruler" below makes it easier to edit a package description.  Line
-# up the first '|' above the ':' following the base package name, and the '|'
-# on the right side marks the last column you can put a character in.  You must
-# make exactly 11 lines for the formatting to be correct.  It's also
-# customary to leave one space after the ':'.
-
-           |-----handy-ruler------------------------------------------------------|
-sunxi-tools: sunxi-tools
-sunxi-tools:
-sunxi-tools: Tools to help hacking Allwinner A10 (aka sun4i) based devicesand possibly
-sunxi-tools: and possibly it's successors, that's why the 'x' in the package name.
-sunxi-tools:
-sunxi-tools:
-sunxi-tools: Homepage:  https://github.com/linux-sunxi/sunxi-tools
-sunxi-tools:
-sunxi-tools:
-sunxi-tools:
-sunxi-tools:
-EOF
+    install -m644 -D "$CWD/packages/${SUNXI_TOOLS}/slack-desc" "$CWD/$BUILD/$PKG/${SUNXI_TOOLS}/install/slack-desc"
 
     cp -P $CWD/$BUILD/$SOURCE/${SUNXI_TOOLS}/{bin2fex,fex2bin,sunxi-fexc,sunxi-nand-part} \
           $CWD/$BUILD/$PKG/${SUNXI_TOOLS}/sbin/
@@ -174,9 +162,7 @@ EOF
     makepkg -l n -c n $CWD/$BUILD/$PKG/${SUNXI_TOOLS}-git_$(date +%Y%m%d)_$(cat $CWD/$BUILD/$SOURCE/${SUNXI_TOOLS}/.git/packed-refs | grep refs/remotes/origin/master | cut -b1-7)-${ARCH}-${PKG_BUILD}${PACKAGER}.txz \
     >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    if [ -d $CWD/$BUILD/$PKG/${SUNXI_TOOLS} ];then
-        rm -rf $CWD/$BUILD/$PKG/${SUNXI_TOOLS}
-    fi
+    [[ -d $CWD/$BUILD/$PKG/${SUNXI_TOOLS} ]] && rm -rf $CWD/$BUILD/$PKG/${SUNXI_TOOLS}
 }
 
 
