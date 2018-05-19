@@ -1,6 +1,6 @@
---- a/arch/arm/boot/dts/rk3288.dtsi	2017-06-25 00:26:05.548725376 +0300
-+++ b/arch/arm/boot/dts/rk3288.dtsi	2017-06-25 00:30:39.325735871 +0300
-@@ -405,7 +405,7 @@
+--- a/arch/arm/boot/dts/rk3288.dtsi	2018-05-08 18:57:52.912389074 +0300
++++ b/arch/arm/boot/dts/rk3288.dtsi	2018-05-19 10:50:41.958457509 +0300
+@@ -425,7 +425,7 @@
  		dma-names = "tx", "rx";
  		interrupts = <GIC_SPI 46 IRQ_TYPE_LEVEL_HIGH>;
  		pinctrl-names = "default";
@@ -9,15 +9,15 @@
  		reg = <0x0 0xff130000 0x0 0x1000>;
  		#address-cells = <1>;
  		#size-cells = <0>;
-@@ -633,6 +633,7 @@
- 		pinctrl-2 = <&otp_gpio>;
+@@ -627,6 +627,7 @@
  		#thermal-sensor-cells = <1>;
  		rockchip,hw-tshut-temp = <95000>;
+ 		rockchip,hw-tshut-mode = <0>; /* tshut mode 0:CRU 1:GPIO */
 +		rockchip,grf = <&grf>;
  		status = "disabled";
  	};
  
-@@ -749,6 +750,7 @@
+@@ -756,6 +757,7 @@
  		pinctrl-0 = <&pwm0_pin>;
  		clocks = <&cru PCLK_PWM>;
  		clock-names = "pwm";
@@ -25,7 +25,7 @@
  		status = "disabled";
  	};
  
-@@ -760,6 +762,7 @@
+@@ -767,6 +769,7 @@
  		pinctrl-0 = <&pwm1_pin>;
  		clocks = <&cru PCLK_PWM>;
  		clock-names = "pwm";
@@ -33,7 +33,7 @@
  		status = "disabled";
  	};
  
-@@ -771,6 +774,7 @@
+@@ -778,6 +781,7 @@
  		pinctrl-0 = <&pwm2_pin>;
  		clocks = <&cru PCLK_PWM>;
  		clock-names = "pwm";
@@ -41,7 +41,7 @@
  		status = "disabled";
  	};
  
-@@ -782,6 +786,7 @@
+@@ -789,6 +793,7 @@
  		pinctrl-0 = <&pwm3_pin>;
  		clocks = <&cru PCLK_PWM>;
  		clock-names = "pwm";
