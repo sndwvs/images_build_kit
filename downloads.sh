@@ -105,9 +105,8 @@ download() {
         fi
             message "" "extract" "$KERNEL_DIR"
             cd $CWD/$BUILD/$SOURCE/$KERNEL_DIR && git checkout $KERNEL_BRANCH >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-            [[ ! -z $KERNEL_COMMIT ]] && git reset --hard $KERNEL_COMMIT >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            [[ ! -z $KERNEL_COMMIT ]] && ( git reset --hard $KERNEL_COMMIT >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
     fi
-
     if [[ $SOCFAMILY == sun* ]]; then
         message "" "download" "$SUNXI_TOOLS"
         if [ -d $CWD/$BUILD/$SOURCE/$SUNXI_TOOLS ];then
