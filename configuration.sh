@@ -27,7 +27,7 @@ fi
 #---------------------------------------------
 URL_BOOT_LOADER_SOURCE="http://git.denx.de"
 BOOT_LOADER="u-boot"
-BOOT_LOADER_BRANCH="" #>v2017.05
+BOOT_LOADER_BRANCH=${BOOT_LOADER_BRANCH:-""} #>v2017.05
 
 #---------------------------------------------
 # xtools configuration

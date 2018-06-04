@@ -65,7 +65,7 @@ compile_sunxi_tools() {
 }
 
 compile_boot_loader() {
-    message "" "compiling" "$BOOT_LOADER"
+    message "" "compiling" "$BOOT_LOADER $BOOT_LOADER_BRANCH"
     cd $CWD/$BUILD/$SOURCE/$BOOT_LOADER >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
 #    [[ $KARCH == arm64 ]] && local CROSS=$CROSS64
