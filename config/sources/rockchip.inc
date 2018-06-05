@@ -31,7 +31,7 @@ case $KERNEL_SOURCE in
             URL_LINUX_SOURCE="https://github.com/rockchip-linux"
             LINUX_SOURCE="kernel"
             KERNEL_BRANCH="release-4.4"
-            KERNEL_COMMIT="3dd9af3221d2a4ea4caf2865bac5fe9aaf2e2643"
+#            KERNEL_COMMIT="3dd9af3221d2a4ea4caf2865bac5fe9aaf2e2643"
             KERNEL_DIR="linux-$SOCFAMILY-$KERNEL_SOURCE"
     ;;
 esac

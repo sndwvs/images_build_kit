@@ -1,0 +1,10 @@
+--- a/arch/arm/boot/dts/rk3288-firefly.dts	2018-06-05 21:21:48.150809404 +0300
++++ b/arch/arm/boot/dts/rk3288-firefly.dts	2018-06-05 21:22:20.842461743 +0300
+@@ -43,6 +43,7 @@
+ /dts-v1/;
+ #include "rk3288-firefly.dtsi"
+ #include "rk3288-linux.dtsi"
++#include "rk3288cg-opp.dtsi"
+ 
+ / {
+ 	model = "Firefly-RK3288";

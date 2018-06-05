@@ -1,0 +1,12 @@
+--- a/arch/arm/boot/dts/rk3288-firefly.dtsi	2018-06-05 21:19:26.383316730 +0300
++++ b/arch/arm/boot/dts/rk3288-firefly.dtsi	2018-06-05 21:44:01.974681054 +0300
+@@ -302,7 +302,8 @@
+ 	vcc-supply = <&vdd_10>;
+ 	vccio-supply = <&vcc_18>;
+ 	force-hpd;
+-	status = "okay";
++	status = "disabled";
++	//status = "okay";
+ 
+ 	ports {
+ 		edp_out: port@1 {
