@@ -1,0 +1,62 @@
+--- a/arch/arm/boot/dts/rk3288-firefly.dtsi	2018-05-19 10:52:56.250794282 +0300
++++ b/arch/arm/boot/dts/rk3288-firefly.dtsi	2018-06-06 21:09:24.752375072 +0300
+@@ -176,6 +176,29 @@
+ 		reset-gpios = <&gpio4 28 GPIO_ACTIVE_LOW>;
+ 	};
+ 
++	es8323-sound {
++	status = "okay";
++        compatible = "simple-audio-card";
++        simple-audio-card,format = "i2s";
++        simple-audio-card,name = "rockchip,es8323-codec";
++        simple-audio-card,mclk-fs = <256>;
++        //simple-audio-card,hp-det-gpio = <&gpio7 15 GPIO_ACTIVE_HIGH>;
++		simple-audio-card,widgets =
++				"Microphone","Mic Jack",
++				"Headphone","Headphone Jack";
++		simple-audio-card,routing =
++				"Mic Jack","MICBIAS1",
++				"IN1P","Mic Jack",
++				"Headphone Jack","HPOL",
++				"Headphone Jack","HPOR";
++		simple-audio-card,cpu {
++				sound-dai = <&i2s>;
++		};
++		simple-audio-card,codec {
++				sound-dai = <&es8323>;
++		};
++	};
++
+ 	sound {
+ 		compatible = "simple-audio-card";
+ 		simple-audio-card,name = "SPDIF";
+@@ -530,6 +553,17 @@
+ 
+ &i2c2 {
+ 	status = "okay";
++
++	es8323: es8323@10 {
++        status = "okay";
++		compatible = "everest,es8323";
++		reg = <0x10>;
++		spk-con-gpio = <&gpio7 3 GPIO_ACTIVE_HIGH>;
++		hp-det-gpio = <&gpio7 15 GPIO_ACTIVE_LOW>;
++		clock-names = "mclk";
++		clocks = <&cru SCLK_I2S0_OUT>;
++		#sound-dai-cells = <0>;
++	};
+ };
+ 
+ &i2c4 {
+@@ -675,6 +709,11 @@
+ 	};
+ };
+ 
++&i2s {
++	status = "okay";
++	#sound-dai-cells = <0>;
++};
++
+ &saradc {
+ 	vref-supply = <&vcc_18>;
+ 	status = "okay";
