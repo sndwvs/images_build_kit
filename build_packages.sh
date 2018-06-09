@@ -187,14 +187,16 @@ build_flash_script() {
 create_bootloader_pack(){
     message "" "create" "bootloader pack"
     cd $CWD/$BUILD/$OUTPUT/ || exit 1
-    create_uboot 'mmc'
     install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER/$BOOT_LOADER_BIN" "$CWD/$BUILD/$OUTPUT/boot/$BOOT_LOADER_BIN" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     [[ ! -z $BLOB_LOADER ]] && install -Dm644 "$CWD/$BUILD/$SOURCE/$RKBIN/${SOCFAMILY:0:4}/$BLOB_LOADER" "$CWD/$BUILD/$OUTPUT/boot/$BLOB_LOADER" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     if [[ $SOCFAMILY == rk33* ]]; then
         install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER/uboot.img" "$CWD/$BUILD/$OUTPUT/boot/uboot.img" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
     [[ ! -z $ATF ]] && ( install -Dm644 "$CWD/$BUILD/$SOURCE/$ATF_SOURCE/trust.img" "$CWD/$BUILD/$OUTPUT/boot/trust.img" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
-    tar cJf $CWD/$BUILD/$OUTPUT/$FLASH/boot.tar.xz boot || exit 1
+    tar cJf $CWD/$BUILD/$OUTPUT/$FLASH/boot-${ROOTFS_VERSION}.tar.xz boot || exit 1
+    for boot_file in $(ls $CWD/$BUILD/$OUTPUT/boot/ | grep -v $BLOB_LOADER); do
+        cp -a "$CWD/$BUILD/$OUTPUT/boot/$boot_file" "$CWD/$BUILD/$SOURCE/$ROOTFS/boot/$boot_file" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    done
 }
 
 

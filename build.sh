@@ -199,6 +199,7 @@ for image_type in ${CREATE_IMAGE[@]}; do
     if [[ $image_type == mini ]]; then
         download_rootfs
         prepare_rootfs
+        create_bootloader_pack
         setting_hostname
         setting_fstab
         setting_debug
@@ -246,7 +247,6 @@ done
 
 if [[ $TOOLS_PACK == true && $SOCFAMILY == rk3* ]]; then
 #    build_flash_script
-    create_bootloader_pack
     create_tools_pack
 fi
 
