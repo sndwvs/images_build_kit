@@ -24,7 +24,7 @@ if test -e ${devtype} ${devnum} ${load_addr} ${prefix}uEnv.txt; then
 	env import -t ${load_addr} ${filesize}
 fi
 
-if test "${console}" = "display" || test "${console}" = "both"; then setenv consoleargs "console=ttyS0,115200"; fi
+if test "${console}" = "display" || test "${console}" = "both"; then setenv consoleargs "console=%SERIAL_CONSOLE%,%SERIAL_CONSOLE_SPEED%"; fi
 if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "${consoleargs} earlyprintk console=tty1"; fi
 
 # get PARTUUID of first partition on SD/eMMC it was loaded from

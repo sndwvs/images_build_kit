@@ -35,14 +35,7 @@ build_kernel_pkg() {
     [[ $SOCFAMILY == rk33* ]] && ( install -Dm644 $CWD/$BUILD/$SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/rockchip/$DEVICE_TREE_BLOB \
                                     "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/$DEVICE_TREE_BLOB" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
 
-    # u-boot
-    [[ $SOCFAMILY == rk3* ]] && install -Dm644 $CWD/config/boot_scripts/boot-$SOCFAMILY.cmd "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd"
-
     if [[ $SOCFAMILY == sun* ]]; then
-
-        # u-boot
-        install -Dm644 $CWD/config/boot_scripts/boot-sunxi.cmd "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd"
-
         if [[ $KERNEL_SOURCE != next ]];then
             if [[ $BOARD_NAME == cubietruck ]]; then
                 # vga | screen0_output_type = 4
@@ -68,6 +61,12 @@ build_kernel_pkg() {
         fi
     fi
 
+    # u-boot config
+    install -Dm644 $CWD/config/boot_scripts/boot-$SOCFAMILY.cmd "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd"
+    # u-boot serial inteface config
+    sed -e "s:%SERIAL_CONSOLE%:${SERIAL_CONSOLE}:g" \
+        -e "s:%SERIAL_CONSOLE_SPEED%:${SERIAL_CONSOLE_SPEED}:g" \
+        -i "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd"
     # compile boot script
     [[ -f $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd ]] && ( $CWD/$BUILD/$SOURCE/$BOOT_LOADER/tools/mkimage -C none -A arm -T script -d $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd \
                                                                         "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.scr" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )

@@ -14,6 +14,7 @@ RKFLASH_TOOLS="rkflashtool"
 FIRMWARE="firmware-overlay"
 
 SERIAL_CONSOLE_SPEED=115200
+SERIAL_CONSOLE=ttyS0
 
 IMAGE_OFFSET=32768
 
@@ -31,7 +32,7 @@ case $KERNEL_SOURCE in
             URL_LINUX_SOURCE="https://github.com/rockchip-linux"
             LINUX_SOURCE="kernel"
             KERNEL_BRANCH="release-4.4"
-#            KERNEL_COMMIT="3dd9af3221d2a4ea4caf2865bac5fe9aaf2e2643"
+#            KERNEL_COMMIT="763b2b0fabd8e52c38aa43b5eca9752073bd0993"
             KERNEL_DIR="linux-$SOCFAMILY-$KERNEL_SOURCE"
     ;;
 esac

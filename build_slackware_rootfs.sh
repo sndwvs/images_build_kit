@@ -71,13 +71,8 @@ setting_debug() {
              }' \
         -i "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/securetty"
 
-    sed -e 's/#\(s\(2\)\)\(.*\)\(ttyS1\)\(.*\)\(9600\)/\1\3\4 '$SERIAL_CONSOLE_SPEED'/' \
+    sed -e 's/^\(s\(0\)\)\(.*\)\(115200\)\(.*\)\(ttyS0\)/\1\3'$SERIAL_CONSOLE' '$SERIAL_CONSOLE_SPEED'/' \
         -i "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/inittab"
-    if [[ $SOCFAMILY == rk3* ]]; then
-        sed -e 's/\(s2:\)\(.*\)/#\1\2/' \
-            -e 's/#\(s1:\)\(.*\)\(ttyS0\)\(.*\)\(9600\)/\1\2ttyFIQ0\4'$SERIAL_CONSOLE_SPEED'/' \
-            -i "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/inittab"
-    fi
 }
 
 
