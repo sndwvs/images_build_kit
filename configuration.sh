@@ -99,7 +99,7 @@ export PATH=/bin:/sbin:/usr/bin:/usr/sbin:$CWD/$BUILD/$OUTPUT/$TOOLS/
 #---------------------------------------------
 #URL_DISTR="http://dl.fail.pp.ua/slackware/slackwarearm-14.2/slackware"
 [[ $ARCH == arm ]] && URL_DISTR="http://dl.fail.pp.ua/slackware/slackwarearm-current/slackware"
-[[ $ARCH == aarch64 ]] && URL_DISTR="http://dl.fail.pp.ua/slackware/slarm64-current/slackware"
+[[ $ARCH == aarch64 ]] && URL_DISTR="http://dl.fail.pp.ua/slackware/slarm64-current/slarm64"
 URL_DISTR_EXTRA="http://dl.fail.pp.ua/slackware/pkg/${ARCH}"
 
 #---------------------------------------------
