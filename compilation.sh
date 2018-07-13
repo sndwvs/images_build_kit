@@ -140,9 +140,10 @@ compile_kernel() {
     fi
 
     # delete previous creations
-    [[ $SOCFAMILY != rk3288 || $KERNEL_SOURCE != next ]] \
-        && message "" "clean" "$KERNEL_DIR" \
-        && make CROSS_COMPILE=$CROSS clean >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    if [[ $SOCFAMILY != rk3288 || $KERNEL_SOURCE != next ]]; then
+        message "" "clean" "$KERNEL_DIR"
+        make CROSS_COMPILE=$CROSS clean >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
 
     # use proven config
     install -D $CWD/config/kernel/$LINUX_CONFIG $CWD/$BUILD/$SOURCE/$KERNEL_DIR/.config || (message "err" "details" && exit 1) || exit 1
