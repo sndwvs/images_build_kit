@@ -29,10 +29,9 @@ ATF_BRANCH=${ATF_BRANCH:-master}
 
 case $KERNEL_SOURCE in
     legacy)
-            URL_LINUX_SOURCE="https://github.com/rockchip-linux"
-            LINUX_SOURCE="kernel"
-            KERNEL_BRANCH="release-4.4"
-#            KERNEL_COMMIT="763b2b0fabd8e52c38aa43b5eca9752073bd0993"
+            LINUX_SOURCE="https://github.com/rockchip-linux/kernel"
+            KERNEL_BRANCH="release-4.4::"
+#            KERNEL_BRANCH="release-4.4:commit:763b2b0fabd8e52c38aa43b5eca9752073bd0993"
             KERNEL_DIR="linux-$SOCFAMILY-$KERNEL_SOURCE"
     ;;
 esac
@@ -42,7 +41,7 @@ esac
 
 create_uboot()
 {
-    pushd $CWD/$BUILD/$SOURCE/$BOOT_LOADER >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    pushd $CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     if [[ $SOCFAMILY == rk32* ]]; then
         # U-Boot SPL, with SPL_BACK_TO_BROM option enabled
@@ -73,10 +72,10 @@ write_uboot()
 {
     # clear u-boot
 #    dd if=/dev/zero of=$1 bs=1k count=1023 seek=1 status=noxfer >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    dd if=$CWD/$BUILD/$SOURCE/$BOOT_LOADER/$BOOT_LOADER_BIN of=$1 seek=64 status=noxfer >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    dd if=$CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/$BOOT_LOADER_BIN of=$1 seek=64 status=noxfer >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     if [[ $SOCFAMILY == rk33* ]]; then
-        dd if=$CWD/$BUILD/$SOURCE/$BOOT_LOADER/uboot.img of=$1 seek=16384 status=noxfer >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        dd if=$CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/uboot.img of=$1 seek=16384 status=noxfer >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         dd if=$CWD/$BUILD/$SOURCE/$ATF_SOURCE/trust.img of=$1 seek=24576 status=noxfer >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
-    message "" "write" "$BOOT_LOADER"
+    message "" "write" "$BOOT_LOADER_DIR"
 }

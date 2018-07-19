@@ -65,8 +65,8 @@ compile_sunxi_tools() {
 }
 
 compile_boot_loader() {
-    message "" "compiling" "$BOOT_LOADER $BOOT_LOADER_BRANCH"
-    cd $CWD/$BUILD/$SOURCE/$BOOT_LOADER >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    message "" "compiling" "$BOOT_LOADER_DIR $BOOT_LOADER_BRANCH"
+    cd $CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
 #    [[ $KARCH == arm64 ]] && local CROSS=$CROSS64
 
@@ -92,9 +92,9 @@ compile_boot_loader() {
     if [[ $SOCFAMILY == sun* ]]; then
         if [ "$KERNEL_SOURCE" != "next" ] ; then
             # patch mainline uboot configuration to boot with old kernels
-            if [ "$(cat $CWD/$BUILD/$SOURCE/$BOOT_LOADER/.config | grep CONFIG_ARMV7_BOOT_SEC_DEFAULT=y)" == "" ]; then
-                echo "CONFIG_ARMV7_BOOT_SEC_DEFAULT=y" >> $CWD/$BUILD/$SOURCE/$BOOT_LOADER/.config
-                echo "CONFIG_OLD_SUNXI_KERNEL_COMPAT=y" >> $CWD/$BUILD/$SOURCE/$BOOT_LOADER/.config
+            if [ "$(cat $CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/.config | grep CONFIG_ARMV7_BOOT_SEC_DEFAULT=y)" == "" ]; then
+                echo "CONFIG_ARMV7_BOOT_SEC_DEFAULT=y" >> $CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/.config
+                echo "CONFIG_OLD_SUNXI_KERNEL_COMPAT=y" >> $CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/.config
             fi
         fi
         make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1

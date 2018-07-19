@@ -15,19 +15,18 @@ get_config
 # mainline kernel source configuration
 #---------------------------------------------
 if [[ $KERNEL_SOURCE == next ]]; then
-    URL_LINUX_SOURCE="https://kernel.googlesource.com/pub/scm/linux/kernel/git/stable"
-    #URL_LINUX_SOURCE='git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git'
-    LINUX_SOURCE="linux-stable"
-    KERNEL_BRANCH="linux-4.14.y"
+    LINUX_SOURCE="https://kernel.googlesource.com/pub/scm/linux/kernel/git/stable/linux-stable"
+    #LINUX_SOURCE='git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git'
+    KERNEL_BRANCH="linux-4.14.y::"
     KERNEL_DIR="linux-$KERNEL_SOURCE"
 fi
 
 #---------------------------------------------
 # boot loader configuration
 #---------------------------------------------
-URL_BOOT_LOADER_SOURCE="http://git.denx.de"
-BOOT_LOADER="u-boot"
-BOOT_LOADER_BRANCH=${BOOT_LOADER_BRANCH:-""} #>v2017.05
+BOOT_LOADER_SOURCE="https://git.denx.de/u-boot.git"
+BOOT_LOADER_DIR="u-boot"
+BOOT_LOADER_BRANCH=${BOOT_LOADER_BRANCH:-"master::"} #"master:tag:v2017.05"
 
 #---------------------------------------------
 # xtools configuration

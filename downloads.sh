@@ -10,6 +10,44 @@ fi
 # downloads sources and binares
 #---------------------------------------------
 
+
+# $1 upload directory
+# $2 repository url
+# $3 branch
+#            <branch>:<tag|commit>:value
+git_fetch() {
+    local DIR=$1
+    local URL=$2
+    local BRANCH=$(echo $3 | cut -f1 -d ":")
+    local TYPE=$(echo $3 | cut -f2 -d ":")
+    local VAR=$(echo $3 | cut -f3 -d ":")
+
+    [[ -z $DIR || -z $URL ]] && ( message "err" "details" && exit 1 )
+
+    if [[ ! -d $DIR ]]; then
+#        cd $DIR && ( git checkout -f ${BRANCH} && git clean -df && git pull origin ${BRANCH} ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+#    else
+        git clone -b ${BRANCH} --depth 1 $URL $DIR 2>/dev/null || status=$?
+        [[ 0 -ne $status ]] && ( git clone -b ${BRANCH} $URL $DIR >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+    fi
+    pushd $DIR >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
+    if [[ $TYPE == commit && ! $(git log --format=format:%H | grep $VAR) ]]; then
+        i=1
+        set +e
+        while [ ! $(git log --format=format:%H | grep $VAR) ]; do
+            git fetch --depth=$((i+=10)) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+#            git log --format=format:%H | grep $VAR
+        done
+        set -e
+    fi
+    case $TYPE in
+        tag)    git checkout -f ${VAR} >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 ;;
+        commit) git reset --hard ${VAR} >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 ;;
+    esac
+    popd >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+}
+
 download_xtools() {
     local c=0
     for XTOOLS in ${XTOOLS[*]}; do
@@ -35,13 +73,11 @@ download() {
 
     download_xtools
 
-    message "" "download" "$BOOT_LOADER"
-    if [ -d $CWD/$BUILD/$SOURCE/$BOOT_LOADER ]; then
-        cd $CWD/$BUILD/$SOURCE/$BOOT_LOADER && ( git checkout -f ${BOOT_LOADER_BRANCH:-master} && git clean -df && git pull origin ${BOOT_LOADER_BRANCH:-master} ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    else
-        git clone $URL_BOOT_LOADER_SOURCE/${BOOT_LOADER}.git $CWD/$BUILD/$SOURCE/$BOOT_LOADER >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    fi
+    message "" "download" "$BOOT_LOADER_DIR"
+    # git_fetch <dir> <url> <branch>
+    git_fetch $CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR $BOOT_LOADER_SOURCE ${BOOT_LOADER_BRANCH}
 
+# after changes start
     if [[ ! -z $ATF ]]; then
         message "" "download" "$ATF_SOURCE"
         if [ -d $CWD/$BUILD/$SOURCE/$ATF_SOURCE ]; then
@@ -88,25 +124,13 @@ download() {
         else
             git clone $URL_RKBIN/${RKBIN}.git $CWD/$BUILD/$SOURCE/$RKBIN >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
-
-        message "" "download" "$KERNEL_DIR"
-        if [[ $KERNEL_SOURCE == next ]]; then
-            if [ -d $CWD/$BUILD/$SOURCE/$KERNEL_DIR ]; then
-                cd $CWD/$BUILD/$SOURCE/$KERNEL_DIR && ( git checkout -f ${KERNEL_BRANCH:-master} && git clean -df && git pull origin ${KERNEL_BRANCH:-master} ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-            else
-                git clone -b $KERNEL_BRANCH --depth 1 $URL_LINUX_SOURCE/$LINUX_SOURCE $CWD/$BUILD/$SOURCE/$KERNEL_DIR >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-            fi
-        else
-            if [ -d $CWD/$BUILD/$SOURCE/$KERNEL_DIR ]; then
-                cd $CWD/$BUILD/$SOURCE/$KERNEL_DIR && ( git checkout -f ${KERNEL_BRANCH:-master} && git clean -df && git pull origin ${KERNEL_BRANCH:-master} ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-            else
-                git clone -b $KERNEL_BRANCH --depth 1 $URL_LINUX_SOURCE/$LINUX_SOURCE $CWD/$BUILD/$SOURCE/$KERNEL_DIR >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-            fi
-        fi
-            message "" "extract" "$KERNEL_DIR"
-            cd $CWD/$BUILD/$SOURCE/$KERNEL_DIR && git checkout $KERNEL_BRANCH >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-            [[ ! -z $KERNEL_COMMIT ]] && ( git reset --hard $KERNEL_COMMIT >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+# after changes end
     fi
+
+    message "" "download" "$KERNEL_DIR"
+    # git_fetch <dir> <url> <branch>
+    git_fetch $CWD/$BUILD/$SOURCE/$KERNEL_DIR $LINUX_SOURCE ${KERNEL_BRANCH}
+
     if [[ $SOCFAMILY == sun* ]]; then
         message "" "download" "$SUNXI_TOOLS"
         if [ -d $CWD/$BUILD/$SOURCE/$SUNXI_TOOLS ];then
@@ -114,26 +138,5 @@ download() {
         else
             git clone $URL_SUNXI_TOOLS/$SUNXI_TOOLS $CWD/$BUILD/$SOURCE/$SUNXI_TOOLS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
-
-        message "" "download" "$KERNEL_DIR"
-        if [[ $SOCFAMILY == sun8* ]] || [[ $KERNEL_SOURCE != next ]]; then
-            if [ -d $CWD/$BUILD/$SOURCE/$KERNEL_DIR ]; then
-                cd $CWD/$BUILD/$SOURCE/$KERNEL_DIR && ( git checkout -f ${KERNEL_BRANCH:-master} && git clean -df && git pull origin ${KERNEL_BRANCH:-master} ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-            else
-                git clone -b $KERNEL_BRANCH --depth 1 $URL_LINUX_SOURCE/$LINUX_SOURCE $CWD/$BUILD/$SOURCE/$KERNEL_DIR >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-            fi
-            message "" "extract" "$KERNEL_DIR"
-            cd $CWD/$BUILD/$SOURCE/$KERNEL_DIR && git checkout $KERNEL_BRANCH >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        fi
-    fi
-
-    if [[ $KERNEL_SOURCE == next ]]; then
-        if [ -d $CWD/$BUILD/$SOURCE/$KERNEL_DIR ]; then
-            cd $CWD/$BUILD/$SOURCE/$KERNEL_DIR && ( git checkout -f ${KERNEL_BRANCH:-master} && git clean -df && git pull origin ${KERNEL_BRANCH:-master} ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        else
-            git clone -b $KERNEL_BRANCH --depth 1 $URL_LINUX_SOURCE/$LINUX_SOURCE $CWD/$BUILD/$SOURCE/$KERNEL_DIR >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        fi
-        message "" "extract" "$KERNEL_DIR"
-        cd $CWD/$BUILD/$SOURCE/$KERNEL_DIR && git checkout $KERNEL_BRANCH >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 }
