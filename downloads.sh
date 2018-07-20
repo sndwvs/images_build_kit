@@ -25,11 +25,12 @@ git_fetch() {
     [[ -z $DIR || -z $URL ]] && ( message "err" "details" && exit 1 )
 
     if [[ ! -d $DIR ]]; then
-#        cd $DIR && ( git checkout -f ${BRANCH} && git clean -df && git pull origin ${BRANCH} ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-#    else
         git clone -b ${BRANCH} --depth 1 $URL $DIR 2>/dev/null || status=$?
         [[ 0 -ne $status ]] && ( git clone -b ${BRANCH} $URL $DIR >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+    else
+        cd $DIR && ( git checkout -f ${BRANCH} && git clean -df && git pull origin ${BRANCH} ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
+
     pushd $DIR >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     set +e
