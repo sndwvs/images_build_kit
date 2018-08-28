@@ -57,12 +57,14 @@ create_uboot()
 
         cat $CWD/$BUILD/$SOURCE/$RKBIN/${SOCFAMILY:0:4}/$MINI_LOADER >> $BOOT_LOADER_BIN || exit 1
 
-        # u-boot
-        #
-        # Total hours wasted before finding that the new "load address" parameter is not optional: 3
-        # https://github.com/rockchip-linux/build/commit/fff8f5a2d91fd11f8c4f6d605cac704d28baab4d
-        #
-        $CWD/$BUILD/$SOURCE/$RKBIN/tools/loaderimage --pack --uboot u-boot-dtb.bin uboot.img 0x200000 >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        if [[ $NATIVE_ARCH != true ]]; then
+            # u-boot
+            #
+            # Total hours wasted before finding that the new "load address" parameter is not optional: 3
+            # https://github.com/rockchip-linux/build/commit/fff8f5a2d91fd11f8c4f6d605cac704d28baab4d
+            #
+            $CWD/$BUILD/$SOURCE/$RKBIN/tools/loaderimage --pack --uboot u-boot-dtb.bin uboot.img 0x200000 >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        fi
     fi
     popd >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
@@ -78,4 +80,10 @@ write_uboot()
         dd if=$CWD/$BUILD/$SOURCE/$ATF_SOURCE/trust.img of=$1 seek=24576 status=noxfer >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
     message "" "write" "$BOOT_LOADER_DIR"
+}
+
+fix_native_arch()
+{
+    cp -f $CWD/$BUILD/$SOURCE/$RKBIN/img/$SOCFAMILY/uboot.img $CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    cp -f $CWD/$BUILD/$SOURCE/$RKBIN/img/$SOCFAMILY/trust.img $CWD/$BUILD/$SOURCE/$ATF_SOURCE/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }

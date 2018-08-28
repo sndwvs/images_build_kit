@@ -72,7 +72,7 @@ download_xtools() {
 
 download() {
 
-    download_xtools
+    [[ $NATIVE_ARCH != true ]] && download_xtools
 
     message "" "download" "$BOOT_LOADER_DIR"
     # git_fetch <dir> <url> <branch>

@@ -88,6 +88,8 @@ for XTOOL in ${XTOOLS[*]}; do
     fi
 done
 
+[[ $NATIVE_ARCH == true ]] && export CROSS="" OLD_CROSS=""
+
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin:$CWD/$BUILD/$OUTPUT/$TOOLS/
 #export PATH=/bin:/sbin:/usr/bin:/usr/sbin:$CWD/$BUILD/${SOURCE}/$ARM_XTOOLS/bin:$CWD/$BUILD/${SOURCE}/$ARM64_XTOOLS/bin:$CWD/$BUILD/$OUTPUT/$TOOLS/
 #export CROSS="${XTOOLS_ARM_SUFFIX}-"
