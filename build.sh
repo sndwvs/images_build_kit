@@ -165,12 +165,12 @@ fi
 #---------------------------------------------
 message "" "start" "build ARCH $ARCH"
 if [[ $COMPILE_BINARIES == true ]]; then
-
+exit
     patching_source "u-boot"
     compile_boot_loader
     [[ ! -z $ATF && $NATIVE_ARCH != true ]] && compile_atf
 
-    [[ $NATIVE_ARCH != true ]] && fix_native_arch
+    [[ $NATIVE_ARCH == true ]] && fix_native_arch
 
     patching_source "kernel"
     compile_kernel
