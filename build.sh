@@ -166,21 +166,14 @@ fi
 message "" "start" "build ARCH $ARCH"
 if [[ $COMPILE_BINARIES == true ]]; then
 
-        patching_source "u-boot"
-        compile_boot_loader
-        [[ ! -z $ATF ]] && compile_atf
+    patching_source "u-boot"
+    compile_boot_loader
+    [[ ! -z $ATF && $NATIVE_ARCH != true ]] && compile_atf
 
-        [[ $NATIVE_ARCH != true ]] && fix_native_arch
+    [[ $NATIVE_ARCH != true ]] && fix_native_arch
 
-        patching_source "kernel"
-        compile_kernel
-
-    if [[ $SOCFAMILY == rk3288 ]]; then
-        compile_rk2918
-        compile_rkflashtool
-        compile_mkbooting
-        add_linux_upgrade_tool
-    fi
+    patching_source "kernel"
+    compile_kernel
 
 #    if [[ $SOCFAMILY == rk3399 ]]; then
 #        build_kernel_img

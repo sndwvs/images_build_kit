@@ -158,7 +158,8 @@ patching_source() {
 #---------------------------------------------
 gcc_version() {
     local VER
-    VER=$( ${1}gcc --version | grep -oP "GCC.*(?=\))" )
+    #VER=$( ${1}gcc --version | grep -oP "GCC.*(?=\))" )
+    VER=$( ${1}gcc --version | grep GCC | cut -d ' ' -f1,3 )
     eval "$2=\$VER"
 }
 

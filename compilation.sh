@@ -6,43 +6,6 @@ if [ -z $CWD ]; then
     exit
 fi
 
-compile_rk2918() {
-    message "" "compiling" "$RK2918_TOOLS"
-    PROGRAMS="afptool img_unpack img_maker mkkrnlimg"
-    cd $CWD/$BUILD/$SOURCE/$RK2918_TOOLS
-    make $CTHREADS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
-    for p in $PROGRAMS;do
-        message "" "copy" "program: $p"
-        mv $p $CWD/$BUILD/$OUTPUT/$TOOLS/ || exit 1
-    done
-}
-
-compile_rkflashtool() {
-    message "" "compiling" "$RKFLASH_TOOLS"
-    PROGRAMS="rkcrc rkflashtool rkmisc rkpad rkparameters rkparametersblock rkunpack rkunsign"
-    cd $CWD/$BUILD/$SOURCE/$RKFLASH_TOOLS
-    make clean >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    make $CTHREADS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
-    for p in $PROGRAMS;do
-        message "" "copy" "program: $p"
-        cp $p $CWD/$BUILD/$OUTPUT/$TOOLS/ || exit 1
-    done
-}
-
-compile_mkbooting() {
-    message "" "compiling" "$MKBOOTIMG_TOOLS"
-    PROGRAMS="afptool img_maker mkbootimg unmkbootimg mkrootfs mkupdate mkcpiogz unmkcpiogz"
-    cd $CWD/$BUILD/$SOURCE/$MKBOOTIMG_TOOLS
-    make clean >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    make $CTHREADS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
-    for p in $PROGRAMS;do
-        message "" "copy" "program: $p"
-        cp $p $CWD/$BUILD/$OUTPUT/$TOOLS/ || exit 1
-    done
-}
 
 compile_sunxi_tools() {
     message "" "compiling" "$SUNXI_TOOLS"
@@ -70,7 +33,7 @@ compile_boot_loader() {
 
 #    [[ $KARCH == arm64 ]] && local CROSS=$CROSS64
 
-    gcc_version $CROSS GCC_VERSION
+    gcc_version "$CROSS" GCC_VERSION
     message "" "version" "$GCC_VERSION"
 
     local ARCH=arm
@@ -149,7 +112,7 @@ compile_kernel() {
     install -D $CWD/config/kernel/$LINUX_CONFIG $CWD/$BUILD/$SOURCE/$KERNEL_DIR/.config || (message "err" "details" && exit 1) || exit 1
 
     [[ "$KERNEL_SOURCE" != next && $SOCFAMILY == sun* ]] && local CROSS=$OLD_CROSS
-    gcc_version $CROSS GCC_VERSION
+    gcc_version "$CROSS" GCC_VERSION
     message "" "version" "$GCC_VERSION"
 
     if [[ $SOCFAMILY == rk3* ]]; then

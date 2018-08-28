@@ -98,27 +98,6 @@ download() {
             fi
         fi
 
-        message "" "download" "$RK2918_TOOLS"
-        if [[ -d $CWD/$BUILD/$SOURCE/$RK2918_TOOLS ]]; then
-            cd $CWD/$BUILD/$SOURCE/$RK2918_TOOLS && git pull origin HEAD >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        else
-            git clone $URL_RK2918_TOOLS/$RK2918_TOOLS $CWD/$BUILD/$SOURCE/$RK2918_TOOLS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        fi
-
-        message "" "download" "$RKFLASH_TOOLS"
-        if [ -d $CWD/$BUILD/$SOURCE/$RKFLASH_TOOLS ]; then
-            cd $CWD/$BUILD/$SOURCE/$RKFLASH_TOOLS && git pull origin HEAD >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        else
-            git clone $URL_TOOLS/$RKFLASH_TOOLS $CWD/$BUILD/$SOURCE/$RKFLASH_TOOLS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        fi
-
-        message "" "download" "$MKBOOTIMG_TOOLS"
-        if [ -d $CWD/$BUILD/$SOURCE/$MKBOOTIMG_TOOLS ]; then
-            cd $CWD/$BUILD/$SOURCE/$MKBOOTIMG_TOOLS && git pull origin HEAD >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        else
-            git clone $URL_TOOLS/$MKBOOTIMG_TOOLS $CWD/$BUILD/$SOURCE/$MKBOOTIMG_TOOLS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        fi
-
         message "" "download" "$RKBIN"
         if [ -d $CWD/$BUILD/$SOURCE/$RKBIN ]; then
             cd $CWD/$BUILD/$SOURCE/$RKBIN && ( git checkout -f ${RKBIN_BRANCH:-master} && git clean -df && git pull origin ${RKBIN_BRANCH:-master} ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1

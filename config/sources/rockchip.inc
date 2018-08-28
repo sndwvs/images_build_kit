@@ -1,16 +1,8 @@
 
-LINUX_UPGRADE_TOOL="Linux_Upgrade_Tool_v1.21"
-
-URL_RK2918_TOOLS="https://github.com/dayongxie"
-RK2918_TOOLS="rk2918_tools"
-
 URL_RKBIN="https://github.com/rockchip-linux"
 RKBIN="rkbin"
 RKBIN_BRANCH=""
 
-URL_TOOLS="https://github.com/neo-technologies"
-MKBOOTIMG_TOOLS="rockchip-mkbootimg"
-RKFLASH_TOOLS="rkflashtool"
 FIRMWARE="firmware-overlay"
 
 SERIAL_CONSOLE_SPEED=115200
