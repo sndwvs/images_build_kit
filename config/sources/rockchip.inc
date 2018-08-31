@@ -76,6 +76,6 @@ write_uboot()
 
 fix_native_arch()
 {
-    cp -f $CWD/$BUILD/$SOURCE/$RKBIN/img/$SOCFAMILY/uboot.img $CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    cp -f $CWD/$BUILD/$SOURCE/$RKBIN/img/$SOCFAMILY/trust.img $CWD/$BUILD/$SOURCE/$ATF_SOURCE/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    cp -f $CWD/blobs/$BOARD_NAME/u-boot/uboot.img $CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    cp -f $CWD/blobs/$BOARD_NAME/atf/trust.img $CWD/$BUILD/$SOURCE/$ATF_SOURCE/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
