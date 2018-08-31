@@ -130,12 +130,12 @@ EOF
 
 
 setting_wifi() {
-#    if [[ ! -f "$CWD/bin/$BOARD_NAME/rc.wifi" ]]; then
+#    if [[ ! -f "$CWD/blobs/$BOARD_NAME/rc.wifi" ]]; then
 #        return 0
 #    fi
 
     message "" "setting" "wifi"
-#    install -m755 -D "$CWD/bin/$BOARD_NAME/rc.wifi" "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.wifi"
+#    install -m755 -D "$CWD/blobs/$BOARD_NAME/rc.wifi" "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.wifi"
 
     # fix wifi driver
     if [[ $SOCFAMILY != rk3288 && $KERNEL_SOURCE != next ]]; then
