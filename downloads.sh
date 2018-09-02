@@ -37,7 +37,7 @@ git_fetch() {
     if [[ $TYPE == commit && ! $(git log --format=format:%H | grep $VAR) ]]; then
         i=1
         while [ ! $(git log --format=format:%H | grep $VAR) ]; do
-            git fetch --depth=$((i+=10)) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            git fetch --depth=$((i+=600)) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 #            git log --format=format:%H | grep $VAR
         done
     fi
