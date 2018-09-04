@@ -170,7 +170,7 @@ if [[ $COMPILE_BINARIES == true ]]; then
     compile_boot_loader
     [[ ! -z $ATF && $NATIVE_ARCH != true ]] && compile_atf
 
-    [[ $NATIVE_ARCH == true ]] && fix_native_arch
+    [[ $NATIVE_ARCH == true && $SOCFAMILY == rk33* ]] && fix_native_arch
 
     patching_source "kernel"
     compile_kernel
