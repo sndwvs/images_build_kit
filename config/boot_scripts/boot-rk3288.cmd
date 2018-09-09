@@ -3,7 +3,7 @@
 # Please edit /boot/uEnv.txt to set supported parameters
 #
 
-setenv load_addr "0x00000000"
+setenv load_addr "0x21000000"
 setenv rootdev "/dev/mmcblk2p1"
 setenv fdt_file "rk3288-firefly.dtb"
 setenv console "both"
@@ -17,8 +17,8 @@ if test -n ${part_exists}; then
 	setenv devnum "1"
 fi
 
-itest.b ${devnum} == 0 && echo "U-boot loaded from eMMC"
-itest.b ${devnum} == 1 && echo "U-boot loaded from SD"
+itest.b ${devnum} == 0 && echo "U-boot loaded from SD"
+itest.b ${devnum} == 1 && echo "U-boot loaded from eMMC"
 
 if load ${devtype} ${devnum}:1 ${load_addr} ${prefix}uEnv.txt; then
 	env import -t ${load_addr} ${filesize}
@@ -27,7 +27,7 @@ fi
 if test "${console}" = "display" || test "${console}" = "both"; then setenv consoleargs "console=%SERIAL_CONSOLE%,%SERIAL_CONSOLE_SPEED%n8"; fi
 if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "${consoleargs} earlyprintk console=tty1"; fi
 
-setenv bootargs "consoleblank=0 root=${rootdev} ro rootwait rootfstype=ext4 init=/sbin/init ${consoleargs} loglevel=${verbosity} ${extraargs}"
+setenv bootargs "consoleblank=0 scandelay root=${rootdev} ro rootwait rootfstype=ext4 init=/sbin/init ${consoleargs} loglevel=${verbosity} ${extraargs}"
 
 load ${devtype} ${devnum}:1 ${fdt_addr_r} ${prefix}dtb/${fdt_file}
 load ${devtype} ${devnum}:1 ${kernel_addr_r} ${prefix}zImage
