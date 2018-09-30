@@ -28,9 +28,8 @@ git_fetch() {
         git clone -b ${BRANCH} --depth 1 $URL $DIR 2>/dev/null || status=$?
         [[ 0 -ne $status ]] && ( git clone -b ${BRANCH} $URL $DIR >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
     else
-        cd $DIR && ( git checkout -f ${BRANCH} && git clean -df && git pull origin ${BRANCH} ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        cd $DIR && ( git reset && git checkout -f . && git clean -xdfq && git pull origin ${BRANCH} ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
-
     pushd $DIR >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     set +e
@@ -99,11 +98,8 @@ download() {
         fi
 
         message "" "download" "$RKBIN"
-        if [ -d $CWD/$BUILD/$SOURCE/$RKBIN ]; then
-            cd $CWD/$BUILD/$SOURCE/$RKBIN && ( git checkout -f ${RKBIN_BRANCH:-master} && git clean -df && git pull origin ${RKBIN_BRANCH:-master} ) >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        else
-            git clone $URL_RKBIN/${RKBIN}.git $CWD/$BUILD/$SOURCE/$RKBIN >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        fi
+        # git_fetch <dir> <url> <branch>
+        git_fetch $CWD/$BUILD/$SOURCE/$RKBIN $RKBIN ${RKBIN_BRANCH}
 # after changes end
     fi
 
