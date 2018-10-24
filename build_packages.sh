@@ -181,9 +181,9 @@ create_bootloader_pack(){
     install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/$BOOT_LOADER_BIN" "$CWD/$BUILD/$OUTPUT/boot/$BOOT_LOADER_BIN" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     if [[ ! -z $BLOB_LOADER ]]; then
-        BLOB_LOADER_PREFFIX="$SOURCE/$RKBIN/bin/${SOCFAMILY:0:4}"
+        BLOB_LOADER_PREFFIX="$BUILD/$SOURCE/$RKBIN/bin/${SOCFAMILY:0:4}"
         [[ $NATIVE_ARCH == true ]] && BLOB_LOADER_PREFFIX="blobs/u-boot/${SOCFAMILY}"
-        install -Dm644 "$CWD/$BUILD/$BLOB_LOADER_PREFFIX/$BLOB_LOADER" "$CWD/$BUILD/$OUTPUT/boot/$BLOB_LOADER" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        install -Dm644 "$CWD/$BLOB_LOADER_PREFFIX/$BLOB_LOADER" "$CWD/$BUILD/$OUTPUT/boot/$BLOB_LOADER" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
     if [[ $SOCFAMILY == rk33* ]]; then
