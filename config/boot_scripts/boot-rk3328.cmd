@@ -11,16 +11,14 @@ setenv verbosity "4"
 setenv console "both"
 setenv rootfstype "ext4"
 
-# boot from eMMC
-part uuid mmc 1 part_exists
+# boot from SD
+part uuid ${devtype} 1 part_exists
 
 if test -n ${part_exists}; then
-    setenv rootdev "/dev/mmcblk0p1"
+    setenv rootdev "/dev/mmcblk1p1"
     setenv devnum "1"
+    ${devtype} dev ${devnum}
 fi
-
-itest.b ${devnum} == 0 && echo "U-boot loaded from eMMC"
-itest.b ${devnum} == 1 && echo "U-boot loaded from SD"
 
 if load ${devtype} ${devnum}:1 ${load_addr} ${prefix}uEnv.txt; then
     env import -t ${load_addr} ${filesize}
