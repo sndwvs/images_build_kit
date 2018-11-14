@@ -24,8 +24,8 @@ fi
 #---------------------------------------------
 # boot loader configuration
 #---------------------------------------------
-BOOT_LOADER_SOURCE="https://git.denx.de/u-boot.git"
-BOOT_LOADER_DIR="u-boot"
+BOOT_LOADER_SOURCE=${BOOT_LOADER_SOURCE:-"https://git.denx.de/u-boot.git"}
+BOOT_LOADER_DIR=${BOOT_LOADER_DIR:-"u-boot"}
 BOOT_LOADER_BRANCH=${BOOT_LOADER_BRANCH:-"master::"} #"master:tag:v2017.05"
 
 #---------------------------------------------

@@ -199,7 +199,7 @@ create_img() {
     fi
 
     # +800M for create swap firstrun
-    ROOTFS_SIZE=$(expr $(du -sH $CWD/$BUILD/$SOURCE/$IMAGE | awk '{print $1}') / 1024 + 800)"M"
+    ROOTFS_SIZE=$(expr $(du -sH $CWD/$BUILD/$SOURCE/$IMAGE | awk '{print $1}') / 1024 + 1000)"M"
 
     message "" "create" "image size $ROOTFS_SIZE"
 
