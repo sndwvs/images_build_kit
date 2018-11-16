@@ -3,9 +3,9 @@
 # Please edit /boot/uEnv.txt to set supported parameters
 #
 
-setenv load_addr "0x00000000"
-setenv rootdev "/dev/mmcblk1p6"
-setenv fdt_file "rk3399-firefly-linux.dtb"
+setenv load_addr "0x39000000"
+setenv rootdev "/dev/mmcblk0p1"
+setenv fdt_file "%DEVICE_TREE_BLOB%"
 setenv console "both"
 setenv verbosity "4"
 

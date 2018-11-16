@@ -64,7 +64,8 @@ build_kernel_pkg() {
     # u-boot config
     install -Dm644 $CWD/config/boot_scripts/boot-$SOCFAMILY.cmd "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd"
     # u-boot serial inteface config
-    sed -e "s:%SERIAL_CONSOLE%:${SERIAL_CONSOLE}:g" \
+    sed -e "s:%DEVICE_TREE_BLOB%:${DEVICE_TREE_BLOB}:g" \
+        -e "s:%SERIAL_CONSOLE%:${SERIAL_CONSOLE}:g" \
         -e "s:%SERIAL_CONSOLE_SPEED%:${SERIAL_CONSOLE_SPEED}:g" \
         -i "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd"
     # compile boot script
