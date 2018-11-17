@@ -99,7 +99,7 @@ download() {
 
         message "" "download" "$RKBIN"
         # git_fetch <dir> <url> <branch>
-        git_fetch $CWD/$BUILD/$SOURCE/$RKBIN $RKBIN ${RKBIN_BRANCH}
+        git_fetch $CWD/$BUILD/$SOURCE/$RKBIN $URL_RKBIN/$RKBIN ${RKBIN_BRANCH}
 # after changes end
     fi
 
