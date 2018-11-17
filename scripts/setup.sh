@@ -17,8 +17,8 @@ OFFSET=$(fdisk -l /dev/$ROOT_DISK | tac | head -n 1 | awk '{print $2}')
 PART=1
 
 
-case $(hostname) in
-    *rk33|rock64)
+case $(cat /proc/device-tree/compatible) in
+    *rk33*|*rock64*)
             OFFSET_LOADER="64:16384:24576"
             LOADER="idbloader.img:uboot.img:trust.img"
             FIX_BOOT_DISK=1
@@ -28,7 +28,7 @@ case $(hostname) in
             LOADER="idbloader.img::"
             FIX_BOOT_DISK=1
     ;;
-    cubietruck|orange-pi-plus-2e)
+    *cubietruck*|*orange*pi*plus*2e*)
             OFFSET_LOADER="8::"
             LOADER="u-boot-sunxi-with-spl.bin::"
             BS=1024
