@@ -111,13 +111,12 @@ patching_source() {
             ;;
         u-boot)
                 local dirs=(
-                            "$CWD/patch/$BOOT_LOADER"
-                            "$CWD/patch/$BOOT_LOADER/sunxi"
-                            "$CWD/patch/$BOOT_LOADER/sunxi/$KERNEL_SOURCE"
-                            "$CWD/patch/$BOOT_LOADER/$SOCFAMILY"
-                            "$CWD/patch/$BOOT_LOADER/$SOCFAMILY/$KERNEL_SOURCE"
+                            "$CWD/patch/u-boot/$SOCFAMILY"
+                            "$CWD/patch/u-boot/$SOCFAMILY/$KERNEL_SOURCE"
+                            "$CWD/patch/u-boot/$SOCFAMILY/$BOARD_NAME"
+                            "$CWD/patch/u-boot/$SOCFAMILY/$BOARD_NAME/$KERNEL_SOURCE"
                         )
-                PATCH_SOURCE="$CWD/$BUILD/$SOURCE/$BOOT_LOADER"
+                PATCH_SOURCE="$CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR"
             ;;
     esac
 
