@@ -51,7 +51,7 @@ git_fetch() {
 download_xtools() {
     local c=0
     for XTOOLS in ${XTOOLS[*]}; do
-        if [[ $(echo $XTOOLS | grep $ARCH) ]]; then
+        if [[ $(echo $XTOOLS | grep $ARCH) || ! -z $ATF ]]; then
             [[ -f $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz.asc ]] && rm $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz.asc > /dev/null
             wget --no-check-certificate ${URL_XTOOLS[$c]}/$XTOOLS.tar.xz.asc -P $CWD/$BUILD/$SOURCE/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             MD5_XTOOLS=$(awk '{print $1}' $CWD/$BUILD/$SOURCE/$XTOOLS.tar.xz.asc)
