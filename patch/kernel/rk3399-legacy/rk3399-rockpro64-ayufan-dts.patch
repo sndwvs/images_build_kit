@@ -1,5 +1,5 @@
---- /mnt/data/development/arm/slackware_arm_build_kit/build/source/linux-rk3399-legacy/arch/arm64/boot/dts/rockchip/rk3399-rockpro64.dts	2018-11-24 01:04:22.227284949 +0200
-+++ rk3399-rockpro64.dts	2018-11-17 01:09:54.251613398 +0200
+--- a/arch/arm64/boot/dts/rockchip/rk3399-rockpro64.dts	2018-11-24 01:04:22.227284949 +0200
++++ b/arch/arm64/boot/dts/rockchip/rk3399-rockpro64.dts	2018-11-17 01:09:54.251613398 +0200
 @@ -1,7 +1,43 @@
 -// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
  /*
