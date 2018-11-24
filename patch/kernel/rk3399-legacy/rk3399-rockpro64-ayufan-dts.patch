@@ -1136,8 +1136,8 @@
 +		};
 +	};
  };
---- a/arch/arm64/boot/dts/rockchip/rk3399.dtsi.orig	2018-11-24 01:22:28.991905595 +0200
-+++ b/arch/arm64/boot/dts/rockchip/rk3399.dtsi.orig	2018-11-24 03:21:36.325769036 +0200
+--- a/arch/arm64/boot/dts/rockchip/rk3399.dtsi	2018-11-24 01:22:28.991905595 +0200
++++ b/arch/arm64/boot/dts/rockchip/rk3399.dtsi	2018-11-24 03:21:36.325769036 +0200
 @@ -786,7 +786,7 @@
  				};
  			};
