@@ -89,7 +89,6 @@ compile_kernel() {
     if [[ $KARCH == arm64 ]]; then
         [[ $SOCFAMILY == rk33* ]] && local CROSS=$OLD_CROSS
         local KERNEL=Image
-        local DEVICE_TREE_BLOB=dtbs
     fi
 
     if [[ $SOCFAMILY == sun* ]]; then
@@ -131,7 +130,7 @@ compile_kernel() {
 #        make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS menuconfig  || exit 1
         make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS $KERNEL modules | tee $CWD/$BUILD/$SOURCE/$LOG
         [[ ${PIPESTATUS[0]} != 0 ]] && ( message "err" "details" && exit 1 )
-        make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS $DEVICE_TREE_BLOB || (message "err" "details" && exit 1) || exit 1
+        make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS dtbs || (message "err" "details" && exit 1) || exit 1
     fi
 
     if [[ $SOCFAMILY == sun* ]]; then
@@ -140,7 +139,7 @@ compile_kernel() {
         make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS $KERNEL modules || (message "err" "details" && exit 1) || exit 1
 
         if [[ "$KERNEL_SOURCE" == "next" ]]; then
-            make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS $DEVICE_TREE_BLOB || (message "err" "details" && exit 1) || exit 1
+            make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS dtbs || (message "err" "details" && exit 1) || exit 1
         fi
     fi
 
