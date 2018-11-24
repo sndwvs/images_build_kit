@@ -56,7 +56,7 @@ get_config() {
     local dirs=(    "$CWD/config/environment"
                     "$CWD/config/boards/$BOARD_NAME"
                     "$CWD/config/sources/$SOCFAMILY"
-                    "$CWD/config/packages"
+#                    "$CWD/config/packages"
                 )
     for dir in "${dirs[@]}"; do
         for file in ${dir}/*.conf; do
@@ -74,22 +74,22 @@ get_config() {
                 source "$file" || exit 1
             fi
             #---- packages
-            for image_type in ${CREATE_IMAGE[@]}; do
-                if [[ $image_type = xfce ]]; then
-                    if [[ -n ${BOARD_NAME} && ! ${_file%%*-${BOARD_NAME}*} ]]; then
-                         message "" "add" "configuration file $_file"
-                         source "$file" || exit 1
-                    fi
+#            for image_type in ${CREATE_IMAGE[@]}; do
+#                if [[ $image_type = xfce ]]; then
+#                    if [[ -n ${BOARD_NAME} && ! ${_file%%*-${BOARD_NAME}*} ]]; then
+#                         message "" "add" "configuration file $_file"
+#                         source "$file" || exit 1
+#                    fi
 
-                    [[ $file = *extra* ]] && source "$file" && \
-                                            message "" "add" "configuration file $(basename $file)"
+#                    [[ $file = *extra* ]] && source "$file" && \
+#                                            message "" "add" "configuration file $(basename $file)"
 
-                fi
-                if [[ ! ${_file%%*-${image_type}*} ]]; then
-                     message "" "add" "configuration file $_file"
-                     source "$file" || exit 1
-                fi
-            done
+#                fi
+#                if [[ ! ${_file%%*-${image_type}*} ]]; then
+#                     message "" "add" "configuration file $_file"
+#                     source "$file" || exit 1
+#                fi
+#            done
             #---- packages
         done
     done
@@ -161,5 +161,16 @@ gcc_version() {
     VER=$( ${1}gcc --version | grep GCC | cut -d ' ' -f1,3 )
     eval "$2=\$VER"
 }
+
+#---------------------------------------------
+# read packages
+#---------------------------------------------
+read_packages() {
+    local TYPE="$1"
+    local PKG
+    PKG=( $(cat $CWD/config/packages/packages-${TYPE}.conf | grep -v "^#") )
+    eval "$2=\${PKG[*]}"
+}
+
 
 

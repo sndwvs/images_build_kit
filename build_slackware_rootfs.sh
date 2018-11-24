@@ -302,7 +302,10 @@ download_pkg() {
     # get parameters
     local url=$1
     local type=$2
-    eval packages=\$${type}
+    local packages
+
+    # read packages type
+    read_packages "${type}" packages
 
     for pkg in ${packages}; do
         category=$(echo $pkg | cut -f1 -d "/")
@@ -331,7 +334,10 @@ install_pkg(){
     fi
 
     local type=$1
-    eval packages=\$${type}
+    local packages
+
+    # read packages type
+    read_packages "${type}" packages
 
     for pkg in ${packages}; do
         category=$(echo $pkg | cut -f1 -d "/")
