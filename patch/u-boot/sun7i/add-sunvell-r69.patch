@@ -1,23 +1,51 @@
-diff --git a/arch/arm64/boot/dts/allwinner/Makefile b/arch/arm64/boot/dts/allwinner/Makefile
-index dae16cd..501b5a2
---- a/arch/arm64/boot/dts/allwinner/Makefile
-+++ b/arch/arm64/boot/dts/allwinner/Makefile
-@@ -5,6 +5,7 @@ dtb-$(CONFIG_ARCH_SUNXI) += sun50i-a64-sopine-baseboard.dtb
- dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h5-orangepi-pc2.dtb
- dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h5-orangepi-prime.dtb
- dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h5-orangepi-zero-plus2.dtb
-+dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h5-orangepi-zero-plus.dtb
- dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h5-nanopi-neo2.dtb
- dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h5-nanopi-neo-plus2.dtb
- dtb-$(CONFIG_ARCH_SUNXI) += sun50i-h5-nanopi-m1-plus2.dtb
-diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h5-orangepi-zero-plus.dts b/arch/arm64/boot/dts/allwinner/sun50i-h5-orangepi-zero-plus.dts
+diff --git a/configs/sunvell_r69_defconfig b/configs/sunvell_r69_defconfig
 new file mode 100644
-index 0000000..b8e5ca9
+index 0000000..f4947ab
 --- /dev/null
-+++ b/arch/arm64/boot/dts/allwinner/sun50i-h5-orangepi-zero-plus.dts
-@@ -0,0 +1,180 @@
++++ b/configs/sunvell_r69_defconfig
+@@ -0,0 +1,22 @@
++CONFIG_ARM=y
++CONFIG_ARCH_SUNXI=y
++CONFIG_SYS_TEXT_BASE=0x4a000000
++CONFIG_MACH_SUN8I_H3=y
++CONFIG_DRAM_CLK=408
++CONFIG_DRAM_ZQ=3881979
++CONFIG_DRAM_ODT_EN=y
++# CONFIG_VIDEO_DE2 is not set
++# CONFIG_VIDEO_COMPOSITE is not set
++CONFIG_DEFAULT_DEVICE_TREE="sun8i-h2-plus-sunvell-r69"
++CONFIG_MMC_SUNXI_SLOT_EXTRA=2
++# CONFIG_SYS_MALLOC_CLEAR_ON_INIT is not set
++# CONFIG_CONSOLE_MUX is not set
++CONFIG_SPL=y
++# CONFIG_CMD_FLASH is not set
++# CONFIG_CMD_FPGA is not set
++# CONFIG_SPL_SPI_SUNXI is not set
++CONFIG_SUN8I_EMAC=y
++CONFIG_USB_EHCI_HCD=y
++CONFIG_SYS_CLK_FREQ=480000000
++CONFIG_SYS_USB_EVENT_POLL_VIA_INT_QUEUE=y
++
+diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
+index 7202541..1af2005 100644
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -320,6 +320,7 @@ dtb-$(CONFIG_MACH_SUN8I_A83T) += \
+ dtb-$(CONFIG_MACH_SUN8I_H3) += \
+ 	sun8i-h2-plus-orangepi-zero.dtb \
+ 	sun8i-h2-plus-nanopi-duo.dtb \
++	sun8i-h2-plus-sunvell-r69.dtb \
+ 	sun8i-h3-bananapi-m2-plus.dtb \
+ 	sun8i-h3-orangepi-2.dtb \
+ 	sun8i-h3-orangepi-lite.dtb \
+diff --git a/arch/arm/dts/sun8i-h2-plus-sunvell-r69.dts b/arch/arm/dts/sun8i-h2-plus-sunvell-r69.dts
+new file mode 100644
+index 0000000..4b41116
+--- /dev/null
++++ b/arch/arm/dts/sun8i-h2-plus-sunvell-r69.dts
+@@ -0,0 +1,166 @@
 +/*
-+ * Copyright (C) 2016 ARM Ltd.
++ * Based original Sunvell R69 FEX file (2017 <github.com/karabek>)
 + *
 + * This file is dual-licensed: you can use it either under the terms
 + * of the GPL or the X11 license, at your option. Note that this dual
@@ -59,27 +87,21 @@ index 0000000..b8e5ca9
 + */
 +
 +/dts-v1/;
-+#include "sun50i-h5.dtsi"
++#include "sun8i-h3.dtsi"
++#include "sunxi-common-regulators.dtsi"
 +
 +#include <dt-bindings/gpio/gpio.h>
 +#include <dt-bindings/input/input.h>
 +#include <dt-bindings/pinctrl/sun4i-a10.h>
 +
 +/ {
-+	model = "Xunlong Orange Pi Zero Plus";
-+	compatible = "xunlong,orangepi-zero-plus", "allwinner,sun50i-h5";
-+
-+	reg_vcc3v3: vcc3v3 {
-+		compatible = "regulator-fixed";
-+		regulator-name = "vcc3v3";
-+		regulator-min-microvolt = <3300000>;
-+		regulator-max-microvolt = <3300000>;
-+	};
++	model = "Sunvell R69";
++	compatible = "sunvell,sunvell-r69", "allwinner,sun8i-h2-plus";
 +
 +	aliases {
-+		ethernet0 = &emac;
-+		ethernet1 = &rtl8189ftv;
 +		serial0 = &uart0;
++		/* ethernet0 is the H3 emac, defined in sun8i-h3.dtsi */
++		ethernet1 = &xr819;
 +	};
 +
 +	chosen {
@@ -89,41 +111,31 @@ index 0000000..b8e5ca9
 +	leds {
 +		compatible = "gpio-leds";
 +
-+		pwr {
-+			label = "orangepi:green:pwr";
-+			gpios = <&r_pio 0 10 GPIO_ACTIVE_HIGH>;
++		pwr_led {
++			label = "sunvell-r69:blue:pwr";
++			gpios = <&pio 0 15 GPIO_ACTIVE_HIGH>;
 +			default-state = "on";
 +		};
 +
-+		status {
-+			label = "orangepi:red:status";
-+			gpios = <&pio 0 17 GPIO_ACTIVE_HIGH>;
++		status_led {
++			label = "sunvell-r69:red:status";
++			gpios = <&r_pio 0 10 GPIO_ACTIVE_HIGH>;
 +		};
 +	};
 +
-+	reg_gmac_3v3: gmac-3v3 {
++	reg_vcc_wifi: reg_vcc_wifi {
 +		compatible = "regulator-fixed";
-+		regulator-name = "gmac-3v3";
 +		regulator-min-microvolt = <3300000>;
 +		regulator-max-microvolt = <3300000>;
-+		startup-delay-us = <100000>;
++		regulator-name = "vcc-wifi";
 +		enable-active-high;
-+		gpio = <&pio 3 6 GPIO_ACTIVE_HIGH>;
++		gpio = <&r_pio 0 7 GPIO_ACTIVE_HIGH>;
 +	};
 +
-+	reg_usb0_vbus: usb0-vbus {
-+		compatible = "regulator-fixed";
-+		regulator-name = "usb0-vbus";
-+		regulator-min-microvolt = <5000000>;
-+		regulator-max-microvolt = <5000000>;
-+		enable-active-high;
-+		gpio = <&r_pio 0 2 GPIO_ACTIVE_HIGH>; /* PL2 */
-+		status = "okay";
++	wifi_pwrseq: wifi_pwrseq {
++		compatible = "mmc-pwrseq-simple";
++		reset-gpios = <&r_pio 0 0 GPIO_ACTIVE_LOW>;
 +	};
-+};
-+
-+&ehci0 {
-+	status = "okay";
 +};
 +
 +&ehci1 {
@@ -131,34 +143,31 @@ index 0000000..b8e5ca9
 +};
 +
 +&emac {
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&emac_rgmii_pins>;
-+	phy-supply = <&reg_gmac_3v3>;
-+	phy-handle = <&ext_rgmii_phy>;
-+	phy-mode = "rgmii";
++	phy = <&phy1>;
++	phy-mode = "mii";
++	allwinner,use-internal-phy;
++	allwinner,leds-active-low;
 +	status = "okay";
-+};
-+
-+&mdio {
-+	ext_rgmii_phy: ethernet-phy@1 {
-+		compatible = "ethernet-phy-ieee802.3-c22";
++	phy1: ethernet-phy@1 {
 +		reg = <1>;
 +	};
 +};
 +
 +&mmc0 {
 +	pinctrl-names = "default";
-+	pinctrl-0 = <&mmc0_pins_a>, <&mmc0_cd_pin>;
++	pinctrl-0 = <&mmc0_pins_a>;
 +	vmmc-supply = <&reg_vcc3v3>;
 +	bus-width = <4>;
-+	cd-gpios = <&pio 5 6 GPIO_ACTIVE_LOW>; /* PF6 */
++	cd-gpios = <&pio 5 6 GPIO_ACTIVE_HIGH>; /* PF6 */
++	cd-inverted;
 +	status = "okay";
 +};
 +
 +&mmc1 {
 +	pinctrl-names = "default";
 +	pinctrl-0 = <&mmc1_pins_a>;
-+	vmmc-supply = <&reg_vcc3v3>;
++	vmmc-supply = <&reg_vcc_wifi>;
++	mmc-pwrseq = <&wifi_pwrseq>;
 +	bus-width = <4>;
 +	non-removable;
 +	status = "okay";
@@ -167,13 +176,24 @@ index 0000000..b8e5ca9
 +	 * Explicitly define the sdio device, so that we can add an ethernet
 +	 * alias for it (which e.g. makes u-boot set a mac-address).
 +	 */
-+	rtl8189ftv: sdio_wifi@1 {
++	xr819: sdio_wifi@1 {
 +		reg = <1>;
 +	};
 +};
 +
-+&ohci0 {
++&mmc2 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&mmc2_8bit_pins>;
++	vmmc-supply = <&reg_vcc3v3>;
++	bus-width = <8>;
++	non-removable;
++	cap-mmc-hw-reset;
 +	status = "okay";
++};
++
++&mmc2_8bit_pins {
++	/* Increase current from 30mA to 40mA for DDR eMMC */
++	allwinner,drive = <SUN4I_PINCTRL_40_MA>;
 +};
 +
 +&ohci1 {
@@ -186,13 +206,7 @@ index 0000000..b8e5ca9
 +	status = "okay";
 +};
 +
-+&usb_otg {
-+	dr_mode = "peripheral";
-+	status = "okay";
-+};
-+
 +&usbphy {
-+	/* USB Type-A ports' VBUS is always on */
-+	usb0_id_det-gpios = <&pio 6 12 GPIO_ACTIVE_HIGH>; /* PG12 */
++	/* USB VBUS is always on */
 +	status = "okay";
 +};
