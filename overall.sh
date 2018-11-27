@@ -106,11 +106,13 @@ patching_source() {
 
     case "$1" in
         kernel)
-                dirs="$CWD/patch/kernel/$SOCFAMILY-$KERNEL_SOURCE"
+                dirs=(      "$CWD/patch/kernel/$SOCFAMILY-$KERNEL_SOURCE"
+                            "$CWD/patch/kernel/$SOCFAMILY-$KERNEL_SOURCE/$BOARD_NAME"
+                        )
                 PATCH_SOURCE="$CWD/$BUILD/$SOURCE/$KERNEL_DIR"
             ;;
         u-boot)
-                local dirs=(
+                dirs=(
                             "$CWD/patch/u-boot/$SOCFAMILY"
                             "$CWD/patch/u-boot/$SOCFAMILY/$KERNEL_SOURCE"
                             "$CWD/patch/u-boot/$SOCFAMILY/$BOARD_NAME"
