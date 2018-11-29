@@ -1,3 +1,13 @@
+--- a/include/dt-bindings/clock/rk3399-cru.h	2018-11-29 03:42:34.384883154 +0200
++++ b/include/dt-bindings/clock/rk3399-cru.h	2018-11-29 02:03:09.849789202 +0200
+@@ -153,6 +153,7 @@
+ #define DCLK_M0_PERILP			184
+ #define DCLK_VOP0_FRAC			185
+ #define DCLK_VOP1_FRAC			186
++#define SCLK_I2S_8CH			187
+ 
+ #define FCLK_CM0S 			190
+ 
 --- a/arch/arm64/boot/dts/rockchip/Makefile	2018-11-29 03:16:37.686190935 +0200
 +++ b/arch/arm64/boot/dts/rockchip/Makefile	2018-11-29 01:35:58.761547996 +0200
 @@ -58,8 +58,16 @@
