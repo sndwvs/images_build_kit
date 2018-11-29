@@ -1,0 +1,3267 @@
+--- a/arch/arm/boot/dts/Makefile	2018-11-29 03:14:58.041676614 +0200
++++ b/arch/arm/boot/dts/Makefile	2018-11-29 01:34:01.531967041 +0200
+@@ -546,10 +546,16 @@
+ 	rk3288-evb-rk808.dtb \
+ 	rk3288-evb-rk808-linux.dtb \
+ 	rk3288-fennec.dtb \
++	rk3288-firefly-aio-lvds.dtb \
++	rk3288-firefly-aio.dtb \
++	rk3288-firefly-aioc-lvds.dtb \
++	rk3288-firefly-aioc-vga.dtb \
++	rk3288-firefly-aioc.dtb \
+ 	rk3288-firefly-beta.dtb \
+ 	rk3288-firefly-reload.dtb \
+ 	rk3288-firefly-reload-linux.dtb \
+ 	rk3288-firefly-rk808.dtb \
++	rk3288-firefly-vga.dtb \
+ 	rk3288-firefly.dtb \
+ 	rk3288-miniarm.dtb \
+ 	rk3288-miqi.dtb \
+--- a/arch/arm/boot/dts/rk3288-firefly-aio-lvds.dts	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm/boot/dts/rk3288-firefly-aio-lvds.dts	2018-11-29 01:34:27.834321994 +0200
+@@ -0,0 +1,480 @@
++/*
++ * Copyright (c) 2015~2017 Fuzhou Rockchip Electronics Co., Ltd
++ *
++ * This file is dual-licensed: you can use it either under the terms
++ * of the GPL or the X11 license, at your option. Note that this dual
++ * licensing only applies to this file, and not this project as a
++ * whole.
++ *
++ *  a) This file is free software; you can redistribute it and/or
++ *     modify it under the terms of the GNU General Public License as
++ *     published by the Free Software Foundation; either version 2 of the
++ *     License, or (at your option) any later version.
++ *
++ *     This file is distributed in the hope that it will be useful,
++ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *     GNU General Public License for more details.
++ *
++ * Or, alternatively,
++ *
++ *  b) Permission is hereby granted, free of charge, to any person
++ *     obtaining a copy of this software and associated documentation
++ *     files (the "Software"), to deal in the Software without
++ *     restriction, including without limitation the rights to use,
++ *     copy, modify, merge, publish, distribute, sublicense, and/or
++ *     sell copies of the Software, and to permit persons to whom the
++ *     Software is furnished to do so, subject to the following
++ *     conditions:
++ *
++ *     The above copyright notice and this permission notice shall be
++ *     included in all copies or substantial portions of the Software.
++ *
++ *     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
++ *     EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
++ *     OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
++ *     NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
++ *     HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
++ *     WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
++ *     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
++ *     OTHER DEALINGS IN THE SOFTWARE.
++ */
++
++/dts-v1/;
++#include "rk3288-firefly-port.dtsi"
++#include "rk3288-linux.dtsi"
++#include <dt-bindings/sensor-dev.h>
++#include <dt-bindings/display/media-bus-format.h>
++
++/ {
++	model = "AIO-3288J Board LVDS HSX101H40C (Linux Opensource)";
++	compatible = "rockchip,rk3288-firefly", "rockchip,rk3288";
++
++	backlight: backlight {
++		compatible = "pwm-backlight";
++		brightness-levels = </*
++			  0   1   2   3   4   5   6   7
++			  8   9  10  11  12  13  14  15
++			 16  17  18  19  20  21  22  23
++			 24  25  26  27  28  29  30  31
++			 32  33  34  35*/36  37  38  39
++			 40  41  42  43  44  45  46  47
++			 48  49  50  51  52  53  54  55
++			 56  57  58  59  60  61  62  63
++			 64  65  66  67  68  69  70  71
++			 72  73  74  75  76  77  78  79
++			 80  81  82  83  84  85  86  87
++			 88  89  90  91  92  93  94  95
++			 96  97  98  99 100 101 102 103
++			104 105 106 107 108 109 110 111
++			112 113 114 115 116 117 118 119
++			120 121 122 123 124 125 126 127
++			128 129 130 131 132 133 134 135
++			136 137 138 139 140 141 142 143
++			144 145 146 147 148 149 150 151
++			152 153 154 155 156 157 158 159
++			160 161 162 163 164 165 166 167
++			168 169 170 171 172 173 174 175
++			176 177 178 179 180 181 182 183
++			184 185 186 187 188 189 190 191
++			192 193 194 195 196 197 198 199
++			200 201 202 203 204 205 206 207
++			208 209 210 211 212 213 214 215
++			216 217 218 219 220 221 222 223
++			224 225 226 227 228 229 230 231
++			232 233 234 235 236 237 238 239
++			240 241 242 243 244 245 246 247
++			248 249 250 251 252 253 254 255>;
++		default-brightness-level = <200>;
++		enable-gpios = <&gpio5 17 GPIO_ACTIVE_HIGH>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&bl_en>;
++		pwms = <&pwm1 0 1000000 1>;
++	};
++
++	sdio_pwrseq: sdio-pwrseq {
++		compatible = "mmc-pwrseq-simple";
++		clocks = <&hym8563>;
++		clock-names = "ext_clock";
++		pinctrl-names = "default";
++		pinctrl-0 = <&wifi_enable_h>;
++
++		/*
++		 * On the module itself this is one of these (depending
++		 * on the actual card populated):
++		 * - SDIO_RESET_L_WL_REG_ON
++		 * - PDN (power down when low)
++		 */
++		reset-gpios = <&gpio4 28 GPIO_ACTIVE_LOW>;
++	};
++
++	/delete-node/ vsys-regulator;
++	vcc_sys: vsys-regulator {
++		compatible = "regulator-fixed";
++		enable-active-high;
++		gpio = <&gpio0 13 GPIO_ACTIVE_HIGH>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pwr5v_en>;
++		regulator-name = "vcc_sys";
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++		regulator-always-on;
++		regulator-boot-on;
++	};
++
++	vcc_lcd: vcc-lcd {
++		compatible = "regulator-fixed";
++		enable-active-high;
++		gpio = <&gpio7 3 GPIO_ACTIVE_HIGH>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&lcd_en>;
++		regulator-name = "vcc_lcd";
++		regulator-boot-on;
++		vin-supply = <&vcc_io>;
++	};
++
++	gpio-keys {
++		compatible = "gpio-keys";
++		#address-cells = <1>;
++		#size-cells = <0>;
++		autorepeat;
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&pwrbtn>;
++
++		button@0 {
++			gpios = <&gpio0 5 GPIO_ACTIVE_LOW>;
++			linux,code = <116>;
++			label = "GPIO Key Power";
++			linux,input-type = <1>;
++			gpio-key,wakeup = <1>;
++			debounce-interval = <100>;
++		};
++	};
++
++	leds {
++		compatible = "gpio-leds";
++
++		work {
++			gpios = <&gpio8 1 GPIO_ACTIVE_HIGH>;
++			default-state = "on";
++		};
++
++		user {
++			gpios = <&gpio8 2 GPIO_ACTIVE_HIGH>;
++			default-state = "off";
++		};
++	};
++};
++
++&cpu0 {
++	cpu0-supply = <&vdd_cpu>;
++};
++
++&dfi {
++	status = "okay";
++};
++
++&dmc {
++	center-supply = <&vdd_log>;
++	status = "okay";
++};
++
++&gpu {
++	status = "okay";
++	mali-supply = <&vdd_gpu>;
++};
++
++&i2c0 {
++	clock-frequency = <400000>;
++
++	vdd_cpu: syr827@40 {
++		compatible = "silergy,syr827";
++		fcs,suspend-voltage-selector = <1>;
++		reg = <0x40>;
++		regulator-name = "vdd_cpu";
++		regulator-min-microvolt = <850000>;
++		regulator-max-microvolt = <1350000>;
++		regulator-always-on;
++		regulator-boot-on;
++		regulator-enable-ramp-delay = <300>;
++		regulator-ramp-delay = <8000>;
++		vin-supply = <&vcc_sys>;
++		regulator-state-mem {
++			regulator-off-in-suspend;
++		};
++	};
++
++	vdd_gpu: syr828@41 {
++		compatible = "silergy,syr828";
++		fcs,suspend-voltage-selector = <1>;
++		reg = <0x41>;
++		regulator-name = "vdd_gpu";
++		regulator-min-microvolt = <850000>;
++		regulator-max-microvolt = <1350000>;
++		regulator-always-on;
++		regulator-ramp-delay = <6000>;
++		vin-supply = <&vcc_sys>;
++		regulator-state-mem {
++			regulator-off-in-suspend;
++		};
++	};
++
++	hym8563: hym8563@51 {
++		compatible = "haoyu,hym8563";
++		reg = <0x51>;
++		interrupt-parent = <&gpio7>;
++		interrupts = <4 IRQ_TYPE_EDGE_FALLING>;
++		#clock-cells = <0>;
++		clock-frequency = <32768>;
++		clock-output-names = "xin32k";
++		pinctrl-names = "default";
++		pinctrl-0 = <&rtc_int>;
++	};
++
++	act8846: act8846@5a {
++		compatible = "active-semi,act8846";
++		reg = <0x5a>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pmic_vsel>, <&pwr_hold>;
++		system-power-controller;
++
++		vp1-supply = <&vcc_sys>;
++		vp2-supply = <&vcc_sys>;
++		vp3-supply = <&vcc_sys>;
++		vp4-supply = <&vcc_sys>;
++		inl1-supply = <&vcc_sys>;
++		inl2-supply = <&vcc_sys>;
++		inl3-supply = <&vcc_20>;
++
++		regulators {
++			vcc_ddr: REG1 {
++				regulator-name = "vcc_ddr";
++				regulator-min-microvolt = <1200000>;
++				regulator-max-microvolt = <1200000>;
++				regulator-always-on;
++			};
++
++			vcc_io: REG2 {
++				regulator-name = "vcc_io";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++			};
++
++			vdd_log: REG3 {
++				regulator-name = "vdd_log";
++				regulator-min-microvolt = <700000>;
++				regulator-max-microvolt = <1500000>;
++				regulator-always-on;
++			};
++
++			vcc_20: REG4 {
++				regulator-name = "vcc_20";
++				regulator-min-microvolt = <2000000>;
++				regulator-max-microvolt = <2000000>;
++				regulator-always-on;
++			};
++
++			vccio_sd: REG5 {
++				regulator-name = "vccio_sd";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++			};
++
++			vdd10_lcd: REG6 {
++				regulator-name = "vdd10_lcd";
++				regulator-min-microvolt = <1000000>;
++				regulator-max-microvolt = <1000000>;
++				regulator-always-on;
++			};
++
++			vcca_33: REG7 {
++				regulator-name = "vcca_33";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++			};
++
++			vcc_lan: REG8 {
++				regulator-name = "vcc_lan";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++				regulator-boot-on;
++			};
++
++			vcc_pmu: REG9 {
++				regulator-name = "vcc_pmu";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++			};
++
++			vdd_10: REG10 {
++				regulator-name = "vdd_10";
++				regulator-min-microvolt = <1000000>;
++				regulator-max-microvolt = <1000000>;
++				regulator-always-on;
++			};
++
++			vcc_18: REG11 {
++				regulator-name = "vcc_18";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-always-on;
++			};
++
++			vcc18_lcd: REG12 {
++				regulator-name = "vcc18_lcd";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-always-on;
++			};
++		};
++	};
++};
++
++&i2c4 {
++	status = "okay";
++
++	gslx680: gslx680@41 {
++		compatible = "gslX680";
++		reg = <0x41>;
++		screen_max_x = <800>;
++		screen_max_y = <1280>;
++		touch-gpio = <&gpio5 19 IRQ_TYPE_LEVEL_LOW>;
++		reset-gpio = <&gpio7 9 GPIO_ACTIVE_HIGH>;
++		gsl,fw = <1>;
++		flip-x = <1>;
++		flip-y = <0>;
++		swap-xy = <0>;
++	};
++
++	sensor@4c {
++		compatible = "gs_mc3230";
++		reg = <0x4c>;
++		type = <SENSOR_TYPE_ACCEL>;
++		irq_enable = <0>;
++		poll_delay_ms = <30>;
++		layout = <1>;
++	};
++};
++
++&rga {
++	status = "okay";
++};
++
++&sound {
++	status = "okay";
++};
++
++&es8323 {
++	aux-det-gpio = <&gpio2 15 GPIO_ACTIVE_HIGH>;
++	spk-ctl-gpio = <&gpio7 6 GPIO_ACTIVE_LOW>;
++};
++
++&spi0 {
++	status = "okay";
++};
++
++&spi_wk2xxx {
++	status = "okay";
++};
++
++&uart1 {
++	status = "okay";
++};
++
++&uart2 {
++	status = "okay";
++};
++
++&uart3 {
++	status = "okay";
++};
++
++&usb_otg {
++	status = "okay";
++	dr_mode = "host";
++};
++
++&hdmi_in_vopl {
++	status = "disabled";
++};
++
++&lvds_in_vopb {
++	status = "disabled";
++};
++
++&lvds {
++	status = "okay";
++};
++
++&lvds_panel {
++	status = "okay";
++	compatible ="simple-panel";
++	power-supply = <&vcc_lcd>;
++	backlight = <&backlight>;
++	bus-format = <MEDIA_BUS_FMT_RGB666_1X18>;
++	enable-delay-ms = <10>;
++	rockchip,data-mapping = "vesa";
++	rockchip,data-width = <24>;
++	rockchip,output = "lvds";
++
++	display-timings {
++		native-mode = <&timing0>;
++		timing0: timing0 {
++			clock-frequency = <65000000>;
++			hactive = <800>;
++			vactive = <1280>;
++			hback-porch = <8>;
++			hfront-porch = <32>;
++			vback-porch = <11>;
++			vfront-porch = <17>;
++			hsync-len = <8>;
++			vsync-len = <4>;
++			hsync-active = <0>;
++			vsync-active = <0>;
++			de-active = <0>;
++			pixelclk-active = <0>;
++		};
++	};
++};
++
++&pinctrl {
++	act8846 {
++		pmic_vsel: pmic-vsel {
++			rockchip,pins = <7 14 RK_FUNC_GPIO &pcfg_output_low>;
++		};
++
++		pwr_hold: pwr-hold {
++			rockchip,pins = <0 6 RK_FUNC_GPIO &pcfg_output_high>;
++		};
++	};
++
++	backlight {
++		bl_en: bl-en {
++			rockchip,pins = <5 17 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++	};
++
++	buttons {
++		pwrbtn: pwrbtn {
++			rockchip,pins = <0 5 RK_FUNC_GPIO &pcfg_pull_up>;
++		};
++	};
++
++	lcd {
++		lcd_en: lcd-en  {
++			rockchip,pins = <7 3 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++	};
++
++	vcc-sys {
++		pwr5v_en: pwr5v-en {
++			rockchip,pins = <0 13 RK_FUNC_GPIO &pcfg_output_high>;
++		};
++	};
++};
+--- a/arch/arm/boot/dts/rk3288-firefly-aio.dts	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm/boot/dts/rk3288-firefly-aio.dts	2018-11-29 01:34:27.852322237 +0200
+@@ -0,0 +1,323 @@
++/*
++ * Copyright (c) 2015~2017 Fuzhou Rockchip Electronics Co., Ltd
++ *
++ * This file is dual-licensed: you can use it either under the terms
++ * of the GPL or the X11 license, at your option. Note that this dual
++ * licensing only applies to this file, and not this project as a
++ * whole.
++ *
++ *  a) This file is free software; you can redistribute it and/or
++ *     modify it under the terms of the GNU General Public License as
++ *     published by the Free Software Foundation; either version 2 of the
++ *     License, or (at your option) any later version.
++ *
++ *     This file is distributed in the hope that it will be useful,
++ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *     GNU General Public License for more details.
++ *
++ * Or, alternatively,
++ *
++ *  b) Permission is hereby granted, free of charge, to any person
++ *     obtaining a copy of this software and associated documentation
++ *     files (the "Software"), to deal in the Software without
++ *     restriction, including without limitation the rights to use,
++ *     copy, modify, merge, publish, distribute, sublicense, and/or
++ *     sell copies of the Software, and to permit persons to whom the
++ *     Software is furnished to do so, subject to the following
++ *     conditions:
++ *
++ *     The above copyright notice and this permission notice shall be
++ *     included in all copies or substantial portions of the Software.
++ *
++ *     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
++ *     EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
++ *     OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
++ *     NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
++ *     HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
++ *     WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
++ *     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
++ *     OTHER DEALINGS IN THE SOFTWARE.
++ */
++
++/dts-v1/;
++#include "rk3288-firefly-port.dtsi"
++#include "rk3288-linux.dtsi"
++
++/ {
++	model = "AIO-3288J Board (Linux Opensource)";
++	compatible = "rockchip,rk3288-firefly", "rockchip,rk3288";
++
++	sdio_pwrseq: sdio-pwrseq {
++		compatible = "mmc-pwrseq-simple";
++		clocks = <&hym8563>;
++		clock-names = "ext_clock";
++		pinctrl-names = "default";
++		pinctrl-0 = <&wifi_enable_h>;
++
++		/*
++		 * On the module itself this is one of these (depending
++		 * on the actual card populated):
++		 * - SDIO_RESET_L_WL_REG_ON
++		 * - PDN (power down when low)
++		 */
++		reset-gpios = <&gpio4 28 GPIO_ACTIVE_LOW>;
++	};
++
++	/delete-node/ vsys-regulator;
++	vcc_sys: vsys-regulator {
++		compatible = "regulator-fixed";
++		enable-active-high;
++		gpio = <&gpio0 13 GPIO_ACTIVE_HIGH>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pwr5v_en>;
++		regulator-name = "vcc_sys";
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++		regulator-always-on;
++		regulator-boot-on;
++	};
++
++	leds {
++		compatible = "gpio-leds";
++
++		work {
++			gpios = <&gpio8 1 GPIO_ACTIVE_HIGH>;
++			default-state = "on";
++		};
++
++		user {
++			gpios = <&gpio8 2 GPIO_ACTIVE_HIGH>;
++			default-state = "off";
++		};
++	};
++};
++
++&cpu0 {
++	cpu0-supply = <&vdd_cpu>;
++};
++
++&dfi {
++	status = "okay";
++};
++
++&dmc {
++	center-supply = <&vdd_log>;
++	status = "okay";
++};
++
++&gpu {
++	status = "okay";
++	mali-supply = <&vdd_gpu>;
++};
++
++&i2c0 {
++	clock-frequency = <400000>;
++
++	vdd_cpu: syr827@40 {
++		compatible = "silergy,syr827";
++		fcs,suspend-voltage-selector = <1>;
++		reg = <0x40>;
++		regulator-name = "vdd_cpu";
++		regulator-min-microvolt = <850000>;
++		regulator-max-microvolt = <1350000>;
++		regulator-always-on;
++		regulator-boot-on;
++		regulator-enable-ramp-delay = <300>;
++		regulator-ramp-delay = <8000>;
++		vin-supply = <&vcc_sys>;
++		regulator-state-mem {
++			regulator-off-in-suspend;
++		};
++	};
++
++	vdd_gpu: syr828@41 {
++		compatible = "silergy,syr828";
++		fcs,suspend-voltage-selector = <1>;
++		reg = <0x41>;
++		regulator-name = "vdd_gpu";
++		regulator-min-microvolt = <850000>;
++		regulator-max-microvolt = <1350000>;
++		regulator-always-on;
++		regulator-ramp-delay = <6000>;
++		vin-supply = <&vcc_sys>;
++		regulator-state-mem {
++			regulator-off-in-suspend;
++		};
++	};
++
++	hym8563: hym8563@51 {
++		compatible = "haoyu,hym8563";
++		reg = <0x51>;
++		interrupt-parent = <&gpio7>;
++		interrupts = <4 IRQ_TYPE_EDGE_FALLING>;
++		#clock-cells = <0>;
++		clock-frequency = <32768>;
++		clock-output-names = "xin32k";
++		pinctrl-names = "default";
++		pinctrl-0 = <&rtc_int>;
++	};
++
++	act8846: act8846@5a {
++		compatible = "active-semi,act8846";
++		reg = <0x5a>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pmic_vsel>, <&pwr_hold>;
++		system-power-controller;
++
++		vp1-supply = <&vcc_sys>;
++		vp2-supply = <&vcc_sys>;
++		vp3-supply = <&vcc_sys>;
++		vp4-supply = <&vcc_sys>;
++		inl1-supply = <&vcc_sys>;
++		inl2-supply = <&vcc_sys>;
++		inl3-supply = <&vcc_20>;
++
++		regulators {
++			vcc_ddr: REG1 {
++				regulator-name = "vcc_ddr";
++				regulator-min-microvolt = <1200000>;
++				regulator-max-microvolt = <1200000>;
++				regulator-always-on;
++			};
++
++			vcc_io: REG2 {
++				regulator-name = "vcc_io";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++			};
++
++			vdd_log: REG3 {
++				regulator-name = "vdd_log";
++				regulator-min-microvolt = <700000>;
++				regulator-max-microvolt = <1500000>;
++				regulator-always-on;
++			};
++
++			vcc_20: REG4 {
++				regulator-name = "vcc_20";
++				regulator-min-microvolt = <2000000>;
++				regulator-max-microvolt = <2000000>;
++				regulator-always-on;
++			};
++
++			vccio_sd: REG5 {
++				regulator-name = "vccio_sd";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++			};
++
++			vdd10_lcd: REG6 {
++				regulator-name = "vdd10_lcd";
++				regulator-min-microvolt = <1000000>;
++				regulator-max-microvolt = <1000000>;
++				regulator-always-on;
++			};
++
++			vcca_33: REG7 {
++				regulator-name = "vcca_33";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++			};
++
++			vcc_lan: REG8 {
++				regulator-name = "vcc_lan";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++				regulator-boot-on;
++			};
++
++			vcc_pmu: REG9 {
++				regulator-name = "vcc_pmu";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++			};
++
++			vdd_10: REG10 {
++				regulator-name = "vdd_10";
++				regulator-min-microvolt = <1000000>;
++				regulator-max-microvolt = <1000000>;
++				regulator-always-on;
++			};
++
++			vcc_18: REG11 {
++				regulator-name = "vcc_18";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-always-on;
++			};
++
++			vcc18_lcd: REG12 {
++				regulator-name = "vcc18_lcd";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-always-on;
++			};
++		};
++	};
++};
++
++&rga {
++	status = "okay";
++};
++
++&sound {
++	status = "okay";
++};
++
++&es8323 {
++	aux-det-gpio = <&gpio2 15 GPIO_ACTIVE_HIGH>;
++	spk-ctl-gpio = <&gpio7 6 GPIO_ACTIVE_LOW>;
++};
++
++&spi0 {
++	status = "okay";
++};
++
++&spi_wk2xxx {
++	status = "okay";
++};
++
++&uart1 {
++	status = "okay";
++};
++
++&uart2 {
++	status = "okay";
++};
++
++&uart3 {
++	status = "okay";
++};
++
++&usb_otg {
++	status = "okay";
++	dr_mode = "host";
++};
++
++&hdmi_in_vopl {
++	status = "disabled";
++};
++
++&pinctrl {
++	act8846 {
++		pmic_vsel: pmic-vsel {
++			rockchip,pins = <7 14 RK_FUNC_GPIO &pcfg_output_low>;
++		};
++
++		pwr_hold: pwr-hold {
++			rockchip,pins = <0 6 RK_FUNC_GPIO &pcfg_output_high>;
++		};
++	};
++
++	vcc-sys {
++		pwr5v_en: pwr5v-en {
++			rockchip,pins = <0 13 RK_FUNC_GPIO &pcfg_output_high>;
++		};
++	};
++};
+--- a/arch/arm/boot/dts/rk3288-firefly-aioc-lvds.dts	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm/boot/dts/rk3288-firefly-aioc-lvds.dts	2018-11-29 01:34:27.866322426 +0200
+@@ -0,0 +1,446 @@
++/*
++ * Copyright (c) 2015~2017 Fuzhou Rockchip Electronics Co., Ltd
++ *
++ * This file is dual-licensed: you can use it either under the terms
++ * of the GPL or the X11 license, at your option. Note that this dual
++ * licensing only applies to this file, and not this project as a
++ * whole.
++ *
++ *  a) This file is free software; you can redistribute it and/or
++ *     modify it under the terms of the GNU General Public License as
++ *     published by the Free Software Foundation; either version 2 of the
++ *     License, or (at your option) any later version.
++ *
++ *     This file is distributed in the hope that it will be useful,
++ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *     GNU General Public License for more details.
++ *
++ * Or, alternatively,
++ *
++ *  b) Permission is hereby granted, free of charge, to any person
++ *     obtaining a copy of this software and associated documentation
++ *     files (the "Software"), to deal in the Software without
++ *     restriction, including without limitation the rights to use,
++ *     copy, modify, merge, publish, distribute, sublicense, and/or
++ *     sell copies of the Software, and to permit persons to whom the
++ *     Software is furnished to do so, subject to the following
++ *     conditions:
++ *
++ *     The above copyright notice and this permission notice shall be
++ *     included in all copies or substantial portions of the Software.
++ *
++ *     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
++ *     EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
++ *     OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
++ *     NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
++ *     HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
++ *     WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
++ *     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
++ *     OTHER DEALINGS IN THE SOFTWARE.
++ */
++
++/dts-v1/;
++#include "rk3288-firefly-port.dtsi"
++#include "rk3288-linux.dtsi"
++#include <dt-bindings/sensor-dev.h>
++#include <dt-bindings/display/media-bus-format.h>
++
++/ {
++	model = "AIO-3288C Board LVDS HSX101H40C (Linux Opensource)";
++	compatible = "rockchip,rk3288-firefly", "rockchip,rk3288";
++
++	backlight: backlight {
++		compatible = "pwm-backlight";
++		brightness-levels = </*
++			  0   1   2   3   4   5   6   7
++			  8   9  10  11  12  13  14  15
++			 16  17  18  19  20  21  22  23
++			 24  25  26  27  28  29  30  31
++			 32  33  34  35*/36  37  38  39
++			 40  41  42  43  44  45  46  47
++			 48  49  50  51  52  53  54  55
++			 56  57  58  59  60  61  62  63
++			 64  65  66  67  68  69  70  71
++			 72  73  74  75  76  77  78  79
++			 80  81  82  83  84  85  86  87
++			 88  89  90  91  92  93  94  95
++			 96  97  98  99 100 101 102 103
++			104 105 106 107 108 109 110 111
++			112 113 114 115 116 117 118 119
++			120 121 122 123 124 125 126 127
++			128 129 130 131 132 133 134 135
++			136 137 138 139 140 141 142 143
++			144 145 146 147 148 149 150 151
++			152 153 154 155 156 157 158 159
++			160 161 162 163 164 165 166 167
++			168 169 170 171 172 173 174 175
++			176 177 178 179 180 181 182 183
++			184 185 186 187 188 189 190 191
++			192 193 194 195 196 197 198 199
++			200 201 202 203 204 205 206 207
++			208 209 210 211 212 213 214 215
++			216 217 218 219 220 221 222 223
++			224 225 226 227 228 229 230 231
++			232 233 234 235 236 237 238 239
++			240 241 242 243 244 245 246 247
++			248 249 250 251 252 253 254 255>;
++		default-brightness-level = <200>;
++		enable-gpios = <&gpio8 9 GPIO_ACTIVE_HIGH>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&bl_en>;
++		pwms = <&pwm1 0 1000000 1>;
++	};
++
++	sdio_pwrseq: sdio-pwrseq {
++		compatible = "mmc-pwrseq-simple";
++		clocks = <&hym8563>;
++		clock-names = "ext_clock";
++		pinctrl-names = "default";
++		pinctrl-0 = <&wifi_enable_h>;
++
++		/*
++		 * On the module itself this is one of these (depending
++		 * on the actual card populated):
++		 * - SDIO_RESET_L_WL_REG_ON
++		 * - PDN (power down when low)
++		 */
++		reset-gpios = <&gpio4 28 GPIO_ACTIVE_LOW>;
++	};
++
++	/delete-node/ vsys-regulator;
++	vcc_sys: vsys-regulator {
++		compatible = "regulator-fixed";
++		enable-active-high;
++		gpio = <&gpio7 3 GPIO_ACTIVE_HIGH>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pwr5v_en>;
++		regulator-name = "vcc_sys";
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++		regulator-always-on;
++		regulator-boot-on;
++	};
++
++	vcc_lcd: vcc-lcd {
++		compatible = "regulator-fixed";
++		enable-active-high;
++		gpio = <&gpio6 5 GPIO_ACTIVE_HIGH>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&lcd_en>;
++		regulator-name = "vcc_lcd";
++		regulator-boot-on;
++		vin-supply = <&vcc_io>;
++	};
++
++	leds {
++		compatible = "gpio-leds";
++
++		work {
++			gpios = <&gpio8 6 GPIO_ACTIVE_HIGH>;
++			default-state = "on";
++		};
++
++		user {
++			gpios = <&gpio8 1 GPIO_ACTIVE_LOW>;
++			default-state = "off";
++		};
++	};
++};
++
++&cpu0 {
++	cpu0-supply = <&vdd_cpu>;
++};
++
++&dfi {
++	status = "okay";
++};
++
++&dmc {
++	center-supply = <&vdd_log>;
++	status = "okay";
++};
++
++&gpu {
++	status = "okay";
++	mali-supply = <&vdd_gpu>;
++};
++
++&i2c0 {
++	clock-frequency = <400000>;
++
++	vdd_cpu: syr827@40 {
++		compatible = "silergy,syr827";
++		fcs,suspend-voltage-selector = <1>;
++		reg = <0x40>;
++		regulator-name = "vdd_cpu";
++		regulator-min-microvolt = <850000>;
++		regulator-max-microvolt = <1350000>;
++		regulator-always-on;
++		regulator-boot-on;
++		regulator-enable-ramp-delay = <300>;
++		regulator-ramp-delay = <8000>;
++		vin-supply = <&vcc_sys>;
++		regulator-state-mem {
++			regulator-off-in-suspend;
++		};
++	};
++
++	vdd_gpu: syr828@41 {
++		compatible = "silergy,syr828";
++		fcs,suspend-voltage-selector = <1>;
++		reg = <0x41>;
++		regulator-name = "vdd_gpu";
++		regulator-min-microvolt = <850000>;
++		regulator-max-microvolt = <1350000>;
++		regulator-always-on;
++		regulator-ramp-delay = <6000>;
++		vin-supply = <&vcc_sys>;
++		regulator-state-mem {
++			regulator-off-in-suspend;
++		};
++	};
++
++	hym8563: hym8563@51 {
++		compatible = "haoyu,hym8563";
++		reg = <0x51>;
++		interrupt-parent = <&gpio7>;
++		interrupts = <4 IRQ_TYPE_EDGE_FALLING>;
++		#clock-cells = <0>;
++		clock-frequency = <32768>;
++		clock-output-names = "xin32k";
++		pinctrl-names = "default";
++		pinctrl-0 = <&rtc_int>;
++	};
++
++	act8846: act8846@5a {
++		compatible = "active-semi,act8846";
++		reg = <0x5a>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pmic_vsel>, <&pwr_hold>;
++		system-power-controller;
++
++		vp1-supply = <&vcc_sys>;
++		vp2-supply = <&vcc_sys>;
++		vp3-supply = <&vcc_sys>;
++		vp4-supply = <&vcc_sys>;
++		inl1-supply = <&vcc_sys>;
++		inl2-supply = <&vcc_sys>;
++		inl3-supply = <&vcc_20>;
++
++		regulators {
++			vcc_ddr: REG1 {
++				regulator-name = "vcc_ddr";
++				regulator-min-microvolt = <1200000>;
++				regulator-max-microvolt = <1200000>;
++				regulator-always-on;
++			};
++
++			vcc_io: REG2 {
++				regulator-name = "vcc_io";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++			};
++
++			vdd_log: REG3 {
++				regulator-name = "vdd_log";
++				regulator-min-microvolt = <700000>;
++				regulator-max-microvolt = <1500000>;
++				regulator-always-on;
++			};
++
++			vcc_20: REG4 {
++				regulator-name = "vcc_20";
++				regulator-min-microvolt = <2000000>;
++				regulator-max-microvolt = <2000000>;
++				regulator-always-on;
++			};
++
++			vccio_sd: REG5 {
++				regulator-name = "vccio_sd";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++			};
++
++			vdd10_lcd: REG6 {
++				regulator-name = "vdd10_lcd";
++				regulator-min-microvolt = <1050000>;
++				regulator-max-microvolt = <1050000>;
++				regulator-always-on;
++			};
++
++			vcca_18: REG7 {
++				regulator-name = "vcca_18";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-always-on;
++			};
++
++			vcca_33: REG8 {
++				regulator-name = "vcca_33";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++			};
++
++			vcc_lan: REG9 {
++				regulator-name = "vcc_lan";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++				regulator-boot-on;
++			};
++
++			vdd_10: REG10 {
++				regulator-name = "vdd_10";
++				regulator-min-microvolt = <1100000>;
++				regulator-max-microvolt = <1100000>;
++				regulator-always-on;
++			};
++
++			vcc_18: REG11 {
++				regulator-name = "vcc_18";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-always-on;
++			};
++
++			vcc18_lcd: REG12 {
++				regulator-name = "vcc18_lcd";
++				regulator-min-microvolt = <1850000>;
++				regulator-max-microvolt = <1850000>;
++				regulator-always-on;
++			};
++		};
++	};
++};
++
++&i2c4 {
++	status = "okay";
++
++	gslx680: gslx680@41 {
++		compatible = "gslX680";
++		reg = <0x41>;
++		screen_max_x = <800>;
++		screen_max_y = <1280>;
++		touch-gpio = <&gpio5 19 IRQ_TYPE_LEVEL_LOW>;
++		reset-gpio = <&gpio7 6 GPIO_ACTIVE_HIGH>;
++		gsl,fw = <1>;
++		flip-x = <1>;
++		flip-y = <0>;
++		swap-xy = <0>;
++	};
++
++	sensor@4c {
++		compatible = "gs_mc3230";
++		reg = <0x4c>;
++		type = <SENSOR_TYPE_ACCEL>;
++		irq_enable = <0>;
++		poll_delay_ms = <30>;
++		layout = <1>;
++	};
++};
++
++&rga {
++	status = "okay";
++};
++
++&sound {
++	status = "okay";
++};
++
++&es8323 {
++	spk-ctl-gpio = <&gpio7 2 GPIO_ACTIVE_HIGH>;
++};
++
++&uart1 {
++	status = "okay";
++};
++
++&uart2 {
++	status = "okay";
++};
++
++&uart3 {
++	status = "okay";
++};
++
++&usb_otg {
++	status = "okay";
++	dr_mode = "host";
++};
++
++&hdmi_in_vopl {
++	status = "disabled";
++};
++
++&lvds_in_vopb {
++	status = "disabled";
++};
++
++&lvds {
++	status = "okay";
++};
++
++&lvds_panel {
++	status = "okay";
++	compatible ="simple-panel";
++	power-supply = <&vcc_lcd>;
++	backlight = <&backlight>;
++	bus-format = <MEDIA_BUS_FMT_RGB666_1X18>;
++	enable-delay-ms = <10>;
++	rockchip,data-mapping = "vesa";
++	rockchip,data-width = <24>;
++	rockchip,output = "lvds";
++
++	display-timings {
++		native-mode = <&timing0>;
++		timing0: timing0 {
++			clock-frequency = <65000000>;
++			hactive = <800>;
++			vactive = <1280>;
++			hback-porch = <8>;
++			hfront-porch = <32>;
++			vback-porch = <11>;
++			vfront-porch = <17>;
++			hsync-len = <8>;
++			vsync-len = <4>;
++			hsync-active = <0>;
++			vsync-active = <0>;
++			de-active = <0>;
++			pixelclk-active = <0>;
++		};
++	};
++};
++
++&pinctrl {
++	act8846 {
++		pmic_vsel: pmic-vsel {
++			rockchip,pins = <7 14 RK_FUNC_GPIO &pcfg_output_low>;
++		};
++
++		pwr_hold: pwr-hold {
++			rockchip,pins = <0 6 RK_FUNC_GPIO &pcfg_output_high>;
++		};
++	};
++
++	backlight {
++		bl_en: bl-en {
++			rockchip,pins = <8 9 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++	};
++
++	lcd {
++		lcd_en: lcd-en  {
++			rockchip,pins = <6 5 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++	};
++
++	vcc-sys {
++		pwr5v_en: pwr5v-en {
++			rockchip,pins = <7 3 RK_FUNC_GPIO &pcfg_output_high>;
++		};
++	};
++};
+--- a/arch/arm/boot/dts/rk3288-firefly-aioc-vga.dts	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm/boot/dts/rk3288-firefly-aioc-vga.dts	2018-11-29 01:34:27.883322655 +0200
+@@ -0,0 +1,376 @@
++/*
++ * Copyright (c) 2015~2017 Fuzhou Rockchip Electronics Co., Ltd
++ *
++ * This file is dual-licensed: you can use it either under the terms
++ * of the GPL or the X11 license, at your option. Note that this dual
++ * licensing only applies to this file, and not this project as a
++ * whole.
++ *
++ *  a) This file is free software; you can redistribute it and/or
++ *     modify it under the terms of the GNU General Public License as
++ *     published by the Free Software Foundation; either version 2 of the
++ *     License, or (at your option) any later version.
++ *
++ *     This file is distributed in the hope that it will be useful,
++ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *     GNU General Public License for more details.
++ *
++ * Or, alternatively,
++ *
++ *  b) Permission is hereby granted, free of charge, to any person
++ *     obtaining a copy of this software and associated documentation
++ *     files (the "Software"), to deal in the Software without
++ *     restriction, including without limitation the rights to use,
++ *     copy, modify, merge, publish, distribute, sublicense, and/or
++ *     sell copies of the Software, and to permit persons to whom the
++ *     Software is furnished to do so, subject to the following
++ *     conditions:
++ *
++ *     The above copyright notice and this permission notice shall be
++ *     included in all copies or substantial portions of the Software.
++ *
++ *     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
++ *     EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
++ *     OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
++ *     NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
++ *     HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
++ *     WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
++ *     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
++ *     OTHER DEALINGS IN THE SOFTWARE.
++ */
++
++/dts-v1/;
++#include "rk3288-firefly-port.dtsi"
++#include "rk3288-linux.dtsi"
++
++/ {
++	model = "AIO-3288C Board (Linux Opensource)";
++	compatible = "firefly,rk3288-firefly", "rockchip,rk3288";
++
++	sdio_pwrseq: sdio-pwrseq {
++		compatible = "mmc-pwrseq-simple";
++		clocks = <&hym8563>;
++		clock-names = "ext_clock";
++		pinctrl-names = "default";
++		pinctrl-0 = <&wifi_enable_h>;
++
++		/*
++		 * On the module itself this is one of these (depending
++		 * on the actual card populated):
++		 * - SDIO_RESET_L_WL_REG_ON
++		 * - PDN (power down when low)
++		 */
++		reset-gpios = <&gpio4 28 GPIO_ACTIVE_LOW>;
++	};
++
++	/delete-node/ vsys-regulator;
++	vcc_sys: vsys-regulator {
++		compatible = "regulator-fixed";
++		enable-active-high;
++		gpio = <&gpio7 3 GPIO_ACTIVE_HIGH>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pwr5v_en>;
++		regulator-name = "vcc_sys";
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++		regulator-always-on;
++		regulator-boot-on;
++	};
++
++	vga_bridge: vga-bridge {
++		compatible = "adi,adv7123";
++		psave-gpios = <&gpio0 17 GPIO_ACTIVE_HIGH>;
++		rockchip,output = "rgb";
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		ports {
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			port@0 {
++				reg = <0>;
++				adv7123_in: endpoint {
++					remote-endpoint = <&rgb_out>;
++				};
++			};
++
++			port@1 {
++				reg = <1>;
++				adv7123_out: endpoint {
++					remote-endpoint = <&vga_in>;
++				};
++			};
++		};
++	};
++
++	vga {
++		compatible = "vga-connector";
++		label = "vga";
++		ddc-i2c-bus = <&i2c4>;
++
++		 port {
++			vga_in: endpoint {
++				remote-endpoint = <&adv7123_out>;
++			};
++		};
++	};
++
++	leds {
++		compatible = "gpio-leds";
++
++		work {
++			gpios = <&gpio8 6 GPIO_ACTIVE_HIGH>;
++			default-state = "on";
++		};
++
++		user {
++			gpios = <&gpio8 1 GPIO_ACTIVE_LOW>;
++			default-state = "off";
++		};
++	};
++};
++
++&cpu0 {
++	cpu0-supply = <&vdd_cpu>;
++};
++
++&dfi {
++	status = "okay";
++};
++
++&dmc {
++	center-supply = <&vdd_log>;
++	status = "okay";
++};
++
++&gpu {
++	status = "okay";
++	mali-supply = <&vdd_gpu>;
++};
++
++&i2c0 {
++	clock-frequency = <400000>;
++
++	vdd_cpu: syr827@40 {
++		compatible = "silergy,syr827";
++		fcs,suspend-voltage-selector = <1>;
++		reg = <0x40>;
++		regulator-name = "vdd_cpu";
++		regulator-min-microvolt = <850000>;
++		regulator-max-microvolt = <1350000>;
++		regulator-always-on;
++		regulator-boot-on;
++		regulator-enable-ramp-delay = <300>;
++		regulator-ramp-delay = <8000>;
++		vin-supply = <&vcc_sys>;
++		regulator-state-mem {
++			regulator-off-in-suspend;
++		};
++	};
++
++	vdd_gpu: syr828@41 {
++		compatible = "silergy,syr828";
++		fcs,suspend-voltage-selector = <1>;
++		reg = <0x41>;
++		regulator-name = "vdd_gpu";
++		regulator-min-microvolt = <850000>;
++		regulator-max-microvolt = <1350000>;
++		regulator-always-on;
++		regulator-ramp-delay = <6000>;
++		vin-supply = <&vcc_sys>;
++		regulator-state-mem {
++			regulator-off-in-suspend;
++		};
++	};
++
++	hym8563: hym8563@51 {
++		compatible = "haoyu,hym8563";
++		reg = <0x51>;
++		interrupt-parent = <&gpio7>;
++		interrupts = <4 IRQ_TYPE_EDGE_FALLING>;
++		#clock-cells = <0>;
++		clock-frequency = <32768>;
++		clock-output-names = "xin32k";
++		pinctrl-names = "default";
++		pinctrl-0 = <&rtc_int>;
++	};
++
++	act8846: act8846@5a {
++		compatible = "active-semi,act8846";
++		reg = <0x5a>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pmic_vsel>, <&pwr_hold>;
++		system-power-controller;
++
++		vp1-supply = <&vcc_sys>;
++		vp2-supply = <&vcc_sys>;
++		vp3-supply = <&vcc_sys>;
++		vp4-supply = <&vcc_sys>;
++		inl1-supply = <&vcc_sys>;
++		inl2-supply = <&vcc_sys>;
++		inl3-supply = <&vcc_20>;
++
++		regulators {
++			vcc_ddr: REG1 {
++				regulator-name = "vcc_ddr";
++				regulator-min-microvolt = <1200000>;
++				regulator-max-microvolt = <1200000>;
++				regulator-always-on;
++			};
++
++			vcc_io: REG2 {
++				regulator-name = "vcc_io";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++			};
++
++			vdd_log: REG3 {
++				regulator-name = "vdd_log";
++				regulator-min-microvolt = <700000>;
++				regulator-max-microvolt = <1500000>;
++				regulator-always-on;
++			};
++
++			vcc_20: REG4 {
++				regulator-name = "vcc_20";
++				regulator-min-microvolt = <2000000>;
++				regulator-max-microvolt = <2000000>;
++				regulator-always-on;
++			};
++
++			vccio_sd: REG5 {
++				regulator-name = "vccio_sd";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++			};
++
++			vdd10_lcd: REG6 {
++				regulator-name = "vdd10_lcd";
++				regulator-min-microvolt = <1050000>;
++				regulator-max-microvolt = <1050000>;
++				regulator-always-on;
++			};
++
++			vcca_18: REG7 {
++				regulator-name = "vcca_18";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-always-on;
++			};
++
++			vcca_33: REG8 {
++				regulator-name = "vcca_33";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++			};
++
++			vcc_lan: REG9 {
++				regulator-name = "vcc_lan";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++				regulator-boot-on;
++			};
++
++			vdd_10: REG10 {
++				regulator-name = "vdd_10";
++				regulator-min-microvolt = <1100000>;
++				regulator-max-microvolt = <1100000>;
++				regulator-always-on;
++			};
++
++			vcc_18: REG11 {
++				regulator-name = "vcc_18";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-always-on;
++			};
++
++			vcc18_lcd: REG12 {
++				regulator-name = "vcc18_lcd";
++				regulator-min-microvolt = <1850000>;
++				regulator-max-microvolt = <1850000>;
++				regulator-always-on;
++			};
++		};
++	};
++};
++
++&rga {
++	status = "okay";
++};
++
++&sound {
++	status = "okay";
++};
++
++&es8323 {
++	spk-ctl-gpio = <&gpio7 2 GPIO_ACTIVE_HIGH>;
++};
++
++&uart1 {
++	status = "okay";
++};
++
++&uart2 {
++	status = "okay";
++};
++
++&uart3 {
++	status = "okay";
++};
++
++&usb_otg {
++	status = "okay";
++	dr_mode = "host";
++};
++
++&hdmi_in_vopl {
++	status = "disabled";
++};
++
++&lvds_in_vopb {
++	status = "disabled";
++};
++
++&lvds {
++	pinctrl-names = "default";
++	pinctrl-0 = <&lcdc_ctl>;
++	status = "okay";
++
++	ports {
++		port@1 {
++			reg = <1>;
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			rgb_out: endpoint@0 {
++				reg = <0>;
++				remote-endpoint = <&adv7123_in>;
++			};
++		};
++	};
++};
++
++&pinctrl {
++	act8846 {
++		pmic_vsel: pmic-vsel {
++			rockchip,pins = <7 14 RK_FUNC_GPIO &pcfg_output_low>;
++		};
++
++		pwr_hold: pwr-hold {
++			rockchip,pins = <0 6 RK_FUNC_GPIO &pcfg_output_high>;
++		};
++	};
++
++	vcc-sys {
++		pwr5v_en: pwr5v-en {
++			rockchip,pins = <7 3 RK_FUNC_GPIO &pcfg_output_high>;
++		};
++	};
++};
+--- a/arch/arm/boot/dts/rk3288-firefly-aioc.dts	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm/boot/dts/rk3288-firefly-aioc.dts	2018-11-29 01:34:27.899322871 +0200
+@@ -0,0 +1,314 @@
++/*
++ * Copyright (c) 2015~2017 Fuzhou Rockchip Electronics Co., Ltd
++ *
++ * This file is dual-licensed: you can use it either under the terms
++ * of the GPL or the X11 license, at your option. Note that this dual
++ * licensing only applies to this file, and not this project as a
++ * whole.
++ *
++ *  a) This file is free software; you can redistribute it and/or
++ *     modify it under the terms of the GNU General Public License as
++ *     published by the Free Software Foundation; either version 2 of the
++ *     License, or (at your option) any later version.
++ *
++ *     This file is distributed in the hope that it will be useful,
++ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *     GNU General Public License for more details.
++ *
++ * Or, alternatively,
++ *
++ *  b) Permission is hereby granted, free of charge, to any person
++ *     obtaining a copy of this software and associated documentation
++ *     files (the "Software"), to deal in the Software without
++ *     restriction, including without limitation the rights to use,
++ *     copy, modify, merge, publish, distribute, sublicense, and/or
++ *     sell copies of the Software, and to permit persons to whom the
++ *     Software is furnished to do so, subject to the following
++ *     conditions:
++ *
++ *     The above copyright notice and this permission notice shall be
++ *     included in all copies or substantial portions of the Software.
++ *
++ *     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
++ *     EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
++ *     OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
++ *     NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
++ *     HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
++ *     WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
++ *     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
++ *     OTHER DEALINGS IN THE SOFTWARE.
++ */
++
++/dts-v1/;
++#include "rk3288-firefly-port.dtsi"
++#include "rk3288-linux.dtsi"
++
++/ {
++	model = "AIO-3288C Board (Linux Opensource)";
++	compatible = "rockchip,rk3288-firefly", "rockchip,rk3288";
++
++	sdio_pwrseq: sdio-pwrseq {
++		compatible = "mmc-pwrseq-simple";
++		clocks = <&hym8563>;
++		clock-names = "ext_clock";
++		pinctrl-names = "default";
++		pinctrl-0 = <&wifi_enable_h>;
++
++		/*
++		 * On the module itself this is one of these (depending
++		 * on the actual card populated):
++		 * - SDIO_RESET_L_WL_REG_ON
++		 * - PDN (power down when low)
++		 */
++		reset-gpios = <&gpio4 28 GPIO_ACTIVE_LOW>;
++	};
++
++	/delete-node/ vsys-regulator;
++	vcc_sys: vsys-regulator {
++		compatible = "regulator-fixed";
++		enable-active-high;
++		gpio = <&gpio7 3 GPIO_ACTIVE_HIGH>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pwr5v_en>;
++		regulator-name = "vcc_sys";
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++		regulator-always-on;
++		regulator-boot-on;
++	};
++
++	leds {
++		compatible = "gpio-leds";
++
++		work {
++			gpios = <&gpio8 6 GPIO_ACTIVE_HIGH>;
++			default-state = "on";
++		};
++
++		user {
++			gpios = <&gpio8 1 GPIO_ACTIVE_LOW>;
++			default-state = "off";
++		};
++	};
++};
++
++&cpu0 {
++	cpu0-supply = <&vdd_cpu>;
++};
++
++&dfi {
++	status = "okay";
++};
++
++&dmc {
++	center-supply = <&vdd_log>;
++	status = "okay";
++};
++
++&gpu {
++	status = "okay";
++	mali-supply = <&vdd_gpu>;
++};
++
++&i2c0 {
++	clock-frequency = <400000>;
++
++	vdd_cpu: syr827@40 {
++		compatible = "silergy,syr827";
++		fcs,suspend-voltage-selector = <1>;
++		reg = <0x40>;
++		regulator-name = "vdd_cpu";
++		regulator-min-microvolt = <850000>;
++		regulator-max-microvolt = <1350000>;
++		regulator-always-on;
++		regulator-boot-on;
++		regulator-enable-ramp-delay = <300>;
++		regulator-ramp-delay = <8000>;
++		vin-supply = <&vcc_sys>;
++		regulator-state-mem {
++			regulator-off-in-suspend;
++		};
++	};
++
++	vdd_gpu: syr828@41 {
++		compatible = "silergy,syr828";
++		fcs,suspend-voltage-selector = <1>;
++		reg = <0x41>;
++		regulator-name = "vdd_gpu";
++		regulator-min-microvolt = <850000>;
++		regulator-max-microvolt = <1350000>;
++		regulator-always-on;
++		regulator-ramp-delay = <6000>;
++		vin-supply = <&vcc_sys>;
++		regulator-state-mem {
++			regulator-off-in-suspend;
++		};
++	};
++
++	hym8563: hym8563@51 {
++		compatible = "haoyu,hym8563";
++		reg = <0x51>;
++		interrupt-parent = <&gpio7>;
++		interrupts = <4 IRQ_TYPE_EDGE_FALLING>;
++		#clock-cells = <0>;
++		clock-frequency = <32768>;
++		clock-output-names = "xin32k";
++		pinctrl-names = "default";
++		pinctrl-0 = <&rtc_int>;
++	};
++
++	act8846: act8846@5a {
++		compatible = "active-semi,act8846";
++		reg = <0x5a>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pmic_vsel>, <&pwr_hold>;
++		system-power-controller;
++
++		vp1-supply = <&vcc_sys>;
++		vp2-supply = <&vcc_sys>;
++		vp3-supply = <&vcc_sys>;
++		vp4-supply = <&vcc_sys>;
++		inl1-supply = <&vcc_sys>;
++		inl2-supply = <&vcc_sys>;
++		inl3-supply = <&vcc_20>;
++
++		regulators {
++			vcc_ddr: REG1 {
++				regulator-name = "vcc_ddr";
++				regulator-min-microvolt = <1200000>;
++				regulator-max-microvolt = <1200000>;
++				regulator-always-on;
++			};
++
++			vcc_io: REG2 {
++				regulator-name = "vcc_io";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++			};
++
++			vdd_log: REG3 {
++				regulator-name = "vdd_log";
++				regulator-min-microvolt = <700000>;
++				regulator-max-microvolt = <1500000>;
++				regulator-always-on;
++			};
++
++			vcc_20: REG4 {
++				regulator-name = "vcc_20";
++				regulator-min-microvolt = <2000000>;
++				regulator-max-microvolt = <2000000>;
++				regulator-always-on;
++			};
++
++			vccio_sd: REG5 {
++				regulator-name = "vccio_sd";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++			};
++
++			vdd10_lcd: REG6 {
++				regulator-name = "vdd10_lcd";
++				regulator-min-microvolt = <1050000>;
++				regulator-max-microvolt = <1050000>;
++				regulator-always-on;
++			};
++
++			vcca_18: REG7 {
++				regulator-name = "vcca_18";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-always-on;
++			};
++
++			vcca_33: REG8 {
++				regulator-name = "vcca_33";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++			};
++
++			vcc_lan: REG9 {
++				regulator-name = "vcc_lan";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++				regulator-boot-on;
++			};
++
++			vdd_10: REG10 {
++				regulator-name = "vdd_10";
++				regulator-min-microvolt = <1100000>;
++				regulator-max-microvolt = <1100000>;
++				regulator-always-on;
++			};
++
++			vcc_18: REG11 {
++				regulator-name = "vcc_18";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-always-on;
++			};
++
++			vcc18_lcd: REG12 {
++				regulator-name = "vcc18_lcd";
++				regulator-min-microvolt = <1850000>;
++				regulator-max-microvolt = <1850000>;
++				regulator-always-on;
++			};
++		};
++	};
++};
++
++&rga {
++	status = "okay";
++};
++
++&sound {
++	status = "okay";
++};
++
++&es8323 {
++	spk-ctl-gpio = <&gpio7 2 GPIO_ACTIVE_HIGH>;
++};
++
++&uart1 {
++	status = "okay";
++};
++
++&uart2 {
++	status = "okay";
++};
++
++&uart3 {
++	status = "okay";
++};
++
++&usb_otg {
++	status = "okay";
++	dr_mode = "host";
++};
++
++&hdmi_in_vopl {
++	status = "disabled";
++};
++
++&pinctrl {
++	act8846 {
++		pmic_vsel: pmic-vsel {
++			rockchip,pins = <7 14 RK_FUNC_GPIO &pcfg_output_low>;
++		};
++
++		pwr_hold: pwr-hold {
++			rockchip,pins = <0 6 RK_FUNC_GPIO &pcfg_output_high>;
++		};
++	};
++
++	vcc-sys {
++		pwr5v_en: pwr5v-en {
++			rockchip,pins = <7 3 RK_FUNC_GPIO &pcfg_output_high>;
++		};
++	};
++};
+--- a/arch/arm/boot/dts/rk3288-firefly-port.dtsi	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm/boot/dts/rk3288-firefly-port.dtsi	2018-11-29 01:34:27.962323721 +0200
+@@ -0,0 +1,702 @@
++/*
++ * Copyright (c) 2015~2017 Fuzhou Rockchip Electronics Co., Ltd
++ *
++ * This file is dual-licensed: you can use it either under the terms
++ * of the GPL or the X11 license, at your option. Note that this dual
++ * licensing only applies to this file, and not this project as a
++ * whole.
++ *
++ *  a) This file is free software; you can redistribute it and/or
++ *     modify it under the terms of the GNU General Public License as
++ *     published by the Free Software Foundation; either version 2 of the
++ *     License, or (at your option) any later version.
++ *
++ *     This file is distributed in the hope that it will be useful,
++ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *     GNU General Public License for more details.
++ *
++ * Or, alternatively,
++ *
++ *  b) Permission is hereby granted, free of charge, to any person
++ *     obtaining a copy of this software and associated documentation
++ *     files (the "Software"), to deal in the Software without
++ *     restriction, including without limitation the rights to use,
++ *     copy, modify, merge, publish, distribute, sublicense, and/or
++ *     sell copies of the Software, and to permit persons to whom the
++ *     Software is furnished to do so, subject to the following
++ *     conditions:
++ *
++ *     The above copyright notice and this permission notice shall be
++ *     included in all copies or substantial portions of the Software.
++ *
++ *     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
++ *     EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
++ *     OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
++ *     NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
++ *     HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
++ *     WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
++ *     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
++ *     OTHER DEALINGS IN THE SOFTWARE.
++ */
++
++#include "rk3288.dtsi"
++#include <dt-bindings/pwm/pwm.h>
++#include <dt-bindings/input/input.h>
++
++/ {
++	edp_panel: edp-panel {
++		status = "disabled";
++
++		ports {
++			panel_in_edp: endpoint {
++				remote-endpoint = <&edp_out_panel>;
++			};
++		};
++	};
++
++	lvds_panel: lvds-panel {
++		status = "disabled";
++
++		ports {
++			panel_in_lvds: endpoint {
++				remote-endpoint = <&lvds_out_panel>;
++			};
++		};
++	};
++
++	sound: sound {
++		status = "disabled";
++		compatible = "simple-audio-card";
++		simple-audio-card,format = "i2s";
++		simple-audio-card,name = "rockchip,firefly-codec";
++		simple-audio-card,mclk-fs = <512>;
++		simple-audio-card,widgets =
++			"Microphone", "Microphone Jack",
++			"Headphone", "Headphone Jack";
++		simple-audio-card,routing =
++			"MIC1", "Microphone Jack",
++			"MIC2", "Microphone Jack",
++			"Microphone Jack", "micbias1",
++			"Headphone Jack", "HPOL",
++			"Headphone Jack", "HPOR";
++
++		simple-audio-card,dai-link@0 {
++			format = "i2s";
++			cpu {
++				sound-dai = <&i2s>;
++			};
++
++			codec {
++				sound-dai = <&es8323>;
++			};
++		};
++
++		simple-audio-card,dai-link@1 {
++			format = "i2s";
++			cpu {
++				sound-dai = <&i2s>;
++			};
++
++			codec {
++				sound-dai = <&hdmi>;
++			};
++		};
++	};
++
++	ext_gmac: external-gmac-clock {
++		compatible = "fixed-clock";
++		clock-frequency = <125000000>;
++		clock-output-names = "ext_gmac";
++		#clock-cells = <0>;
++	};
++
++	vccadc_ref: vccadc-ref {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc1v8_sys";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++		regulator-always-on;
++		regulator-boot-on;
++	};
++
++	/* This turns on USB vbus for both host0 (ehci) and host1 (dwc2) */
++	vcc_host_5v: usb-host-regulator {
++		compatible = "regulator-fixed";
++		enable-active-high;
++		gpio = <&gpio0 14 GPIO_ACTIVE_HIGH>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&host_vbus_drv>;
++		regulator-name = "vcc_host_5v";
++		regulator-always-on;
++	};
++
++	vcc_otg_5v: usb-otg-regulator {
++		compatible = "regulator-fixed";
++		enable-active-high;
++		gpio = <&gpio0 12 GPIO_ACTIVE_HIGH>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&otg_vbus_drv>;
++		regulator-name = "vcc_otg_5v";
++		regulator-always-on;
++	};
++
++	vcc_sys: vsys-regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc_sys";
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++		regulator-always-on;
++		regulator-boot-on;
++	};
++
++	vcc_flash: flash-regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc_flash";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++		regulator-always-on;
++		regulator-boot-on;
++		vin-supply = <&vcc_io>;
++	};
++
++	vcc_sd: sdmmc-regulator {
++		compatible = "regulator-fixed";
++		gpio = <&gpio7 11 GPIO_ACTIVE_LOW>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&sdmmc_pwr>;
++		regulator-name = "vcc_sd";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		startup-delay-us = <100000>;
++		vin-supply = <&vcc_io>;
++	};
++
++	/*
++	 * A TT8142 creates both dovdd_1v8 and vcc28_dvp, controlled
++	 * by the dvp_pwr pin.
++	 */
++	vcc28_dvp: vcc28-dvp-regulator {
++		compatible = "regulator-fixed";
++		enable-active-high;
++		gpio = <&gpio0 11 GPIO_ACTIVE_HIGH>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&dvp_pwr>;
++		regulator-name = "vcc28_dvp";
++		regulator-min-microvolt = <2800000>;
++		regulator-max-microvolt = <2800000>;
++		regulator-always-on;
++		vin-supply = <&vcc_io>;
++	};
++
++	dovdd_1v8: dovdd-1v8-regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "dovdd_1v8";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++		regulator-always-on;
++		regulator-boot-on;
++		vin-supply = <&vcc28_dvp>;
++	};
++
++	spdif_out: spdif-out {
++		status = "okay";
++		compatible = "linux,spdif-dit";
++		#sound-dai-cells = <0>;
++	};
++
++	spdif-sound {
++		status = "okay";
++		compatible = "simple-audio-card";
++		simple-audio-card,name = "ROCKCHIP,SPDIF";
++		simple-audio-card,cpu {
++			sound-dai = <&spdif>;
++		};
++
++		simple-audio-card,codec {
++			sound-dai = <&spdif_out>;
++		};
++	};
++
++	gpio-keys {
++		compatible = "gpio-keys";
++		#address-cells = <1>;
++		#size-cells = <0>;
++		autorepeat;
++
++		pinctrl-names = "default";
++		pinctrl-0 = <&pwrbtn>;
++
++		button@0 {
++			gpios = <&gpio0 5 GPIO_ACTIVE_LOW>;
++			linux,code = <KEY_POWER>;
++			label = "GPIO Key Power";
++			linux,input-type = <1>;
++			gpio-key,wakeup = <1>;
++			debounce-interval = <100>;
++		};
++	};
++
++	leds {
++		compatible = "gpio-leds";
++
++		work {
++			label = "firefly:blue:power";
++			linux,default-trigger = "ir-power-click";
++			gpios = <&gpio8 1 GPIO_ACTIVE_LOW>;
++			pinctrl-names = "default";
++			pinctrl-0 = <&led_power>;
++			default-state = "on";
++		};
++
++		user {
++			label = "firefly:yellow:user";
++			linux,default-trigger = "ir-user-click";
++			gpios = <&gpio8 2 GPIO_ACTIVE_LOW>;
++			pinctrl-names = "default";
++			pinctrl-0 = <&led_user>;
++			default-state = "off";
++		};
++	};
++
++	wireless-bluetooth {
++		compatible = "bluetooth-platdata";
++		uart_rts_gpios = <&gpio4 19 GPIO_ACTIVE_LOW>;
++		pinctrl-names = "default", "rts_gpio";
++		pinctrl-0 = <&uart0_rts>;
++		pinctrl-1 = <&uart0_gpios>;
++		BT,reset_gpio    = <&gpio4 29 GPIO_ACTIVE_HIGH>;
++		BT,wake_gpio     = <&gpio4 26 GPIO_ACTIVE_HIGH>;
++		BT,wake_host_irq = <&gpio4 31 GPIO_ACTIVE_HIGH>;
++		status = "okay";
++	};
++
++	wireless-wlan {
++		compatible = "wlan-platdata";
++		rockchip,grf = <&grf>;
++		wifi_chip_type = "ap6212";
++		sdio_vref = <1800>;
++		WIFI,host_wake_irq = <&gpio4 30 GPIO_ACTIVE_HIGH>;
++		status = "okay";
++	};
++};
++
++&emmc {
++	bus-width = <8>;
++	cap-mmc-highspeed;
++	disable-wp;
++	non-removable;
++	num-slots = <1>;
++	max-frequency = <100000000>;
++	mmc-hs200-1_8v;
++	mmc-ddr-1_8v;
++	pinctrl-names = "default";
++	pinctrl-0 = <&emmc_clk &emmc_cmd &emmc_pwr &emmc_bus8>;
++	status = "okay";
++};
++
++&gmac {
++	phy-supply = <&vcc_lan>;
++	phy-mode = "rgmii";
++	clock_in_out = "input";
++	snps,reset-gpio = <&gpio4 7 0>;
++	snps,reset-active-low;
++	snps,force_thresh_dma_mode;
++	snps,reset-delays-us = <0 10000 1000000>;
++	assigned-clocks = <&cru SCLK_MAC>;
++	assigned-clock-parents = <&ext_gmac>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&rgmii_pins &phy_rst &phy_pmeb &phy_int>;
++	tx_delay = <0x1d>;
++	rx_delay = <0x16>;
++	max-speed = <100>;
++	status = "ok";
++};
++
++&hdmi {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	#sound-dai-cells = <0>;
++	status = "okay";
++};
++
++&saradc {
++	vref-supply = <&vccadc_ref>;
++	status = "okay";
++};
++
++&sdmmc {
++	bus-width = <4>;
++	cap-mmc-highspeed;
++	sd-uhs-sdr12;
++	sd-uhs-sdr25;
++	sd-uhs-sdr50;
++	sd-uhs-sdr104;
++	cap-sd-highspeed;
++	card-detect-delay = <200>;
++	disable-wp;			/* wp not hooked up */
++	supports-sd;
++	num-slots = <1>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&sdmmc_clk &sdmmc_cmd &sdmmc_cd &sdmmc_bus4>;
++	vmmc-supply = <&vcc_sd>;
++	vqmmc-supply = <&vccio_sd>;
++	status = "okay";
++};
++
++&edp {
++	force-hpd;
++	status = "disabled";
++
++	ports {
++		edp_out: port@1 {
++			reg = <1>;
++			#address-cells = <1>;
++			#size-cells = <0>;
++			edp_out_panel: endpoint {
++				reg = <0>;
++				remote-endpoint = <&panel_in_edp>;
++			};
++		};
++	};
++};
++
++&hevc_service {
++	status = "okay";
++};
++
++&i2c0 {
++	status = "okay";
++};
++
++&i2c2 {
++	status = "okay";
++
++	es8323: es8323@10 {
++		compatible = "everest,es8323";
++		reg = <0x10>;
++		hp-det-gpio = <&gpio7 15 GPIO_ACTIVE_HIGH>;
++		hp-ctl-gpio = <&gpio0 10 GPIO_ACTIVE_HIGH>;
++		clock-names = "mclk";
++		clocks = <&cru SCLK_I2S0_OUT>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&i2s0_mclk>;
++		#sound-dai-cells = <0>;
++	};
++};
++
++&i2c3 {
++	status = "okay";
++};
++
++&i2c4 {
++	status = "okay";
++};
++
++&i2s {
++	#sound-dai-cells = <0>;
++	status = "okay";
++};
++
++&io_domains {
++	status = "okay";
++
++	audio-supply = <&vcca_33>;
++	dvp-supply = <&dovdd_1v8>;
++	flash0-supply = <&vcc_flash>;
++	flash1-supply = <&vcc_lan>;
++	sdcard-supply = <&vccio_sd>;
++	wifi-supply = <&vcc_18>;
++};
++
++&wdt {
++	status = "okay";
++};
++
++&pwm0 {
++	interrupts = <GIC_SPI 78 IRQ_TYPE_LEVEL_HIGH>;
++	compatible = "rockchip,remotectl-pwm";
++	pinctrl-names = "default";
++	remote_pwm_id = <0>;
++	handle_cpu_id = <1>;
++	remote_support_psci = <0>;
++	status = "okay";
++
++	ir_key1 {
++        rockchip,usercode = <0xff00>;
++        rockchip,key_table =
++            <0xeb   KEY_POWER>,
++            <0xec   KEY_COMPOSE>,
++            <0xfe   KEY_BACK>,
++            <0xb7   KEY_HOME>,
++            <0xa3   KEY_WWW>,
++            <0xf4   KEY_VOLUMEUP>,
++            <0xa7   KEY_VOLUMEDOWN>,
++            <0xf8   KEY_ENTER>,
++            <0xfc   KEY_UP>,
++            <0xfd   KEY_DOWN>,
++            <0xf1   KEY_LEFT>,
++            <0xe5   KEY_RIGHT>;
++    };
++};
++
++&pwm1 {
++	status = "okay";
++};
++
++&isp {
++	status = "okay";
++};
++
++&isp_mmu {
++	status = "okay";
++};
++
++&rga {
++	status = "okay";
++};
++
++&sdio0 {
++	clock-frequency = <50000000>;
++	clock-freq-min-max = <200000 50000000>;
++	bus-width = <4>;
++	cap-sd-highspeed;
++	cap-sdio-irq;
++	disable-wp;
++	keep-power-in-suspend;
++	mmc-pwrseq = <&sdio_pwrseq>;
++	non-removable;
++	num-slots = <1>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&sdio0_bus4 &sdio0_cmd &sdio0_clk &sdio0_int>;
++	sd-uhs-sdr104;
++	supports-sdio;
++	status = "okay";
++};
++
++&rockchip_suspend {
++	status = "okay";
++};
++
++&uart0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&uart0_xfer &uart0_cts>;
++	status = "okay";
++};
++
++&uart2 {
++	status = "disabled";
++};
++
++&vpu_service {
++	status = "okay";
++};
++
++&tsadc {
++	rockchip,hw-tshut-polarity = <0>; /* tshut polarity 0:LOW 1:HIGH */
++	status = "okay";
++};
++
++&usbphy {
++	status = "okay";
++};
++
++&usb_host0_ehci {
++	rockchip-relinquish-port;
++	status = "okay";
++};
++
++&usb_host0_ohci {
++	status = "okay";
++};
++
++&usb_host1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&usbhub_rst>;
++	status = "okay";
++};
++
++&usb_otg {
++	status = "okay";
++};
++
++&lvds {
++	status = "disabled";
++
++	ports {
++		lvds_out: port@1 {
++			reg = <1>;
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			lvds_out_panel: endpoint@0 {
++				reg = <0>;
++				remote-endpoint = <&panel_in_lvds>;
++			};
++		};
++	};
++};
++
++&spdif {
++	status = "okay";
++};
++
++&spi0 {
++	status = "okay";
++	max-freq = <48000000>;
++
++	spi_wk2xxx: spi-wk2xxx@00 {
++		status = "disabled";
++		compatible = "firefly,spi-wk2xxx";
++		reg = <0x00>;
++		spi-max-frequency = <10000000>;
++		power-gpio = <&gpio3 14 GPIO_ACTIVE_HIGH>;
++		reset-gpio = <&gpio0 18 GPIO_ACTIVE_HIGH>;
++		irq-gpio = <&gpio0 7 IRQ_TYPE_EDGE_FALLING>;
++		cs-gpio = <&gpio5 13 GPIO_ACTIVE_HIGH>;
++		/* spi-wk2xxx driver support SPI_CPOL | SPI_CPHA | SPI_CS_HIGH */
++		//spi-cpha;     /* SPI mode: CPHA=1 */
++		//spi-cpol;     /* SPI mode: CPOL=1 */
++		//spi-cs-high;
++	};
++};
++
++&vopb {
++	status = "okay";
++};
++
++&vopb_mmu {
++	status = "okay";
++};
++
++&vopl {
++	status = "okay";
++};
++
++&vopl_mmu {
++	status = "okay";
++};
++
++&pinctrl {
++	pcfg_output_high: pcfg-output-high {
++		output-high;
++	};
++
++	pcfg_output_low: pcfg-output-low {
++		output-low;
++	};
++
++	pcfg_pull_none_drv_8ma: pcfg-pull-none-drv-8ma {
++		drive-strength = <8>;
++	};
++
++	pcfg_pull_up_drv_8ma: pcfg-pull-up-drv-8ma {
++		bias-pull-up;
++		drive-strength = <8>;
++	};
++
++	act8846 {
++		pmic_vsel: pmic-vsel {
++			rockchip,pins = <7 14 RK_FUNC_GPIO &pcfg_output_low>;
++		};
++
++		pwr_hold: pwr-hold {
++			rockchip,pins = <0 6 RK_FUNC_GPIO &pcfg_output_high>;
++		};
++	};
++
++	dvp {
++		dvp_pwr: dvp-pwr {
++			rockchip,pins = <0 11 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++	};
++
++	gmac {
++		phy_int: phy-int {
++			rockchip,pins = <0 9 RK_FUNC_GPIO &pcfg_pull_up>;
++		};
++
++		phy_pmeb: phy-pmeb {
++			rockchip,pins = <0 8 RK_FUNC_GPIO &pcfg_pull_up>;
++		};
++
++		phy_rst: phy-rst {
++			rockchip,pins = <4 8 RK_FUNC_GPIO &pcfg_output_high>;
++		};
++	};
++
++	hym8563 {
++		rtc_int: rtc-int {
++			rockchip,pins = <7 4 RK_FUNC_GPIO &pcfg_pull_up>;
++		};
++	};
++
++	buttons {
++		pwrbtn: pwrbtn {
++			rockchip,pins = <0 5 RK_FUNC_GPIO &pcfg_pull_up>;
++		};
++	};
++
++	leds {
++		led_power: led-power {
++			rockchip,pins = <8 1 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++
++		led_user: led-work {
++			rockchip,pins = <8 2 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++	};
++
++	sdio-pwrseq {
++		wifi_enable_h: wifi-enable-h {
++			rockchip,pins = <4 28 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++	};
++
++	sdmmc {
++		/*
++		 * Default drive strength isn't enough to achieve even
++		 * high-speed mode on firefly board so bump up to 8ma.
++		 */
++		sdmmc_bus4: sdmmc-bus4 {
++			rockchip,pins = <6 16 RK_FUNC_1 &pcfg_pull_up_drv_8ma>,
++					<6 17 RK_FUNC_1 &pcfg_pull_up_drv_8ma>,
++					<6 18 RK_FUNC_1 &pcfg_pull_up_drv_8ma>,
++					<6 19 RK_FUNC_1 &pcfg_pull_up_drv_8ma>;
++		};
++
++		sdmmc_clk: sdmmc-clk {
++			rockchip,pins = <6 20 RK_FUNC_1 &pcfg_pull_none_drv_8ma>;
++		};
++
++		sdmmc_cmd: sdmmc-cmd {
++			rockchip,pins = <6 21 RK_FUNC_1 &pcfg_pull_up_drv_8ma>;
++		};
++
++		sdmmc_pwr: sdmmc-pwr {
++			rockchip,pins = <7 11 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++	};
++
++	usb_host {
++		host_vbus_drv: host-vbus-drv {
++			rockchip,pins = <0 14 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++
++		usbhub_rst: usbhub-rst {
++			rockchip,pins = <8 3 RK_FUNC_GPIO &pcfg_output_high>;
++		};
++	};
++
++	usb_otg {
++		otg_vbus_drv: otg-vbus-drv {
++			rockchip,pins = <0 12 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++	};
++
++	wireless-bluetooth {
++		uart0_gpios: uart0-gpios {
++			rockchip,pins = <4 19 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++	};
++};
+--- a/arch/arm/boot/dts/rk3288-firefly-vga.dts	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm/boot/dts/rk3288-firefly-vga.dts	2018-11-29 01:34:28.047324868 +0200
+@@ -0,0 +1,325 @@
++/*
++ * Copyright (c) 2015~2017 Fuzhou Rockchip Electronics Co., Ltd
++ *
++ * This file is dual-licensed: you can use it either under the terms
++ * of the GPL or the X11 license, at your option. Note that this dual
++ * licensing only applies to this file, and not this project as a
++ * whole.
++ *
++ *  a) This file is free software; you can redistribute it and/or
++ *     modify it under the terms of the GNU General Public License as
++ *     published by the Free Software Foundation; either version 2 of the
++ *     License, or (at your option) any later version.
++ *
++ *     This file is distributed in the hope that it will be useful,
++ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *     GNU General Public License for more details.
++ *
++ * Or, alternatively,
++ *
++ *  b) Permission is hereby granted, free of charge, to any person
++ *     obtaining a copy of this software and associated documentation
++ *     files (the "Software"), to deal in the Software without
++ *     restriction, including without limitation the rights to use,
++ *     copy, modify, merge, publish, distribute, sublicense, and/or
++ *     sell copies of the Software, and to permit persons to whom the
++ *     Software is furnished to do so, subject to the following
++ *     conditions:
++ *
++ *     The above copyright notice and this permission notice shall be
++ *     included in all copies or substantial portions of the Software.
++ *
++ *     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
++ *     EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
++ *     OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
++ *     NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
++ *     HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
++ *     WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
++ *     FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
++ *     OTHER DEALINGS IN THE SOFTWARE.
++ */
++
++/dts-v1/;
++#include "rk3288-firefly-port.dtsi"
++#include "rk3288-linux.dtsi"
++
++/ {
++	model = "Firefly-RK3288 Board (Linux Opensource)";
++	compatible = "firefly,rk3288-firefly", "rockchip,rk3288";
++
++	sdio_pwrseq: sdio-pwrseq {
++		compatible = "mmc-pwrseq-simple";
++		clocks = <&hym8563>;
++		clock-names = "ext_clock";
++		pinctrl-names = "default";
++		pinctrl-0 = <&wifi_enable_h>;
++
++		/*
++		 * On the module itself this is one of these (depending
++		 * on the actual card populated):
++		 * - SDIO_RESET_L_WL_REG_ON
++		 * - PDN (power down when low)
++		 */
++		reset-gpios = <&gpio4 28 GPIO_ACTIVE_LOW>;
++	};
++
++	vga_bridge: vga-bridge {
++		compatible = "adi,adv7123";
++		psave-gpios = <&gpio0 17 GPIO_ACTIVE_HIGH>;
++		rockchip,output = "rgb";
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		ports {
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			port@0 {
++				reg = <0>;
++				adv7123_in: endpoint {
++					remote-endpoint = <&rgb_out>;
++				};
++			};
++
++			port@1 {
++				reg = <1>;
++				adv7123_out: endpoint {
++					remote-endpoint = <&vga_in>;
++				};
++			};
++		};
++	};
++
++	vga {
++		compatible = "vga-connector";
++		label = "vga";
++		ddc-i2c-bus = <&i2c4>;
++
++		 port {
++			vga_in: endpoint {
++				remote-endpoint = <&adv7123_out>;
++			};
++		};
++	};
++};
++
++&cpu0 {
++	cpu0-supply = <&vdd_cpu>;
++};
++
++&dfi {
++	status = "okay";
++};
++
++&dmc {
++	center-supply = <&vdd_log>;
++	status = "okay";
++};
++
++&gpu {
++	status = "okay";
++	mali-supply = <&vdd_gpu>;
++};
++
++&i2c0 {
++	clock-frequency = <400000>;
++
++	vdd_cpu: syr827@40 {
++		compatible = "silergy,syr827";
++		fcs,suspend-voltage-selector = <1>;
++		reg = <0x40>;
++		regulator-name = "vdd_cpu";
++		regulator-min-microvolt = <850000>;
++		regulator-max-microvolt = <1350000>;
++		regulator-always-on;
++		regulator-boot-on;
++		regulator-enable-ramp-delay = <300>;
++		regulator-ramp-delay = <8000>;
++		vin-supply = <&vcc_sys>;
++		regulator-state-mem {
++			regulator-off-in-suspend;
++		};
++	};
++
++	vdd_gpu: syr828@41 {
++		compatible = "silergy,syr828";
++		fcs,suspend-voltage-selector = <1>;
++		reg = <0x41>;
++		regulator-name = "vdd_gpu";
++		regulator-min-microvolt = <850000>;
++		regulator-max-microvolt = <1350000>;
++		regulator-always-on;
++		regulator-ramp-delay = <6000>;
++		vin-supply = <&vcc_sys>;
++		regulator-state-mem {
++			regulator-off-in-suspend;
++		};
++	};
++
++	hym8563: hym8563@51 {
++		compatible = "haoyu,hym8563";
++		reg = <0x51>;
++		interrupt-parent = <&gpio7>;
++		interrupts = <4 IRQ_TYPE_EDGE_FALLING>;
++		#clock-cells = <0>;
++		clock-frequency = <32768>;
++		clock-output-names = "xin32k";
++		pinctrl-names = "default";
++		pinctrl-0 = <&rtc_int>;
++	};
++
++	act8846: act8846@5a {
++		compatible = "active-semi,act8846";
++		reg = <0x5a>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pmic_vsel>, <&pwr_hold>;
++		system-power-controller;
++
++		vp1-supply = <&vcc_sys>;
++		vp2-supply = <&vcc_sys>;
++		vp3-supply = <&vcc_sys>;
++		vp4-supply = <&vcc_sys>;
++		inl1-supply = <&vcc_sys>;
++		inl2-supply = <&vcc_sys>;
++		inl3-supply = <&vcc_20>;
++
++		regulators {
++			vcc_ddr: REG1 {
++				regulator-name = "vcc_ddr";
++				regulator-min-microvolt = <1200000>;
++				regulator-max-microvolt = <1200000>;
++				regulator-always-on;
++			};
++
++			vcc_io: REG2 {
++				regulator-name = "vcc_io";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++			};
++
++			vdd_log: REG3 {
++				regulator-name = "vdd_log";
++				regulator-min-microvolt = <700000>;
++				regulator-max-microvolt = <1500000>;
++				regulator-always-on;
++			};
++
++			vcc_20: REG4 {
++				regulator-name = "vcc_20";
++				regulator-min-microvolt = <2000000>;
++				regulator-max-microvolt = <2000000>;
++				regulator-always-on;
++			};
++
++			vccio_sd: REG5 {
++				regulator-name = "vccio_sd";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++			};
++
++			vdd10_lcd: REG6 {
++				regulator-name = "vdd10_lcd";
++				regulator-min-microvolt = <1050000>;
++				regulator-max-microvolt = <1050000>;
++				regulator-always-on;
++			};
++
++			vcca_18: REG7 {
++				regulator-name = "vcca_18";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-always-on;
++			};
++
++			vcca_33: REG8 {
++				regulator-name = "vcca_33";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++			};
++
++			vcc_lan: REG9 {
++				regulator-name = "vcc_lan";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++				regulator-boot-on;
++			};
++
++			vdd_10: REG10 {
++				regulator-name = "vdd_10";
++				regulator-min-microvolt = <1100000>;
++				regulator-max-microvolt = <1100000>;
++				regulator-always-on;
++			};
++
++			vcc_18: REG11 {
++				regulator-name = "vcc_18";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-always-on;
++			};
++
++			vcc18_lcd: REG12 {
++				regulator-name = "vcc18_lcd";
++				regulator-min-microvolt = <1850000>;
++				regulator-max-microvolt = <1850000>;
++				regulator-always-on;
++			};
++		};
++	};
++};
++
++&rga {
++	status = "okay";
++};
++
++&sound {
++	status = "okay";
++};
++
++&uart2 {
++	status = "okay";
++};
++
++&hdmi_in_vopl {
++	status = "disabled";
++};
++
++&lvds_in_vopb {
++	status = "disabled";
++};
++
++&lvds {
++	pinctrl-names = "default";
++	pinctrl-0 = <&lcdc_ctl>;
++	status = "okay";
++
++	ports {
++		port@1 {
++			reg = <1>;
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			rgb_out: endpoint@0 {
++				reg = <0>;
++				remote-endpoint = <&adv7123_in>;
++			};
++		};
++	};
++};
++
++&pinctrl {
++	act8846 {
++		pmic_vsel: pmic-vsel {
++			rockchip,pins = <7 14 RK_FUNC_GPIO &pcfg_output_low>;
++		};
++
++		pwr_hold: pwr-hold {
++			rockchip,pins = <0 6 RK_FUNC_GPIO &pcfg_output_high>;
++		};
++	};
++};
+--- a/arch/arm/boot/dts/rk3288-firefly.dts	2018-11-29 03:15:20.851025274 +0200
++++ b/arch/arm/boot/dts/rk3288-firefly.dts	2018-11-29 01:34:28.066325124 +0200
+@@ -1,5 +1,5 @@
+ /*
+- * Copyright (c) 2014, 2015 FUKAUMI Naoki <naobsd@gmail.com>
++ * Copyright (c) 2015~2017 Fuzhou Rockchip Electronics Co., Ltd
+  *
+  * This file is dual-licensed: you can use it either under the terms
+  * of the GPL or the X11 license, at your option. Note that this dual
+@@ -41,32 +41,223 @@
+  */
+ 
+ /dts-v1/;
+-#include "rk3288-firefly.dtsi"
++#include "rk3288-firefly-port.dtsi"
+ #include "rk3288-linux.dtsi"
+ 
+ / {
+-	model = "Firefly-RK3288";
+-	compatible = "firefly,firefly-rk3288", "rockchip,rk3288";
++	model = "Firefly-RK3288 Board (Linux Opensource)";
++	compatible = "rockchip,rk3288-firefly", "rockchip,rk3288";
++
++	sdio_pwrseq: sdio-pwrseq {
++		compatible = "mmc-pwrseq-simple";
++		clocks = <&hym8563>;
++		clock-names = "ext_clock";
++		pinctrl-names = "default";
++		pinctrl-0 = <&wifi_enable_h>;
++
++		/*
++		 * On the module itself this is one of these (depending
++		 * on the actual card populated):
++		 * - SDIO_RESET_L_WL_REG_ON
++		 * - PDN (power down when low)
++		 */
++		reset-gpios = <&gpio4 28 GPIO_ACTIVE_LOW>;
++	};
+ };
+ 
+-&ir {
+-	gpios = <&gpio7 0 GPIO_ACTIVE_LOW>;
++&cpu0 {
++	cpu0-supply = <&vdd_cpu>;
+ };
+ 
+-&pinctrl {
+-	act8846 {
+-		pmic_vsel: pmic-vsel {
+-			rockchip,pins = <7 14 RK_FUNC_GPIO &pcfg_output_low>;
++&dfi {
++	status = "okay";
++};
++
++&dmc {
++	center-supply = <&vdd_log>;
++	status = "okay";
++};
++
++&gpu {
++	status = "okay";
++	mali-supply = <&vdd_gpu>;
++};
++
++&i2c0 {
++	clock-frequency = <400000>;
++
++	vdd_cpu: syr827@40 {
++		compatible = "silergy,syr827";
++		fcs,suspend-voltage-selector = <1>;
++		reg = <0x40>;
++		regulator-name = "vdd_cpu";
++		regulator-min-microvolt = <850000>;
++		regulator-max-microvolt = <1350000>;
++		regulator-always-on;
++		regulator-boot-on;
++		regulator-enable-ramp-delay = <300>;
++		regulator-ramp-delay = <8000>;
++		vin-supply = <&vcc_sys>;
++		regulator-state-mem {
++			regulator-off-in-suspend;
+ 		};
+ 	};
+ 
+-	ir {
+-		ir_int: ir-int {
+-			rockchip,pins = <7 0 RK_FUNC_GPIO &pcfg_pull_up>;
++	vdd_gpu: syr828@41 {
++		compatible = "silergy,syr828";
++		fcs,suspend-voltage-selector = <1>;
++		reg = <0x41>;
++		regulator-name = "vdd_gpu";
++		regulator-min-microvolt = <850000>;
++		regulator-max-microvolt = <1350000>;
++		regulator-always-on;
++		regulator-ramp-delay = <6000>;
++		vin-supply = <&vcc_sys>;
++		regulator-state-mem {
++			regulator-off-in-suspend;
+ 		};
+ 	};
++
++	hym8563: hym8563@51 {
++		compatible = "haoyu,hym8563";
++		reg = <0x51>;
++		interrupt-parent = <&gpio7>;
++		interrupts = <4 IRQ_TYPE_EDGE_FALLING>;
++		#clock-cells = <0>;
++		clock-frequency = <32768>;
++		clock-output-names = "xin32k";
++		pinctrl-names = "default";
++		pinctrl-0 = <&rtc_int>;
++	};
++
++	act8846: act8846@5a {
++		compatible = "active-semi,act8846";
++		reg = <0x5a>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pmic_vsel>, <&pwr_hold>;
++		system-power-controller;
++
++		vp1-supply = <&vcc_sys>;
++		vp2-supply = <&vcc_sys>;
++		vp3-supply = <&vcc_sys>;
++		vp4-supply = <&vcc_sys>;
++		inl1-supply = <&vcc_sys>;
++		inl2-supply = <&vcc_sys>;
++		inl3-supply = <&vcc_20>;
++
++		regulators {
++			vcc_ddr: REG1 {
++				regulator-name = "vcc_ddr";
++				regulator-min-microvolt = <1200000>;
++				regulator-max-microvolt = <1200000>;
++				regulator-always-on;
++			};
++
++			vcc_io: REG2 {
++				regulator-name = "vcc_io";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++			};
++
++			vdd_log: REG3 {
++				regulator-name = "vdd_log";
++				regulator-min-microvolt = <700000>;
++				regulator-max-microvolt = <1500000>;
++				regulator-always-on;
++			};
++
++			vcc_20: REG4 {
++				regulator-name = "vcc_20";
++				regulator-min-microvolt = <2000000>;
++				regulator-max-microvolt = <2000000>;
++				regulator-always-on;
++			};
++
++			vccio_sd: REG5 {
++				regulator-name = "vccio_sd";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++			};
++
++			vdd10_lcd: REG6 {
++				regulator-name = "vdd10_lcd";
++				regulator-min-microvolt = <1050000>;
++				regulator-max-microvolt = <1050000>;
++				regulator-always-on;
++			};
++
++			vcca_18: REG7 {
++				regulator-name = "vcca_18";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-always-on;
++			};
++
++			vcca_33: REG8 {
++				regulator-name = "vcca_33";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++			};
++
++			vcc_lan: REG9 {
++				regulator-name = "vcc_lan";
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
++				regulator-always-on;
++				regulator-boot-on;
++			};
++
++			vdd_10: REG10 {
++				regulator-name = "vdd_10";
++				regulator-min-microvolt = <1100000>;
++				regulator-max-microvolt = <1100000>;
++				regulator-always-on;
++			};
++
++			vcc_18: REG11 {
++				regulator-name = "vcc_18";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-always-on;
++			};
++
++			vcc18_lcd: REG12 {
++				regulator-name = "vcc18_lcd";
++				regulator-min-microvolt = <1850000>;
++				regulator-max-microvolt = <1850000>;
++				regulator-always-on;
++			};
++		};
++	};
++};
++
++&rga {
++	status = "okay";
++};
++
++&sound {
++	status = "okay";
+ };
+ 
+-&pwm1 {
++&uart2 {
+ 	status = "okay";
+ };
++
++&hdmi_in_vopl {
++	status = "disabled";
++};
++
++&pinctrl {
++	act8846 {
++		pmic_vsel: pmic-vsel {
++			rockchip,pins = <7 14 RK_FUNC_GPIO &pcfg_output_low>;
++		};
++
++		pwr_hold: pwr-hold {
++			rockchip,pins = <0 6 RK_FUNC_GPIO &pcfg_output_high>;
++		};
++	};
++};
+--- a/arch/arm/boot/dts/rk3288.dtsi	2018-11-29 03:15:21.551035973 +0200
++++ b/arch/arm/boot/dts/rk3288.dtsi	2018-11-29 01:34:28.779334745 +0200
+@@ -335,6 +335,12 @@
+ 		#clock-cells = <0>;
+ 	};
+ 
++	cpuinfo {
++		compatible = "rockchip,cpuinfo";
++		nvmem-cells = <&efuse_id>;
++		nvmem-cell-names = "id";
++	};
++
+ 	timer {
+ 		compatible = "arm,armv7-timer";
+ 		arm,cpu-registers-not-fw-configured;
