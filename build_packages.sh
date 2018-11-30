@@ -78,10 +78,9 @@ build_kernel_pkg() {
     [[ -f "$CWD/config/boot_scripts/uEnv-$SOCFAMILY.txt" ]] && install -Dm644 $CWD/config/boot_scripts/uEnv-$SOCFAMILY.txt "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/uEnv.txt.new"
     # change root disk if disk not default
     [[ -n ${ROOT_DISK##*mmcblk0p1} ]] && echo "rootdev=/dev/$ROOT_DISK" >> "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/uEnv.txt.new"
-
+    cd "$CWD" # fix actual current directory
     # clean-up unnecessary files generated during install
     find "$CWD/$BUILD/$PKG/kernel-modules" "$CWD/$BUILD/$PKG/kernel-headers" \( -name .install -o -name ..install.cmd \) -delete
-
     message "" "create" "kernel pakages"
     # split install_modules -> firmware
     install -dm755 "$CWD/$BUILD/$PKG/kernel-firmware/lib"
