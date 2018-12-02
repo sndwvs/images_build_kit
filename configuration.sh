@@ -15,10 +15,10 @@ get_config
 # mainline kernel source configuration
 #---------------------------------------------
 if [[ $KERNEL_SOURCE == next ]]; then
-    LINUX_SOURCE="https://kernel.googlesource.com/pub/scm/linux/kernel/git/stable/linux-stable"
+    LINUX_SOURCE=${LINUX_SOURCE:-"https://kernel.googlesource.com/pub/scm/linux/kernel/git/stable/linux-stable"}
     #LINUX_SOURCE='git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git'
-    KERNEL_BRANCH="linux-4.14.y::"
-    KERNEL_DIR="linux-$KERNEL_SOURCE"
+    KERNEL_BRANCH=${KERNEL_BRANCH:-"linux-4.14.y::"}
+    KERNEL_DIR=${KERNEL_DIR:-"linux-$KERNEL_SOURCE"}
 fi
 
 #---------------------------------------------
