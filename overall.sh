@@ -12,20 +12,18 @@ fi
 #---------------------------------------------
 message() {
     # parametr 1 - type message
-    #     0 - error
-    #     1 - info (default is empty)
+    #     "err"  - error
+    #     "info" - info (default is empty)
     # parametr 2 - action message
     # parametr 3 - text message
 
-    if [[ ! -z $2 ]]; then ACTION="\e[0;32m $2 \x1B[0m"; else unset ACTION; fi
-    if [[ ! -z $3 ]]; then MESSAGE="\e[0;37m $3 \x1B[0m"; else unset MESSAGE; fi
+    if [[ ! -z "$2" ]]; then ACTION="$2"; else unset ACTION; fi
+    if [[ ! -z "$3" ]]; then MESSAGE="$3"; else unset MESSAGE; fi
 
-    if [[ $1 == "err" ]]; then
-        echo -e "|\e[0;31m error \x1B[0m| $ACTION $BUILD/$SOURCE/$LOG"
-    elif [[ $1 == "info" ]]; then
-        echo -e "|\e[0;36m info \x1B[0m| $ACTION $MESSAGE"
-    else
-        echo -e "|\e[0;36m info \x1B[0m| $ACTION $MESSAGE"
+    if [[ "$1" == "err" ]]; then
+        printf '|\e[0;31m%s \x1B[0m| \e[0;32m%-12s\x1B[0m %s\n' "$1" "$ACTION" "$BUILD/$SOURCE/$LOG"
+    elif [[ "$1" == "info" || -z "$1" ]]; then
+        printf '|\e[0;36minfo\x1B[0m| \e[0;32m%-12s\x1B[0m %s\n' "$ACTION" "$MESSAGE"
     fi
 }
 
