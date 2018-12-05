@@ -12,7 +12,18 @@ URL_SUNXI_TOOLS="https://github.com/linux-sunxi"
 SUNXI_TOOLS="sunxi-tools"
 SUNXI_TOOLS_BRANCH="" #"v1.2"
 
+#BOOT_LOADER_BRANCH="master:tag:v2018.05"
 BOOT_LOADER_BIN="u-boot-sunxi-with-spl.bin"
+
+
+case $KERNEL_SOURCE in
+    next)
+            LINUX_SOURCE="https://github.com/megous/linux"
+            KERNEL_BRANCH="orange-pi-4.19::"
+            KERNEL_DIR="linux-$SOCFAMILY-$KERNEL_SOURCE"
+    ;;
+esac
+
 
 
 
