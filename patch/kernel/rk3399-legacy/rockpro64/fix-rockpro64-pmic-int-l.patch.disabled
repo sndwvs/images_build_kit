@@ -1,0 +1,16 @@
+RFC RockPro64 DTS change pmic_int_l pinctrl
+I was checking the pins against the schematic, on the Rockchip-master I happened across pmic_int_l, it's listed as Bank 1 C5, but that is I2C8_SCL, which is supposedly the I2C broken out on the 40-pin header.  I saw on the schematic next to GPIO3 B2:  "Note:PMU 终断 GPIO1_C5 更改至此"
+I don't read Chinese so machine translation resulted in: "Note: PMU Final break GPIO1_C5 Change to this point"
+https://github.com/ayufan-rock64/linux-u-boot/commit/274224def9077523dc4c0b283f5134ac593d3da6
+
+--- a/arch/arm64/boot/dts/rockchip/rk3399-rockpro64.dts	2018-12-12 03:03:42.187389967 +0200
++++ b/arch/arm64/boot/dts/rockchip/rk3399-rockpro64.dts	2018-12-12 03:06:58.857119397 +0200
+@@ -930,7 +930,7 @@
+ 	pmic {
+ 		pmic_int_l: pmic-int-l {
+ 			rockchip,pins =
+-				<1 21 RK_FUNC_GPIO &pcfg_pull_up>;
++				<3 RK_PB2 RK_FUNC_GPIO &pcfg_pull_up>;
+ 		};
+ 
+ 		vsel1_gpio: vsel1-gpio {
