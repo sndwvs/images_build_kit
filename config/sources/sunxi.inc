@@ -1,5 +1,5 @@
 
-FIRMWARE="firmware-overlay"
+FIRMWARE="firmware"
 
 SERIAL_CONSOLE_SPEED=115200
 SERIAL_CONSOLE=ttyS0

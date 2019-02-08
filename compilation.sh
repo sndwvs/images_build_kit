@@ -115,15 +115,6 @@ compile_kernel() {
     message "" "version" "$GCC_VERSION"
 
     if [[ $SOCFAMILY == rk3* ]]; then
-        if [ "$KERNEL_SOURCE" != "next" ]; then
-            # fix firmware /system /lib
-            find drivers/net/wireless/rockchip_wlan/rkwifi/ -type f -exec \
-            sed -i "s#\/system\/etc\/firmware\/#\/lib\/firmware\/#" {} \;
-
-            # fix kernel version
-#            sed -i "/SUBLEVEL = 0/d" Makefile
-        fi
-
         # fix build firmware
         rsync -ar --ignore-existing $CWD/blobs/$FIRMWARE/brcm/ -d $CWD/$BUILD/$SOURCE/$KERNEL_DIR/firmware/brcm >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
