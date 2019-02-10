@@ -231,8 +231,8 @@ for image_type in ${CREATE_IMAGE[@]}; do
         install_pkg 'extra'
 
         # install extra board packages
-        download_pkg $URL_DISTR_EXTRA $BOARD_NAME
-        install_pkg $BOARD_NAME
+        download_pkg $URL_DISTR_EXTRA $SOCFAMILY
+        install_pkg $SOCFAMILY
 
         setting_default_theme_xfce
         setting_default_start_x
