@@ -1,5 +1,7 @@
 # README #
 
+to build images you need OS Slackware 14.2 or higher
+
 project site: **[fail.pp.ua](http://fail.pp.ua)**  
 **[images](http://dl.fail.pp.ua/slackware/images/)**  
 
@@ -26,4 +28,5 @@ password: **password**
     * RK3399
         + [Firefly-RK3399](http://en.t-firefly.com/product/rk3399.html)
         + [ROCKPro64](http://wiki.pine64.org/index.php/ROCKPro64_Main_Page#SoC_and_Memory_Specification)
+        + [Rock Pi 4](http://rockpi.org/#spec-section)
 
