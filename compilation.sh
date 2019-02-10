@@ -48,6 +48,12 @@ compile_boot_loader() {
         [[ $SOCFAMILY == rk3288 ]] && ( sed 's/^\(CONFIG_EFI_LOADER=y\)/# CONFIG_EFI_LOADER is not set/' \
                                             -i .config >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
         make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
+        # for rockpro64, rock pi 4
+        if [[ ! -z $BL31 ]]; then
+            make $CTHREADS ARCH=$ARCH u-boot.itb CROSS_COMPILE=$CROSS BL31=$CWD/$BUILD/$SOURCE/$RKBIN/bin/${SOCFAMILY:0:4}/$BL31 >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        fi
+
         # create bootloader
         create_uboot
     fi
