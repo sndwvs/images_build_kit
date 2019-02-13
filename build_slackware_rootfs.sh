@@ -401,10 +401,12 @@ setting_move_to_internal() {
 
     # u-boot
     install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/$BOOT_LOADER_BIN" "$CWD/$BUILD/$SOURCE/$ROOTFS/boot/$BOOT_LOADER_BIN" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    if [[ $SOCFAMILY == rk33* ]]; then
+
+    if [[ $SOCFAMILY == rk33* ]] && [[ $BOARD_NAME -ne rockpro64 ]] || [[ $BOARD_NAME -ne rock_pi_4 ]]; then
         install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/uboot.img" "$CWD/$BUILD/$SOURCE/$ROOTFS/boot/uboot.img" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
-    [[ ! -z $ATF ]] && ( install -Dm644 "$CWD/$BUILD/$SOURCE/$ATF_SOURCE/trust.img" "$CWD/$BUILD/$SOURCE/$ROOTFS/boot/trust.img" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+    [[ ! -z $ATF ]]  && [[ $BOARD_NAME -ne rockpro64 ]] || [[ $BOARD_NAME -ne rock_pi_4 ]] && \
+            ( install -Dm644 "$CWD/$BUILD/$SOURCE/$ATF_SOURCE/trust.img" "$CWD/$BUILD/$SOURCE/$ROOTFS/boot/trust.img" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
 
     if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/issue 2>&1 | grep setup.sh) ]];then
         cat <<EOF >$CWD/$BUILD/$SOURCE/$ROOTFS/etc/issue

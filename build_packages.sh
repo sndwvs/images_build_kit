@@ -188,10 +188,11 @@ create_bootloader_pack(){
         install -Dm644 "$CWD/$BLOB_LOADER_PREFFIX/$BLOB_LOADER" "$CWD/$BUILD/$OUTPUT/boot/$BLOB_LOADER" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
-    if [[ $SOCFAMILY == rk33* ]]; then
+    if [[ $SOCFAMILY == rk33* ]] && [[ $BOARD_NAME -ne rockpro64 ]] || [[ $BOARD_NAME -ne rock_pi_4 ]]; then
         install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/uboot.img" "$CWD/$BUILD/$OUTPUT/boot/uboot.img" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
-    [[ ! -z $ATF ]] && ( install -Dm644 "$CWD/$BUILD/$SOURCE/$ATF_SOURCE/trust.img" "$CWD/$BUILD/$OUTPUT/boot/trust.img" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+    [[ ! -z $ATF ]] && [[ $BOARD_NAME -ne rockpro64 ]] || [[ $BOARD_NAME -ne rock_pi_4 ]] && \
+            ( install -Dm644 "$CWD/$BUILD/$SOURCE/$ATF_SOURCE/trust.img" "$CWD/$BUILD/$OUTPUT/boot/trust.img" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
     tar cJf $CWD/$BUILD/$OUTPUT/$FLASH/boot-${ROOTFS_VERSION}.tar.xz boot || exit 1
     for boot_file in $(ls $CWD/$BUILD/$OUTPUT/boot/ | grep -v $BLOB_LOADER); do
         cp -a "$CWD/$BUILD/$OUTPUT/boot/$boot_file" "$CWD/$BUILD/$SOURCE/$ROOTFS/boot/$boot_file" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
