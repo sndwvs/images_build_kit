@@ -1,5 +1,5 @@
 diff --git a/drivers/gpu/arm/midgard/mali_kbase_mem.c b/drivers/gpu/arm/midgard/mali_kbase_mem.c
-index 4a223e8ee..42e0df5db 100644
+index 4a223e8e..42e0df5d 100644
 --- a/drivers/gpu/arm/midgard/mali_kbase_mem.c
 +++ b/drivers/gpu/arm/midgard/mali_kbase_mem.c
 @@ -2182,14 +2182,14 @@ static int kbase_jd_user_buf_map(struct kbase_context *kctx,
@@ -47,3 +47,16 @@ index eea429a8..76610fda 100644
  #else
  	faulted_pages = get_user_pages(address, *va_pages,
  			reg->flags & KBASE_REG_GPU_WR ? FOLL_WRITE : 0,
+diff --git a/drivers/video/rockchip/rga2/rga2_mmu_info.c b/drivers/video/rockchip/rga2/rga2_mmu_info.c
+index 8fc83cea..03645213 100644
+--- a/drivers/video/rockchip/rga2/rga2_mmu_info.c
++++ b/drivers/video/rockchip/rga2/rga2_mmu_info.c
+@@ -312,7 +312,7 @@ static int rga2_MapUserMemory(struct page **pages, uint32_t *pageTable,
+ 	down_read(&current->mm->mmap_sem);
+ #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 6, 0)
+ 	result = get_user_pages(current, current->mm, Memory << PAGE_SHIFT,
+-				pageCount, writeFlag, 0, pages, NULL);
++				pageCount, writeFlag ? FOLL_WRITE : 0, pages, NULL);
+ #else
+ 	result = get_user_pages_remote(current, current->mm,
+ 				       Memory << PAGE_SHIFT,
