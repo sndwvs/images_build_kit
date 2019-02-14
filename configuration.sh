@@ -69,9 +69,9 @@ for XTOOL in ${XTOOLS[*]}; do
         [[ $(echo $XTOOLS_ARM64_SUFFIX | grep $ARCH) ]] && _XTOOLS_ARM_SUFFIX=$XTOOLS_ARM64_SUFFIX
         VER=$(echo $XTOOL | cut -f3 -d "-")
         if [[ $VER > 6 ]]; then
-            export CROSS="$CWD/$BUILD/${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
+            export CROSS="$BUILD/${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
         else
-            export OLD_CROSS="$CWD/$BUILD/${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
+            export OLD_CROSS="$BUILD/${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
         fi
 #        echo $XTOOL $VER
     fi
@@ -80,9 +80,9 @@ for XTOOL in ${XTOOLS[*]}; do
         [[ $(echo $XTOOLS_ARM_SUFFIX | grep arm) ]] && _XTOOLS_ARM_SUFFIX=$XTOOLS_ARM_SUFFIX
         VER=$(echo $XTOOL | cut -f3 -d "-")
         if [[ $VER > 6 ]]; then
-            export CROSS32="$CWD/$BUILD/${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
+            export CROSS32="$BUILD/${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
         else
-            export OLD_CROSS32="$CWD/$BUILD/${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
+            export OLD_CROSS32="$BUILD/${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
         fi
 #        echo $XTOOL $VER
     fi
@@ -90,8 +90,8 @@ done
 
 [[ $NATIVE_ARCH == true ]] && export CROSS="" OLD_CROSS=""
 
-export PATH=/bin:/sbin:/usr/bin:/usr/sbin:$CWD/$BUILD/$OUTPUT/$TOOLS/
-#export PATH=/bin:/sbin:/usr/bin:/usr/sbin:$CWD/$BUILD/${SOURCE}/$ARM_XTOOLS/bin:$CWD/$BUILD/${SOURCE}/$ARM64_XTOOLS/bin:$CWD/$BUILD/$OUTPUT/$TOOLS/
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin:$BUILD/$OUTPUT/$TOOLS/
+#export PATH=/bin:/sbin:/usr/bin:/usr/sbin:$BUILD/${SOURCE}/$ARM_XTOOLS/bin:$BUILD/${SOURCE}/$ARM64_XTOOLS/bin:$BUILD/$OUTPUT/$TOOLS/
 #export CROSS="${XTOOLS_ARM_SUFFIX}-"
 #export CROSS64="${XTOOLS_ARM64_SUFFIX}-"
 
@@ -107,14 +107,14 @@ URL_DISTR_EXTRA="http://dl.fail.pp.ua/slackware/pkg/${ARCH}"
 # claear enviroment
 #---------------------------------------------
 clean_sources (){
-    #rm -rf $CWD/$BUILD/{$SOURCE/{$XTOOLS,$XTOOLS_OLD},$PKG,$OUTPUT/{$TOOLS,$FLASH}}
-    rm -rf $CWD/$BUILD/ || exit 1
+    #rm -rf $BUILD/{$SOURCE/{$XTOOLS,$XTOOLS_OLD},$PKG,$OUTPUT/{$TOOLS,$FLASH}}
+    rm -rf $BUILD/ || exit 1
 }
 
 #---------------------------------------------
 # create enviroment
 #---------------------------------------------
 prepare_dest (){
-    mkdir -p $CWD/$BUILD/{$SOURCE/$PKG,$OUTPUT/{$TOOLS,$FLASH}} || exit 1
+    mkdir -p $BUILD/{$SOURCE/$PKG,$OUTPUT/{$TOOLS,$FLASH}} || exit 1
 }
 

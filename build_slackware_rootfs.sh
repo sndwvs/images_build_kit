@@ -46,11 +46,11 @@ prepare_rootfs() {
     tar xpf $SOURCE/$ROOTFS_NAME.tar.xz -C "$SOURCE/$ROOTFS" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     message "" "install" "kernel for $ROOTFS"
-    ROOT=$SOURCE/$ROOTFS upgradepkg --install-new $CWD/$BUILD/$PKG/*${SOCFAMILY}*${KERNEL_VERSION}*.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    ROOT=$SOURCE/$ROOTFS upgradepkg --install-new $BUILD/$PKG/*${SOCFAMILY}*${KERNEL_VERSION}*.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     if [[ ! -z $TOOLS_PACK ]] && [[ $SOCFAMILY == sun* ]]; then
         message "" "install" "${SUNXI_TOOLS}"
-        ROOT=$SOURCE/$ROOTFS upgradepkg --install-new $CWD/$BUILD/$PKG/*${SUNXI_TOOLS}*.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        ROOT=$SOURCE/$ROOTFS upgradepkg --install-new $BUILD/$PKG/*${SUNXI_TOOLS}*.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 }
 
@@ -243,7 +243,7 @@ create_img() {
     losetup -d $LOOP
 
     if [[ -f $SOURCE/$IMAGE.img ]]; then
-        mv $SOURCE/$IMAGE.img $CWD/$BUILD/$OUTPUT/$FLASH
+        mv $SOURCE/$IMAGE.img $BUILD/$OUTPUT/$FLASH
     fi
 
     message "" "done" "image $IMAGE"
@@ -319,7 +319,7 @@ download_pkg() {
             [[ -z ${_PKG_NAME} ]] && ( echo "empty download package ${category}/$pkg" >> $LOG 2>&1 && message "err" "details" && exit 1 )
 
             message "" "download" "package $category/${_PKG_NAME}"
-            wget -c -nc -nd -np ${url}/${category}/${_PKG_NAME} -P $CWD/$BUILD/$PKG/${type}/${ARCH}/${category}/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            wget -c -nc -nd -np ${url}/${category}/${_PKG_NAME} -P $BUILD/$PKG/${type}/${ARCH}/${category}/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             unset _PKG_NAME
         fi
     done
@@ -344,7 +344,7 @@ install_pkg(){
         pkg=$(echo $pkg | cut -f2 -d "/")
         if [[ ! -z ${pkg} ]];then
             message "" "install" "package $category/${pkg}"
-            ROOT=$SOURCE/$ROOTFS upgradepkg --install-new $CWD/$BUILD/$PKG/${type}/${ARCH}/$category/${pkg}-* >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            ROOT=$SOURCE/$ROOTFS upgradepkg --install-new $BUILD/$PKG/${type}/${ARCH}/$category/${pkg}-* >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
     done
 }
