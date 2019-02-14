@@ -33,15 +33,15 @@ message() {
 kernel_version() {
     local VER
 
-    if [[ ! -f $CWD/$BUILD/$SOURCE/$KERNEL_DIR/Makefile ]]; then
+    if [[ ! -f $SOURCE/$KERNEL_DIR/Makefile ]]; then
         echo "no get kernel version" >> $LOG
         (message "err" "details" && exit 1) || exit 1
     fi
 
-    VER=$(cat $CWD/$BUILD/$SOURCE/$KERNEL_DIR/Makefile | grep VERSION | head -1 | awk '{print $(NF)}')
-    VER=$VER.$(cat $CWD/$BUILD/$SOURCE/$KERNEL_DIR/Makefile | grep PATCHLEVEL | head -1 | awk '{print $(NF)}')
-    VER=$VER.$(cat $CWD/$BUILD/$SOURCE/$KERNEL_DIR/Makefile | grep SUBLEVEL | head -1 | awk '{print $(NF)}')
-    EXTRAVERSION=$(cat $CWD/$BUILD/$SOURCE/$KERNEL_DIR/Makefile | grep EXTRAVERSION | head -1 | awk '{print $(NF)}')
+    VER=$(cat $SOURCE/$KERNEL_DIR/Makefile | grep VERSION | head -1 | awk '{print $(NF)}')
+    VER=$VER.$(cat $SOURCE/$KERNEL_DIR/Makefile | grep PATCHLEVEL | head -1 | awk '{print $(NF)}')
+    VER=$VER.$(cat $SOURCE/$KERNEL_DIR/Makefile | grep SUBLEVEL | head -1 | awk '{print $(NF)}')
+    EXTRAVERSION=$(cat $SOURCE/$KERNEL_DIR/Makefile | grep EXTRAVERSION | head -1 | awk '{print $(NF)}')
     if [ "$EXTRAVERSION" != "=" ]; then VER=$VER$EXTRAVERSION; fi
 #    message "" "get" "kernel version $VER"
     eval "$1=\$VER"
@@ -107,7 +107,7 @@ patching_source() {
                 dirs=(      "$CWD/patch/kernel/$SOCFAMILY-$KERNEL_SOURCE"
                             "$CWD/patch/kernel/$SOCFAMILY-$KERNEL_SOURCE/$BOARD_NAME"
                         )
-                PATCH_SOURCE="$CWD/$BUILD/$SOURCE/$KERNEL_DIR"
+                PATCH_SOURCE="$SOURCE/$KERNEL_DIR"
             ;;
         u-boot)
                 dirs=(
@@ -116,7 +116,7 @@ patching_source() {
                             "$CWD/patch/u-boot/$SOCFAMILY/$BOARD_NAME"
                             "$CWD/patch/u-boot/$SOCFAMILY/$BOARD_NAME/$KERNEL_SOURCE"
                         )
-                PATCH_SOURCE="$CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR"
+                PATCH_SOURCE="$SOURCE/$BOOT_LOADER_DIR"
             ;;
     esac
 

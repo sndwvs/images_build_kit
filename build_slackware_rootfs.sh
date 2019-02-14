@@ -22,44 +22,44 @@ get_name_rootfs() {
 clean_rootfs() {
     image_type=$1
 
-    if [[ $image_type == mini ]] && [[ ! -z $ROOTFS ]] && [[ -d $CWD/$BUILD/$SOURCE/$ROOTFS ]]; then
+    if [[ $image_type == mini ]] && [[ ! -z $ROOTFS ]] && [[ -d $SOURCE/$ROOTFS ]]; then
         message "" "clean" "$ROOTFS"
-        rm -rf $CWD/$BUILD/$SOURCE/$ROOTFS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        rm -rf $SOURCE/$ROOTFS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
-    if [[ $image_type == xfce ]] && [[ ! -z $ROOTFS_XFCE ]] && [[ -d $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE ]] ;then
+    if [[ $image_type == xfce ]] && [[ ! -z $ROOTFS_XFCE ]] && [[ -d $SOURCE/$ROOTFS_XFCE ]] ;then
         message "" "clean" "$ROOTFS_XFCE"
-        rm -rf $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        rm -rf $SOURCE/$ROOTFS_XFCE >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 }
 
 
 download_rootfs() {
     message "" "download" "$ROOTFS_NAME"
-    wget -c --no-check-certificate $URL_ROOTFS/$ROOTFS_NAME.tar.xz -O $CWD/$BUILD/$SOURCE/$ROOTFS_NAME.tar.xz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    wget -c --no-check-certificate $URL_ROOTFS/$ROOTFS_NAME.tar.xz -O $SOURCE/$ROOTFS_NAME.tar.xz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 
 prepare_rootfs() {
     message "" "prepare" "$ROOTFS"
-    mkdir -p $CWD/$BUILD/$SOURCE/$ROOTFS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    tar xpf $CWD/$BUILD/$SOURCE/$ROOTFS_NAME.tar.xz -C "$CWD/$BUILD/$SOURCE/$ROOTFS" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    mkdir -p $SOURCE/$ROOTFS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    tar xpf $SOURCE/$ROOTFS_NAME.tar.xz -C "$SOURCE/$ROOTFS" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     message "" "install" "kernel for $ROOTFS"
-    ROOT=$CWD/$BUILD/$SOURCE/$ROOTFS upgradepkg --install-new $CWD/$BUILD/$PKG/*${SOCFAMILY}*${KERNEL_VERSION}*.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    ROOT=$SOURCE/$ROOTFS upgradepkg --install-new $CWD/$BUILD/$PKG/*${SOCFAMILY}*${KERNEL_VERSION}*.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     if [[ ! -z $TOOLS_PACK ]] && [[ $SOCFAMILY == sun* ]]; then
         message "" "install" "${SUNXI_TOOLS}"
-        ROOT=$CWD/$BUILD/$SOURCE/$ROOTFS upgradepkg --install-new $CWD/$BUILD/$PKG/*${SUNXI_TOOLS}*.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        ROOT=$SOURCE/$ROOTFS upgradepkg --install-new $CWD/$BUILD/$PKG/*${SUNXI_TOOLS}*.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 }
 
 
 setting_fstab() {
-    if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/fstab | grep $ROOT_DISK) ]];then
+    if [[ ! $(cat $SOURCE/$ROOTFS/etc/fstab | grep $ROOT_DISK) ]];then
         message "" "setting" "fstab"
-        sed -i "s:# tmpfs:tmpfs:" $CWD/$BUILD/$SOURCE/$ROOTFS/etc/fstab
-        echo "/dev/$ROOT_DISK    /          ext4    noatime,nodiratime,data=writeback,errors=remount-ro       0       1" >> $CWD/$BUILD/$SOURCE/$ROOTFS/etc/fstab || exit 1
+        sed -i "s:# tmpfs:tmpfs:" $SOURCE/$ROOTFS/etc/fstab
+        echo "/dev/$ROOT_DISK    /          ext4    noatime,nodiratime,data=writeback,errors=remount-ro       0       1" >> $SOURCE/$ROOTFS/etc/fstab || exit 1
     fi
 }
 
@@ -69,23 +69,23 @@ setting_debug() {
     sed -e 's/#\(ttyS[0-2]\)/\1/' \
         -e '/#ttyS3/{n;/^#/i ttyFIQ0
              }' \
-        -i "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/securetty"
+        -i "$SOURCE/$ROOTFS/etc/securetty"
 
     sed -e 's/^\(s\(0\)\)\(.*\)\(115200\)\(.*\)\(ttyS0\)/\1\3'$SERIAL_CONSOLE' '$SERIAL_CONSOLE_SPEED'/' \
-        -i "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/inittab"
+        -i "$SOURCE/$ROOTFS/etc/inittab"
 }
 
 
 setting_motd() {
     message "" "setting" "motd message"
     # http://patorjk.com/ font: rectangles
-    [[ -f "$CWD/config/boards/$BOARD_NAME/motd" ]] && install -m644 -D "$CWD/config/boards/$BOARD_NAME/motd" "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/motd"
+    [[ -f "$CWD/config/boards/$BOARD_NAME/motd" ]] && install -m644 -D "$CWD/config/boards/$BOARD_NAME/motd" "$SOURCE/$ROOTFS/etc/motd"
 }
 
 
 setting_rc_local() {
     message "" "setting" "rc.local"
-    cat <<EOF >"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local"
+    cat <<EOF >"$SOURCE/$ROOTFS/etc/rc.d/rc.local"
 #!/bin/sh
 #
 # /etc/rc.d/rc.local:  Local system initialization script.
@@ -123,8 +123,8 @@ if [ -x /etc/rc.d/rc.settings ]; then
 fi
 EOF
 
-        ln -s "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local" \
-           -r "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local_shutdown"
+        ln -s "$SOURCE/$ROOTFS/etc/rc.d/rc.local" \
+           -r "$SOURCE/$ROOTFS/etc/rc.d/rc.local_shutdown"
 
 }
 
@@ -135,16 +135,16 @@ setting_wifi() {
 #    fi
 
     message "" "setting" "wifi"
-#    install -m755 -D "$CWD/blobs/$BOARD_NAME/rc.wifi" "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.wifi"
+#    install -m755 -D "$CWD/blobs/$BOARD_NAME/rc.wifi" "$SOURCE/$ROOTFS/etc/rc.d/rc.wifi"
 
     # fix wifi driver
     if [[ $SOCFAMILY != rk3288 && $KERNEL_SOURCE != next ]]; then
-        sed -i "s#wext#nl80211#" $CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.inet1.conf >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        sed -i "s#wext#nl80211#" $SOURCE/$ROOTFS/etc/rc.d/rc.inet1.conf >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
-#    if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local | grep wifi) ]]; then
+#    if [[ ! $(cat $SOURCE/$ROOTFS/etc/rc.d/rc.local | grep wifi) ]]; then
         # add start wifi boot
-#        cat <<EOF >>"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local"
+#        cat <<EOF >>"$SOURCE/$ROOTFS/etc/rc.d/rc.local"
 #
 #if [ -x /etc/rc.d/rc.wifi ] ; then
 #  . /etc/rc.d/rc.wifi \$command
@@ -155,20 +155,20 @@ setting_wifi() {
 
 
 setting_firstboot() {
-    if [[ ! -x $CWD/$BUILD/$SOURCE/$ROOTFS/tmp/firstboot ]]; then
+    if [[ ! -x $SOURCE/$ROOTFS/tmp/firstboot ]]; then
         message "" "setting" "firstboot"
         # add start wifi boot
-        install -m755 -D "$CWD/scripts/firstboot" "$CWD/$BUILD/$SOURCE/$ROOTFS/tmp/firstboot"
+        install -m755 -D "$CWD/scripts/firstboot" "$SOURCE/$ROOTFS/tmp/firstboot"
     fi
 
     # add root password
-    sed -i "s#password#$(openssl passwd -1 password)#" "$CWD/$BUILD/$SOURCE/$ROOTFS/tmp/firstboot"
+    sed -i "s#password#$(openssl passwd -1 password)#" "$SOURCE/$ROOTFS/tmp/firstboot"
 
     # resize fs
-    sed -i "s#mmcblk[0-9]p[0-9]#$ROOT_DISK#" "$CWD/$BUILD/$SOURCE/$ROOTFS/tmp/firstboot"
+    sed -i "s#mmcblk[0-9]p[0-9]#$ROOT_DISK#" "$SOURCE/$ROOTFS/tmp/firstboot"
 
-    if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local | grep firstboot) ]]; then
-        cat <<EOF >>"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local"
+    if [[ ! $(cat $SOURCE/$ROOTFS/etc/rc.d/rc.local | grep firstboot) ]]; then
+        cat <<EOF >>"$SOURCE/$ROOTFS/etc/rc.d/rc.local"
 
 if [ -x /tmp/firstboot ]; then
   . /tmp/firstboot \$command
@@ -179,9 +179,9 @@ EOF
 
 
 setting_dhcpcd() {
-    if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/dhcpcd.conf | grep nolink) ]]; then
+    if [[ ! $(cat $SOURCE/$ROOTFS/etc/dhcpcd.conf | grep nolink) ]]; then
         message "" "setting" "dhcpcd.conf"
-        cat <<EOF >>"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/dhcpcd.conf"
+        cat <<EOF >>"$SOURCE/$ROOTFS/etc/dhcpcd.conf"
 noarp
 nolink
 
@@ -199,15 +199,15 @@ create_img() {
     fi
 
     # +800M for create swap firstrun
-    ROOTFS_SIZE=$(expr $(du -sH $CWD/$BUILD/$SOURCE/$IMAGE | awk '{print $1}') / 1024 + 1000)"M"
+    ROOTFS_SIZE=$(expr $(du -sH $SOURCE/$IMAGE | awk '{print $1}') / 1024 + 1000)"M"
 
     message "" "create" "image size $ROOTFS_SIZE"
 
-    dd if=/dev/zero of=$CWD/$BUILD/$SOURCE/$IMAGE.img bs=1 count=0 seek=$ROOTFS_SIZE >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    dd if=/dev/zero of=$SOURCE/$IMAGE.img bs=1 count=0 seek=$ROOTFS_SIZE >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     LOOP=$(losetup -f)
 
-    losetup $LOOP $CWD/$BUILD/$SOURCE/$IMAGE.img || exit 1
+    losetup $LOOP $SOURCE/$IMAGE.img || exit 1
 
     write_uboot $LOOP
 
@@ -222,7 +222,7 @@ create_img() {
     sleep 2
 
     # $IMAGE_OFFSET (start) x 512 (block size) = where to mount partition
-    losetup -o $(($IMAGE_OFFSET*512)) $LOOP $CWD/$BUILD/$SOURCE/$IMAGE.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    losetup -o $(($IMAGE_OFFSET*512)) $LOOP $SOURCE/$IMAGE.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     message "" "create" "filesystem"
     mkfs.ext4 -F -m 0 -L linuxroot $LOOP >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
@@ -233,17 +233,17 @@ create_img() {
     e2fsck -yf $LOOP >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     message "" "create" "mount point and mount image"
-    mkdir -p $CWD/$BUILD/$SOURCE/image
-    mount $LOOP $CWD/$BUILD/$SOURCE/image
-    rsync -a "$CWD/$BUILD/$SOURCE/$IMAGE/" "$CWD/$BUILD/$SOURCE/image/"
-    umount $CWD/$BUILD/$SOURCE/image
-    if [[ -d $CWD/$BUILD/$SOURCE/image ]]; then
-        rm -rf $CWD/$BUILD/$SOURCE/image
+    mkdir -p $SOURCE/image
+    mount $LOOP $SOURCE/image
+    rsync -a "$SOURCE/$IMAGE/" "$SOURCE/image/"
+    umount $SOURCE/image
+    if [[ -d $SOURCE/image ]]; then
+        rm -rf $SOURCE/image
     fi
     losetup -d $LOOP
 
-    if [[ -f $CWD/$BUILD/$SOURCE/$IMAGE.img ]]; then
-        mv $CWD/$BUILD/$SOURCE/$IMAGE.img $CWD/$BUILD/$OUTPUT/$FLASH
+    if [[ -f $SOURCE/$IMAGE.img ]]; then
+        mv $SOURCE/$IMAGE.img $CWD/$BUILD/$OUTPUT/$FLASH
     fi
 
     message "" "done" "image $IMAGE"
@@ -251,11 +251,11 @@ create_img() {
 
 
 setting_settings() {
-    if [[ ! -f "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.settings" ]];then
+    if [[ ! -f "$SOURCE/$ROOTFS/etc/rc.d/rc.settings" ]];then
         message "" "setting" "rc.settings"
 
         if [[ "$KERNEL_SOURCE" == "next" && "$BOARD_NAME" == "cubietruck" ]];then
-            cat <<EOF >>"$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.settings"
+            cat <<EOF >>"$SOURCE/$ROOTFS/etc/rc.d/rc.settings"
 #!/bin/sh
 
 LED="/sys/class/leds"
@@ -291,8 +291,8 @@ echo 200000 > /sys/devices/system/cpu/cpufreq/ondemand/sampling_rate
 EOF
         fi
 
-        if [[ -f "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.settings" ]];then
-            chmod 755 "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.settings"
+        if [[ -f "$SOURCE/$ROOTFS/etc/rc.d/rc.settings" ]];then
+            chmod 755 "$SOURCE/$ROOTFS/etc/rc.d/rc.settings"
         fi
     fi
 }
@@ -344,32 +344,32 @@ install_pkg(){
         pkg=$(echo $pkg | cut -f2 -d "/")
         if [[ ! -z ${pkg} ]];then
             message "" "install" "package $category/${pkg}"
-            ROOT=$CWD/$BUILD/$SOURCE/$ROOTFS upgradepkg --install-new $CWD/$BUILD/$PKG/${type}/${ARCH}/$category/${pkg}-* >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            ROOT=$SOURCE/$ROOTFS upgradepkg --install-new $CWD/$BUILD/$PKG/${type}/${ARCH}/$category/${pkg}-* >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
     done
 }
 
 
 setting_default_theme_xfce() {
-    if [[ ! -d "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/skel/.config/xfce4" ]];then
+    if [[ ! -d "$SOURCE/$ROOTFS_XFCE/etc/skel/.config/xfce4" ]];then
         message "" "setting" "default settings xfce"
-        rsync -a "$CWD/config/xfce/" "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/skel/" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        rsync -a "$CWD/config/xfce/" "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/root/" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        rsync -a "$CWD/config/xfce/" "$SOURCE/$ROOTFS_XFCE/etc/skel/" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        rsync -a "$CWD/config/xfce/" "$SOURCE/$ROOTFS_XFCE/root/" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 }
 
 
 setting_default_start_x() {
-    sed "s#id:3#id:4#" -i $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/inittab
+    sed "s#id:3#id:4#" -i $SOURCE/$ROOTFS_XFCE/etc/inittab
 
     # fix default xfce
-    ln -sf $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/X11/xinit/xinitrc.xfce \
-       -r $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/X11/xinit/xinitrc
+    ln -sf $SOURCE/$ROOTFS_XFCE/etc/X11/xinit/xinitrc.xfce \
+       -r $SOURCE/$ROOTFS_XFCE/etc/X11/xinit/xinitrc
 
     if [[ $SOCFAMILY == rk3288 ]]; then
-        if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.local | grep fbset) ]];then
+        if [[ ! $(cat $SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.local | grep fbset) ]];then
             # add start fbset for DefaultDepth 24
-            cat <<EOF >>"$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.local"
+            cat <<EOF >>"$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.local"
 
 if [ -x /etc/rc.d/rc.fbset ] ; then
     /etc/rc.d/rc.fbset
@@ -382,34 +382,34 @@ EOF
 
 setting_for_desktop() {
     # correcting the sound output through the alsa
-    #if [ ! -x "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.pulseaudio" ]; then
-    #    chmod 755 "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.pulseaudio"
+    #if [ ! -x "$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.pulseaudio" ]; then
+    #    chmod 755 "$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.pulseaudio"
     #fi
 
     if [[ $SOCFAMILY == sun* ]]; then
         # adjustment for vdpau
-        sed -i 's#sunxi_ve_mem_reserve=0#sunxi_ve_mem_reserve=128#' "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/boot/boot.cmd"
-        $CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A arm -T script -d $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/boot/boot.cmd \
-        "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/boot/boot.scr" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        sed -i 's#sunxi_ve_mem_reserve=0#sunxi_ve_mem_reserve=128#' "$SOURCE/$ROOTFS_XFCE/boot/boot.cmd"
+        $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A arm -T script -d $SOURCE/$ROOTFS_XFCE/boot/boot.cmd \
+        "$SOURCE/$ROOTFS_XFCE/boot/boot.scr" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 }
 
 
 setting_move_to_internal() {
     message "" "setting" "data move to nand"
-    install -m755 -D "$CWD/scripts/setup.sh" "$CWD/$BUILD/$SOURCE/$ROOTFS/root/setup.sh"
+    install -m755 -D "$CWD/scripts/setup.sh" "$SOURCE/$ROOTFS/root/setup.sh"
 
     # u-boot
-    install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/$BOOT_LOADER_BIN" "$CWD/$BUILD/$SOURCE/$ROOTFS/boot/$BOOT_LOADER_BIN" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    install -Dm644 "$SOURCE/$BOOT_LOADER_DIR/$BOOT_LOADER_BIN" "$SOURCE/$ROOTFS/boot/$BOOT_LOADER_BIN" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     if [[ $SOCFAMILY == rk33* ]] && [[ $BOARD_NAME -ne rockpro64 ]] || [[ $BOARD_NAME -ne rock_pi_4 ]]; then
-        install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/uboot.img" "$CWD/$BUILD/$SOURCE/$ROOTFS/boot/uboot.img" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        install -Dm644 "$SOURCE/$BOOT_LOADER_DIR/uboot.img" "$SOURCE/$ROOTFS/boot/uboot.img" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
     [[ ! -z $ATF ]]  && [[ $BOARD_NAME -ne rockpro64 ]] || [[ $BOARD_NAME -ne rock_pi_4 ]] && \
-            ( install -Dm644 "$CWD/$BUILD/$SOURCE/$ATF_SOURCE/trust.img" "$CWD/$BUILD/$SOURCE/$ROOTFS/boot/trust.img" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+            ( install -Dm644 "$SOURCE/$ATF_SOURCE/trust.img" "$SOURCE/$ROOTFS/boot/trust.img" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
 
-    if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/issue 2>&1 | grep setup.sh) ]];then
-        cat <<EOF >$CWD/$BUILD/$SOURCE/$ROOTFS/etc/issue
+    if [[ ! $(cat $SOURCE/$ROOTFS/etc/issue 2>&1 | grep setup.sh) ]];then
+        cat <<EOF >$SOURCE/$ROOTFS/etc/issue
 
 [0;36m=======================================================================[0;39m
 
@@ -427,14 +427,14 @@ Kernel \r (\m)
 EOF
     fi
 
-    if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/root/.bashrc 2>&1 | grep setup.sh) ]];then
-        cat <<EOF >$CWD/$BUILD/$SOURCE/$ROOTFS/root/.bashrc
+    if [[ ! $(cat $SOURCE/$ROOTFS/root/.bashrc 2>&1 | grep setup.sh) ]];then
+        cat <<EOF >$SOURCE/$ROOTFS/root/.bashrc
 alias setup='/root/setup.sh'
 EOF
     fi
 
-    if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/root/.bash_profile 2>&1 | grep setup.sh) ]];then
-        cat <<EOF >$CWD/$BUILD/$SOURCE/$ROOTFS/root/.bash_profile
+    if [[ ! $(cat $SOURCE/$ROOTFS/root/.bash_profile 2>&1 | grep setup.sh) ]];then
+        cat <<EOF >$SOURCE/$ROOTFS/root/.bash_profile
 source ~/.bashrc
 EOF
     fi
@@ -443,14 +443,14 @@ EOF
 
 setting_first_login() {
     message "" "setting" "first login"
-    install -m755 -D "$CWD/scripts/check_first_login.sh" "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/profile.d/check_first_login.sh"
-    touch "$CWD/$BUILD/$SOURCE/$ROOTFS/root/.never_logged"
+    install -m755 -D "$CWD/scripts/check_first_login.sh" "$SOURCE/$ROOTFS/etc/profile.d/check_first_login.sh"
+    touch "$SOURCE/$ROOTFS/root/.never_logged"
 }
 
 
 setting_issue() {
     message "" "setting" "issue message"
-    install -m644 -D "$CWD/config/issue" "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/issue"
+    install -m644 -D "$CWD/config/issue" "$SOURCE/$ROOTFS/etc/issue"
 }
 
 
@@ -458,15 +458,15 @@ setting_alsa() {
     [[ ! -z "$1" ]] && local ROOTFS="$1"
 
     message "" "setting" "default alsa"
-    chmod 644 "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.pulseaudio" || exit 1
-    chmod 755 "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.alsa" || exit 1
-    mv "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/asound.conf" "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/asound.conf.new" || exit 1
+    chmod 644 "$SOURCE/$ROOTFS/etc/rc.d/rc.pulseaudio" || exit 1
+    chmod 755 "$SOURCE/$ROOTFS/etc/rc.d/rc.alsa" || exit 1
+    mv "$SOURCE/$ROOTFS/etc/asound.conf" "$SOURCE/$ROOTFS/etc/asound.conf.new" || exit 1
 }
 
 
 setting_sysctl() {
     message "" "setting" "sysctl"
-    cat <<EOF >$CWD/$BUILD/$SOURCE/$ROOTFS/etc/sysctl.d/ext4_tune.conf
+    cat <<EOF >$SOURCE/$ROOTFS/etc/sysctl.d/ext4_tune.conf
 vm.dirty_writeback_centisecs = 100
 vm.dirty_expire_centisecs = 100
 EOF
@@ -475,19 +475,19 @@ EOF
 
 setting_udev() {
     message "" "setting" "udev"
-    install -m644 -D "$CWD/config/50-usb-power.rules" "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/udev/rules.d/50-usb-power.rules"
+    install -m644 -D "$CWD/config/50-usb-power.rules" "$SOURCE/$ROOTFS/etc/udev/rules.d/50-usb-power.rules"
 }
 
 
 setting_h3dmode() {
     message "" "setting" "h3dmode"
-    install -m755 -D "$CWD/scripts/h3dmode" "$CWD/$BUILD/$SOURCE/$ROOTFS/sbin/h3dmode"
+    install -m755 -D "$CWD/scripts/h3dmode" "$SOURCE/$ROOTFS/sbin/h3dmode"
 }
 
 
 setting_hostname() {
     message "" "setting" "hostname"
-    echo $BOARD_NAME | sed 's/_/-/g' > "$CWD/$BUILD/$SOURCE/$ROOTFS/etc/HOSTNAME"
+    echo $BOARD_NAME | sed 's/_/-/g' > "$SOURCE/$ROOTFS/etc/HOSTNAME"
 }
 
 

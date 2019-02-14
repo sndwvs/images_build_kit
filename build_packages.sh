@@ -21,7 +21,7 @@ build_kernel_pkg() {
     fi
 
     # install kernel
-    install -Dm644 $CWD/$BUILD/$SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/$KERNEL "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/$KERNEL"
+    install -Dm644 $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/$KERNEL "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/$KERNEL"
 
     # adding custom firmware
     [[ ! -z $FIRMWARE ]] && ( cp -a $CWD/blobs/$FIRMWARE/* -d $CWD/$BUILD/$PKG/kernel-modules/lib/firmware/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
@@ -30,10 +30,10 @@ build_kernel_pkg() {
     # add device tree
     install -m755 -d "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/"
     if [[ ${KARCH} == arm64 ]]; then
-            [[ $SOCFAMILY == rk3* ]] && ( cp -a $CWD/$BUILD/$SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/rockchip/*${SOCFAMILY}*dtb \
+            [[ $SOCFAMILY == rk3* ]] && ( cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/rockchip/*${SOCFAMILY}*dtb \
               $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
     else
-        cp -a $CWD/$BUILD/$SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/*${SOCFAMILY}*dtb \
+        cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/*${SOCFAMILY}*dtb \
               $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
@@ -42,20 +42,20 @@ build_kernel_pkg() {
             if [[ $BOARD_NAME == cubietruck ]]; then
                 # vga | screen0_output_type = 4
                 sed 's#screen0_output_type = [0-9]#screen0_output_type = 4#' "$CWD/config/boards/$BOARD_NAME/$BOARD_NAME.fex" \
-                    > "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/script-vga.fex"
-                $CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/fex2bin "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/script-vga.fex" "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/script-vga.bin"
+                    > "$SOURCE/$SUNXI_TOOLS/host/script-vga.fex"
+                $SOURCE/$SUNXI_TOOLS/host/fex2bin "$SOURCE/$SUNXI_TOOLS/host/script-vga.fex" "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/script-vga.bin"
             fi
 
             # hdmi | screen0_output_type = 3
             sed 's#screen0_output_type = [0-9]#screen0_output_type = 3#' "$CWD/config/boards/$BOARD_NAME/$BOARD_NAME.fex" \
-                > "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/script-hdmi.fex"
-            $CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/fex2bin "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/script-hdmi.fex" "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/script-hdmi.bin"
+                > "$SOURCE/$SUNXI_TOOLS/host/script-hdmi.fex"
+            $SOURCE/$SUNXI_TOOLS/host/fex2bin "$SOURCE/$SUNXI_TOOLS/host/script-hdmi.fex" "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/script-hdmi.bin"
 
             # add entries necessary for HDMI-to-DVI adapters
             sed -e 's#screen0_output_type = [0-9]#screen0_output_type = 3#' \
                 -e '/\[hdmi_para\]/a hdcp_enable = 0\nhdmi_cts_compatibility = 1' "$CWD/config/boards/$BOARD_NAME/$BOARD_NAME.fex" \
-                > "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/script-hdmi-to-dvi.fex"
-            $CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/fex2bin "$CWD/$BUILD/$SOURCE/$SUNXI_TOOLS/host/script-hdmi-to-dvi.fex" "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/script-hdmi-to-dvi.bin"
+                > "$SOURCE/$SUNXI_TOOLS/host/script-hdmi-to-dvi.fex"
+            $SOURCE/$SUNXI_TOOLS/host/fex2bin "$SOURCE/$SUNXI_TOOLS/host/script-hdmi-to-dvi.fex" "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/script-hdmi-to-dvi.bin"
 
             cd "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot"
             ln -sf "script-$VIDEO_OUTPUT.bin" "script.bin"
@@ -71,7 +71,7 @@ build_kernel_pkg() {
         -e "s:%SERIAL_CONSOLE_SPEED%:${SERIAL_CONSOLE_SPEED}:g" \
         -i "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd"
     # compile boot script
-    [[ -f $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd ]] && ( $CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A arm -T script -d $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd \
+    [[ -f $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd ]] && ( $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A arm -T script -d $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd \
                                                                         "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.scr" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
 
     # u-boot
@@ -156,11 +156,11 @@ build_sunxi_tools() {
 
     install -m644 -D "$CWD/packages/${SUNXI_TOOLS}/slack-desc" "$CWD/$BUILD/$PKG/${SUNXI_TOOLS}/install/slack-desc"
 
-    cp -P $CWD/$BUILD/$SOURCE/${SUNXI_TOOLS}/{bin2fex,fex2bin,sunxi-fexc,sunxi-nand-part} \
+    cp -P $SOURCE/${SUNXI_TOOLS}/{bin2fex,fex2bin,sunxi-fexc,sunxi-nand-part} \
           $CWD/$BUILD/$PKG/${SUNXI_TOOLS}/sbin/
 
     cd $CWD/$BUILD/$PKG/${SUNXI_TOOLS}/
-    makepkg -l n -c n $CWD/$BUILD/$PKG/${SUNXI_TOOLS}-git_$(date +%Y%m%d)_$(cat $CWD/$BUILD/$SOURCE/${SUNXI_TOOLS}/.git/packed-refs | grep refs/remotes/origin/master | cut -b1-7)-${ARCH}-${PKG_BUILD}${PACKAGER}.txz \
+    makepkg -l n -c n $CWD/$BUILD/$PKG/${SUNXI_TOOLS}-git_$(date +%Y%m%d)_$(cat $SOURCE/${SUNXI_TOOLS}/.git/packed-refs | grep refs/remotes/origin/master | cut -b1-7)-${ARCH}-${PKG_BUILD}${PACKAGER}.txz \
     >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     [[ -d $CWD/$BUILD/$PKG/${SUNXI_TOOLS} ]] && rm -rf $CWD/$BUILD/$PKG/${SUNXI_TOOLS}
@@ -180,7 +180,7 @@ build_flash_script() {
 create_bootloader_pack(){
     message "" "create" "bootloader pack"
     cd $CWD/$BUILD/$OUTPUT/ || exit 1
-    install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/$BOOT_LOADER_BIN" "$CWD/$BUILD/$OUTPUT/boot/$BOOT_LOADER_BIN" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    install -Dm644 "$SOURCE/$BOOT_LOADER_DIR/$BOOT_LOADER_BIN" "$CWD/$BUILD/$OUTPUT/boot/$BOOT_LOADER_BIN" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     if [[ ! -z $BLOB_LOADER ]]; then
         BLOB_LOADER_PREFFIX="$BUILD/$SOURCE/$RKBIN/bin/${SOCFAMILY:0:4}"
@@ -189,13 +189,13 @@ create_bootloader_pack(){
     fi
 
     if [[ $SOCFAMILY == rk33* ]] && [[ $BOARD_NAME -ne rockpro64 ]] || [[ $BOARD_NAME -ne rock_pi_4 ]]; then
-        install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/uboot.img" "$CWD/$BUILD/$OUTPUT/boot/uboot.img" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        install -Dm644 "$SOURCE/$BOOT_LOADER_DIR/uboot.img" "$CWD/$BUILD/$OUTPUT/boot/uboot.img" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
     [[ ! -z $ATF ]] && [[ $BOARD_NAME -ne rockpro64 ]] || [[ $BOARD_NAME -ne rock_pi_4 ]] && \
-            ( install -Dm644 "$CWD/$BUILD/$SOURCE/$ATF_SOURCE/trust.img" "$CWD/$BUILD/$OUTPUT/boot/trust.img" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+            ( install -Dm644 "$SOURCE/$ATF_SOURCE/trust.img" "$CWD/$BUILD/$OUTPUT/boot/trust.img" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
     tar cJf $CWD/$BUILD/$OUTPUT/$FLASH/boot-${ROOTFS_VERSION}.tar.xz boot || exit 1
     for boot_file in $(ls $CWD/$BUILD/$OUTPUT/boot/ | grep -v $BLOB_LOADER); do
-        cp -a "$CWD/$BUILD/$OUTPUT/boot/$boot_file" "$CWD/$BUILD/$SOURCE/$ROOTFS/boot/$boot_file" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        cp -a "$CWD/$BUILD/$OUTPUT/boot/$boot_file" "$SOURCE/$ROOTFS/boot/$boot_file" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     done
 }
 
