@@ -33,12 +33,12 @@ esac
 
 create_uboot()
 {
-    pushd $CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    pushd $CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     if [[ $SOCFAMILY == rk32* ]]; then
         # U-Boot SPL, with SPL_BACK_TO_BROM option enabled
-        tools/mkimage -n $SOCFAMILY -T rksd -d spl/u-boot-spl-dtb.bin $BOOT_LOADER_BIN >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-#        tools/mkimage -n $SOCFAMILY -T rksd -d $CWD/$BUILD/$SOURCE/$RKBIN/bin/${SOCFAMILY:0:4}/$DDR $BOOT_LOADER_BIN >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        tools/mkimage -n $SOCFAMILY -T rksd -d spl/u-boot-spl-dtb.bin $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+#        tools/mkimage -n $SOCFAMILY -T rksd -d $CWD/$BUILD/$SOURCE/$RKBIN/bin/${SOCFAMILY:0:4}/$DDR $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         cat u-boot-dtb.bin >> $BOOT_LOADER_BIN || exit 1
     fi
 
@@ -55,7 +55,7 @@ create_uboot()
         else
             # The ddr binary files for ARM64 platforms from Rockchip, likes RK3399 and RK3328 should not skip first 4 bytes.
             # U-Boot SPL, with SPL_BACK_TO_BROM option disabled SD
-            tools/mkimage -n $SOCFAMILY -T rksd -d $CWD/$BUILD/$SOURCE/$RKBIN/bin/${SOCFAMILY:0:4}/$DDR $BOOT_LOADER_BIN >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            tools/mkimage -n $SOCFAMILY -T rksd -d $CWD/$BUILD/$SOURCE/$RKBIN/bin/${SOCFAMILY:0:4}/$DDR $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
             cat $CWD/$BUILD/$SOURCE/$RKBIN/bin/${SOCFAMILY:0:4}/$MINI_LOADER >> $BOOT_LOADER_BIN || exit 1
 
@@ -65,27 +65,27 @@ create_uboot()
                 # Total hours wasted before finding that the new "load address" parameter is not optional: 3
                 # https://github.com/rockchip-linux/build/commit/fff8f5a2d91fd11f8c4f6d605cac704d28baab4d
                 #
-                $CWD/$BUILD/$SOURCE/$RKBIN/tools/loaderimage --pack --uboot u-boot-dtb.bin uboot.img 0x200000 >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+                $CWD/$BUILD/$SOURCE/$RKBIN/tools/loaderimage --pack --uboot u-boot-dtb.bin uboot.img 0x200000 >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             fi
         fi
     fi
-    popd >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    popd >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 
 write_uboot()
 {
     # clear u-boot
-#    dd if=/dev/zero of=$1 bs=1k count=$((${IMAGE_OFFSET}-1)) seek=1 status=noxfer >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+#    dd if=/dev/zero of=$1 bs=1k count=$((${IMAGE_OFFSET}-1)) seek=1 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
 #    if [[ $BOARD_NAME == rockpro64 ]] || [[ $BOARD_NAME == rock_pi_4 ]]; then
-#        dd if=$CWD/blobs/$BOARD_NAME/u-boot/$BOOT_LOADER_BIN of=$1 seek=64 conv=notrunc status=none >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-#        dd if=$CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/$BOOT_LOADER_BIN of=$1 seek=64 conv=notrunc status=none >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+#        dd if=$CWD/blobs/$BOARD_NAME/u-boot/$BOOT_LOADER_BIN of=$1 seek=64 conv=notrunc status=none >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+#        dd if=$CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/$BOOT_LOADER_BIN of=$1 seek=64 conv=notrunc status=none >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 #    else
-    dd if=$CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/$BOOT_LOADER_BIN of=$1 seek=64 status=noxfer >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    dd if=$CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/$BOOT_LOADER_BIN of=$1 seek=64 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     if [[ $SOCFAMILY == rk33* ]] && [[ $BOARD_NAME -ne rockpro64 ]] || [[ $BOARD_NAME -ne rock_pi_4 ]]; then
-        dd if=$CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/uboot.img of=$1 seek=16384 status=noxfer >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        dd if=$CWD/$BUILD/$SOURCE/$ATF_SOURCE/trust.img of=$1 seek=24576 status=noxfer >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        dd if=$CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/uboot.img of=$1 seek=16384 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        dd if=$CWD/$BUILD/$SOURCE/$ATF_SOURCE/trust.img of=$1 seek=24576 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 #    fi
     message "" "write" "$BOOT_LOADER_DIR"
@@ -95,7 +95,7 @@ write_uboot()
 fix_native_arch()
 {
     if [[ $BOARD_NAME -ne rockpro64 ]] || [[ $BOARD_NAME -ne rock_pi_4 ]]; then
-        cp -f $CWD/blobs/$BOARD_NAME/u-boot/uboot.img $CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        cp -f $CWD/blobs/$BOARD_NAME/atf/trust.img $CWD/$BUILD/$SOURCE/$ATF_SOURCE/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        cp -f $CWD/blobs/$BOARD_NAME/u-boot/uboot.img $CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        cp -f $CWD/blobs/$BOARD_NAME/atf/trust.img $CWD/$BUILD/$SOURCE/$ATF_SOURCE/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 }

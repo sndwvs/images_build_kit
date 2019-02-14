@@ -17,24 +17,24 @@ build_kernel_pkg() {
     if [[ ! -z $FIRMWARE ]]; then
         [[ ! -d "$CWD/$BUILD/$PKG/kernel-modules/lib/firmware" ]] && mkdir -p $CWD/$BUILD/$PKG/kernel-modules/lib/firmware
         # adding custom firmware
-        cp -a $CWD/blobs/$FIRMWARE/* -d $CWD/$BUILD/$PKG/kernel-modules/lib/firmware/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        cp -a $CWD/blobs/$FIRMWARE/* -d $CWD/$BUILD/$PKG/kernel-modules/lib/firmware/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
     # install kernel
     install -Dm644 $CWD/$BUILD/$SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/$KERNEL "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/$KERNEL"
 
     # adding custom firmware
-    [[ ! -z $FIRMWARE ]] && ( cp -a $CWD/blobs/$FIRMWARE/* -d $CWD/$BUILD/$PKG/kernel-modules/lib/firmware/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+    [[ ! -z $FIRMWARE ]] && ( cp -a $CWD/blobs/$FIRMWARE/* -d $CWD/$BUILD/$PKG/kernel-modules/lib/firmware/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
 
 
     # add device tree
     install -m755 -d "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/"
     if [[ ${KARCH} == arm64 ]]; then
             [[ $SOCFAMILY == rk3* ]] && ( cp -a $CWD/$BUILD/$SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/rockchip/*${SOCFAMILY}*dtb \
-              $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+              $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
     else
         cp -a $CWD/$BUILD/$SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/*${SOCFAMILY}*dtb \
-              $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+              $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
     if [[ $SOCFAMILY == sun* ]]; then
@@ -72,7 +72,7 @@ build_kernel_pkg() {
         -i "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd"
     # compile boot script
     [[ -f $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd ]] && ( $CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A arm -T script -d $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd \
-                                                                        "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.scr" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+                                                                        "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.scr" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
 
     # u-boot
     [[ -f "$CWD/config/boot_scripts/uEnv-$SOCFAMILY.txt" ]] && install -Dm644 $CWD/config/boot_scripts/uEnv-$SOCFAMILY.txt "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/boot/uEnv.txt.new"
@@ -116,37 +116,37 @@ build_kernel_pkg() {
     else
         echo "rm boot/.next 2> /dev/null" >> "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}/install/doinst.sh"
     fi
-    makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     # create kernel-modules package
     cd $CWD/$BUILD/$PKG/kernel-modules/
     install -m644 -D "$CWD/packages/kernel/slack-desc.kernel-modules" "$CWD/$BUILD/$PKG/kernel-modules/install/slack-desc"
-    makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-modules-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-modules-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     # create kernel-headers package
     cd $CWD/$BUILD/$PKG/kernel-headers/
     install -m644 -D "$CWD/packages/kernel/slack-desc.kernel-headers" "$CWD/$BUILD/$PKG/kernel-headers/install/slack-desc"
-    makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-headers-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-headers-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     # create kernel-firmware package
     cd $CWD/$BUILD/$PKG/kernel-firmware/
     install -m644 -D "$CWD/packages/kernel/slack-desc.kernel-firmware" "$CWD/$BUILD/$PKG/kernel-firmware/install/slack-desc"
-    makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-firmware-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    makepkg -l n -c n $CWD/$BUILD/$PKG/kernel-firmware-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     cd $CWD/$BUILD/$PKG
 
     # clear kernel packages directories
     [[ -d "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}" ]] && \
-        rm -rf "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        rm -rf "$CWD/$BUILD/$PKG/kernel-${SOCFAMILY}" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     [[ -d "$CWD/$BUILD/$PKG/kernel-modules" ]] && \
-        rm -rf "$CWD/$BUILD/$PKG/kernel-modules" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        rm -rf "$CWD/$BUILD/$PKG/kernel-modules" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     [[ -d "$CWD/$BUILD/$PKG/kernel-headers" ]] && \
-        rm -rf "$CWD/$BUILD/$PKG/kernel-headers" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        rm -rf "$CWD/$BUILD/$PKG/kernel-headers" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     [[ -d "$CWD/$BUILD/$PKG/kernel-firmware" ]] && \
-        rm -rf "$CWD/$BUILD/$PKG/kernel-firmware" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        rm -rf "$CWD/$BUILD/$PKG/kernel-firmware" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 
@@ -161,7 +161,7 @@ build_sunxi_tools() {
 
     cd $CWD/$BUILD/$PKG/${SUNXI_TOOLS}/
     makepkg -l n -c n $CWD/$BUILD/$PKG/${SUNXI_TOOLS}-git_$(date +%Y%m%d)_$(cat $CWD/$BUILD/$SOURCE/${SUNXI_TOOLS}/.git/packed-refs | grep refs/remotes/origin/master | cut -b1-7)-${ARCH}-${PKG_BUILD}${PACKAGER}.txz \
-    >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     [[ -d $CWD/$BUILD/$PKG/${SUNXI_TOOLS} ]] && rm -rf $CWD/$BUILD/$PKG/${SUNXI_TOOLS}
 }
@@ -169,33 +169,33 @@ build_sunxi_tools() {
 
 build_flash_script() {
     message "" "create" "flash script"
-    install -Dm755 "$CWD/blobs/${BOARD_NAME}/flash.sh" "$CWD/$BUILD/$OUTPUT/$FLASH/flash.sh" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    install -Dm755 "$CWD/blobs/${BOARD_NAME}/flash.sh" "$CWD/$BUILD/$OUTPUT/$FLASH/flash.sh" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     sed -e "s/\(\${ROOTFS}\)/$ROOTFS/g" \
         -e "s/\(\${ROOTFS_XFCE}\)/$ROOTFS_XFCE/g" \
         -e "s/\(\$TOOLS\)/$TOOLS/g" \
-    -i "$CWD/$BUILD/$OUTPUT/$FLASH/flash.sh" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    -i "$CWD/$BUILD/$OUTPUT/$FLASH/flash.sh" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 
 create_bootloader_pack(){
     message "" "create" "bootloader pack"
     cd $CWD/$BUILD/$OUTPUT/ || exit 1
-    install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/$BOOT_LOADER_BIN" "$CWD/$BUILD/$OUTPUT/boot/$BOOT_LOADER_BIN" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/$BOOT_LOADER_BIN" "$CWD/$BUILD/$OUTPUT/boot/$BOOT_LOADER_BIN" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     if [[ ! -z $BLOB_LOADER ]]; then
         BLOB_LOADER_PREFFIX="$BUILD/$SOURCE/$RKBIN/bin/${SOCFAMILY:0:4}"
         [[ $NATIVE_ARCH == true ]] && BLOB_LOADER_PREFFIX="blobs/u-boot/${SOCFAMILY}"
-        install -Dm644 "$CWD/$BLOB_LOADER_PREFFIX/$BLOB_LOADER" "$CWD/$BUILD/$OUTPUT/boot/$BLOB_LOADER" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        install -Dm644 "$CWD/$BLOB_LOADER_PREFFIX/$BLOB_LOADER" "$CWD/$BUILD/$OUTPUT/boot/$BLOB_LOADER" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
     if [[ $SOCFAMILY == rk33* ]] && [[ $BOARD_NAME -ne rockpro64 ]] || [[ $BOARD_NAME -ne rock_pi_4 ]]; then
-        install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/uboot.img" "$CWD/$BUILD/$OUTPUT/boot/uboot.img" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/uboot.img" "$CWD/$BUILD/$OUTPUT/boot/uboot.img" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
     [[ ! -z $ATF ]] && [[ $BOARD_NAME -ne rockpro64 ]] || [[ $BOARD_NAME -ne rock_pi_4 ]] && \
-            ( install -Dm644 "$CWD/$BUILD/$SOURCE/$ATF_SOURCE/trust.img" "$CWD/$BUILD/$OUTPUT/boot/trust.img" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+            ( install -Dm644 "$CWD/$BUILD/$SOURCE/$ATF_SOURCE/trust.img" "$CWD/$BUILD/$OUTPUT/boot/trust.img" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
     tar cJf $CWD/$BUILD/$OUTPUT/$FLASH/boot-${ROOTFS_VERSION}.tar.xz boot || exit 1
     for boot_file in $(ls $CWD/$BUILD/$OUTPUT/boot/ | grep -v $BLOB_LOADER); do
-        cp -a "$CWD/$BUILD/$OUTPUT/boot/$boot_file" "$CWD/$BUILD/$SOURCE/$ROOTFS/boot/$boot_file" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        cp -a "$CWD/$BUILD/$OUTPUT/boot/$boot_file" "$CWD/$BUILD/$SOURCE/$ROOTFS/boot/$boot_file" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     done
 }
 

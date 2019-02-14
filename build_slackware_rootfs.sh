@@ -24,33 +24,33 @@ clean_rootfs() {
 
     if [[ $image_type == mini ]] && [[ ! -z $ROOTFS ]] && [[ -d $CWD/$BUILD/$SOURCE/$ROOTFS ]]; then
         message "" "clean" "$ROOTFS"
-        rm -rf $CWD/$BUILD/$SOURCE/$ROOTFS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        rm -rf $CWD/$BUILD/$SOURCE/$ROOTFS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
     if [[ $image_type == xfce ]] && [[ ! -z $ROOTFS_XFCE ]] && [[ -d $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE ]] ;then
         message "" "clean" "$ROOTFS_XFCE"
-        rm -rf $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        rm -rf $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 }
 
 
 download_rootfs() {
     message "" "download" "$ROOTFS_NAME"
-    wget -c --no-check-certificate $URL_ROOTFS/$ROOTFS_NAME.tar.xz -O $CWD/$BUILD/$SOURCE/$ROOTFS_NAME.tar.xz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    wget -c --no-check-certificate $URL_ROOTFS/$ROOTFS_NAME.tar.xz -O $CWD/$BUILD/$SOURCE/$ROOTFS_NAME.tar.xz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 
 prepare_rootfs() {
     message "" "prepare" "$ROOTFS"
-    mkdir -p $CWD/$BUILD/$SOURCE/$ROOTFS >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    tar xpf $CWD/$BUILD/$SOURCE/$ROOTFS_NAME.tar.xz -C "$CWD/$BUILD/$SOURCE/$ROOTFS" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    mkdir -p $CWD/$BUILD/$SOURCE/$ROOTFS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    tar xpf $CWD/$BUILD/$SOURCE/$ROOTFS_NAME.tar.xz -C "$CWD/$BUILD/$SOURCE/$ROOTFS" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     message "" "install" "kernel for $ROOTFS"
-    ROOT=$CWD/$BUILD/$SOURCE/$ROOTFS upgradepkg --install-new $CWD/$BUILD/$PKG/*${SOCFAMILY}*${KERNEL_VERSION}*.txz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    ROOT=$CWD/$BUILD/$SOURCE/$ROOTFS upgradepkg --install-new $CWD/$BUILD/$PKG/*${SOCFAMILY}*${KERNEL_VERSION}*.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     if [[ ! -z $TOOLS_PACK ]] && [[ $SOCFAMILY == sun* ]]; then
         message "" "install" "${SUNXI_TOOLS}"
-        ROOT=$CWD/$BUILD/$SOURCE/$ROOTFS upgradepkg --install-new $CWD/$BUILD/$PKG/*${SUNXI_TOOLS}*.txz >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        ROOT=$CWD/$BUILD/$SOURCE/$ROOTFS upgradepkg --install-new $CWD/$BUILD/$PKG/*${SUNXI_TOOLS}*.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 }
 
@@ -139,7 +139,7 @@ setting_wifi() {
 
     # fix wifi driver
     if [[ $SOCFAMILY != rk3288 && $KERNEL_SOURCE != next ]]; then
-        sed -i "s#wext#nl80211#" $CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.inet1.conf >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        sed -i "s#wext#nl80211#" $CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.inet1.conf >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
 #    if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/rc.d/rc.local | grep wifi) ]]; then
@@ -203,7 +203,7 @@ create_img() {
 
     message "" "create" "image size $ROOTFS_SIZE"
 
-    dd if=/dev/zero of=$CWD/$BUILD/$SOURCE/$IMAGE.img bs=1 count=0 seek=$ROOTFS_SIZE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    dd if=/dev/zero of=$CWD/$BUILD/$SOURCE/$IMAGE.img bs=1 count=0 seek=$ROOTFS_SIZE >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     LOOP=$(losetup -f)
 
@@ -212,9 +212,9 @@ create_img() {
     write_uboot $LOOP
 
     message "" "create" "partition"
-    echo -e "\no\nn\np\n1\n$IMAGE_OFFSET\n\nw" | fdisk $LOOP >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || true
+    echo -e "\no\nn\np\n1\n$IMAGE_OFFSET\n\nw" | fdisk $LOOP >> $LOG 2>&1 || true
 
-    partprobe $LOOP >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    partprobe $LOOP >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     losetup -d $LOOP
 
@@ -222,15 +222,15 @@ create_img() {
     sleep 2
 
     # $IMAGE_OFFSET (start) x 512 (block size) = where to mount partition
-    losetup -o $(($IMAGE_OFFSET*512)) $LOOP $CWD/$BUILD/$SOURCE/$IMAGE.img >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    losetup -o $(($IMAGE_OFFSET*512)) $LOOP $CWD/$BUILD/$SOURCE/$IMAGE.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     message "" "create" "filesystem"
-    mkfs.ext4 -F -m 0 -L linuxroot $LOOP >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    mkfs.ext4 -F -m 0 -L linuxroot $LOOP >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     message "" "tune" "filesystem"
-    tune2fs -o journal_data_writeback $LOOP >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    tune2fs -O ^has_journal $LOOP >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    e2fsck -yf $LOOP >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    tune2fs -o journal_data_writeback $LOOP >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    tune2fs -O ^has_journal $LOOP >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    e2fsck -yf $LOOP >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     message "" "create" "mount point and mount image"
     mkdir -p $CWD/$BUILD/$SOURCE/image
@@ -316,10 +316,10 @@ download_pkg() {
                [[ $(echo $raw | rev | cut -d '-' -f4- | rev | grep -ox $pkg) ]] && _PKG_NAME=$raw
             done
 
-            [[ -z ${_PKG_NAME} ]] && ( echo "empty download package ${category}/$pkg" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 && message "err" "details" && exit 1 )
+            [[ -z ${_PKG_NAME} ]] && ( echo "empty download package ${category}/$pkg" >> $LOG 2>&1 && message "err" "details" && exit 1 )
 
             message "" "download" "package $category/${_PKG_NAME}"
-            wget -c -nc -nd -np ${url}/${category}/${_PKG_NAME} -P $CWD/$BUILD/$PKG/${type}/${ARCH}/${category}/ >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            wget -c -nc -nd -np ${url}/${category}/${_PKG_NAME} -P $CWD/$BUILD/$PKG/${type}/${ARCH}/${category}/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             unset _PKG_NAME
         fi
     done
@@ -344,7 +344,7 @@ install_pkg(){
         pkg=$(echo $pkg | cut -f2 -d "/")
         if [[ ! -z ${pkg} ]];then
             message "" "install" "package $category/${pkg}"
-            ROOT=$CWD/$BUILD/$SOURCE/$ROOTFS upgradepkg --install-new $CWD/$BUILD/$PKG/${type}/${ARCH}/$category/${pkg}-* >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            ROOT=$CWD/$BUILD/$SOURCE/$ROOTFS upgradepkg --install-new $CWD/$BUILD/$PKG/${type}/${ARCH}/$category/${pkg}-* >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
     done
 }
@@ -353,8 +353,8 @@ install_pkg(){
 setting_default_theme_xfce() {
     if [[ ! -d "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/skel/.config/xfce4" ]];then
         message "" "setting" "default settings xfce"
-        rsync -a "$CWD/config/xfce/" "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/skel/" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        rsync -a "$CWD/config/xfce/" "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/root/" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        rsync -a "$CWD/config/xfce/" "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/etc/skel/" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        rsync -a "$CWD/config/xfce/" "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/root/" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 }
 
@@ -390,7 +390,7 @@ setting_for_desktop() {
         # adjustment for vdpau
         sed -i 's#sunxi_ve_mem_reserve=0#sunxi_ve_mem_reserve=128#' "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/boot/boot.cmd"
         $CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A arm -T script -d $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/boot/boot.cmd \
-        "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/boot/boot.scr" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        "$CWD/$BUILD/$SOURCE/$ROOTFS_XFCE/boot/boot.scr" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 }
 
@@ -400,13 +400,13 @@ setting_move_to_internal() {
     install -m755 -D "$CWD/scripts/setup.sh" "$CWD/$BUILD/$SOURCE/$ROOTFS/root/setup.sh"
 
     # u-boot
-    install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/$BOOT_LOADER_BIN" "$CWD/$BUILD/$SOURCE/$ROOTFS/boot/$BOOT_LOADER_BIN" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/$BOOT_LOADER_BIN" "$CWD/$BUILD/$SOURCE/$ROOTFS/boot/$BOOT_LOADER_BIN" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     if [[ $SOCFAMILY == rk33* ]] && [[ $BOARD_NAME -ne rockpro64 ]] || [[ $BOARD_NAME -ne rock_pi_4 ]]; then
-        install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/uboot.img" "$CWD/$BUILD/$SOURCE/$ROOTFS/boot/uboot.img" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        install -Dm644 "$CWD/$BUILD/$SOURCE/$BOOT_LOADER_DIR/uboot.img" "$CWD/$BUILD/$SOURCE/$ROOTFS/boot/uboot.img" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
     [[ ! -z $ATF ]]  && [[ $BOARD_NAME -ne rockpro64 ]] || [[ $BOARD_NAME -ne rock_pi_4 ]] && \
-            ( install -Dm644 "$CWD/$BUILD/$SOURCE/$ATF_SOURCE/trust.img" "$CWD/$BUILD/$SOURCE/$ROOTFS/boot/trust.img" >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+            ( install -Dm644 "$CWD/$BUILD/$SOURCE/$ATF_SOURCE/trust.img" "$CWD/$BUILD/$SOURCE/$ROOTFS/boot/trust.img" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
 
     if [[ ! $(cat $CWD/$BUILD/$SOURCE/$ROOTFS/etc/issue 2>&1 | grep setup.sh) ]];then
         cat <<EOF >$CWD/$BUILD/$SOURCE/$ROOTFS/etc/issue

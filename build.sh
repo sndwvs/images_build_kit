@@ -139,8 +139,8 @@ source $CWD/build_slackware_rootfs.sh || exit 1
 #---------------------------------------------
 # clear log
 #---------------------------------------------
-if [[ -f $CWD/$BUILD/$SOURCE/$LOG ]]; then
-    rm $CWD/$BUILD/$SOURCE/$LOG
+if [[ -f $LOG ]]; then
+    rm $LOG
 fi
 
 # compile atf
@@ -222,7 +222,7 @@ for image_type in ${CREATE_IMAGE[@]}; do
 
     if [[ $image_type == xfce ]]; then
         message "" "create" "$ROOTFS_XFCE"
-        rsync -ar --del $CWD/$BUILD/$SOURCE/$ROOTFS/ $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE >> $CWD/$BUILD/$SOURCE/$LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        rsync -ar --del $CWD/$BUILD/$SOURCE/$ROOTFS/ $CWD/$BUILD/$SOURCE/$ROOTFS_XFCE >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         download_pkg $URL_DISTR "$image_type"
         install_pkg "$image_type"
 
