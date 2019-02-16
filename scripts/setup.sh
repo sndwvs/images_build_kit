@@ -18,9 +18,14 @@ PART=1
 
 
 case $(cat /proc/device-tree/compatible) in
-    *rk33*|*rock64*)
+    *firefly*rk33*)
             OFFSET_LOADER="64:16384:24576"
             LOADER="idbloader.img:uboot.img:trust.img"
+            FIX_BOOT_DISK=1
+    ;;
+    *rock*64*|rock*pi*4)
+            OFFSET_LOADER="64"
+            LOADER="rksd_loader.img"
             FIX_BOOT_DISK=1
     ;;
     *rk32*)
