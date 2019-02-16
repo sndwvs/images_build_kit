@@ -84,7 +84,7 @@ write_uboot()
 #        dd if=$CWD/blobs/$BOARD_NAME/u-boot/$BOOT_LOADER_BIN of=$1 seek=64 conv=notrunc status=none >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 #        dd if=$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN of=$1 seek=64 conv=notrunc status=none >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 #    else
-    dd if=$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/u-boot/$BOOT_LOADER_BIN of=$1 seek=64 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    dd if=$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN of=$1 seek=64 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     if [[ $SOCFAMILY == rk33* ]] && [[ $BOARD_NAME -ne rockpro64 ]] || [[ $BOARD_NAME -ne rock_pi_4 ]]; then
         dd if=$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/uboot.img of=$1 seek=16384 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         dd if=$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img of=$1 seek=24576 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
