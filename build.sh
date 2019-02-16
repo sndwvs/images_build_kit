@@ -73,7 +73,7 @@ esac
 exec 3>&1
 
 while true; do
-    result=$(dialog --title "build for $BOARD_NAME" \
+    result=$(dialog --title "build $KERNEL_SOURCE for $BOARD_NAME" \
            --checklist "select build options" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
            "${options[@]}" \
     2>&1 1>&3)
