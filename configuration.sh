@@ -107,7 +107,6 @@ URL_DISTR_EXTRA="http://dl.fail.pp.ua/slackware/pkg/${ARCH}"
 # claear enviroment
 #---------------------------------------------
 clean_sources (){
-    #rm -rf $BUILD/{$SOURCE/{$XTOOLS,$XTOOLS_OLD},$PKG,$OUTPUT/{$TOOLS,$IMAGES}}
     rm -rf $BUILD/ || exit 1
 }
 
@@ -115,6 +114,7 @@ clean_sources (){
 # create enviroment
 #---------------------------------------------
 prepare_dest (){
-    mkdir -p $BUILD/{$SOURCE/$PKG,$OUTPUT/{$TOOLS,$IMAGES}} || exit 1
+#    mkdir -p $BUILD/{$SOURCE/$PKG,$OUTPUT/{$TOOLS,$IMAGES}} || exit 1
+    mkdir -p {$BUILD/$OUTPUT/{$TOOLS,$IMAGES},$SOURCE/$PKG} || exit 1
 }
 
