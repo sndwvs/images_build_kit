@@ -17,7 +17,7 @@ TTY_Y=$(($(stty size | cut -f1 -d " ")-10)) # determine terminal height
 # get boards
 #---------------------------------------------
 for board in $CWD/config/boards/*/*.conf ;do
-    BOARDS+=( $(echo $board | rev | cut -d '/' -f1 | cut -d '.' -f2 | rev) "" "off")
+    BOARDS+=( $(echo $board | rev | cut -d '/' -f1 | cut -d '.' -f2 | rev) "$(sed -n '/^#/{3p}' $board | sed 's:#\s::')" "off")
 done
 
 # Duplicate file descriptor 1 on descriptor 3
