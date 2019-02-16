@@ -169,24 +169,8 @@ build_sunxi_tools() {
 
 create_bootloader_pack(){
     message "" "create" "bootloader pack"
-    cd $BUILD/$OUTPUT/ || exit 1
-    install -Dm644 "$SOURCE/$BOOT_LOADER_DIR/$BOOT_LOADER_BIN" "$BUILD/$OUTPUT/boot/$BOOT_LOADER_BIN" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
-    if [[ ! -z $BLOB_LOADER ]]; then
-        BLOB_LOADER_PREFFIX="$BUILD/$SOURCE/$RKBIN/bin/${SOCFAMILY:0:4}"
-        [[ $NATIVE_ARCH == true ]] && BLOB_LOADER_PREFFIX="blobs/u-boot/${SOCFAMILY}"
-        install -Dm644 "$CWD/$BLOB_LOADER_PREFFIX/$BLOB_LOADER" "$BUILD/$OUTPUT/boot/$BLOB_LOADER" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    fi
-
-    if [[ $SOCFAMILY == rk33* ]] && [[ $BOARD_NAME -ne rockpro64 ]] || [[ $BOARD_NAME -ne rock_pi_4 ]]; then
-        install -Dm644 "$SOURCE/$BOOT_LOADER_DIR/uboot.img" "$BUILD/$OUTPUT/boot/uboot.img" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    fi
-    [[ ! -z $ATF ]] && [[ $BOARD_NAME -ne rockpro64 ]] || [[ $BOARD_NAME -ne rock_pi_4 ]] && \
-            ( install -Dm644 "$SOURCE/$ATF_SOURCE/trust.img" "$BUILD/$OUTPUT/boot/trust.img" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+    cd $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/ || exit 1
     tar cJf $BUILD/$OUTPUT/$IMAGES/boot-${ROOTFS_VERSION}.tar.xz boot || exit 1
-    for boot_file in $(ls $BUILD/$OUTPUT/boot/ | grep -v $BLOB_LOADER); do
-        cp -a "$BUILD/$OUTPUT/boot/$boot_file" "$SOURCE/$ROOTFS/boot/$boot_file" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    done
 }
 
 

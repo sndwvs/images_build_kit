@@ -44,9 +44,9 @@ create_uboot()
 
     if [[ $SOCFAMILY == rk33* ]]; then
         if [[ $BOARD_NAME == rockpro64 ]] || [[ $BOARD_NAME == rock_pi_4 ]]; then
-            tools/mkimage -n $SOCFAMILY -T rksd -d $SOURCE/$RKBIN/bin/${SOCFAMILY:0:4}/$DDR $BOOT_LOADER_BIN
-            cat spl/u-boot-spl.bin >> rksd_loader.img
-            dd if=u-boot.itb of=rksd_loader.img seek=448 conv=notrunc
+            tools/mkimage -n $SOCFAMILY -T rksd -d $SOURCE/$RKBIN/bin/${SOCFAMILY:0:4}/$DDR $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            cat spl/u-boot-spl.bin >> rksd_loader.img || exit 1
+            dd if=u-boot.itb of=rksd_loader.img seek=448 conv=notrunc >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 #            tools/mkimage -n $SOCFAMILY -T rksd -d $SOURCE/$RKBIN/bin/${SOCFAMILY:0:4}/$DDR rkspi_loader.img
 #            cat spl/u-boot-spl.bin >> rkspi_loader.img
 #            for i in `seq 1 128`; do dd count=4 status=none; dd if=/dev/zero count=4 status=none; done < rkspi_loader.img > rkspi_loader.tmp
@@ -66,9 +66,11 @@ create_uboot()
                 # https://github.com/rockchip-linux/build/commit/fff8f5a2d91fd11f8c4f6d605cac704d28baab4d
                 #
                 $SOURCE/$RKBIN/tools/loaderimage --pack --uboot u-boot-dtb.bin uboot.img 0x200000 >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+                install -Dm644 uboot.img $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/uboot.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             fi
         fi
     fi
+    install -Dm644 $BOOT_LOADER_BIN $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     popd >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
@@ -80,12 +82,12 @@ write_uboot()
 
 #    if [[ $BOARD_NAME == rockpro64 ]] || [[ $BOARD_NAME == rock_pi_4 ]]; then
 #        dd if=$CWD/blobs/$BOARD_NAME/u-boot/$BOOT_LOADER_BIN of=$1 seek=64 conv=notrunc status=none >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-#        dd if=$SOURCE/$BOOT_LOADER_DIR/$BOOT_LOADER_BIN of=$1 seek=64 conv=notrunc status=none >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+#        dd if=$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN of=$1 seek=64 conv=notrunc status=none >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 #    else
-    dd if=$SOURCE/$BOOT_LOADER_DIR/$BOOT_LOADER_BIN of=$1 seek=64 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    dd if=$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/u-boot/$BOOT_LOADER_BIN of=$1 seek=64 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     if [[ $SOCFAMILY == rk33* ]] && [[ $BOARD_NAME -ne rockpro64 ]] || [[ $BOARD_NAME -ne rock_pi_4 ]]; then
-        dd if=$SOURCE/$BOOT_LOADER_DIR/uboot.img of=$1 seek=16384 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        dd if=$SOURCE/$ATF_SOURCE/trust.img of=$1 seek=24576 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        dd if=$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/uboot.img of=$1 seek=16384 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        dd if=$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img of=$1 seek=24576 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 #    fi
     message "" "write" "$BOOT_LOADER_DIR"
@@ -95,7 +97,6 @@ write_uboot()
 fix_native_arch()
 {
     if [[ $BOARD_NAME -ne rockpro64 ]] || [[ $BOARD_NAME -ne rock_pi_4 ]]; then
-        cp -f $CWD/blobs/$BOARD_NAME/u-boot/uboot.img $SOURCE/$BOOT_LOADER_DIR/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        cp -f $CWD/blobs/$BOARD_NAME/atf/trust.img $SOURCE/$ATF_SOURCE/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        install -Dm644 $CWD/blobs/$BOARD_NAME/u-boot/uboot.img $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/uboot.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 }

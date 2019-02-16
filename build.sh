@@ -57,7 +57,7 @@ options+=("clean" "clean sources, remove binaries and image" "off")
 options+=("download" "download source and use pre-built binaries" "on")
 options+=("compile" "build binaries locally" "on")
 options+=("mini-image" "create basic image" "on")
-options+=("tools" "create and pack tools" "on")
+#options+=("tools" "create and pack tools" "on")
 options+=("xfce-image" "create image with xfce" "off")
 
 case $BOARD_NAME in
@@ -168,7 +168,7 @@ if [[ $COMPILE_BINARIES == true ]]; then
 
     patching_source "u-boot"
     compile_boot_loader
-    [[ ! -z $ATF && $NATIVE_ARCH != true ]] && compile_atf
+    [[ ! -z $ATF ]] && compile_atf
 
     [[ $NATIVE_ARCH == true && $SOCFAMILY == rk33* ]] && fix_native_arch
 

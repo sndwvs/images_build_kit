@@ -399,14 +399,7 @@ setting_move_to_internal() {
     message "" "setting" "data move to nand"
     install -m755 -D "$CWD/scripts/setup.sh" "$SOURCE/$ROOTFS/root/setup.sh"
 
-    # u-boot
-    install -Dm644 "$SOURCE/$BOOT_LOADER_DIR/$BOOT_LOADER_BIN" "$SOURCE/$ROOTFS/boot/$BOOT_LOADER_BIN" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
-    if [[ $SOCFAMILY == rk33* ]] && [[ $BOARD_NAME -ne rockpro64 ]] || [[ $BOARD_NAME -ne rock_pi_4 ]]; then
-        install -Dm644 "$SOURCE/$BOOT_LOADER_DIR/uboot.img" "$SOURCE/$ROOTFS/boot/uboot.img" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    fi
-    [[ ! -z $ATF ]]  && [[ $BOARD_NAME -ne rockpro64 ]] || [[ $BOARD_NAME -ne rock_pi_4 ]] && \
-            ( install -Dm644 "$SOURCE/$ATF_SOURCE/trust.img" "$SOURCE/$ROOTFS/boot/trust.img" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+    install -m644 "$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/*" "$SOURCE/$ROOTFS/boot/" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     if [[ ! $(cat $SOURCE/$ROOTFS/etc/issue 2>&1 | grep setup.sh) ]];then
         cat <<EOF >$SOURCE/$ROOTFS/etc/issue
