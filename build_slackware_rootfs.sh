@@ -14,7 +14,12 @@ get_name_rootfs() {
     if [[ $image_type == mini ]]; then
         ROOTFS="$ROOTFS_NAME-$KERNEL_VERSION-$BOARD_NAME-build-$ROOTFS_VERSION"
     else
-        ROOTFS_XFCE="$(echo $ROOTFS_NAME | sed 's#miniroot#xfce#')-$KERNEL_VERSION-$BOARD_NAME-build-$ROOTFS_VERSION"
+        ROOTFS_XFCE="${ROOTFS_NAME/miniroot/xfce}-$KERNEL_VERSION-$BOARD_NAME-build-$ROOTFS_VERSION"
+    fi
+
+    if [[ $ARCH == aarch64 ]]; then
+        ROOTFS=${ROOTFS/ck/rm64}
+        ROOTFS_XFCE=${ROOTFS_XFCE/ck/rm64}
     fi
 }
 
