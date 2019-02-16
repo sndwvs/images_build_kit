@@ -242,10 +242,5 @@ for image_type in ${CREATE_IMAGE[@]}; do
     fi
 done
 
-if [[ $TOOLS_PACK == true && $SOCFAMILY == rk3* ]]; then
-#    build_flash_script
-    create_tools_pack
-fi
-
 
 

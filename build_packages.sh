@@ -167,16 +167,6 @@ build_sunxi_tools() {
 }
 
 
-build_flash_script() {
-    message "" "create" "flash script"
-    install -Dm755 "$CWD/blobs/${BOARD_NAME}/flash.sh" "$BUILD/$OUTPUT/$FLASH/flash.sh" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    sed -e "s/\(\${ROOTFS}\)/$ROOTFS/g" \
-        -e "s/\(\${ROOTFS_XFCE}\)/$ROOTFS_XFCE/g" \
-        -e "s/\(\$TOOLS\)/$TOOLS/g" \
-    -i "$BUILD/$OUTPUT/$FLASH/flash.sh" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-}
-
-
 create_bootloader_pack(){
     message "" "create" "bootloader pack"
     cd $BUILD/$OUTPUT/ || exit 1
@@ -193,15 +183,10 @@ create_bootloader_pack(){
     fi
     [[ ! -z $ATF ]] && [[ $BOARD_NAME -ne rockpro64 ]] || [[ $BOARD_NAME -ne rock_pi_4 ]] && \
             ( install -Dm644 "$SOURCE/$ATF_SOURCE/trust.img" "$BUILD/$OUTPUT/boot/trust.img" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
-    tar cJf $BUILD/$OUTPUT/$FLASH/boot-${ROOTFS_VERSION}.tar.xz boot || exit 1
+    tar cJf $BUILD/$OUTPUT/$IMAGES/boot-${ROOTFS_VERSION}.tar.xz boot || exit 1
     for boot_file in $(ls $BUILD/$OUTPUT/boot/ | grep -v $BLOB_LOADER); do
         cp -a "$BUILD/$OUTPUT/boot/$boot_file" "$SOURCE/$ROOTFS/boot/$boot_file" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     done
 }
 
 
-create_tools_pack(){
-    message "" "create" "tools pack"
-    cd $BUILD/$OUTPUT/ || exit 1
-    tar cJf $BUILD/$OUTPUT/$FLASH/$TOOLS-$(uname -m).tar.xz $TOOLS || exit 1
-}

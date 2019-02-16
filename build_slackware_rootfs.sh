@@ -243,7 +243,7 @@ create_img() {
     losetup -d $LOOP
 
     if [[ -f $SOURCE/$IMAGE.img ]]; then
-        mv $SOURCE/$IMAGE.img $BUILD/$OUTPUT/$FLASH
+        mv $SOURCE/$IMAGE.img $BUILD/$OUTPUT/$IMAGES
     fi
 
     message "" "done" "image $IMAGE"
