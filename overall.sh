@@ -21,7 +21,7 @@ message() {
     if [[ ! -z "$3" ]]; then MESSAGE="$3"; else unset MESSAGE; fi
 
     if [[ "$1" == "err" ]]; then
-        printf '|\e[0;31m%s \x1B[0m| \e[0;32m%-12s\x1B[0m %s\n' "$1" "$ACTION" "$BUILD/$SOURCE/$LOG"
+        printf '|\e[0;31m%s \x1B[0m| \e[0;32m%-12s\x1B[0m %s\n' "$1" "$ACTION" "$LOG"
     elif [[ "$1" == "info" || -z "$1" ]]; then
         printf '|\e[0;36minfo\x1B[0m| \e[0;32m%-12s\x1B[0m %s\n' "$ACTION" "$MESSAGE"
     fi

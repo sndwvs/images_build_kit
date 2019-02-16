@@ -182,7 +182,6 @@ setting_dhcpcd() {
     if [[ ! $(cat $SOURCE/$ROOTFS/etc/dhcpcd.conf | grep nolink) ]]; then
         message "" "setting" "dhcpcd.conf"
         cat <<EOF >>"$SOURCE/$ROOTFS/etc/dhcpcd.conf"
-noarp
 nolink
 
 EOF
@@ -399,7 +398,7 @@ setting_move_to_internal() {
     message "" "setting" "data move to nand"
     install -m755 -D "$CWD/scripts/setup.sh" "$SOURCE/$ROOTFS/root/setup.sh"
 
-    install -m644 "$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/*" "$SOURCE/$ROOTFS/boot/" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    rsync -ar $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/ $SOURCE/$ROOTFS/boot >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     if [[ ! $(cat $SOURCE/$ROOTFS/etc/issue 2>&1 | grep setup.sh) ]];then
         cat <<EOF >$SOURCE/$ROOTFS/etc/issue

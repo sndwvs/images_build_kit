@@ -165,7 +165,6 @@ fi
 #---------------------------------------------
 message "" "start" "build ARCH $ARCH"
 if [[ $COMPILE_BINARIES == true ]]; then
-
     patching_source "u-boot"
     compile_boot_loader
     [[ ! -z $ATF ]] && compile_atf
