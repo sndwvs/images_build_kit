@@ -57,7 +57,7 @@ options+=("clean" "clean sources, remove binaries and image" "off")
 options+=("download" "download source and use pre-built binaries" "on")
 options+=("compile" "build binaries locally" "on")
 options+=("mini-image" "create basic image" "on")
-#options+=("tools" "create and pack tools" "on")
+options+=("tools" "create and pack tools" "on")
 options+=("xfce-image" "create image with xfce" "off")
 
 case $BOARD_NAME in
@@ -144,7 +144,7 @@ if [[ -f $LOG ]]; then
 fi
 
 # compile atf
-[[ ! -z $CREATE_IMAGE && $SOCFAMILY == rk33* ]] && ATF="true"
+[[ $SOCFAMILY == rk33* ]] && ATF="true"
 
 #---------------------------------------------
 # main script
@@ -165,9 +165,10 @@ fi
 #---------------------------------------------
 message "" "start" "build ARCH $ARCH"
 if [[ $COMPILE_BINARIES == true ]]; then
+    [[ ! -z $ATF && $NATIVE_ARCH != true ]] && compile_atf
+
     patching_source "u-boot"
     compile_boot_loader
-    [[ ! -z $ATF ]] && compile_atf
 
     [[ $NATIVE_ARCH == true && $SOCFAMILY == rk33* ]] && fix_native_arch
 

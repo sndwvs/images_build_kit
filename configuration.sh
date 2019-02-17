@@ -31,26 +31,40 @@ BOOT_LOADER_BRANCH=${BOOT_LOADER_BRANCH:-"master::"} #"master:tag:v2017.05"
 #---------------------------------------------
 # xtools configuration
 #---------------------------------------------
-BASE_URL_XTOOLS="https://releases.linaro.org/components/toolchain/binaries"
-XTOOLS_ARM_SUFFIX="arm-linux-gnueabihf"
-XTOOLS_ARM64_SUFFIX="aarch64-linux-gnu"
-XTOOLS_PREFIX="gcc-linaro"
+if [[ $NATIVE_ARCH != true ]]; then
+    BASE_URL_XTOOLS="https://releases.linaro.org/components/toolchain/binaries"
+    XTOOLS_ARM_SUFFIX="arm-linux-gnueabihf"
+    XTOOLS_ARM64_SUFFIX="aarch64-linux-gnu"
+    XTOOLS_PREFIX="gcc-linaro"
 
-OLD_BASE_VERSION_XTOOLS="5.5-2017.10"
-OLD_VERSION_XTOOLS="5.5.0-2017.10"
+    OLD_BASE_VERSION_XTOOLS="5.5-2017.10"
+    OLD_VERSION_XTOOLS="5.5.0-2017.10"
 #    OLD_BASE_VERSION_XTOOLS="4.9-2017.01"
 #    OLD_VERSION_XTOOLS="4.9.4-2017.01"
-BASE_VERSION_XTOOLS="7.2-2017.11"
-VERSION_XTOOLS="7.2.1-2017.11"
+    BASE_VERSION_XTOOLS="7.2-2017.11"
+    VERSION_XTOOLS="7.2.1-2017.11"
 
-XTOOLS+=("$XTOOLS_PREFIX-$VERSION_XTOOLS-$(uname -m)_$XTOOLS_ARM_SUFFIX")
-XTOOLS+=("$XTOOLS_PREFIX-$VERSION_XTOOLS-$(uname -m)_$XTOOLS_ARM64_SUFFIX")
-XTOOLS+=("$XTOOLS_PREFIX-$OLD_VERSION_XTOOLS-$(uname -m)_$XTOOLS_ARM_SUFFIX")
-XTOOLS+=("$XTOOLS_PREFIX-$OLD_VERSION_XTOOLS-$(uname -m)_$XTOOLS_ARM64_SUFFIX")
-URL_XTOOLS+=("$BASE_URL_XTOOLS/$BASE_VERSION_XTOOLS/$XTOOLS_ARM_SUFFIX")
-URL_XTOOLS+=("$BASE_URL_XTOOLS/$BASE_VERSION_XTOOLS/$XTOOLS_ARM64_SUFFIX")
-URL_XTOOLS+=("$BASE_URL_XTOOLS/$OLD_BASE_VERSION_XTOOLS/$XTOOLS_ARM_SUFFIX")
-URL_XTOOLS+=("$BASE_URL_XTOOLS/$OLD_BASE_VERSION_XTOOLS/$XTOOLS_ARM64_SUFFIX")
+    XTOOLS+=("$XTOOLS_PREFIX-$VERSION_XTOOLS-$(uname -m)_$XTOOLS_ARM_SUFFIX")
+    XTOOLS+=("$XTOOLS_PREFIX-$VERSION_XTOOLS-$(uname -m)_$XTOOLS_ARM64_SUFFIX")
+    XTOOLS+=("$XTOOLS_PREFIX-$OLD_VERSION_XTOOLS-$(uname -m)_$XTOOLS_ARM_SUFFIX")
+    XTOOLS+=("$XTOOLS_PREFIX-$OLD_VERSION_XTOOLS-$(uname -m)_$XTOOLS_ARM64_SUFFIX")
+    URL_XTOOLS+=("$BASE_URL_XTOOLS/$BASE_VERSION_XTOOLS/$XTOOLS_ARM_SUFFIX")
+    URL_XTOOLS+=("$BASE_URL_XTOOLS/$BASE_VERSION_XTOOLS/$XTOOLS_ARM64_SUFFIX")
+    URL_XTOOLS+=("$BASE_URL_XTOOLS/$OLD_BASE_VERSION_XTOOLS/$XTOOLS_ARM_SUFFIX")
+    URL_XTOOLS+=("$BASE_URL_XTOOLS/$OLD_BASE_VERSION_XTOOLS/$XTOOLS_ARM64_SUFFIX")
+fi
+
+#if [[ $ARCH == aarch64 ]]; then
+#    BASE_URL_XTOOLS="http://dl.fail.pp.ua/slackware/xtools"
+#    XTOOLS_ARM_SUFFIX="arm-slackware-linux-gnueabihf"
+#    XTOOLS_PREFIX="gcc"
+#    BASE_VERSION_XTOOLS="8.2-2019.02"
+#    VERSION_XTOOLS="8.2.0-2019.02"
+
+#    XTOOLS+=("$XTOOLS_PREFIX-$VERSION_XTOOLS-$(uname -m)_$XTOOLS_ARM_SUFFIX")
+#    URL_XTOOLS+=("$BASE_URL_XTOOLS/$BASE_VERSION_XTOOLS/$XTOOLS_ARM_SUFFIX")
+#fi
+
 
 #---------------------------------------------
 # rootfs configuration
@@ -67,22 +81,24 @@ for XTOOL in ${XTOOLS[*]}; do
     if [[ $(echo $XTOOL | grep $ARCH) ]]; then
         [[ $(echo $XTOOLS_ARM_SUFFIX | grep $ARCH) ]] && _XTOOLS_ARM_SUFFIX=$XTOOLS_ARM_SUFFIX
         [[ $(echo $XTOOLS_ARM64_SUFFIX | grep $ARCH) ]] && _XTOOLS_ARM_SUFFIX=$XTOOLS_ARM64_SUFFIX
-        VER=$(echo $XTOOL | cut -f3 -d "-")
+#        VER=$(echo $XTOOL | cut -f3 -d "-")
+        VER=$(echo $XTOOL | sed 's/^.*-\([0-9].[0-9].[0-9]*\)-.*/\1/')
         if [[ $VER > 6 ]]; then
-            export CROSS="$BUILD/${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
+            export CROSS="${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
         else
-            export OLD_CROSS="$BUILD/${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
+            export OLD_CROSS="${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
         fi
 #        echo $XTOOL $VER
     fi
 
     if [[ $ARCH != arm ]] && [[ $(echo $XTOOL | grep arm) ]]; then
         [[ $(echo $XTOOLS_ARM_SUFFIX | grep arm) ]] && _XTOOLS_ARM_SUFFIX=$XTOOLS_ARM_SUFFIX
-        VER=$(echo $XTOOL | cut -f3 -d "-")
+#        VER=$(echo $XTOOL | cut -f3 -d "-")
+        VER=$(echo $XTOOL | sed 's/^.*-\([0-9].[0-9].[0-9]*\)-.*/\1/')
         if [[ $VER > 6 ]]; then
-            export CROSS32="$BUILD/${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
+            export CROSS32="${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
         else
-            export OLD_CROSS32="$BUILD/${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
+            export OLD_CROSS32="${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
         fi
 #        echo $XTOOL $VER
     fi
@@ -91,7 +107,7 @@ done
 [[ $NATIVE_ARCH == true ]] && export CROSS="" OLD_CROSS=""
 
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin:$BUILD/$OUTPUT/$TOOLS/
-#export PATH=/bin:/sbin:/usr/bin:/usr/sbin:$BUILD/${SOURCE}/$ARM_XTOOLS/bin:$BUILD/${SOURCE}/$ARM64_XTOOLS/bin:$BUILD/$OUTPUT/$TOOLS/
+#export PATH=/bin:/sbin:/usr/bin:/usr/sbin:$SOURCE/$ARM_XTOOLS/bin:$SOURCE/$ARM64_XTOOLS/bin:$BUILD/$OUTPUT/$TOOLS/
 #export CROSS="${XTOOLS_ARM_SUFFIX}-"
 #export CROSS64="${XTOOLS_ARM64_SUFFIX}-"
 

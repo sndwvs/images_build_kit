@@ -52,6 +52,7 @@ compile_boot_loader() {
         # for rockpro64, rock pi 4
         if [[ ! -z $BL31 ]]; then
             make $CTHREADS ARCH=$ARCH u-boot.itb CROSS_COMPILE=$CROSS BL31=$SOURCE/$RKBIN/bin/${SOCFAMILY:0:4}/$BL31 >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+#            make $CTHREADS ARCH=$ARCH u-boot.itb CROSS_COMPILE=$CROSS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
 
     fi
@@ -77,12 +78,14 @@ compile_atf() {
 
     make realclean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    if [[ $SOCFAMILY == rk33* && $NATIVE_ARCH != true ]]; then
+    if [[ $SOCFAMILY == rk33* ]]; then
         CFLAGS='-gdwarf-2' \
         CROSS_COMPILE=$CROSS \
         M0_CROSS_COMPILE=$CROSS32 \
         make PLAT=$SOCFAMILY DEBUG=0 bl31 >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        $SOURCE/$RKBIN/tools/trust_merger $CWD/config/atf/$SOCFAMILY/trust.ini >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        if [[ $NATIVE_ARCH != true ]]; then
+            $SOURCE/$RKBIN/tools/trust_merger $CWD/config/atf/$SOCFAMILY/trust.ini >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        fi
     fi
 
     if [[ $NATIVE_ARCH != true ]]; then
@@ -90,6 +93,7 @@ compile_atf() {
     else
         install -Dm644 $CWD/blobs/$BOARD_NAME/atf/trust.img $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
+#    export BL31=$SOURCE/$ATF_SOURCE/$(grep -Po "(?<=\.\/).*" $CWD/config/atf/$SOCFAMILY/trust.ini)
 }
 
 
