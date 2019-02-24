@@ -1,7 +1,7 @@
 
 URL_RKBIN="https://github.com/rockchip-linux"
 RKBIN="rkbin"
-RKBIN_BRANCH="${RKBIN_BRANCH:-29mirror}"
+RKBIN_BRANCH="${RKBIN_BRANCH:-master}"
 
 FIRMWARE="firmware"
 
