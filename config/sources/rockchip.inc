@@ -26,6 +26,11 @@ case $KERNEL_SOURCE in
 #            KERNEL_BRANCH="release-4.4:commit:763b2b0fabd8e52c38aa43b5eca9752073bd0993"
             KERNEL_DIR="linux-$SOCFAMILY-$KERNEL_SOURCE"
     ;;
+    next)
+            LINUX_SOURCE="https://github.com/ayufan-rock64/linux-mainline-kernel"
+            KERNEL_BRANCH="master:tag:5.0.0-1092-ayufan"
+            KERNEL_DIR="linux-$SOCFAMILY-$KERNEL_SOURCE-${BOARD_NAME}"
+    ;;
 esac
 
 

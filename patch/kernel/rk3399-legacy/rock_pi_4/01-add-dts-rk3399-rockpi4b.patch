@@ -1,41 +1,16 @@
-diff --git a/arch/arm64/boot/dts/rockchip/Makefile b/arch/arm64/boot/dts/rockchip/Makefile
-index 02a344399..ad91dd192 100644
---- a/arch/arm64/boot/dts/rockchip/Makefile
-+++ b/arch/arm64/boot/dts/rockchip/Makefile
-@@ -76,6 +76,7 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-sapphire-excavator-disvr.dtb
- dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-sapphire-excavator-edp-android-6.0.dtb
- dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-sapphire-excavator-edp.dtb
- dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-sapphire-excavator-linux.dtb
+--- a/arch/arm64/boot/dts/rockchip/Makefile	2019-03-10 14:58:17.996288293 +0200
++++ b/arch/arm64/boot/dts/rockchip/Makefile	2019-03-10 14:58:40.752145425 +0200
+@@ -67,6 +67,7 @@
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-mid-818-android-6.0.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-mid-818-android.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-rock960-ab.dtb
 +dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-rockpi4b.dtb
- dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-tve1030g.dtb
- dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-tve1205g.dtb
- dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-videostrong-linux.dtb
-diff --git a/arch/arm64/boot/dts/rockchip/rk3399-linux.dtsi b/arch/arm64/boot/dts/rockchip/rk3399-linux.dtsi
-index 2851cd529..77801340b 100644
---- a/arch/arm64/boot/dts/rockchip/rk3399-linux.dtsi
-+++ b/arch/arm64/boot/dts/rockchip/rk3399-linux.dtsi
-@@ -141,6 +141,15 @@
- 			connect = <&vopb_out_dsi>;
- 		};
- 
-+		route_dsi1: route-dsi1 {
-+			status = "disabled";
-+			logo,uboot = "logo.bmp";
-+			logo,kernel = "logo_kernel.bmp";
-+			logo,mode = "fullscreen";
-+			charge_logo,mode = "center";
-+			connect = <&vopb_out_dsi1>;
-+		};
-+
- 		route_edp: route-edp {
- 			status = "disabled";
- 			logo,uboot = "logo.bmp";
-diff --git a/arch/arm64/boot/dts/rockchip/rk3399-rockpi4b.dts b/arch/arm64/boot/dts/rockchip/rk3399-rockpi4b.dts
-new file mode 100644
-index 000000000..59ed95952
---- /dev/null
-+++ b/arch/arm64/boot/dts/rockchip/rk3399-rockpi4b.dts
-@@ -0,0 +1,1311 @@
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-rockpro64.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-rv1-android.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-sapphire-excavator-box-android-6.0.dtb
+--- /dev/null	2019-03-10 12:11:23.412000015 +0200
++++ b/arch/arm64/boot/dts/rockchip/rk3399-rockpi4b.dts	2019-03-10 10:32:40.595686683 +0200
+@@ -0,0 +1,1308 @@
 +/*
 + * Copyright (c) 2016 Fuzhou Rockchip Electronics Co., Ltd
 + *
@@ -308,16 +283,17 @@ index 000000000..59ed95952
 +
 +	gpio-leds {
 +		compatible = "gpio-leds";
++		status = "okay";
 +
 +		user-led1 {
-+			gpios=<&gpio3 28 GPIO_ACTIVE_HIGH>;
-+			linux,default-trigger="heartbeat";
++			gpios = <&gpio3 28 GPIO_ACTIVE_HIGH>;
++			linux,default-trigger = "heartbeat";
 +			default-state = "on";
 +		};
 +
 +		user-led2 {
-+			gpios=<&gpio3 29 GPIO_ACTIVE_HIGH>;
-+			linux,default-trigger="heartbeat";
++			gpios = <&gpio3 29 GPIO_ACTIVE_HIGH>;
++			linux,default-trigger = "heartbeat";
 +			default-state = "on";
 +		};
 +	};
@@ -655,10 +631,6 @@ index 000000000..59ed95952
 +
 +};
 +
-+&i2c7 {
-+	status = "okay";
-+};
-+
 +&i2c4 {
 +	status = "okay";
 +
@@ -851,7 +823,7 @@ index 000000000..59ed95952
 +};
 +
 +&uart4 {
-+	status = "okay";
++	status = "disabled";
 +};
 +
 +&usb_host0_ehci {
