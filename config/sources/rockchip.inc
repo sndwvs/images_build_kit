@@ -28,7 +28,7 @@ case $KERNEL_SOURCE in
     ;;
     next)
             LINUX_SOURCE="https://github.com/ayufan-rock64/linux-mainline-kernel"
-            KERNEL_BRANCH="master:tag:5.0.0-1092-ayufan"
+            KERNEL_BRANCH="master:tag:5.0.0-1103-ayufan"
             KERNEL_DIR="linux-$SOCFAMILY-$KERNEL_SOURCE-${BOARD_NAME}"
     ;;
 esac
