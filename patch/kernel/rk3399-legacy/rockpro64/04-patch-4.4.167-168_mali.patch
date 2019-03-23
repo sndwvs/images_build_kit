@@ -1,0 +1,36 @@
+--- a/drivers/gpu/arm/midgard_for_linux/mali_kbase_mem.c	2019-03-23 20:37:24.097122057 +0200
++++ b/drivers/gpu/arm/midgard_for_linux/mali_kbase_mem.c	2019-03-23 21:05:14.485650201 +0200
+@@ -2041,8 +2041,8 @@
+ 	pinned_pages = get_user_pages(NULL, mm,
+ 			address,
+ 			alloc->imported.user_buf.nr_pages,
+-			reg->flags & KBASE_REG_GPU_WR,
+-			0, pages, NULL);
++			reg->flags & KBASE_REG_GPU_WR ? FOLL_WRITE : 0,
++			pages, NULL);
+ #else
+ 	pinned_pages = get_user_pages_remote(NULL, mm,
+ 			address,
+--- a/drivers/gpu/arm/midgard_for_linux/mali_kbase_mem_linux.c	2019-03-23 21:05:30.529561332 +0200
++++ b/drivers/gpu/arm/midgard_for_linux/mali_kbase_mem_linux.c	2019-03-23 21:09:24.196851053 +0200
+@@ -1191,7 +1191,8 @@
+ 	/* (as part of the external resources handling code) */
+ #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 6, 0)
+ 	faulted_pages = get_user_pages(current, current->mm, address, *va_pages,
+-			reg->flags & KBASE_REG_GPU_WR, 0, NULL, NULL);
++			reg->flags & KBASE_REG_GPU_WR ? FOLL_WRITE : 0,
++			NULL, NULL);
+ #else
+ 	faulted_pages = get_user_pages(address, *va_pages,
+ 			reg->flags & KBASE_REG_GPU_WR, 0, NULL, NULL);
+--- a/drivers/video/rockchip/rga2/rga2_mmu_info.c	2019-03-23 21:11:22.344872176 +0200
++++ b/drivers/video/rockchip/rga2/rga2_mmu_info.c	2019-03-23 21:11:31.388871053 +0200
+@@ -386,7 +386,7 @@
+ 	down_read(&current->mm->mmap_sem);
+ #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 6, 0)
+ 	result = get_user_pages(current, current->mm, Memory << PAGE_SHIFT,
+-				pageCount, writeFlag, 0, pages, NULL);
++				pageCount, writeFlag, pages, NULL);
+ #else
+ 	result = get_user_pages_remote(current, current->mm,
+ 				       Memory << PAGE_SHIFT,
