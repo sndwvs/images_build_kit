@@ -1,0 +1,58 @@
+cpufreq: Use struct kobj_attribute instead of struct global_attr
+---
+
+--- a/drivers/cpufreq/cpufreq_interactive.c	2019-03-24 13:50:26.324724170 +0200
++++ b/drivers/cpufreq/cpufreq_interactive.c	2019-03-24 14:00:23.342140981 +0200
+@@ -1018,7 +1018,7 @@
+  */
+ #define show_gov_pol_sys(file_name)					\
+ static ssize_t show_##file_name##_gov_sys				\
+-(struct kobject *kobj, struct attribute *attr, char *buf)		\
++(struct kobject *kobj, struct kobj_attribute *attr, char *buf)		\
+ {									\
+ 	return show_##file_name(common_tunables, buf);			\
+ }									\
+@@ -1031,7 +1031,7 @@
+ 
+ #define store_gov_pol_sys(file_name)					\
+ static ssize_t store_##file_name##_gov_sys				\
+-(struct kobject *kobj, struct attribute *attr, const char *buf,		\
++(struct kobject *kobj, struct kobj_attribute *attr, const char *buf,		\
+ 	size_t count)							\
+ {									\
+ 	return store_##file_name(common_tunables, buf, count);		\
+@@ -1060,7 +1060,7 @@
+ show_store_gov_pol_sys(io_is_busy);
+ 
+ #define gov_sys_attr_rw(_name)						\
+-static struct global_attr _name##_gov_sys =				\
++static struct kobj_attribute _name##_gov_sys =				\
+ __ATTR(_name, 0644, show_##_name##_gov_sys, store_##_name##_gov_sys)
+ 
+ #define gov_pol_attr_rw(_name)						\
+@@ -1082,14 +1082,14 @@
+ gov_sys_pol_attr_rw(boostpulse_duration);
+ gov_sys_pol_attr_rw(io_is_busy);
+ 
+-static struct global_attr boostpulse_gov_sys =
++static struct kobj_attribute boostpulse_gov_sys =
+ 	__ATTR(boostpulse, 0200, NULL, store_boostpulse_gov_sys);
+ 
+ static struct freq_attr boostpulse_gov_pol =
+ 	__ATTR(boostpulse, 0200, NULL, store_boostpulse_gov_pol);
+ 
+ /* One Governor instance for entire system */
+-static struct attribute *interactive_attributes_gov_sys[] = {
++static struct kobj_attribute *interactive_attributes_gov_sys[] = {
+ 	&target_loads_gov_sys.attr,
+ 	&above_hispeed_delay_gov_sys.attr,
+ 	&hispeed_freq_gov_sys.attr,
+@@ -1110,7 +1110,7 @@
+ };
+ 
+ /* Per policy governor instance */
+-static struct attribute *interactive_attributes_gov_pol[] = {
++static struct kobj_attribute *interactive_attributes_gov_pol[] = {
+ 	&target_loads_gov_pol.attr,
+ 	&above_hispeed_delay_gov_pol.attr,
+ 	&hispeed_freq_gov_pol.attr,
