@@ -8,9 +8,9 @@
  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-rockpro64.dtb
  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-rv1-android.dtb
  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-sapphire-excavator-box-android-6.0.dtb
---- /dev/null	2019-03-10 12:11:23.412000015 +0200
-+++ b/arch/arm64/boot/dts/rockchip/rk3399-rockpi4b.dts	2019-03-10 10:32:40.595686683 +0200
-@@ -0,0 +1,1308 @@
+--- /dev/null	2019-03-30 16:59:44.357847214 +0200
++++ b/arch/arm64/boot/dts/rockchip/rk3399-rockpi4b.dts	2019-03-31 11:34:54.362951555 +0300
+@@ -0,0 +1,1319 @@
 +/*
 + * Copyright (c) 2016 Fuzhou Rockchip Electronics Co., Ltd
 + *
@@ -68,6 +68,7 @@
 +	compatible = "rockchip,rockpi","rockchip,rk3399";
 +
 +	fiq_debugger: fiq-debugger {
++		status = "disabled";
 +		compatible = "rockchip,fiq-debugger";
 +		rockchip,serial-id = <2>;
 +		rockchip,signal-irq = <182>;
@@ -307,6 +308,8 @@
 +	#address-cells = <1>;
 +	#size-cells = <0>;
 +	#sound-dai-cells = <0>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&hdmi_i2c_xfer>, <&hdmi_cec>;
 +	status = "okay";
 +};
 +
@@ -1154,11 +1157,19 @@
 +		};
 +	};
 +	i2s0 {
-+		i2s0_8ch_bus: i2s0-8ch-bus {
-+			rockchip,pins =
-+				<3 28 0 &pcfg_pull_none>,
-+				<3 29 0 &pcfg_pull_none>;
-+		};
++	    i2s0_8ch_bus: i2s0-8ch-bus {
++	        rockchip,pins =
++	            <3 24 RK_FUNC_1 &pcfg_pull_none>,
++	            <3 25 RK_FUNC_1 &pcfg_pull_none>,
++	            <3 26 RK_FUNC_1 &pcfg_pull_none>,
++	            <3 27 RK_FUNC_1 &pcfg_pull_none>,
++	            <3 30 RK_FUNC_1 &pcfg_pull_none>,
++	            <3 31 RK_FUNC_1 &pcfg_pull_none>;
++	    };
++
++	    i2s_8ch_mclk: i2s-8ch-mclk {
++	        rockchip,pins = <4 0 RK_FUNC_1 &pcfg_pull_none>;
++	    };
 +	};
 +};
 +
