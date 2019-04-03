@@ -1,0 +1,11 @@
+--- a/arch/arm64/boot/dts/rockchip/rk3399-rockpro64.dts	2019-03-29 22:05:14.260740781 +0200
++++ b/arch/arm64/boot/dts/rockchip/rk3399-rockpro64.dts	2019-03-29 22:05:44.292665265 +0200
+@@ -767,7 +767,7 @@
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&sdio0_bus4 &sdio0_cmd &sdio0_clk>;
+ 	sd-uhs-sdr104;
+-	status = "okay";
++	status = "disabled";
+ 	defer_pcie = <2000>;
+ };
+ 
