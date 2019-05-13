@@ -1,10 +1,13 @@
---- a/arch/arm/Kconfig	2018-06-17 20:14:05.027867952 +0300
-+++ b/arch/arm/Kconfig	2018-06-17 20:16:08.399595552 +0300
-@@ -763,6 +763,7 @@
- 
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index 513a35fc4e..77bc949cb7 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -623,7 +623,8 @@ config ARCH_SOCFPGA
+
  config ARCH_SUNXI
  	bool "Support sunxi (Allwinner) SoCs"
-+	select OLD_SUNXI_KERNEL_COMPAT
  	select BINMAN
++	select OLD_SUNXI_KERNEL_COMPAT
  	select CMD_GPIO
  	select CMD_MMC if MMC
+ 	select CMD_USB if DISTRO_DEFAULTS
