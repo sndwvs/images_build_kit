@@ -1,5 +1,5 @@
---- a/rk3399-rockpro64.dts	2019-05-27 21:51:12.642835638 +0300
-+++ b/rk3399-rockpro64.dts	2019-05-27 21:55:23.530462528 +0300
+--- a/arch/arm64/boot/dts/rockchip/rk3399-rockpro64.dts	2019-05-27 21:51:12.642835638 +0300
++++ b/arch/arm64/boot/dts/rockchip/rk3399-rockpro64.dts	2019-05-27 21:55:23.530462528 +0300
 @@ -783,7 +783,7 @@
  	vqmmc-supply = <&vcc_sd>;
  	pinctrl-names = "default";
