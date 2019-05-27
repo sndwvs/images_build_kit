@@ -28,7 +28,7 @@ git_fetch() {
         git clone -b ${BRANCH} --depth 1 $URL $DIR 2>/dev/null || status=$?
         [[ 0 -ne $status ]] && ( git clone -b ${BRANCH} $URL $DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
     else
-        cd $DIR && ( git reset && git checkout -f . && git clean -xdfq && git pull origin ${BRANCH} ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        cd $DIR && ( git reset && git fetch && git checkout -f . && git clean -xdfq && git pull origin ${BRANCH} ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
     pushd $DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
@@ -42,8 +42,8 @@ git_fetch() {
     fi
     set -e
     case $TYPE in
-        tag)    git checkout -f ${VAR} >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 ;;
-        commit) git reset --hard ${VAR} >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 ;;
+        tag)    ( git fetch && git checkout -f ${VAR} ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 ;;
+        commit) ( git fetch && git reset --hard ${VAR} ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 ;;
     esac
     popd >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
@@ -82,7 +82,7 @@ download() {
     if [[ ! -z $ATF ]]; then
         message "" "download" "$ATF_SOURCE"
         if [ -d $SOURCE/$ATF_SOURCE ]; then
-            cd $SOURCE/$ATF_SOURCE && ( git checkout -f ${ATF_BRANCH} && git clean -df && git pull origin ${ATF_BRANCH} ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            cd $SOURCE/$ATF_SOURCE && ( git fetch && git checkout -f ${ATF_BRANCH} && git clean -df && git pull origin ${ATF_BRANCH} ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         else
             git clone -b $ATF_BRANCH --depth 1 $URL_ATF/$ATF_SOURCE $SOURCE/$ATF_SOURCE >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
@@ -92,7 +92,7 @@ download() {
         if [[ ! -z $XTOOLS_OLD ]]; then
             message "" "download" "$XTOOLS_OLD"
             if [[ -d $SOURCE/$XTOOLS_OLD ]]; then
-                cd $SOURCE/$XTOOLS_OLD && git pull origin HEAD >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+                cd $SOURCE/$XTOOLS_OLD && ( git fetch && git pull origin HEAD ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             else
                 git clone $URL_XTOOLS_OLD $SOURCE/$XTOOLS_OLD >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             fi
@@ -111,7 +111,7 @@ download() {
     if [[ $SOCFAMILY == sun* ]]; then
         message "" "download" "$SUNXI_TOOLS"
         if [ -d $SOURCE/$SUNXI_TOOLS ];then
-            cd $SOURCE/$SUNXI_TOOLS && ( git checkout -f ${SUNXI_TOOLS_BRANCH:-master} && git clean -df && git pull origin ${SUNXI_TOOLS_BRANCH:-master} ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            cd $SOURCE/$SUNXI_TOOLS && ( git fetch && git checkout -f ${SUNXI_TOOLS_BRANCH:-master} && git clean -df && git pull origin ${SUNXI_TOOLS_BRANCH:-master} ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         else
             git clone $URL_SUNXI_TOOLS/$SUNXI_TOOLS $SOURCE/$SUNXI_TOOLS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
