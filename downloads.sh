@@ -28,7 +28,7 @@ git_fetch() {
         git clone -b ${BRANCH} --depth 1 $URL $DIR 2>/dev/null || status=$?
         [[ 0 -ne $status ]] && ( git clone -b ${BRANCH} $URL $DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
     else
-        cd $DIR && ( git reset && git fetch && git checkout -f . && git clean -xdfq && git pull origin ${BRANCH} ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        cd $DIR && ( git reset --hard && git checkout -f . && git clean -xdfq && git fetch && git pull origin ${BRANCH} ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
     pushd $DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
@@ -43,7 +43,7 @@ git_fetch() {
     set -e
     case $TYPE in
         tag)    ( git fetch && git checkout -f ${VAR} ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 ;;
-        commit) ( git fetch && git reset --hard ${VAR} ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 ;;
+        commit) ( git reset --hard ${VAR} && git fetch ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 ;;
     esac
     popd >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
