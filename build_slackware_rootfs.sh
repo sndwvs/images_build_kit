@@ -474,7 +474,7 @@ EOF
 setting_udev() {
     if [[ -d $CWD/config/udev/$SOCFAMILY ]]; then
         message "" "setting" "udev"
-        install -m644 -D "$CWD/config/udev/$SOCFAMILY/*" -t "$SOURCE/$ROOTFS/etc/udev/rules.d/"
+        install -m644 -D $CWD/config/udev/$SOCFAMILY/* -t $SOURCE/$ROOTFS/etc/udev/rules.d/
     fi
 }
 
