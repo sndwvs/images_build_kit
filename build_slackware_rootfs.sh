@@ -473,7 +473,7 @@ EOF
 
 setting_udev() {
     message "" "setting" "udev"
-    install -m644 -D "$CWD/config/50-usb-power.rules" "$SOURCE/$ROOTFS/etc/udev/rules.d/50-usb-power.rules"
+    [[ -d $CWD/config/udev/$SOCFAMILY ]] && install -m644 -D "$CWD/config/udev/$SOCFAMILY/*" -t "$SOURCE/$ROOTFS/etc/udev/rules.d/"
 }
 
 
