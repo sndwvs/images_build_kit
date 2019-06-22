@@ -209,7 +209,7 @@ for image_type in ${CREATE_IMAGE[@]}; do
         setting_sysctl
         setting_first_login
         setting_wifi
-        [[ $KERNEL_SOURCE == next && $SOCFAMILY == rk3288 ]] && setting_udev
+        setting_udev
 #        if [[ $KERNEL_SOURCE != "next" && $SOCFAMILY == rk3288 ]]; then
 #            setting_move_to_nand
 #        fi

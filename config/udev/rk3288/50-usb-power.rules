@@ -1,2 +1,0 @@
-# fix usb power firefly-rk3288 in kernel 4.4
-ACTION=="add", SUBSYSTEM=="usb", TEST=="power/control", ATTR{idVendor}=="1a40", ATTR{idProduct}=="0101", ATTR{power/control}="on"
