@@ -2887,14 +2887,16 @@ diff --git a/drivers/net/ethernet/stmicro/stmmac/stmmac_mdio.c b/drivers/net/eth
 index 90d95b3654f5..6bdde92869fb 100644
 --- a/drivers/net/ethernet/stmicro/stmmac/stmmac_mdio.c
 +++ b/drivers/net/ethernet/stmicro/stmmac/stmmac_mdio.c
-@@ -154,7 +154,8 @@ int stmmac_mdio_reset(struct mii_bus *bus)
- 			of_property_read_u32_array(np,
+@@ -155,7 +155,9 @@
  				"snps,reset-delays-us", data->delays, 3);
+ 		}
  
--			if (gpio_request(data->reset_gpio, "mdio-reset"))
-+			if (devm_gpio_request(priv->device, data->reset_gpio,
-+					      "mdio-reset"))
- 				return 0;
+-		if (gpio_request(data->reset_gpio, "mdio-reset")) {
++		if (devm_gpio_request(priv->device, data->reset_gpio,
++						"mdio-reset")) {
++                                return 0;
+ 			pr_err("stmmac_mdio_reset: failed to request %d\n", data->reset_gpio);
+ 			goto phy_reset;
  		}
  
 diff --git a/drivers/net/ppp/ppp_deflate.c b/drivers/net/ppp/ppp_deflate.c
