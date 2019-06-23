@@ -3,7 +3,7 @@
 # Please edit /boot/uEnv.txt to set supported parameters
 #
 
-setenv load_addr "0x21000000"
+setenv load_addr "0x39000000"
 setenv rootdev "/dev/mmcblk2p1"
 setenv fdt_file "rk3288-firefly.dtb"
 setenv console "both"
