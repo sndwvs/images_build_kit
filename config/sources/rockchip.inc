@@ -84,23 +84,18 @@ write_uboot()
     # clear u-boot
 #    dd if=/dev/zero of=$1 bs=1k count=$((${IMAGE_OFFSET}-1)) seek=1 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-#    if [[ $BOARD_NAME == rockpro64 || $BOARD_NAME == rock_pi_4 ]]; then
-#        dd if=$CWD/blobs/$BOARD_NAME/u-boot/$BOOT_LOADER_BIN of=$1 seek=64 conv=notrunc status=none >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-#        dd if=$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN of=$1 seek=64 conv=notrunc status=none >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-#    else
     dd if=$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN of=$1 seek=64 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    if [[ $SOCFAMILY == rk33* && $BOARD_NAME != rockpro64 || $BOARD_NAME != rock_pi_4 ]]; then
+    if [[ $SOCFAMILY == rk33* && $BOARD_NAME != rockpro64 && $BOARD_NAME != rock_pi_4 ]]; then
         dd if=$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/uboot.img of=$1 seek=16384 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         dd if=$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img of=$1 seek=24576 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
-#    fi
     message "" "write" "$BOOT_LOADER_DIR"
 }
 
 
 fix_native_arch()
 {
-    if [[ $BOARD_NAME != rockpro64 || $BOARD_NAME != rock_pi_4 ]]; then
+    if [[ $BOARD_NAME != rockpro64 && $BOARD_NAME != rock_pi_4 ]]; then
         install -Dm644 $CWD/blobs/$BOARD_NAME/u-boot/uboot.img $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/uboot.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         install -Dm644 $CWD/blobs/$BOARD_NAME/atf/trust.img $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
