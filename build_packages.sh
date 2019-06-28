@@ -107,9 +107,8 @@ build_kernel_pkg() {
 
 
     # create kernel package
-    cd $BUILD/$PKG/kernel-${SOCFAMILY}/
-    install -m644 -D "$CWD/packages/kernel/slack-desc.kernel-template" "$BUILD/$PKG/kernel-${SOCFAMILY}/install/slack-desc"
-    sed -i "s:%PACKAGE_NAME%:kernel-${SOCFAMILY}:g" "$BUILD/$PKG/kernel-${SOCFAMILY}/install/slack-desc"
+    cd $BUILD/$PKG/kernel-${SOCFAMILY}/ && mkdir "install"
+    cat "$CWD/packages/kernel/slack-desc.kernel-template" | sed "s:%SOCFAMILY%:${SOCFAMILY}:g" > "$BUILD/$PKG/kernel-${SOCFAMILY}/install/slack-desc"
     install -m644 -D "$CWD/packages/kernel/doinst.sh.kernel" "$BUILD/$PKG/kernel-${SOCFAMILY}/install/doinst.sh"
     if [[ $KERNEL_SOURCE = next ]]; then
         touch "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/.next"
@@ -119,18 +118,18 @@ build_kernel_pkg() {
     makepkg -l n -c n $BUILD/$PKG/kernel-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     # create kernel-modules package
-    cd $BUILD/$PKG/kernel-modules/
-    install -m644 -D "$CWD/packages/kernel/slack-desc.kernel-modules" "$BUILD/$PKG/kernel-modules/install/slack-desc"
+    cd $BUILD/$PKG/kernel-modules/ && mkdir "install"
+    cat "$CWD/packages/kernel/slack-desc.kernel-modules" | sed "s:%SOCFAMILY%:${SOCFAMILY}:g" > "$BUILD/$PKG/kernel-modules/install/slack-desc"
     makepkg -l n -c n $BUILD/$PKG/kernel-modules-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     # create kernel-headers package
-    cd $BUILD/$PKG/kernel-headers/
-    install -m644 -D "$CWD/packages/kernel/slack-desc.kernel-headers" "$BUILD/$PKG/kernel-headers/install/slack-desc"
+    cd $BUILD/$PKG/kernel-headers/ && mkdir "install"
+    cat "$CWD/packages/kernel/slack-desc.kernel-headers" | sed "s:%SOCFAMILY%:${SOCFAMILY}:g" > "$BUILD/$PKG/kernel-headers/install/slack-desc"
     makepkg -l n -c n $BUILD/$PKG/kernel-headers-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     # create kernel-firmware package
-    cd $BUILD/$PKG/kernel-firmware/
-    install -m644 -D "$CWD/packages/kernel/slack-desc.kernel-firmware" "$BUILD/$PKG/kernel-firmware/install/slack-desc"
+    cd $BUILD/$PKG/kernel-firmware/ && mkdir "install"
+    cat "$CWD/packages/kernel/slack-desc.kernel-firmware" | sed "s:%SOCFAMILY%:${SOCFAMILY}:g" > "$BUILD/$PKG/kernel-firmware/install/slack-desc"
     makepkg -l n -c n $BUILD/$PKG/kernel-firmware-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     cd $BUILD/$PKG

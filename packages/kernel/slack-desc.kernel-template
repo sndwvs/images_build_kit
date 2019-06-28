@@ -5,15 +5,15 @@
 # make exactly 11 lines for the formatting to be correct. It's also
 # customary to leave one space after the ':'.
 
-              |-----handy-ruler------------------------------------------------------|
-%PACKAGE_NAME%: %PACKAGE_NAME% (a Linux kernel)
-%PACKAGE_NAME%:
-%PACKAGE_NAME%: This is a Linux kernel with built-in support for most disk
-%PACKAGE_NAME%: controllers. To use filesystems, or to load support for a SCSI or
-%PACKAGE_NAME%: other controller, then you'll need to load one or more kernel
-%PACKAGE_NAME%: modules using an initial ramdisk, or initrd. For more information
-%PACKAGE_NAME%: about creating an initrd, see the README.initrd file in the /boot
-%PACKAGE_NAME%: directory.
-%PACKAGE_NAME%:
-%PACKAGE_NAME%:
-%PACKAGE_NAME%:
+                  |-----handy-ruler------------------------------------------------------|
+kernel-%SOCFAMILY%: kernel-%SOCFAMILY% (a Linux kernel)
+kernel-%SOCFAMILY%:
+kernel-%SOCFAMILY%: This is a Linux kernel with built-in support for most disk
+kernel-%SOCFAMILY%: controllers. To use filesystems, or to load support for a SCSI or
+kernel-%SOCFAMILY%: other controller, then you'll need to load one or more kernel
+kernel-%SOCFAMILY%: modules using an initial ramdisk, or initrd. For more information
+kernel-%SOCFAMILY%: about creating an initrd, see the README.initrd file in the /boot
+kernel-%SOCFAMILY%: directory.
+kernel-%SOCFAMILY%:
+kernel-%SOCFAMILY%:
+kernel-%SOCFAMILY%:
