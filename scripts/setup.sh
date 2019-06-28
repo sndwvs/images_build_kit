@@ -17,7 +17,7 @@ OFFSET=$(fdisk -l /dev/$ROOT_DISK | tac | head -n 1 | awk '{print $2}')
 PART=1
 
 
-case $(cat /proc/device-tree/compatible) in
+case $(cat /proc/device-tree/compatible | tr -d [:cntrl:]) in
     *firefly*rk33*)
             OFFSET_LOADER="64:16384:24576"
             LOADER="idbloader.img:uboot.img:trust.img"
