@@ -69,7 +69,9 @@ create_uboot()
                 # Total hours wasted before finding that the new "load address" parameter is not optional: 3
                 # https://github.com/rockchip-linux/build/commit/fff8f5a2d91fd11f8c4f6d605cac704d28baab4d
                 #
-                $SOURCE/$RKBIN/tools/loaderimage --pack --uboot u-boot-dtb.bin uboot.img 0x200000 >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+                LOAD_ADDRESS="0x200000"
+                [[ $SOCFAMILY == rk3308 ]] && LOAD_ADDRESS="0x600000"
+                $SOURCE/$RKBIN/tools/loaderimage --pack --uboot u-boot-dtb.bin uboot.img $LOAD_ADDRESS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
                 install -Dm644 uboot.img $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/uboot.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             fi
         fi
