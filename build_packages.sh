@@ -30,7 +30,7 @@ build_kernel_pkg() {
     # add device tree
     install -m755 -d "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/"
     if [[ ${KARCH} == arm64 ]]; then
-            [[ $SOCFAMILY == rk3* ]] && ( cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/rockchip/*${SOCFAMILY}*dtb \
+            [[ $SOCFAMILY == rk3* ]] && ( cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/rockchip/*.dtb \
               $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
     else
         cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/*${SOCFAMILY}*dtb \
