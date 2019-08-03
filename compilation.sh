@@ -50,10 +50,10 @@ compile_boot_loader() {
         make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
         # for rockpro64, rock pi 4
-        if [[ ! -z $BL31 ]]; then
-            make $CTHREADS ARCH=$ARCH u-boot.itb CROSS_COMPILE=$CROSS BL31=$SOURCE/$RKBIN/bin/${SOCFAMILY:0:4}/$BL31 >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+#        if [[ ! -z $BL31 ]]; then
+#            make $CTHREADS ARCH=$ARCH u-boot.itb CROSS_COMPILE=$CROSS BL31=$SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL31 >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 #            make $CTHREADS ARCH=$ARCH u-boot.itb CROSS_COMPILE=$CROSS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        fi
+#        fi
 
     fi
 
@@ -73,27 +73,33 @@ compile_boot_loader() {
 }
 
 compile_atf() {
-    message "" "compiling" "$ATF_SOURCE"
-    cd $SOURCE/$ATF_SOURCE >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    message "" "compiling" "$ATF_DIR $ATF_BRANCH"
+    cd $SOURCE/$ATF_DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    make realclean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
-    if [[ $SOCFAMILY == rk33* ]]; then
+    if [[ $SOCFAMILY == rk33* && $NATIVE_ARCH != true ]]; then
+        make realclean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         CFLAGS='-gdwarf-2' \
         CROSS_COMPILE=$CROSS \
         M0_CROSS_COMPILE=$CROSS32 \
         make PLAT=$SOCFAMILY DEBUG=0 bl31 >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        if [[ $NATIVE_ARCH != true ]]; then
-            $SOURCE/$RKBIN/tools/trust_merger $CWD/config/atf/$SOCFAMILY/trust.ini >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        fi
     fi
 
-    if [[ $NATIVE_ARCH != true ]]; then
-        install -Dm644 trust.img $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    if [[ ! -z $BL31 && $NATIVE_ARCH == true ]]; then
+        ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL31 bl31.elf
     else
-        install -Dm644 $CWD/blobs/$BOARD_NAME/atf/trust.img $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        ln -fs ./build/$SOCFAMILY/release/bl31/bl31.elf bl31.elf
     fi
-#    export BL31=$SOURCE/$ATF_SOURCE/$(grep -Po "(?<=\.\/).*" $CWD/config/atf/$SOCFAMILY/trust.ini)
+
+    $SOURCE/$BOOT_LOADER_TOOLS_DIR/tools/trust_merger $CWD/config/atf/$SOCFAMILY/trust.ini >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    install -Dm644 trust.img $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+}
+
+compile_boot_tools() {
+    message "" "compiling" "$BOOT_LOADER_TOOLS_DIR $BOOT_LOADER_TOOLS_BRANCH"
+    cd $SOURCE/$BOOT_LOADER_TOOLS_DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make clean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make ${SOCFAMILY}_defconfig >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make $CTHREADS tools >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 

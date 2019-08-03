@@ -78,16 +78,19 @@ download() {
     # git_fetch <dir> <url> <branch>
     git_fetch $SOURCE/$BOOT_LOADER_DIR $BOOT_LOADER_SOURCE ${BOOT_LOADER_BRANCH}
 
-# after changes start
-    if [[ ! -z $ATF ]]; then
-        message "" "download" "$ATF_SOURCE"
-        if [ -d $SOURCE/$ATF_SOURCE ]; then
-            cd $SOURCE/$ATF_SOURCE && ( git fetch && git checkout -f ${ATF_BRANCH} && git clean -df && git pull origin ${ATF_BRANCH} ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        else
-            git clone -b $ATF_BRANCH --depth 1 $URL_ATF/$ATF_SOURCE $SOURCE/$ATF_SOURCE >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        fi
+    if [[ ! -z $BOOT_LOADER_TOOLS_SOURCE ]]; then
+        message "" "download" "$BOOT_LOADER_TOOLS_DIR"
+        # git_fetch <dir> <url> <branch>
+        git_fetch $SOURCE/$BOOT_LOADER_TOOLS_DIR $BOOT_LOADER_TOOLS_SOURCE ${BOOT_LOADER_TOOLS_BRANCH}
     fi
 
+    if [[ ! -z $ATF ]]; then
+        message "" "download" "$ATF_DIR"
+        # git_fetch <dir> <url> <branch>
+        git_fetch $SOURCE/$ATF_DIR $ATF_SOURCE ${ATF_BRANCH}
+    fi
+
+# after changes start
     if [[ $SOCFAMILY == rk3* ]]; then
         if [[ ! -z $XTOOLS_OLD ]]; then
             message "" "download" "$XTOOLS_OLD"
@@ -98,9 +101,9 @@ download() {
             fi
         fi
 
-        message "" "download" "$RKBIN"
+        message "" "download" "$RKBIN_DIR"
         # git_fetch <dir> <url> <branch>
-        git_fetch $SOURCE/$RKBIN $URL_RKBIN/$RKBIN ${RKBIN_BRANCH}
+        git_fetch $SOURCE/$RKBIN_DIR $RKBIN_SOURCE ${RKBIN_BRANCH}
 # after changes end
     fi
 

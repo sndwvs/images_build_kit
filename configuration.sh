@@ -29,6 +29,13 @@ BOOT_LOADER_DIR=${BOOT_LOADER_DIR:-"u-boot"}
 BOOT_LOADER_BRANCH=${BOOT_LOADER_BRANCH:-"master::"} #"master:tag:v2017.05"
 
 #---------------------------------------------
+# arm trusted firmware configuration
+#---------------------------------------------
+ATF_SOURCE=${ATF_SOURCE:-"https://github.com/ARM-software/arm-trusted-firmware.git"}
+ATF_DIR=${ATF_DIR:-"arm-trusted-firmware"}
+ATF_BRANCH=${ATF_BRANCH:-"master::"}
+
+#---------------------------------------------
 # xtools configuration
 #---------------------------------------------
 if [[ $NATIVE_ARCH != true ]]; then
