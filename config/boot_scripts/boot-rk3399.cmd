@@ -32,6 +32,8 @@ setenv bootargs "consoleblank=0 root=${rootdev} ro rootwait rootfstype=${rootfst
 
 load ${devtype} ${devnum}:1 ${fdt_addr_r} ${prefix}dtb/${fdt_file}
 load ${devtype} ${devnum}:1 ${kernel_addr_r} ${prefix}Image
+fdt addr ${fdt_addr_r}
+fdt resize 65536
 booti ${kernel_addr_r} - ${fdt_addr_r}
 
 # Recompile with:
