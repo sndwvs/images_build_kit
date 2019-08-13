@@ -42,6 +42,9 @@ compile_boot_loader() {
 
     make ARCH=$ARCH $BOOT_LOADER_CONFIG CROSS_COMPILE=$CROSS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
+    # added in name suffix
+    change_name_version "-$SOCFAMILY"
+
     if [[ $SOCFAMILY == rk3* ]]; then
         # u-boot-firefly-rk3288 2016.03 package contains backports
         # of EFI support patches and fails to boot the kernel on the Firefly.
@@ -135,6 +138,9 @@ compile_kernel() {
     [[ "$KERNEL_SOURCE" != next && $SOCFAMILY == sun* ]] && local CROSS=$OLD_CROSS
     gcc_version "$CROSS" GCC_VERSION
     message "" "version" "$GCC_VERSION"
+
+    # added in name suffix
+    change_name_version ""
 
     if [[ $SOCFAMILY == rk3* ]]; then
         # fix build firmware

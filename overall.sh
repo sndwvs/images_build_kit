@@ -173,4 +173,14 @@ read_packages() {
 }
 
 
+#---------------------------------------------
+# change the name of the version u-boot kernel
+#---------------------------------------------
+change_name_version() {
+    local SUFFIX="$1"
+    [[ -f .config ]] && sed -i "s/CONFIG_LOCALVERSION=\"\"/CONFIG_LOCALVERSION=\"$SUFFIX\"/g" .config
+    [[ -f .config ]] && sed -i "s/CONFIG_LOCALVERSION_AUTO=.*/# CONFIG_LOCALVERSION_AUTO is not set/g" .config
+}
+
+
 

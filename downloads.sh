@@ -28,7 +28,7 @@ git_fetch() {
         git clone -b ${BRANCH} --depth 1 $URL $DIR 2>/dev/null || status=$?
         [[ 0 -ne $status ]] && ( git clone -b ${BRANCH} $URL $DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
     else
-        cd $DIR && ( git reset --hard ${BRANCH} && git clean -xdfq && git checkout -f ${BRANCH} && git fetch && git pull origin ${BRANCH} ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        cd $DIR && ( git reset --hard && git clean -xdfq && git checkout -f ${BRANCH} && git fetch && git pull origin ${BRANCH} ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
     pushd $DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
