@@ -3,7 +3,7 @@
 # Please edit /boot/uEnv.txt to set supported parameters
 #
 
-setenv load_addr "0x00700000"
+setenv load_addr "0x00900000"
 # default values
 setenv rootdev "/dev/mmcblk0p1"
 setenv fdt_file "%DEVICE_TREE_BLOB%"

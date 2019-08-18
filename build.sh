@@ -170,7 +170,7 @@ if [[ $COMPILE_BINARIES == true ]]; then
 
     patching_source "u-boot"
     compile_boot_loader
-exit
+
     patching_source "kernel"
     compile_kernel
 
