@@ -1,0 +1,10 @@
+--- a/Makefile	2019-08-16 21:26:25.986126301 +0300
++++ b/Makefile	2019-08-16 21:27:27.954008148 +0300
+@@ -593,6 +593,7 @@
+ 
+ KBUILD_CFLAGS += $(call cc-option,-fno-stack-protector)
+ KBUILD_CFLAGS += $(call cc-option,-fno-delete-null-pointer-checks)
++KBUILD_CFLAGS += $(call cc-disable-warning, address-of-packed-member)
+ 
+ KBUILD_CFLAGS	+= -g
+ # $(KBUILD_AFLAGS) sets -g, which causes gcc to pass a suitable -g<format>
