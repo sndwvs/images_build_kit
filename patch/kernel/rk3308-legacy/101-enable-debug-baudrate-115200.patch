@@ -1,0 +1,15 @@
+--- a/arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s.dts	2019-08-19 21:13:44.626801477 +0300
++++ b/arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s.dts	2019-08-19 21:21:10.254052235 +0300
+@@ -330,6 +330,12 @@
+ 	};
+ };
+ 
++&fiq_debugger {
++	rockchip,serial-id = <0>;
++	rockchip,baudrate = <115200>;  /* Only 115200 and 1500000 */
++	status = "okay";
++};
++
+ &uart4 {
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&uart4_xfer &uart4_cts>;

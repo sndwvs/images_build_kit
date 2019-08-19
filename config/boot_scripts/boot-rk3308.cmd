@@ -15,9 +15,8 @@ setenv rootfstype "ext4"
 part uuid ${devtype} 1 part_exists
 
 if test -n ${part_exists}; then
-    setenv rootdev "/dev/mmcblk1p1"
+    setenv rootdev "/dev/mmcblk0p1"
     setenv devnum "1"
-    ${devtype} dev ${devnum}
 fi
 
 if load ${devtype} ${devnum}:1 ${load_addr} ${prefix}uEnv.txt; then
