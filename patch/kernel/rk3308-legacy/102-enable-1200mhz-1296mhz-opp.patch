@@ -1,0 +1,24 @@
+--- a/arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s.dts	2019-08-20 22:19:00.949050872 +0300
++++ b/arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s.dts	2019-08-20 22:14:02.966165137 +0300
+@@ -191,6 +191,21 @@
+ 	cpu-supply = <&vdd_core>;
+ };
+ 
++&cpu0_opp_table {
++	opp-1200000000 {
++		opp-hz = /bits/ 64 <1200000000>;
++		opp-microvolt = <1250000 1250000 1340000>;
++		clock-latency-ns = <40000>;
++		status = "okay";
++	};
++	opp-1296000000 {
++		opp-hz = /bits/ 64 <1296000000>;
++		opp-microvolt = <1300000 1300000 1340000>;
++		clock-latency-ns = <40000>;
++		status = "okay";
++	};
++};
++
+ &dmc {
+ 	center-supply = <&vdd_log>;
+ 	status = "okay";
