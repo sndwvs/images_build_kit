@@ -1,0 +1,11 @@
+--- a/drivers/net/wireless/rockchip_wlan/rtl8723ds/Makefile	2019-08-22 19:35:13.169428668 +0300
++++ b/drivers/net/wireless/rockchip_wlan/rtl8723ds/Makefile	2019-08-22 19:34:20.245575007 +0300
+@@ -79,7 +79,7 @@
+ CONFIG_RTW_DEBUG = y
+ # default log level is _DRV_INFO_ = 4,
+ # please refer to "How_to_set_driver_debug_log_level.doc" to set the available level.
+-CONFIG_RTW_LOG_LEVEL = 2
++CONFIG_RTW_LOG_LEVEL = 0
+ ######################## Wake On Lan ##########################
+ CONFIG_WOWLAN = y
+ CONFIG_WAKEUP_TYPE = 0x7 #bit2: deauth, bit1: unicast, bit0: magic pkt.
