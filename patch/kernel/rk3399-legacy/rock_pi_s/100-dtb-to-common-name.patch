@@ -9,8 +9,8 @@
  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3308b-evb-amic-v10.dtb
  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3326-evb-ai-va-v10.dtb
 --- /dev/null	2019-08-09 14:00:19.818766453 +0300
-+++ b/arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s.dts	2019-08-18 14:22:15.751159632 +0300
-@@ -0,0 +1,350 @@
++++ b/arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s.dts	2019-08-23 18:57:48.538130782 +0300
+@@ -0,0 +1,360 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 +/*
 + * Copyright (c) 2018 Fuzhou Rockchip Electronics Co., Ltd
@@ -198,6 +198,15 @@
 +			default-state = "on";
 +		};
 +	};
++
++	acodec_sound: acodec-sound {
++		compatible = "rockchip,multicodecs-card";
++		rockchip,card-name = "rockchip,rk3308-acodec";
++		rockchip,codec-hp-det;
++		rockchip,mclk-fs = <256>;
++		rockchip,cpu = <&i2s_8ch_2>;
++		rockchip,codec = <&acodec>;
++     };
 +};
 +
 +&cpu0 {
@@ -258,11 +267,8 @@
 +	vccio5-supply = <&vcc_io>;
 +};
 +
-+&i2s_8ch_0 {
++&i2s_8ch_2 {
 +	status = "okay";
-+	assigned-clocks = <&cru SCLK_I2S0_8CH_RX>;
-+	assigned-clock-parents = <&cru SCLK_I2S0_8CH_TX_MUX>;
-+	rockchip,clk-trcm = <1>;
 +	#sound-dai-cells = <0>;
 +};
 +
@@ -361,3 +367,8 @@
 +&usb_host0_ohci{
 +	status = "okay";
 +};
++
++&acodec {
++	status = "okay";
++};
+\ В конце файла нет новой строки
