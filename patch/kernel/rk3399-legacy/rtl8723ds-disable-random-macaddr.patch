@@ -1,0 +1,11 @@
+--- a/drivers/net/wireless/rockchip_wlan/rtl8723ds/core/rtw_ieee80211.c	2019-08-24 21:22:01.174914821 +0300
++++ b/drivers/net/wireless/rockchip_wlan/rtl8723ds/core/rtw_ieee80211.c	2019-08-24 21:22:12.466896450 +0300
+@@ -1381,7 +1381,7 @@
+  */
+ void rtw_macaddr_cfg(u8 *out, const u8 *hw_mac_addr)
+ {
+-#define DEFAULT_RANDOM_MACADDR 1
++#define DEFAULT_RANDOM_MACADDR 0
+ 	u8 mac[ETH_ALEN];
+ 
+ 	if (out == NULL) {
