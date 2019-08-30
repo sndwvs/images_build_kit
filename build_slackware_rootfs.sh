@@ -316,7 +316,7 @@ download_pkg() {
         category=$(echo $pkg | cut -f1 -d "/")
         pkg=$(echo $pkg | cut -f2 -d "/")
         if [[ ! -z ${pkg} ]];then
-            PKG_NAME=($(wget -q -O - ${url}/${category}/ | cut -f7 -d '>' | cut -f1 -d '<' | egrep -o "(^$(echo $pkg | sed 's/+/\\\+/g'))-.*(t.z)" | sort -ur))
+            PKG_NAME=($(wget --no-check-certificate -q -O - ${url}/${category}/ | cut -f7 -d '>' | cut -f1 -d '<' | egrep -o "(^$(echo $pkg | sed 's/+/\\\+/g'))-.*(t.z)" | sort -ur))
             for raw in ${PKG_NAME[*]};do
                [[ $(echo $raw | rev | cut -d '-' -f4- | rev | grep -ox $pkg) ]] && _PKG_NAME=$raw
             done
@@ -324,7 +324,7 @@ download_pkg() {
             [[ -z ${_PKG_NAME} ]] && ( echo "empty download package ${category}/$pkg" >> $LOG 2>&1 && message "err" "details" && exit 1 )
 
             message "" "download" "package $category/${_PKG_NAME}"
-            wget -c -nc -nd -np ${url}/${category}/${_PKG_NAME} -P $BUILD/$PKG/${type}/${ARCH}/${category}/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            wget --no-check-certificate -c -nc -nd -np ${url}/${category}/${_PKG_NAME} -P $BUILD/$PKG/${type}/${ARCH}/${category}/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             unset _PKG_NAME
         fi
     done
