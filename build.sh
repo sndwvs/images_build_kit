@@ -97,13 +97,13 @@ for arg in ${result[*]}; do
                     COMPILE_BINARIES="true"
                 ;;
            mini*)
-                    CREATE_IMAGE=($(echo $arg | cut -f1 -d '-'))
+                    DISTR_IMAGES+=($(echo $arg | cut -f1 -d '-'))
                 ;;
            tools)
                     TOOLS_PACK="true"
                 ;;
-      xfce-image)
-                    CREATE_IMAGE+=($(echo $arg | cut -f1 -d '-'))
+           xfce*)
+                    DISTR_IMAGES+=($(echo $arg | cut -f1 -d '-'))
                 ;;
             hdmi)
                     VIDEO_OUTPUT=$arg
@@ -163,7 +163,7 @@ fi
 #---------------------------------------------
 # start build
 #---------------------------------------------
-message "" "start" "build ARCH $ARCH"
+message "" "start" "build $DISTR ARCH $ARCH"
 if [[ $COMPILE_BINARIES == true ]]; then
     [[ ! -z $ATF ]] && compile_boot_tools
     [[ ! -z $ATF ]] && compile_atf
@@ -187,7 +187,7 @@ if [[ $COMPILE_BINARIES == true ]]; then
     build_kernel_pkg
 fi
 
-for image_type in ${CREATE_IMAGE[@]}; do
+for image_type in ${DISTR_IMAGES[@]}; do
 
     get_name_rootfs $image_type
     clean_rootfs $image_type
@@ -209,12 +209,9 @@ for image_type in ${CREATE_IMAGE[@]}; do
         setting_first_login
         setting_wifi
         setting_udev
-#        if [[ $KERNEL_SOURCE != "next" && $SOCFAMILY == rk3288 ]]; then
-#            setting_move_to_nand
-#        fi
         setting_move_to_internal
         [[ $KERNEL_SOURCE == legacy && $SOCFAMILY == sun* ]] && setting_h3dmode
-        download_pkg $URL_DISTR "$image_type"
+        download_pkg $DISTR_URL "$image_type"
         install_pkg "$image_type"
         create_img
     fi
@@ -222,22 +219,22 @@ for image_type in ${CREATE_IMAGE[@]}; do
     if [[ $image_type == xfce ]]; then
         message "" "create" "$ROOTFS_XFCE"
         rsync -ar --del $SOURCE/$ROOTFS/ $SOURCE/$ROOTFS_XFCE >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        download_pkg $URL_DISTR "$image_type"
+        download_pkg $DISTR_URL "$image_type"
         install_pkg "$image_type"
 
         # install extra packages
-        download_pkg $URL_DISTR_EXTRA 'extra'
+        download_pkg $DISTR_EXTRA_URL 'extra'
         install_pkg 'extra'
 
         # install extra board packages
-        download_pkg $URL_DISTR_EXTRA $SOCFAMILY
+        download_pkg $DISTR_EXTRA_URL $SOCFAMILY
         install_pkg $SOCFAMILY
 
         setting_default_theme_xfce
         setting_default_start_x
         setting_for_desktop
         setting_alsa "$ROOTFS_XFCE"
-        create_img xfce
+        create_img "$image_type"
     fi
 done
 

@@ -22,6 +22,17 @@ if [[ $KERNEL_SOURCE == next ]]; then
 fi
 
 #---------------------------------------------
+# configuration linux distribution
+#---------------------------------------------
+DISTR=${DISTR:-"slackwarearm"}
+DISTR_VERSION=${DISTR_VERSION:-"current"} # or 14.2
+
+#---------------------------------------------
+# configuration build images
+#---------------------------------------------
+#DISTR_IMAGES=${DISTR_IMAGES:-"mini"}
+
+#---------------------------------------------
 # boot loader configuration
 #---------------------------------------------
 BOOT_LOADER_SOURCE=${BOOT_LOADER_SOURCE:-"https://git.denx.de/u-boot.git"}
@@ -124,10 +135,13 @@ export PATH=/bin:/sbin:/usr/bin:/usr/sbin:$BUILD/$OUTPUT/$TOOLS/
 #---------------------------------------------
 # packages
 #---------------------------------------------
-#URL_DISTR="http://dl.fail.pp.ua/slackware/slackwarearm-14.2/slackware"
-[[ $ARCH == arm ]] && URL_DISTR="http://dl.fail.pp.ua/slackware/slackwarearm-current/slackware"
-[[ $ARCH == aarch64 ]] && URL_DISTR="http://dl.fail.pp.ua/slackware/slarm64-current/slarm64"
-URL_DISTR_EXTRA="http://dl.fail.pp.ua/slackware/pkg/${ARCH}"
+if [[ ${DISTR} == slackwarearm ]];then
+    DISTR_DIR=${DISTR/arm/}
+else
+    DISTR_DIR=${DISTR}
+fi
+DISTR_URL="http://dl.fail.pp.ua/slackware/${DISTR}-${DISTR_VERSION}/${DISTR_DIR}"
+DISTR_EXTRA_URL="http://dl.fail.pp.ua/slackware/packages/${ARCH}"
 
 #---------------------------------------------
 # claear enviroment
