@@ -1,0 +1,24 @@
+--- a/arch/arm/boot/dts/rk3288.dtsi	2019-08-31 20:00:04.105635665 +0300
++++ b/arch/arm/boot/dts/rk3288.dtsi	2019-08-31 20:06:28.381987864 +0300
+@@ -147,12 +147,20 @@
+ 		};
+ 		opp-1512000000 {
+ 			opp-hz = /bits/ 64 <1512000000>;
+-			opp-microvolt = <1300000>;
++			opp-microvolt = <1250000>;
+ 		};
+ 		opp-1608000000 {
+ 			opp-hz = /bits/ 64 <1608000000>;
++			opp-microvolt = <1300000>;
++		};
++		opp-1704000000 {
++			opp-hz = /bits/ 64 <1704000000>;
+ 			opp-microvolt = <1350000>;
+ 		};
++		opp-1800000000 {
++			opp-hz = /bits/ 64 <1800000000>;
++			opp-microvolt = <1400000>;
++		};
+ 	};
+ 
+ 	amba {

@@ -1,0 +1,70 @@
+--- a/arch/arm/boot/dts/rk3288.dtsi	2019-08-31 20:37:59.249923040 +0300
++++ b/arch/arm/boot/dts/rk3288.dtsi	2019-08-31 20:40:42.556895668 +0300
+@@ -161,6 +161,67 @@
+ 			opp-hz = /bits/ 64 <1800000000>;
+ 			opp-microvolt = <1400000>;
+ 		};
++		/* boot-only frequencies below */
++		opp-1896000000 {
++			opp-hz = /bits/ 64 <1896000000>;
++			opp-microvolt = <1425000>;
++			turbo-mode;
++		};
++		opp-1920000000 {
++			opp-hz = /bits/ 64 <1920000000>;
++			opp-microvolt = <1425000>;
++			turbo-mode;
++		};
++		opp-1992000000 {
++			opp-hz = /bits/ 64 <1992000000>;
++			opp-microvolt = <1450000>;
++			turbo-mode;
++		};
++		opp-2016000000 {
++			opp-hz = /bits/ 64 <2016000000>;
++			opp-microvolt = <1475000>;
++			turbo-mode;
++		};
++		opp-2040000000 {
++			opp-hz = /bits/ 64 <2040000000>;
++			opp-microvolt = <1475000>;
++			turbo-mode;
++		};
++		opp-2064000000 {
++			opp-hz = /bits/ 64 <2064000000>;
++			opp-microvolt = <1475000>;
++			turbo-mode;
++		};
++		opp-2088000000 {
++			opp-hz = /bits/ 64 <2088000000>;
++			opp-microvolt = <1500000>;
++			turbo-mode;
++		};
++		opp-2112000000 {
++			opp-hz = /bits/ 64 <2112000000>;
++			opp-microvolt = <1500000>;
++			turbo-mode;
++		};
++		opp-2136000000 {
++			opp-hz = /bits/ 64 <2136000000>;
++			opp-microvolt = <1500000>;
++			turbo-mode;
++		};
++		opp-2160000000 {
++			opp-hz = /bits/ 64 <2160000000>;
++			opp-microvolt = <1500000>;
++			turbo-mode;
++		};
++		opp-2184000000 {
++			opp-hz = /bits/ 64 <2184000000>;
++			opp-microvolt = <1500000>;
++			turbo-mode;
++		};
++		opp-2208000000 {
++			opp-hz = /bits/ 64 <2208000000>;
++			opp-microvolt = <1500000>;
++			turbo-mode;
++		};
+ 	};
+ 
+ 	amba {
