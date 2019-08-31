@@ -1,7 +1,7 @@
-From bc16cd0aa3cdaaff27b9bf2d3282ccfff81d8784 Mon Sep 17 00:00:00 2001
+From e03d074b8ec00718337e7373e991912f6b6f9a52 Mon Sep 17 00:00:00 2001
 From: "Miouyouyou (Myy)" <myy@miouyouyou.fr>
-Date: Sat, 29 Sep 2018 02:56:32 +0200
-Subject: [PATCH 5/6] drivers: clk-rk3288: support for dedicating NPLL to a VOP
+Date: Mon, 5 Nov 2018 19:53:43 +0100
+Subject: [PATCH] clk: rockchip: rk3288: Support for dedicating NPLL to a VOP
 
 This patch is taken from Urja Rannikko ( @urjaman ) patchset here :
 https://github.com/urjaman/arch-c201/blob/master/linux-c201/0020-RK3288-HDMI-clock-hacks-combined.patch
@@ -15,69 +15,21 @@ I have no clear idea how HDMI Neuronal PLL (and PLL in general) work,
 so I cannot comment on what it's doing and if it's a good idea in
 general.
 
-The only thing I know from this patchset is that it works and have
-resolved some purple line issue at the left of my HDMI screen, when
-connected to MiQi or Tinkerboard devices.
+Now, I still have to test if that patch does anything useful on
+RK3288 boards. If it doesn't, I might just throw it away on next
+versions.
 
 Signed-off-by: Miouyouyou (Myy) <myy@miouyouyou.fr>
 ---
- drivers/clk/rockchip/clk-rk3288.c | 98 ++++++++++++++++++++++++++++++++-------
+ drivers/clk/rockchip/clk-rk3288.c | 68 ++++++++++++++++++++++++++++++++-------
  drivers/clk/rockchip/clk.h        |  3 ++
- 2 files changed, 85 insertions(+), 16 deletions(-)
+ 2 files changed, 59 insertions(+), 12 deletions(-)
 
 diff --git a/drivers/clk/rockchip/clk-rk3288.c b/drivers/clk/rockchip/clk-rk3288.c
-index fd2058f7d..b5b56169d 100644
+index 13b38cb89..0d8b99b6b 100644
 --- a/drivers/clk/rockchip/clk-rk3288.c
 +++ b/drivers/clk/rockchip/clk-rk3288.c
-@@ -83,22 +83,43 @@ static struct rockchip_pll_rate_table rk3288_pll_rates[] = {
- 	RK3066_PLL_RATE( 768000000, 1, 64, 2),
- 	RK3066_PLL_RATE( 742500000, 8, 495, 2),
- 	RK3066_PLL_RATE( 696000000, 1, 58, 2),
-+	RK3066_PLL_RATE_NB(621000000, 1, 207, 8, 1),
- 	RK3066_PLL_RATE( 600000000, 1, 50, 2),
- 	RK3066_PLL_RATE_NB(594000000, 1, 198, 8, 1),
- 	RK3066_PLL_RATE( 552000000, 1, 46, 2),
- 	RK3066_PLL_RATE( 504000000, 1, 84, 4),
- 	RK3066_PLL_RATE( 500000000, 3, 125, 2),
- 	RK3066_PLL_RATE( 456000000, 1, 76, 4),
-+	RK3066_PLL_RATE( 428000000, 1, 107, 6),
- 	RK3066_PLL_RATE( 408000000, 1, 68, 4),
- 	RK3066_PLL_RATE( 400000000, 3, 100, 2),
-+	RK3066_PLL_RATE_NB( 394000000, 1, 197, 12, 1),
- 	RK3066_PLL_RATE( 384000000, 2, 128, 4),
- 	RK3066_PLL_RATE( 360000000, 1, 60, 4),
-+	RK3066_PLL_RATE_NB( 356000000, 1, 178, 12, 1),
-+	RK3066_PLL_RATE_NB( 324000000, 1, 189, 14, 1),
- 	RK3066_PLL_RATE( 312000000, 1, 52, 4),
--	RK3066_PLL_RATE( 300000000, 1, 50, 4),
--	RK3066_PLL_RATE( 297000000, 2, 198, 8),
-+	RK3066_PLL_RATE_NB( 308000000, 1, 154, 12, 1),
-+	RK3066_PLL_RATE_NB( 303000000, 1, 202, 16, 1),
-+	RK3066_PLL_RATE( 300000000, 1, 75, 6),
-+	RK3066_PLL_RATE_NB( 297750000, 2, 397, 16, 1),
-+	RK3066_PLL_RATE_NB( 293250000, 2, 391, 16, 1),
-+	RK3066_PLL_RATE_NB( 292500000, 1, 195, 16, 1),
-+	RK3066_PLL_RATE( 273600000, 1, 114, 10),
-+	RK3066_PLL_RATE_NB( 273000000, 1, 182, 16, 1),
-+	RK3066_PLL_RATE_NB( 270000000, 1, 180, 16, 1),
-+	RK3066_PLL_RATE_NB( 266250000, 2, 355, 16, 1),
-+	RK3066_PLL_RATE_NB( 256500000, 1, 171, 16, 1),
- 	RK3066_PLL_RATE( 252000000, 1, 84, 8),
--	RK3066_PLL_RATE( 216000000, 1, 72, 8),
--	RK3066_PLL_RATE( 148500000, 2, 99, 8),
-+	RK3066_PLL_RATE_NB( 250500000, 1, 167, 16, 1),
-+	RK3066_PLL_RATE_NB( 243428571, 1, 142, 14, 1),
-+	RK3066_PLL_RATE( 238000000, 1, 119, 12),
-+	RK3066_PLL_RATE_NB( 219750000, 2, 293, 16, 1),
-+	RK3066_PLL_RATE_NB( 216000000, 1, 144, 16, 1),
-+	RK3066_PLL_RATE_NB( 213000000, 1, 142, 16, 1),
-+	RK3066_PLL_RATE( 195428571, 1, 114, 14),
-+	RK3066_PLL_RATE( 160000000, 1, 80, 12),
-+	RK3066_PLL_RATE( 157500000, 1, 105, 16),
- 	RK3066_PLL_RATE( 126000000, 1, 84, 16),
- 	RK3066_PLL_RATE(  48000000, 1, 64, 32),
- 	{ /* sentinel */ },
-@@ -194,10 +215,14 @@ PNAME(mux_ddrphy_p)		= { "dpll_ddr", "gpll_ddr" };
+@@ -215,10 +215,13 @@ PNAME(mux_ddrphy_p)		= { "dpll_ddr", "gpll_ddr" };
  PNAME(mux_aclk_cpu_src_p)	= { "cpll_aclk_cpu", "gpll_aclk_cpu" };
  
  PNAME(mux_pll_src_cpll_gpll_p)		= { "cpll", "gpll" };
@@ -88,14 +40,13 @@ index fd2058f7d..b5b56169d 100644
 +PNAME_ED(mux_pll_src_cgn_pll_nonvop_p)	= { "cpll", "gpll", "npll" };
 +PNAME_ED(mux_pll_src_cgn_pll_vop0_p) = { "cpll", "gpll", "npll" };
 +PNAME_ED(mux_pll_src_cgn_pll_vop1_p) = { "cpll", "gpll", "npll" };
-+
- PNAME(mux_pll_src_cpll_gpll_usb480m_p)	= { "cpll", "gpll", "usbphy480m_src" };
--PNAME(mux_pll_src_cpll_gll_usb_npll_p)	= { "cpll", "gpll", "usbphy480m_src", "npll" };
+ PNAME(mux_pll_src_cpll_gpll_usb480m_p)	= { "cpll", "gpll", "unstable:usbphy480m_src" };
+-PNAME(mux_pll_src_cpll_gll_usb_npll_p)	= { "cpll", "gpll", "unstable:usbphy480m_src", "npll" };
 +PNAME_ED(mux_pll_src_cpll_gll_usb_npll_p) = { "cpll", "gpll", "usbphy480m_src", "npll" };
  
  PNAME(mux_mmc_src_p)	= { "cpll", "gpll", "xin24m", "xin24m" };
  PNAME(mux_i2s_pre_p)	= { "i2s_src", "i2s_frac", "ext_i2s", "xin12m" };
-@@ -443,24 +468,24 @@ static struct rockchip_clk_branch rk3288_clk_branches[] __initdata = {
+@@ -464,24 +467,24 @@ static struct rockchip_clk_branch rk3288_clk_branches[] __initdata = {
  			RK3288_CLKSEL_CON(30), 14, 2, MFLAGS, 8, 5, DFLAGS,
  			RK3288_CLKGATE_CON(3), 4, GFLAGS),
  
@@ -125,7 +76,7 @@ index fd2058f7d..b5b56169d 100644
  			RK3288_CLKSEL_CON(6), 14, 2, MFLAGS, 8, 6, DFLAGS,
  			RK3288_CLKGATE_CON(3), 15, GFLAGS),
  
-@@ -469,16 +494,16 @@ static struct rockchip_clk_branch rk3288_clk_branches[] __initdata = {
+@@ -490,16 +493,16 @@ static struct rockchip_clk_branch rk3288_clk_branches[] __initdata = {
  	GATE(SCLK_HDMI_CEC, "sclk_hdmi_cec", "xin32k", 0,
  			RK3288_CLKGATE_CON(5), 11, GFLAGS),
  
@@ -145,7 +96,7 @@ index fd2058f7d..b5b56169d 100644
  			RK3288_CLKSEL_CON(42), 14, 2, MFLAGS, 8, 5, DFLAGS,
  			RK3288_CLKGATE_CON(13), 15, GFLAGS),
  
-@@ -552,7 +577,7 @@ static struct rockchip_clk_branch rk3288_clk_branches[] __initdata = {
+@@ -573,7 +576,7 @@ static struct rockchip_clk_branch rk3288_clk_branches[] __initdata = {
  	COMPOSITE(0, "sclk_tspout", mux_tspout_p, 0,
  			RK3288_CLKSEL_CON(35), 14, 2, MFLAGS, 8, 5, DFLAGS,
  			RK3288_CLKGATE_CON(4), 11, GFLAGS),
@@ -154,7 +105,7 @@ index fd2058f7d..b5b56169d 100644
  			RK3288_CLKSEL_CON(35), 6, 2, MFLAGS, 0, 5, DFLAGS,
  			RK3288_CLKGATE_CON(4), 10, GFLAGS),
  
-@@ -912,6 +937,7 @@ static void __init rk3288_clk_init(struct device_node *np)
+@@ -933,6 +936,7 @@ static void __init rk3288_clk_init(struct device_node *np)
  {
  	struct rockchip_clk_provider *ctx;
  	struct clk *clk;
@@ -162,7 +113,7 @@ index fd2058f7d..b5b56169d 100644
  
  	rk3288_cru_base = of_iomap(np, 0);
  	if (!rk3288_cru_base) {
-@@ -919,6 +945,46 @@ static void __init rk3288_clk_init(struct device_node *np)
+@@ -940,6 +944,46 @@ static void __init rk3288_clk_init(struct device_node *np)
  		return;
  	}
  
