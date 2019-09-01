@@ -1,0 +1,52 @@
+--- a/arch/arm/boot/dts/rk3288-firefly.dtsi	2019-09-01 06:44:16.170783604 +0300
++++ b/arch/arm/boot/dts/rk3288-firefly.dtsi	2019-09-01 06:52:18.520315306 +0300
+@@ -79,6 +79,20 @@
+ 		};
+ 	};
+ 
++	sound {
++		compatible = "simple-audio-card";
++		simple-audio-card,name = "SPDIF";
++		simple-audio-card,dai-link@1 {  /* S/PDIF - S/PDIF */
++			cpu { sound-dai = <&spdif>; };
++			codec { sound-dai = <&spdif_out>; };
++		};
++	};
++
++	spdif_out: spdif-out {
++		compatible = "linux,spdif-dit";
++		#sound-dai-cells = <0>;
++	};
++
+ 	vbat_wl: vcc_sys: vsys-regulator {
+ 		compatible = "regulator-fixed";
+ 		regulator-name = "vcc_sys";
+@@ -471,6 +485,17 @@
+ 
+ &i2c2 {
+ 	status = "okay";
++
++	codec: es8328@10 {
++		compatible = "everest,es8328";
++		DVDD-supply = <&vcca_33>;
++		AVDD-supply = <&vcca_33>;
++		PVDD-supply = <&vcca_33>;
++		HPVDD-supply = <&vcca_33>;
++		clocks = <&cru HCLK_I2S0>, <&cru SCLK_I2S0>;
++		clock-names = "i2s_hclk", "i2s_clk";
++		reg = <0x10>;
++	};
+ };
+ 
+ &i2c4 {
+@@ -616,6 +641,10 @@
+ 	status = "okay";
+ };
+ 
++&spdif {
++	status = "okay";
++};
++
+ &sdmmc {
+ 	bus-width = <4>;
+ 	cap-mmc-highspeed;
