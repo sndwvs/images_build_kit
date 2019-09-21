@@ -518,19 +518,6 @@ index 941527e507f7..f618f45fc8e9 100644
  	uml_setup_stubs(new);
  	up_write(&new->mmap_sem);
  }
-diff --git a/arch/x86/kernel/cpu/bugs.c b/arch/x86/kernel/cpu/bugs.c
-index 310e279be0d8..ab2df0f9ac45 100644
---- a/arch/x86/kernel/cpu/bugs.c
-+++ b/arch/x86/kernel/cpu/bugs.c
-@@ -1094,7 +1094,7 @@ static void __init l1tf_select_mitigation(void)
- static ssize_t mds_show_state(char *buf)
- {
- #ifdef CONFIG_HYPERVISOR_GUEST
--	if (x86_hyper) {
-+	if (boot_cpu_has(X86_FEATURE_HYPERVISOR)) {
- 		return sprintf(buf, "%s; SMT Host state unknown\n",
- 			       mds_strings[mds_mitigation]);
- 	}
 diff --git a/arch/x86/kernel/cpu/mkcapflags.sh b/arch/x86/kernel/cpu/mkcapflags.sh
 index 6988c74409a8..711b74e0e623 100644
 --- a/arch/x86/kernel/cpu/mkcapflags.sh

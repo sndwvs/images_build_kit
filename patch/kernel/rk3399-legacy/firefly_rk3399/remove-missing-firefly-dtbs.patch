@@ -1,0 +1,12 @@
+--- a/arch/arm64/boot/dts/rockchip/Makefile	2019-09-22 01:17:33.442052406 +0300
++++ b/arch/arm64/boot/dts/rockchip/Makefile	2019-09-22 01:17:45.205991635 +0300
+@@ -88,8 +88,6 @@
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-firefly-aioc-lvds.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-firefly-aioc-mipi.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-firefly-aioc.dtb
+-dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-firefly-aioec.dtb
+-dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-firefly-aioec-lvds.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-firefly-aiojd4.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-firefly-srjd4.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-firefly-android.dtb
+
