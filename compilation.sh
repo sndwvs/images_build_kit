@@ -88,8 +88,10 @@ compile_atf() {
 
     if [[ ! -z $BL31 && $NATIVE_ARCH == true ]]; then
         ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL31 bl31.elf
+        [[ ! -z $BL32 ]] && ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL32 bl32.bin
     else
         ln -fs ./build/$SOCFAMILY/release/bl31/bl31.elf bl31.elf
+        ln -fs ./build/$SOCFAMILY/release/bl32/bl32.bin bl32.bin
     fi
 
     $SOURCE/$BOOT_LOADER_TOOLS_DIR/tools/trust_merger $CWD/config/atf/$SOCFAMILY/trust.ini >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
