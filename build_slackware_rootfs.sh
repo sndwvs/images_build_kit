@@ -184,17 +184,6 @@ EOF
 }
 
 
-setting_dhcpcd() {
-    if [[ ! $(cat $SOURCE/$ROOTFS/etc/dhcpcd.conf | grep nolink) ]]; then
-        message "" "setting" "dhcpcd.conf"
-        cat <<EOF >>"$SOURCE/$ROOTFS/etc/dhcpcd.conf"
-nolink
-
-EOF
-    fi
-}
-
-
 create_img() {
 
     if [[ $1 == xfce ]]; then

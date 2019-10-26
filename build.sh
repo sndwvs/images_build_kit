@@ -202,7 +202,6 @@ for image_type in ${DISTR_IMAGES[@]}; do
         setting_motd
         setting_issue
         setting_rc_local
-        setting_dhcpcd
         setting_firstboot
         setting_settings
         setting_sysctl
