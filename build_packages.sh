@@ -37,32 +37,6 @@ build_kernel_pkg() {
               $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
-    if [[ $SOCFAMILY == sun* ]]; then
-        if [[ $KERNEL_SOURCE != next ]];then
-            if [[ $BOARD_NAME == cubietruck ]]; then
-                # vga | screen0_output_type = 4
-                sed 's#screen0_output_type = [0-9]#screen0_output_type = 4#' "$CWD/config/boards/$BOARD_NAME/$BOARD_NAME.fex" \
-                    > "$SOURCE/$SUNXI_TOOLS/host/script-vga.fex"
-                $SOURCE/$SUNXI_TOOLS/host/fex2bin "$SOURCE/$SUNXI_TOOLS/host/script-vga.fex" "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/script-vga.bin"
-            fi
-
-            # hdmi | screen0_output_type = 3
-            sed 's#screen0_output_type = [0-9]#screen0_output_type = 3#' "$CWD/config/boards/$BOARD_NAME/$BOARD_NAME.fex" \
-                > "$SOURCE/$SUNXI_TOOLS/host/script-hdmi.fex"
-            $SOURCE/$SUNXI_TOOLS/host/fex2bin "$SOURCE/$SUNXI_TOOLS/host/script-hdmi.fex" "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/script-hdmi.bin"
-
-            # add entries necessary for HDMI-to-DVI adapters
-            sed -e 's#screen0_output_type = [0-9]#screen0_output_type = 3#' \
-                -e '/\[hdmi_para\]/a hdcp_enable = 0\nhdmi_cts_compatibility = 1' "$CWD/config/boards/$BOARD_NAME/$BOARD_NAME.fex" \
-                > "$SOURCE/$SUNXI_TOOLS/host/script-hdmi-to-dvi.fex"
-            $SOURCE/$SUNXI_TOOLS/host/fex2bin "$SOURCE/$SUNXI_TOOLS/host/script-hdmi-to-dvi.fex" "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/script-hdmi-to-dvi.bin"
-
-            cd "$BUILD/$PKG/kernel-${SOCFAMILY}/boot"
-            ln -sf "script-$VIDEO_OUTPUT.bin" "script.bin"
-            cd "$CWD"
-        fi
-    fi
-
     # u-boot config
     install -Dm644 $CWD/config/boot_scripts/boot-$SOCFAMILY.cmd "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd"
     # u-boot serial inteface config

@@ -60,15 +60,6 @@ options+=("mini-image" "create basic image" "on")
 options+=("tools" "create and pack tools" "on")
 options+=("xfce-image" "create image with xfce" "off")
 
-case $BOARD_NAME in
-    cubietruck)
-                options+=("hdmi" "video mode hdmi (default vga)" "off")
-            ;;
-    orange_pi*)
-                options+=("hdmi-to-dvi" "video mode via hdmi-to-dvi adapter (default hdmi)" "off")
-            ;;
-esac
-
 # Duplicate file descriptor 1 on descriptor 3
 exec 3>&1
 
@@ -105,18 +96,9 @@ for arg in ${result[*]}; do
            xfce*)
                     DISTR_IMAGES+=($(echo $arg | cut -f1 -d '-'))
                 ;;
-            hdmi)
-                    VIDEO_OUTPUT=$arg
-                ;;
-        hdmi-to-dvi)
-                    VIDEO_OUTPUT=$arg
-                ;;
     esac
 done
 
-# set default
-[[ $BOARD_NAME == orange_pi* ]] && VIDEO_OUTPUT="hdmi"
-[[ -z $VIDEO_OUTPUT ]] && VIDEO_OUTPUT="vga"
 
 #---------------------------------------------
 # clean terminal
@@ -173,11 +155,6 @@ if [[ $COMPILE_BINARIES == true ]]; then
 
     patching_source "kernel"
     compile_kernel
-
-#    if [[ $SOCFAMILY == rk3399 ]]; then
-#        build_kernel_img
-#        build_resource_img
-#    fi
 
     if [[ $SOCFAMILY == sun* && $TOOLS_PACK == true ]]; then
         compile_sunxi_tools
