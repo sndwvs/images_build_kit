@@ -17,6 +17,10 @@ BOOT_LOADER_BIN="u-boot-sunxi-with-spl.bin"
 
 
 case $KERNEL_SOURCE in
+    legacy)
+            KERNEL_BRANCH="linux-4.19.y::"
+            KERNEL_DIR="linux-$SOCFAMILY-$KERNEL_SOURCE"
+    ;;
     next)
             LINUX_SOURCE="https://github.com/megous/linux"
             KERNEL_BRANCH="orange-pi-4.19::"
