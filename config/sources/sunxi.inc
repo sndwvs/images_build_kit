@@ -12,7 +12,7 @@ URL_SUNXI_TOOLS="https://github.com/linux-sunxi"
 SUNXI_TOOLS="sunxi-tools"
 SUNXI_TOOLS_BRANCH="" #"v1.2"
 
-#BOOT_LOADER_BRANCH="master:tag:v2018.05"
+BOOT_LOADER_BRANCH="master:tag:v2019.10"
 BOOT_LOADER_BIN="u-boot-sunxi-with-spl.bin"
 
 
