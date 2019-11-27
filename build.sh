@@ -208,6 +208,7 @@ for image_type in ${DISTR_IMAGES[@]}; do
         setting_first_login
         setting_wifi
         setting_udev
+        install_scripts
         setting_move_to_internal
         [[ $KERNEL_SOURCE == legacy && $SOCFAMILY == sun* ]] && setting_h3dmode
         download_pkg $DISTR_URL "$image_type"

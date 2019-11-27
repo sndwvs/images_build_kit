@@ -480,3 +480,12 @@ setting_hostname() {
 }
 
 
+install_scripts() {
+    if [[ -d $CWD/scripts/$SOCFAMILY ]]; then
+        message "" "install" "scripts"
+        install -d $SOURCE/$ROOTFS/usr/local/bin
+        install -m644 -D $CWD/scripts/$SOCFAMILY/* -t $SOURCE/$ROOTFS/usr/local/bin
+    fi
+}
+
+
