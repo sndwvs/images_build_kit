@@ -7,19 +7,12 @@ if [ -z $CWD ]; then
 fi
 
 #---------------------------------------------
-# board configuration
-#---------------------------------------------
-get_config
-
-#---------------------------------------------
 # mainline kernel source configuration
 #---------------------------------------------
-if [[ $KERNEL_SOURCE == next ]]; then
-    LINUX_SOURCE=${LINUX_SOURCE:-"https://kernel.googlesource.com/pub/scm/linux/kernel/git/stable/linux-stable"}
-    #LINUX_SOURCE='git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git'
-    KERNEL_BRANCH=${KERNEL_BRANCH:-"linux-5.3.y::"}
-    KERNEL_DIR=${KERNEL_DIR:-"linux-$KERNEL_SOURCE"}
-fi
+LINUX_SOURCE=${LINUX_SOURCE:-"https://kernel.googlesource.com/pub/scm/linux/kernel/git/stable/linux-stable"}
+#LINUX_SOURCE='git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git'
+KERNEL_BRANCH=${KERNEL_BRANCH:-"linux-5.3.y::"}
+KERNEL_DIR=${KERNEL_DIR:-"linux-$KERNEL_SOURCE"}
 
 #---------------------------------------------
 # configuration linux distribution
@@ -45,6 +38,17 @@ BOOT_LOADER_BRANCH=${BOOT_LOADER_BRANCH:-"master::"} #"master:tag:v2017.05"
 ATF_SOURCE=${ATF_SOURCE:-"https://github.com/ARM-software/arm-trusted-firmware.git"}
 ATF_DIR=${ATF_DIR:-"arm-trusted-firmware"}
 ATF_BRANCH=${ATF_BRANCH:-"master::"}
+
+
+
+
+#---------------------------------------------
+# board configuration
+#---------------------------------------------
+get_config
+
+
+
 
 #---------------------------------------------
 # xtools configuration
