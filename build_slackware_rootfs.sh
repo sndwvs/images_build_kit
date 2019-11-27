@@ -468,12 +468,6 @@ setting_udev() {
 }
 
 
-setting_h3dmode() {
-    message "" "setting" "h3dmode"
-    install -m755 -D "$CWD/scripts/h3dmode" "$SOURCE/$ROOTFS/sbin/h3dmode"
-}
-
-
 setting_hostname() {
     message "" "setting" "hostname"
     echo $BOARD_NAME | sed 's/_/-/g' > "$SOURCE/$ROOTFS/etc/HOSTNAME"
@@ -484,7 +478,7 @@ install_scripts() {
     if [[ -d $CWD/scripts/$SOCFAMILY ]]; then
         message "" "install" "scripts"
         install -d $SOURCE/$ROOTFS/usr/local/bin
-        install -m644 -D $CWD/scripts/$SOCFAMILY/* -t $SOURCE/$ROOTFS/usr/local/bin
+        install -m755 -D $CWD/scripts/$SOCFAMILY/* -t $SOURCE/$ROOTFS/usr/local/bin
     fi
 }
 
