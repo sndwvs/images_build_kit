@@ -118,16 +118,6 @@ compile_kernel() {
         local KERNEL=Image
     fi
 
-    if [[ $SOCFAMILY == sun* ]]; then
-        # Attempting to run 'firmware_install' with CONFIG_USB_SERIAL_TI=y when
-        # using make 3.82 results in an error
-        # make[2]: *** No rule to make target `/lib/firmware/./', needed by
-        # `/lib/firmware/ti_3410.fw'.  Stop.
-        if [[ $(grep '$(INSTALL_FW_PATH)/$$(dir %)' scripts/Makefile.fwinst) ]];then
-            sed -i 's:$(INSTALL_FW_PATH)/$$(dir %):$$(dir $(INSTALL_FW_PATH)/%):' scripts/Makefile.fwinst
-        fi
-    fi
-
     # delete previous creations
     if [[ $SOCFAMILY != rk3288 || $KERNEL_SOURCE != next ]]; then
         message "" "clean" "$KERNEL_DIR"
