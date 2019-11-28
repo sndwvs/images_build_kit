@@ -44,5 +44,7 @@ write_uboot()
     message "" "write" "$BOOT_LOADER_DIR"
     # clear u-boot
     dd if=/dev/zero of=$1 bs=1k count=1023 seek=1 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    dd if="$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/u-boot/$BOOT_LOADER_BIN" of=$1 bs=1024 seek=8 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    dd if="$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN" of=$1 bs=1024 seek=8 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
+
+
