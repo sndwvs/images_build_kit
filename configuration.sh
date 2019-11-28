@@ -96,7 +96,7 @@ if [[ ${DISTR} == slackwarearm ]];then
 else
     URL_ROOTFS="http://dl.fail.pp.ua/slackware/rootfs/"
 fi
-ROOTFS_NAME=$(wget --no-check-certificate -q -O - $URL_ROOTFS | grep -oP "(sla(ck|rm64)-current-${ARCH}[\.\-\+\d\w]+.tar.xz)" | sort -ur | head -n1 | cut -d '.' -f1)
+ROOTFS_NAME=$(wget --no-check-certificate -q -O - $URL_ROOTFS | grep -oP "(sla(ck|rm64)-current-[\.\-\+\d\w]+.tar.xz)" | sort -ur | head -n1 | cut -d '.' -f1)
 ROOTFS_VERSION=$(date +%Y%m%d)
 
 #---------------------------------------------
