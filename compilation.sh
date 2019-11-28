@@ -137,25 +137,15 @@ compile_kernel() {
     if [[ $SOCFAMILY == rk3* ]]; then
         # fix build firmware
         [[ -d $SOURCE/$KERNEL_DIR/firmware/brcm ]] && ( rsync -ar --ignore-existing $CWD/blobs/$FIRMWARE/brcm/ -d $SOURCE/$KERNEL_DIR/firmware/brcm >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
-
-#        make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS menuconfig  || exit 1
-        make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS $KERNEL modules | tee $LOG
-        [[ ${PIPESTATUS[0]} != 0 ]] && ( message "err" "details" && exit 1 )
-        make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS dtbs || (message "err" "details" && exit 1) || exit 1
     fi
 
-    if [[ $SOCFAMILY == sun* ]]; then
-#        make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS menuconfig  || exit 1
-        make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS oldconfig
-        make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS $KERNEL modules || (message "err" "details" && exit 1) || exit 1
-
-        if [[ "$KERNEL_SOURCE" == "next" ]]; then
-            make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS dtbs || (message "err" "details" && exit 1) || exit 1
-        fi
-    fi
+#    make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS menuconfig  || exit 1
+    make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS oldconfig || (message "err" "details" && exit 1) || exit 1
+    make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS $KERNEL modules | tee $LOG
+    [[ ${PIPESTATUS[0]} != 0 ]] && ( message "err" "details" && exit 1 )
+    make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS dtbs || (message "err" "details" && exit 1) || exit 1
 
     make $CTHREADS O=$(pwd) ARCH=$KARCH CROSS_COMPILE=$CROSS INSTALL_MOD_PATH=$BUILD/$PKG/kernel-modules modules_install >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    [[ "$KERNEL_SOURCE" != next ]] && ( make $CTHREADS O=$(pwd) ARCH=$KARCH CROSS_COMPILE=$CROSS INSTALL_MOD_PATH=$BUILD/$PKG/kernel-modules firmware_install >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
     make $CTHREADS O=$(pwd) ARCH=$KARCH CROSS_COMPILE=$CROSS INSTALL_HDR_PATH=$BUILD/$PKG/kernel-headers/usr headers_install >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
