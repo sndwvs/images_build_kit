@@ -84,11 +84,7 @@ build_kernel_pkg() {
     cd $BUILD/$PKG/kernel-${SOCFAMILY}/ && mkdir "install"
     cat "$CWD/packages/kernel/slack-desc.kernel-template" | sed "s:%SOCFAMILY%:${SOCFAMILY}:g" > "$BUILD/$PKG/kernel-${SOCFAMILY}/install/slack-desc"
     install -m644 -D "$CWD/packages/kernel/doinst.sh.kernel" "$BUILD/$PKG/kernel-${SOCFAMILY}/install/doinst.sh"
-    if [[ $KERNEL_SOURCE = next ]]; then
-        touch "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/.next"
-    else
-        echo "rm boot/.next 2> /dev/null" >> "$BUILD/$PKG/kernel-${SOCFAMILY}/install/doinst.sh"
-    fi
+
     makepkg -l n -c n $BUILD/$PKG/kernel-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     # create kernel-modules package

@@ -37,17 +37,11 @@ if test "${disp_mem_reserves}" = "off"; then setenv bootargs "${bootargs} sunxi_
 
 load ${devtype} ${devnum} ${kernel_addr_r} ${prefix}zImage
 
-if test -e ${devtype} ${devnum} "${prefix}.next"; then
-	echo "Found mainline kernel configuration"
-	load ${devtype} ${devnum} ${fdt_addr_r} ${prefix}dtb/${fdtfile}
-	fdt addr ${fdt_addr_r}
-	fdt resize
-	bootz ${kernel_addr_r} - ${fdt_addr_r}
-else
-	echo "Found legacy kernel configuration"
-	load ${devtype} ${devnum} ${fdt_addr_r} ${prefix}script.bin
-	bootz ${kernel_addr_r}
-fi
+echo "Found mainline kernel configuration"
+load ${devtype} ${devnum} ${fdt_addr_r} ${prefix}dtb/${fdtfile}
+fdt addr ${fdt_addr_r}
+fdt resize 65536
+bootz ${kernel_addr_r} - ${fdt_addr_r}
 
 # Recompile with:
 # mkimage -C none -A arm -T script -d /boot/boot.cmd /boot/boot.scr
