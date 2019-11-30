@@ -13,18 +13,13 @@ compile_sunxi_tools() {
 
     # for host
     make -s clean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    make -s all clean CROSS_COMPILE='' >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    make -s fex2bin >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    make -s bin2fex >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make -s tools >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     mkdir -p "host"
     cp -a {sunxi-fexc,fex2bin,bin2fex} "host/"
 
     # for destination
     make -s clean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    make -s all clean CROSS_COMPILE='' >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    make $CTHREADS 'fex2bin' CC=${CROSS}gcc >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    make $CTHREADS 'bin2fex' CC=${CROSS}gcc >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    make $CTHREADS 'sunxi-nand-part' CC=${CROSS}gcc >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make $CTHREADS tools CC=${CROSS}gcc >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 compile_boot_loader() {
