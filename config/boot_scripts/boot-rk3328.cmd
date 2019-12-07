@@ -6,7 +6,6 @@
 setenv load_addr "0x39000000"
 # default values
 setenv rootdev "/dev/mmcblk0p1"
-setenv fdt_file "%DEVICE_TREE_BLOB%"
 setenv verbosity "4"
 setenv console "both"
 setenv rootfstype "ext4"
@@ -29,7 +28,7 @@ if test "${console}" = "serial" || test "${console}" = "both"; then setenv conso
 
 setenv bootargs "root=${rootdev} ro rootwait rootfstype=${rootfstype} init=/sbin/init ${consoleargs} panic=10 consoleblank=0 loglevel=${verbosity} ${extraargs}"
 
-load ${devtype} ${devnum}:1 ${fdt_addr_r} ${prefix}dtb/${fdt_file}
+load ${devtype} ${devnum}:1 ${fdt_addr_r} ${prefix}dtb/${fdtfile}
 load ${devtype} ${devnum}:1 ${kernel_addr_r} ${prefix}Image
 fdt addr ${fdt_addr_r}
 fdt resize 65536

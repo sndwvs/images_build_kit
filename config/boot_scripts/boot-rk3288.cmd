@@ -5,7 +5,6 @@
 
 setenv load_addr "0x39000000"
 setenv rootdev "/dev/mmcblk2p1"
-setenv fdt_file "rk3288-firefly.dtb"
 setenv console "both"
 setenv verbosity "4"
 setenv rootfstype "ext4"
@@ -30,7 +29,7 @@ if test "${console}" = "serial" || test "${console}" = "both"; then setenv conso
 
 setenv bootargs "consoleblank=0 scandelay root=${rootdev} ro rootwait rootfstype=${rootfstype} init=/sbin/init ${consoleargs} loglevel=${verbosity} ${extraargs}"
 
-load ${devtype} ${devnum}:1 ${fdt_addr_r} ${prefix}dtb/${fdt_file}
+load ${devtype} ${devnum}:1 ${fdt_addr_r} ${prefix}dtb/${fdtfile}
 load ${devtype} ${devnum}:1 ${kernel_addr_r} ${prefix}zImage
 bootz ${kernel_addr_r} - ${fdt_addr_r}
 

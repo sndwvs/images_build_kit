@@ -40,16 +40,17 @@ build_kernel_pkg() {
     # u-boot config
     install -Dm644 $CWD/config/boot_scripts/boot-$SOCFAMILY.cmd "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd"
     # u-boot serial inteface config
-    sed -e "s:%DEVICE_TREE_BLOB%:${DEVICE_TREE_BLOB}:g" \
-        -e "s:%SERIAL_CONSOLE%:${SERIAL_CONSOLE}:g" \
+    sed -e "s:%SERIAL_CONSOLE%:${SERIAL_CONSOLE}:g" \
         -e "s:%SERIAL_CONSOLE_SPEED%:${SERIAL_CONSOLE_SPEED}:g" \
         -i "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd"
     # compile boot script
     [[ -f $BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd ]] && ( $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A arm -T script -d $BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd \
                                                                         "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.scr" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
-
     # u-boot
-    [[ -f "$CWD/config/boot_scripts/uEnv-$SOCFAMILY.txt" ]] && install -Dm644 $CWD/config/boot_scripts/uEnv-$SOCFAMILY.txt "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/uEnv.txt.new"
+    if [[ -f "$CWD/config/boot_scripts/uEnv-$SOCFAMILY.txt" ]]; then
+        install -Dm644 $CWD/config/boot_scripts/uEnv-$SOCFAMILY.txt "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/uEnv.txt.new"
+        echo "fdtfile=${DEVICE_TREE_BLOB}" >> "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/uEnv.txt.new"
+    fi
     # change root disk if disk not default
     [[ -n ${ROOT_DISK##*mmcblk0p1} ]] && echo "rootdev=/dev/$ROOT_DISK" >> "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/uEnv.txt.new"
     cd "$CWD" # fix actual current directory
