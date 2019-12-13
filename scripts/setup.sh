@@ -23,7 +23,7 @@ case $(cat /proc/device-tree/compatible | tr -d [:cntrl:]) in
             LOADER="idbloader.img:uboot.img:trust.img"
             FIX_BOOT_DISK=1
     ;;
-    *rock*64*|rock*pi*4)
+    *rock*64*|rock*pi*)
             OFFSET_LOADER="64"
             LOADER="rksd_loader.img"
             FIX_BOOT_DISK=1
@@ -231,7 +231,7 @@ case "$OUT" in
 #    3)  get_disks DISK ;;
 esac
 
-msginfo "\nwait is disk preparation..."
+msginfo "\ndisk preparation in progress..."
 
 prepare_disk "$DISK" OUT
 
