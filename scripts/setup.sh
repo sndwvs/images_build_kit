@@ -11,7 +11,7 @@ fi
 # configuration
 #---------------------------------------------
 ROOT_DISK=$(lsblk -in |  grep "/$" | cut -d '-' -f2 | cut -d ' ' -f1 | sed 's/^\([a-z]*\)\([0-9]*\)\(\w*\)/\1\2/')
-DIRS=("/bin" "/boot" "/dev" "/etc" "/home" "/lib" "/media" "/mnt" "/opt" "/root" "/run" "/sbin" "/srv" "/swap" "/tmp" "/usr" "/var")
+DIRS=("/bin" "/boot" "/etc" "/home" "/lib" "/opt" "/root" "/sbin" "/srv" "/swap" "/tmp" "/usr" "/var")
 OUTPUT="/prepare"
 OFFSET=$(fdisk -l /dev/$ROOT_DISK | tac | head -n 1 | awk '{print $2}')
 PART=1
@@ -192,7 +192,7 @@ prepare_disk() {
 transfer() {
     local size=$( du -s ${DIRS[@]} | awk 'BEGIN{sum=0}{sum+=$1}END{print sum}' )
 
-    mkdir -p $OUTPUT/{proc,sys}
+    mkdir -p $OUTPUT/{dev,media,mnt,proc,run,sys}
 
     (
         for dir in ${DIRS[@]}; do
