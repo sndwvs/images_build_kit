@@ -199,13 +199,15 @@ transfer() {
             local processed=$(( $processed + $(du -s $dir | awk 'BEGIN{sum=0}{sum+=$1}END{print sum}') ))
             local pct=$(( $processed * 100 / $size ))
             local procent=${pct%.*}
-            cp -ra $dir $OUTPUT/
+            cp -ra $dir $OUTPUT/ 2>&1>/dev/null || exit 1
             echo "XXX"
             echo "transfer directory:  $dir"
             echo "XXX"
             printf '%.0f\n' ${procent}
         done
     ) | dialog --title "Transfer system" --gauge "Copy system..." 6 60
+
+    return ${PIPESTATUS[0]}
 }
 
 #---------------------------------------------
