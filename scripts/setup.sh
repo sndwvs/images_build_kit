@@ -11,7 +11,8 @@ fi
 # configuration
 #---------------------------------------------
 ROOT_DISK=$(lsblk -in |  grep "/$" | cut -d '-' -f2 | cut -d ' ' -f1 | sed 's/^\([a-z]*\)\([0-9]*\)\(\w*\)/\1\2/')
-DIRS=("/bin" "/boot" "/etc" "/home" "/lib" "/opt" "/root" "/sbin" "/srv" "/swap" "/tmp" "/usr" "/var")
+DIRS=("/bin" "/boot" "/dev" "/etc" "/home" "/lib" "/opt" "/root" "/sbin" "/srv" "/swap" "/tmp" "/usr" "/var")
+[[ $(uname -m) == aarch64 ]] && DIRS+=("/lib64")
 OUTPUT="/prepare"
 OFFSET=$(fdisk -l /dev/$ROOT_DISK | tac | head -n 1 | awk '{print $2}')
 PART=1
@@ -197,7 +198,7 @@ prepare_disk() {
 transfer() {
     local size=$( du -s ${DIRS[@]} | awk 'BEGIN{sum=0}{sum+=$1}END{print sum}' )
 
-    mkdir -p $OUTPUT/{dev,media,mnt,proc,run,sys}
+    mkdir -p $OUTPUT/{media,mnt,proc,run,sys}
 
     (
         for dir in ${DIRS[@]}; do
@@ -232,7 +233,7 @@ fix_config() {
 #---------------------------------------------
 # main
 #---------------------------------------------
-[[ $RUNLEVEL > 2 ]] && ( msginfo " ATTENTION " "\ncurrent runlevel $RUNLEVEL\nin order to correctly transfer the system,\nyou must go to level 2 or lower\nbash$ init 2" && exit 1 )
+[[ $RUNLEVEL > 2 ]] && ( msginfo " ATTENTION " "\ncurrent runlevel $RUNLEVEL\nin order to correctly transfer the system,\nyou must go to runlevel 2 or lower\nbash$ init 2" && exit 1 )
 
 options+=("1" "system moving on the emmc or nand")
 #options+=("2" "system moving on the nand")
