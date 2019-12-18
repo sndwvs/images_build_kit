@@ -232,7 +232,7 @@ fix_config() {
 #---------------------------------------------
 # main
 #---------------------------------------------
-[[ $RUNLEVEL > 2 ]] && msginfo " ATTENTION " "\ncurrent runlevel $RUNLEVEL\nin order to correctly transfer the system,\nyou must go to level 2 or lower\nbash$ init 2"
+[[ $RUNLEVEL > 2 ]] && ( msginfo " ATTENTION " "\ncurrent runlevel $RUNLEVEL\nin order to correctly transfer the system,\nyou must go to level 2 or lower\nbash$ init 2" && exit 1 )
 
 options+=("1" "system moving on the emmc or nand")
 #options+=("2" "system moving on the nand")
