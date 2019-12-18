@@ -15,6 +15,8 @@ DIRS=("/bin" "/boot" "/etc" "/home" "/lib" "/opt" "/root" "/sbin" "/srv" "/swap"
 OUTPUT="/prepare"
 OFFSET=$(fdisk -l /dev/$ROOT_DISK | tac | head -n 1 | awk '{print $2}')
 PART=1
+RUNLEVEL=$(runlevel)
+RUNLEVEL=${RUNLEVEL#* }
 
 
 case $(cat /proc/device-tree/compatible | tr -d [:cntrl:]) in
@@ -49,8 +51,8 @@ esac
 # selected message
 #---------------------------------------------
 msg() {
-    local title=$1
-    local message=$2
+    local title="$1"
+    local message="$2"
 
     # Duplicate file descriptor 1 on descriptor 3
     exec 3>&1
@@ -71,11 +73,14 @@ msg() {
 # info message
 #---------------------------------------------
 msginfo() {
+    local title="$1"
+    local message="$2"
+
     # Duplicate file descriptor 1 on descriptor 3
     exec 3>&1
     # Generate the dialog box
-    result=$(dialog --title "message" \
-      --infobox "$1" 10 50 2>&1 1>&3)
+    result=$(dialog --title "$title" \
+      --infobox "$message" 10 50 2>&1 1>&3)
     sleep 2
     # Close file descriptor 3
     exec 3>&-
@@ -221,6 +226,14 @@ fix_config() {
     sed -i '/^if*/,/^$/d' $OUTPUT/etc/issue
 }
 
+
+
+
+#---------------------------------------------
+# main
+#---------------------------------------------
+[[ $RUNLEVEL > 2 ]] && msginfo " ATTENTION " "\ncurrent runlevel $RUNLEVEL\nin order to correctly transfer the system,\nyou must go to level 2 or lower\nbash$ init 2"
+
 options+=("1" "system moving on the emmc or nand")
 #options+=("2" "system moving on the nand")
 #options+=("3" "system moving on the sata")
@@ -233,7 +246,7 @@ case "$OUT" in
 #    3)  get_disks DISK ;;
 esac
 
-msginfo "\ndisk preparation in progress..."
+msginfo " ATTENTION " "\ndisk preparation in progress..."
 
 prepare_disk "$DISK" OUT
 
@@ -249,5 +262,5 @@ umount $OUTPUT
 
 rmdir $OUTPUT
 
-msginfo "\nremove the memory card and restart the system"
+msginfo " CONGRATULATIONS " "\nremove the memory card and restart the system"
 
