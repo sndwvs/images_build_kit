@@ -5557,15 +5557,6 @@ index 0401d4ec1f45..e544deb61d28 100644
  		#clock-cells = <1>;
  		clock-output-names = "xin32k", "rk808-clkout2";
  		pinctrl-names = "default";
-@@ -574,7 +574,7 @@
- 
- 	pmic {
- 		pmic_int_l: pmic-int-l {
--			rockchip,pins = <1 RK_PC5 RK_FUNC_GPIO &pcfg_pull_up>;
-+			rockchip,pins = <3 RK_PB2 RK_FUNC_GPIO &pcfg_pull_up>;
- 		};
- 
- 		vsel1_gpio: vsel1-gpio {
 @@ -624,7 +624,6 @@
  
  &sdmmc {
@@ -5574,16 +5565,6 @@ index 0401d4ec1f45..e544deb61d28 100644
  	cap-sd-highspeed;
  	cd-gpios = <&gpio0 7 GPIO_ACTIVE_LOW>;
  	disable-wp;
-@@ -636,8 +635,7 @@
- 
- &sdhci {
- 	bus-width = <8>;
--	mmc-hs400-1_8v;
--	mmc-hs400-enhanced-strobe;
-+	mmc-hs200-1_8v;
- 	non-removable;
- 	status = "okay";
- };
 diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfig
 index 8e05c39eab08..c9a867ac32d4 100644
 --- a/arch/arm64/configs/defconfig
