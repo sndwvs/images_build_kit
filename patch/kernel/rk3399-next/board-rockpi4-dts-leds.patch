@@ -24,7 +24,7 @@ index e03062715..a97e02bc0 100644
 +			label = "power";
 +			gpios = <&gpio3 RK_PD4 GPIO_ACTIVE_HIGH>;
 +			linux,default-trigger = "default-on";
-+//			status = "disabled";
++			status = "disabled";
 +		};
 +
 +		system-status {
