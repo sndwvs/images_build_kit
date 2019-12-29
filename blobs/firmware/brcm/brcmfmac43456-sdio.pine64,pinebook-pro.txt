@@ -1,1 +1,1 @@
-../nvram_ap6256.txt
+brcmfmac4356-sdio.txt
