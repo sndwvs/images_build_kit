@@ -77,8 +77,25 @@ build_kernel_pkg() {
 
     cd $BUILD/$PKG/kernel-modules/lib/modules/${KERNEL_VERSION}*
     rm build source
-    ln -s /usr/include build
-    ln -s /usr/include source
+    ln -s /usr/src/linux-${KERNEL_VERSION} build
+    ln -s /usr/src/linux-${KERNEL_VERSION} source
+
+
+    # build kernel-source
+    [[ ! -d "$BUILD/$PKG/kernel-source" ]] && mkdir -p $BUILD/$PKG/kernel-source/usr/src/linux-${KERNEL_VERSION}
+    rsync -a --exclude .git --delete $SOURCE/$KERNEL_DIR/ $BUILD/$PKG/kernel-source/usr/src/linux-${KERNEL_VERSION}/
+    cd $BUILD/$PKG/kernel-source/usr/src/linux-${KERNEL_VERSION}/
+    make clean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    # Make sure header files aren't missing...
+    make prepare >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    # Don't package the kernel in the sources:
+    find . -name "*Image" -exec rm "{}" \+
+    # No need for these:
+    rm -f .config.old .version
+    find . -name "*.cmd" -exec rm -f "{}" \+ 
+    rm .*.d
+    cd ..
+    ln -sf linux-${KERNEL_VERSION} linux
 
 
     # create kernel package
@@ -103,6 +120,11 @@ build_kernel_pkg() {
     cat "$CWD/packages/kernel/slack-desc.kernel-firmware" | sed "s:%SOCFAMILY%:${SOCFAMILY}:g" > "$BUILD/$PKG/kernel-firmware/install/slack-desc"
     makepkg -l n -c n $BUILD/$PKG/kernel-firmware-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
+    # create kernel-source package
+    cd $BUILD/$PKG/kernel-source/ && mkdir "install"
+    cat "$CWD/packages/kernel/slack-desc.kernel-source" | sed "s:%SOCFAMILY%:${SOCFAMILY}:g" > "$BUILD/$PKG/kernel-source/install/slack-desc"
+    makepkg -l n -c n $BUILD/$PKG/kernel-source-${SOCFAMILY}-${KERNEL_VERSION}-noarch-${PKG_BUILD}${PACKAGER}.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
     cd $BUILD/$PKG
 
     # clear kernel packages directories
@@ -117,6 +139,9 @@ build_kernel_pkg() {
 
     [[ -d "$BUILD/$PKG/kernel-firmware" ]] && \
         rm -rf "$BUILD/$PKG/kernel-firmware" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
+    [[ -d "$BUILD/$PKG/kernel-source" ]] && \
+        rm -rf "$BUILD/$PKG/kernel-source" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 
