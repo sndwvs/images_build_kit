@@ -19,9 +19,9 @@ case "$1" in
                     mkswap /swap >/dev/null 2>&1
                     swapon /swap >/dev/null 2>&1
                     echo "/swap none swap defaults,pri=5 0 0" >> /etc/fstab
-                    echo "vm.swappiness = 0" >> /etc/sysctl.d/swap.conf
+                    echo "vm.swappiness = 10" >> /etc/sysctl.d/swap.conf
                     # apply parameter
-                    sysctl -qw vm.swappiness=0
+                    sysctl -qw vm.swappiness=10
 
                     rm -f /tmp/{firstboot,part} 2>&1>/dev/null
                     exit 0
