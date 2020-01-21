@@ -42,7 +42,7 @@ git_fetch() {
     fi
     set -e
     case $TYPE in
-        tag)    ( git fetch && git checkout -f ${VAR} ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 ;;
+        tag)    ( git fetch -t && git checkout -f ${VAR} ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 ;;
         commit) ( git reset --hard ${VAR} && git fetch ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 ;;
     esac
     popd >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
