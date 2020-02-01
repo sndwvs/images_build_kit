@@ -1380,7 +1380,20 @@ diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/boot/dts/rockchip/rk3399-ro
  	sdio_pwrseq: sdio-pwrseq {
  		compatible = "mmc-pwrseq-simple";
  		clocks = <&rk808 1>;
-@@ -96,6 +121,15 @@
+@@ -81,12 +106,6 @@
+ 		reset-gpios = <&gpio0 RK_PB2 GPIO_ACTIVE_LOW>;
+ 	};
+ 
+-	sound {
+-		compatible = "audio-graph-card";
+-		label = "rockchip,rk3399";
+-		dais = <&i2s1_p0>;
+-	};
+-
+ 	vcc12v_dcin: vcc12v-dcin {
+ 		compatible = "regulator-fixed";
+ 		regulator-name = "vcc12v_dcin";
+@@ -96,6 +115,15 @@
  		regulator-max-microvolt = <12000000>;
  	};
  
@@ -1396,7 +1409,7 @@ diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/boot/dts/rockchip/rk3399-ro
  	/* switched by pmic_sleep */
  	vcc1v8_s3: vcca1v8_s3: vcc1v8-s3 {
  		compatible = "regulator-fixed";
-@@ -119,6 +153,13 @@
+@@ -119,6 +147,13 @@
  		vin-supply = <&vcc12v_dcin>;
  	};
  
@@ -1410,7 +1423,7 @@ diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/boot/dts/rockchip/rk3399-ro
  	vcc3v3_sys: vcc3v3-sys {
  		compatible = "regulator-fixed";
  		regulator-name = "vcc3v3_sys";
-@@ -208,6 +249,33 @@
+@@ -208,6 +243,33 @@
  	cpu-supply = <&vdd_cpu_b>;
  };
  
@@ -1444,7 +1457,7 @@ diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/boot/dts/rockchip/rk3399-ro
  &emmc_phy {
  	status = "okay";
  };
-@@ -216,15 +284,20 @@
+@@ -216,15 +278,20 @@
  	assigned-clocks = <&cru SCLK_RMII_SRC>;
  	assigned-clock-parents = <&clkin_gmac>;
  	clock_in_out = "input";
@@ -1467,7 +1480,7 @@ diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/boot/dts/rockchip/rk3399-ro
  	status = "okay";
  };
  
-@@ -439,6 +512,8 @@
+@@ -439,6 +506,8 @@
  		fcs,suspend-voltage-selector = <1>;
  		pinctrl-names = "default";
  		pinctrl-0 = <&vsel1_gpio>;
@@ -1476,7 +1489,7 @@ diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/boot/dts/rockchip/rk3399-ro
  		regulator-name = "vdd_cpu_b";
  		regulator-min-microvolt = <712500>;
  		regulator-max-microvolt = <1500000>;
-@@ -458,6 +533,8 @@
+@@ -458,6 +527,8 @@
  		fcs,suspend-voltage-selector = <1>;
  		pinctrl-names = "default";
  		pinctrl-0 = <&vsel2_gpio>;
@@ -1485,25 +1498,32 @@ diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/boot/dts/rockchip/rk3399-ro
  		regulator-name = "vdd_gpu";
  		regulator-min-microvolt = <712500>;
  		regulator-max-microvolt = <1500000>;
-@@ -496,6 +573,17 @@
- 	i2c-scl-rising-time-ns = <450>;
+@@ -477,18 +548,15 @@
  	i2c-scl-falling-time-ns = <15>;
  	status = "okay";
-+
+ 
+-	es8316: codec@11 {
 +	es8316: es8316@10 {
 +		#sound-dai-cells = <0>;
-+		compatible = "everest,es8316";
+ 		compatible = "everest,es8316";
+-		reg = <0x11>;
 +		reg = <0x10>;
-+		clocks = <&cru SCLK_I2S_8CH_OUT>;
-+		clock-names = "mclk";
+ 		clocks = <&cru SCLK_I2S_8CH_OUT>;
+ 		clock-names = "mclk";
+-		#sound-dai-cells = <0>;
+-
+-		port {
+-			es8316_p0_0: endpoint {
+-				remote-endpoint = <&i2s1_p0_0>;
+-			};
+-		};
 +		pinctrl-names = "default";
 +		pinctrl-0 = <&i2s_8ch_mclk>;
 +		hp-det-gpio = <&gpio0 RK_PB0 GPIO_ACTIVE_LOW>;
-+	};
+ 	};
  };
  
- &i2c4 {
-@@ -503,27 +591,19 @@
+@@ -503,46 +571,31 @@
  	i2c-scl-falling-time-ns = <20>;
  	status = "okay";
  
@@ -1531,9 +1551,14 @@ diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/boot/dts/rockchip/rk3399-ro
  	rockchip,capture-channels = <2>;
 +	#sound-dai-cells = <0>;
  	status = "okay";
- 
- 	i2s1_p0: port {
-@@ -536,13 +616,14 @@
+-
+-	i2s1_p0: port {
+-		i2s1_p0_0: endpoint {
+-			dai-format = "i2s";
+-			mclk-fs = <256>;
+-			remote-endpoint = <&es8316_p0_0>;
+-		};
+-	};
  };
  
  &i2s2 {
@@ -1549,7 +1574,7 @@ diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/boot/dts/rockchip/rk3399-ro
  	audio-supply = <&vcc_3v0>;
  	sdmmc-supply = <&vcc_sdio>;
  	gpio1830-supply = <&vcc_3v0>;
-@@ -626,11 +707,23 @@
+@@ -626,11 +680,23 @@
  		};
  	};
  
@@ -1573,7 +1598,7 @@ diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/boot/dts/rockchip/rk3399-ro
  };
  
  &pwm0 {
-@@ -641,6 +734,10 @@
+@@ -641,6 +707,10 @@
  	status = "okay";
  };
  
@@ -1584,7 +1609,7 @@ diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/boot/dts/rockchip/rk3399-ro
  &pwm2 {
  	status = "okay";
  };
-@@ -650,12 +747,30 @@
+@@ -650,12 +720,30 @@
  	status = "okay";
  };
  
@@ -1615,7 +1640,7 @@ diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/boot/dts/rockchip/rk3399-ro
  	pinctrl-names = "default";
  	pinctrl-0 = <&sdmmc_clk &sdmmc_cmd &sdmmc_bus4>;
  	status = "okay";
-@@ -663,7 +778,9 @@
+@@ -663,7 +751,9 @@
  
  &sdhci {
  	bus-width = <8>;
@@ -1625,7 +1650,7 @@ diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/boot/dts/rockchip/rk3399-ro
  	non-removable;
  	status = "okay";
  };
-@@ -779,3 +896,39 @@
+@@ -779,3 +869,39 @@
  &vopl_mmu {
  	status = "okay";
  };
