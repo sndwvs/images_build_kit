@@ -56,7 +56,7 @@ build_kernel_pkg() {
     cd "$CWD" # fix actual current directory
     # clean-up unnecessary files generated during install
     find "$BUILD/$PKG/kernel-modules" "$BUILD/$PKG/kernel-headers" \( -name .install -o -name ..install.cmd \) -delete
-    message "" "create" "kernel pakages"
+    message "" "create" "kernel packages"
     # split install_modules -> firmware
     install -dm755 "$BUILD/$PKG/kernel-firmware/lib"
     if [ -d $BUILD/$PKG/kernel-modules/lib/firmware ];then
