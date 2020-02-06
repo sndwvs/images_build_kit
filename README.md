@@ -31,4 +31,5 @@ password: **password**
         + [Firefly-RK3399](http://en.t-firefly.com/product/rk3399.html)
         + [ROCKPro64](http://wiki.pine64.org/index.php/ROCKPro64_Main_Page#SoC_and_Memory_Specification)
         + [Rock Pi 4](http://rockpi.org/#spec-section)
+        + [Pinebook Pro](https://wiki.pine64.org/index.php/Pinebook_Pro#SoC_and_Memory_Specification)
 
