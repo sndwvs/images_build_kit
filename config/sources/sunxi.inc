@@ -37,8 +37,8 @@ create_uboot()
     if [[ $SOCFAMILY == sun?i ]]; then
         install -Dm644 $BOOT_LOADER_BIN $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     else
-        install -Dm644 sunxi-spl.bin $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        install -Dm644 u-boot.itb $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        install -Dm644 sunxi-spl.bin $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/sunxi-spl.bin >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        install -Dm644 u-boot.itb $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/u-boot.itb >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
     popd >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
