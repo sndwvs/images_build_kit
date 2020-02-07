@@ -20,6 +20,8 @@ password: **password**
     * H3
         + [Orange Pi Plus 2E](https://linux-sunxi.org/Xunlong_Orange_Pi_Plus_2E)
         + [Orange Pi PC](https://linux-sunxi.org/Xunlong_Orange_Pi_PC)
+    * A64
+        + [1080P Pinebook](https://wiki.pine64.org/index.php/1080P_Pinebook#SoC_and_Memory_Specification)
 * Rockchip
     * RK3288
         + [Firefly-RK3288](http://en.t-firefly.com/product/rk3288.html)
