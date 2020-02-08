@@ -125,9 +125,6 @@ if [[ -f $LOG ]]; then
     rm $LOG
 fi
 
-# compile atf
-[[ $SOCFAMILY == rk33* ]] && ATF="true"
-
 #---------------------------------------------
 # main script
 #---------------------------------------------
@@ -147,7 +144,7 @@ fi
 #---------------------------------------------
 message "" "start" "build $DISTR ARCH $ARCH"
 if [[ $COMPILE_BINARIES == true ]]; then
-    [[ ! -z $ATF ]] && compile_boot_tools
+    [[ ! -z $ATF && $SOCFAMILY == rk33* ]] && compile_boot_tools
     [[ ! -z $ATF ]] && compile_atf
 
     patching_source "u-boot"

@@ -40,6 +40,9 @@ compile_boot_loader() {
     # added in name suffix
     change_name_version "-$SOCFAMILY"
 
+    [[ ! -z $ATF && ! -z $BL31 ]] && export BL31=$SOURCE/$ATF_DIR/$BL31
+    [[ ! -z $ATF && -z $BL31 ]] && export BL31=$SOURCE/$ATF_DIR/bl31.bin
+
     if [[ $SOCFAMILY == rk3* ]]; then
         # u-boot-firefly-rk3288 2016.03 package contains backports
         # of EFI support patches and fails to boot the kernel on the Firefly.
@@ -50,7 +53,7 @@ compile_boot_loader() {
 
         # for rockpro64, rock pi 4, pinebook pro
         if [[ $BOARD_NAME == rockpro64 || $BOARD_NAME == rock_pi_4 || $BOARD_NAME == pinebook_pro ]]; then
-            make $CTHREADS ARCH=$ARCH u-boot.itb CROSS_COMPILE=$CROSS BL31=$SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL31 >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            make $CTHREADS ARCH=$ARCH u-boot.itb CROSS_COMPILE=$CROSS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
     fi
 
@@ -78,19 +81,32 @@ compile_atf() {
         CFLAGS='-gdwarf-2' \
         CROSS_COMPILE=$CROSS \
         M0_CROSS_COMPILE=$CROSS32 \
-        make PLAT=$SOCFAMILY DEBUG=0 bl31 >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        make PLAT=$ATF_PLAT DEBUG=0 bl31 >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
+
+    if [[ $SOCFAMILY == sun50* ]]; then
+        make realclean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        make PLAT=$ATF_PLAT DEBUG=0 bl31 >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
     if [[ ! -z $BL31 && $NATIVE_ARCH == true ]]; then
-        ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL31 bl31.elf
-        [[ ! -z $BL32 ]] && ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL32 bl32.bin
+        if [[ $SOCFAMILY == rk3* ]]; then
+            ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL31 bl31.elf
+            [[ ! -z $BL32 ]] && ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL32 bl32.bin
+        fi
     else
-        ln -fs ./build/$SOCFAMILY/release/bl31/bl31.elf bl31.elf
-        ln -fs ./build/$SOCFAMILY/release/bl32/bl32.bin bl32.bin
+        if [[ $SOCFAMILY == rk3* ]]; then
+            ln -fs ./build/$SOCFAMILY/release/bl31/bl31.elf bl31.elf
+            ln -fs ./build/$SOCFAMILY/release/bl32/bl32.bin bl32.bin
+        elif [[ $SOCFAMILY == sun50* ]]; then
+            [[ -e ./build/sun50i_a64/release/bl31.bin ]] && ln -fs ./build/sun50i_a64/release/bl31.bin bl31.bin
+        fi
     fi
 
-    $SOURCE/$BOOT_LOADER_TOOLS_DIR/tools/trust_merger $CWD/config/atf/$SOCFAMILY/trust.ini >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    install -Dm644 trust.img $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    if [[ $SOCFAMILY == rk3* ]]; then
+        $SOURCE/$BOOT_LOADER_TOOLS_DIR/tools/trust_merger $CWD/config/atf/$SOCFAMILY/trust.ini >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        install -Dm644 trust.img $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
 }
 
 compile_boot_tools() {
