@@ -97,7 +97,7 @@ compile_atf() {
     else
         if [[ $SOCFAMILY == rk3* ]]; then
             ln -fs ./build/$SOCFAMILY/release/bl31/bl31.elf bl31.elf
-            ln -fs ./build/$SOCFAMILY/release/bl32/bl32.bin bl32.bin
+#            ln -fs ./build/$SOCFAMILY/release/bl32/bl32.bin bl32.bin
         elif [[ $SOCFAMILY == sun50* ]]; then
             [[ -e ./build/sun50i_a64/release/bl31.bin ]] && ln -fs ./build/sun50i_a64/release/bl31.bin bl31.bin
         fi
