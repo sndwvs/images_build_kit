@@ -53,7 +53,7 @@ get_config
 #---------------------------------------------
 # xtools configuration
 #---------------------------------------------
-if [[ $NATIVE_ARCH != true ]]; then
+if [[ $ARCH == "x86_64" ]]; then
     BASE_URL_XTOOLS="https://releases.linaro.org/components/toolchain/binaries"
     XTOOLS_ARM_SUFFIX="arm-linux-gnueabihf"
     XTOOLS_ARM64_SUFFIX="aarch64-linux-gnu"
@@ -61,31 +61,27 @@ if [[ $NATIVE_ARCH != true ]]; then
 
     OLD_BASE_VERSION_XTOOLS="5.5-2017.10"
     OLD_VERSION_XTOOLS="5.5.0-2017.10"
-#    OLD_BASE_VERSION_XTOOLS="4.9-2017.01"
-#    OLD_VERSION_XTOOLS="4.9.4-2017.01"
     BASE_VERSION_XTOOLS="7.2-2017.11"
     VERSION_XTOOLS="7.2.1-2017.11"
 
-    XTOOLS+=("$XTOOLS_PREFIX-$VERSION_XTOOLS-$(uname -m)_$XTOOLS_ARM_SUFFIX")
-    XTOOLS+=("$XTOOLS_PREFIX-$VERSION_XTOOLS-$(uname -m)_$XTOOLS_ARM64_SUFFIX")
-    XTOOLS+=("$XTOOLS_PREFIX-$OLD_VERSION_XTOOLS-$(uname -m)_$XTOOLS_ARM_SUFFIX")
-    XTOOLS+=("$XTOOLS_PREFIX-$OLD_VERSION_XTOOLS-$(uname -m)_$XTOOLS_ARM64_SUFFIX")
+    XTOOLS+=("$XTOOLS_PREFIX-$VERSION_XTOOLS-${ARCH}_$XTOOLS_ARM_SUFFIX")
+    XTOOLS+=("$XTOOLS_PREFIX-$VERSION_XTOOLS-${ARCH}_$XTOOLS_ARM64_SUFFIX")
+    XTOOLS+=("$XTOOLS_PREFIX-$OLD_VERSION_XTOOLS-${ARCH}_$XTOOLS_ARM_SUFFIX")
+    XTOOLS+=("$XTOOLS_PREFIX-$OLD_VERSION_XTOOLS-${ARCH}_$XTOOLS_ARM64_SUFFIX")
     URL_XTOOLS+=("$BASE_URL_XTOOLS/$BASE_VERSION_XTOOLS/$XTOOLS_ARM_SUFFIX")
     URL_XTOOLS+=("$BASE_URL_XTOOLS/$BASE_VERSION_XTOOLS/$XTOOLS_ARM64_SUFFIX")
     URL_XTOOLS+=("$BASE_URL_XTOOLS/$OLD_BASE_VERSION_XTOOLS/$XTOOLS_ARM_SUFFIX")
     URL_XTOOLS+=("$BASE_URL_XTOOLS/$OLD_BASE_VERSION_XTOOLS/$XTOOLS_ARM64_SUFFIX")
+elif [[ $ARCH == "aarch64" ]]; then
+    # https://developer.arm.com/-/media/Files/downloads/gnu-a/9.2-2019.12/binrel/gcc-arm-9.2-2019.12-aarch64-arm-none-linux-gnueabihf.tar.xz
+    BASE_URL_XTOOLS="https://developer.arm.com/-/media/Files/downloads/gnu-a"
+    XTOOLS_ARM_SUFFIX="arm-none-linux-gnueabihf"
+    XTOOLS_PREFIX="gcc-arm"
+    BASE_VERSION_XTOOLS="9.2-2019.12"
+    VERSION_XTOOLS=$BASE_VERSION_XTOOLS
+    XTOOLS+=("$XTOOLS_PREFIX-$VERSION_XTOOLS-$ARCH-$XTOOLS_ARM_SUFFIX")
+    URL_XTOOLS+=("$BASE_URL_XTOOLS/$BASE_VERSION_XTOOLS/binrel")
 fi
-
-#if [[ $ARCH == aarch64 ]]; then
-#    BASE_URL_XTOOLS="http://dl.fail.pp.ua/slackware/xtools"
-#    XTOOLS_ARM_SUFFIX="arm-slackware-linux-gnueabihf"
-#    XTOOLS_PREFIX="gcc"
-#    BASE_VERSION_XTOOLS="8.2-2019.02"
-#    VERSION_XTOOLS="8.2.0-2019.02"
-
-#    XTOOLS+=("$XTOOLS_PREFIX-$VERSION_XTOOLS-$(uname -m)_$XTOOLS_ARM_SUFFIX")
-#    URL_XTOOLS+=("$BASE_URL_XTOOLS/$BASE_VERSION_XTOOLS/$XTOOLS_ARM_SUFFIX")
-#fi
 
 
 #---------------------------------------------
@@ -129,7 +125,7 @@ for XTOOL in ${XTOOLS[*]}; do
     fi
 done
 
-[[ $NATIVE_ARCH == true ]] && export CROSS="" OLD_CROSS=""
+[[ $ARCH != "x86_64" ]] && export CROSS="" OLD_CROSS=""
 
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin:$BUILD/$OUTPUT/$TOOLS/
 #export PATH=/bin:/sbin:/usr/bin:/usr/sbin:$SOURCE/$ARM_XTOOLS/bin:$SOURCE/$ARM64_XTOOLS/bin:$BUILD/$OUTPUT/$TOOLS/

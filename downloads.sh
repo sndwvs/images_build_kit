@@ -65,14 +65,15 @@ download_xtools() {
                 [[ -f $SOURCE/$XTOOLS.tar.xz ]] && tar xpf $SOURCE/$XTOOLS.tar.xz -C "$SOURCE/" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             fi
         fi
+        # aarch64 change interpreter path
+        [[ $ARCH == aarch64 ]] && change_interpreter_path "$SOURCE/$XTOOLS"
         ((c+=1))
     done
 }
 
 download() {
 
-    [[ $NATIVE_ARCH != true ]] && download_xtools
-#    [[ $NATIVE_ARCH != true || $ARCH == aarch64 ]] && download_xtools
+    [[ $ARCH == "x86_64" || $ARCH == aarch64 ]] && download_xtools
 
     message "" "download" "$BOOT_LOADER_DIR"
     # git_fetch <dir> <url> <branch>
