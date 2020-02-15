@@ -118,6 +118,12 @@ patching_source() {
                         )
                 PATCH_SOURCE="$SOURCE/$BOOT_LOADER_DIR"
             ;;
+        atf)
+                dirs=(      "$CWD/patch/atf/$SOCFAMILY"
+                            "$CWD/patch/atf/$SOCFAMILY/$BOARD_NAME"
+                        )
+                PATCH_SOURCE="$SOURCE/$ATF_DIR"
+            ;;
     esac
 
 

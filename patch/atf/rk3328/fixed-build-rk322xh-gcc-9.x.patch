@@ -1,0 +1,43 @@
+diff -Naur a/plat/rockchip/common/drivers/fiq/fiq_dfs.h b/plat/rockchip/common/drivers/fiq/fiq_dfs.h
+--- a/plat/rockchip/common/drivers/fiq/fiq_dfs.h	2020-02-15 06:31:11.742391616 +0200
++++ b/plat/rockchip/common/drivers/fiq/fiq_dfs.h	2020-02-15 06:23:25.756061268 +0200
+@@ -94,13 +94,13 @@
+ {
+ 	uint64_t save_sp;
+ 
+-	__asm volatile("mov %0, sp" : "=r" (save_sp) : : "sp");
++	__asm volatile("mov %0, sp" : "=r" (save_sp) : : );
+ 	return save_sp;
+ }
+ 
+ static inline void rockchip_set_sp(uint64_t set_sp)
+ {
+-	__asm volatile("mov sp, %0" : : "r" (set_sp) : "sp");
++	__asm volatile("mov sp, %0" : : "r" (set_sp) : );
+ }
+ 
+ #endif
+diff -Naur a/plat/rockchip/rk322xh/drivers/pmu/pmu.c b/plat/rockchip/rk322xh/drivers/pmu/pmu.c
+--- a/plat/rockchip/rk322xh/drivers/pmu/pmu.c	2020-02-15 06:31:11.754391572 +0200
++++ b/plat/rockchip/rk322xh/drivers/pmu/pmu.c	2020-02-15 06:22:18.024385403 +0200
+@@ -545,7 +545,7 @@
+ 
+ static inline void rockchip_set_sram_sp(uint64_t set_sp)
+ {
+-	__asm volatile("mov sp, %0\n"::"r" (set_sp) : "sp");
++	__asm volatile("mov sp, %0\n"::"r" (set_sp) : );
+ }
+ 
+ static __sramfunc void ddr_suspend(void)
+diff -Naur a/plat/rockchip/rk3328/drivers/pmu/pmu.c b/plat/rockchip/rk3328/drivers/pmu/pmu.c
+--- a/plat/rockchip/rk3328/drivers/pmu/pmu.c	2020-02-15 06:31:11.758391557 +0200
++++ b/plat/rockchip/rk3328/drivers/pmu/pmu.c	2020-02-15 06:20:51.012798876 +0200
+@@ -520,7 +520,7 @@
+ 
+ static inline void rockchip_set_sram_sp(uint64_t set_sp)
+ {
+-	__asm volatile("mov sp, %0\n"::"r" (set_sp) : "sp");
++	__asm volatile("mov sp, %0\n"::"r" (set_sp) : );
+ }
+ 
+ static __sramfunc void ddr_suspend(void)

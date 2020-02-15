@@ -145,7 +145,7 @@ fi
 message "" "start" "build $DISTR ARCH $ARCH"
 if [[ $COMPILE_BINARIES == true ]]; then
     [[ ! -z $ATF && $SOCFAMILY == rk33* ]] && compile_boot_tools
-    [[ ! -z $ATF ]] && compile_atf
+    [[ ! -z $ATF ]] && ( patching_source "atf" && compile_atf )
 
     patching_source "u-boot"
     compile_boot_loader
