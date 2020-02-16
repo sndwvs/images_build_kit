@@ -98,32 +98,33 @@ ROOTFS_VERSION=$(date +%Y%m%d)
 #---------------------------------------------
 # cross compilation
 #---------------------------------------------
-for XTOOL in ${XTOOLS[*]}; do
-    if [[ $(echo $XTOOL | grep $ARCH) ]]; then
-        [[ $(echo $XTOOLS_ARM_SUFFIX | grep $ARCH) ]] && _XTOOLS_ARM_SUFFIX=$XTOOLS_ARM_SUFFIX
-        [[ $(echo $XTOOLS_ARM64_SUFFIX | grep $ARCH) ]] && _XTOOLS_ARM_SUFFIX=$XTOOLS_ARM64_SUFFIX
-#        VER=$(echo $XTOOL | cut -f3 -d "-")
-        VER=$(echo $XTOOL | sed 's/^.*-\([0-9].[0-9].[0-9]*\)-.*/\1/')
-        if [[ $VER > 6 ]]; then
-            export CROSS="${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
-        else
-            export OLD_CROSS="${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
+if [[ $ARCH == "x86_64" || $ARCH == "aarch64" ]]; then
+    for XTOOL in ${XTOOLS[*]}; do
+        if [[ $XTOOL =~ "aarch64" ]]; then
+            [[ $XTOOLS_ARM_SUFFIX =~ "arm" ]] && _XTOOLS_ARM_SUFFIX=$XTOOLS_ARM_SUFFIX
+            [[ $XTOOLS_ARM64_SUFFIX =~ "aarch64" ]] && _XTOOLS_ARM_SUFFIX=$XTOOLS_ARM64_SUFFIX
+    #        VER=$(echo $XTOOL | cut -f3 -d "-")
+            VER=$(echo $XTOOL | sed 's/^.*-\([0-9].[0-9].[0-9]*\)-.*/\1/')
+            if [[ $VER > 6 ]]; then
+                export CROSS="${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
+            else
+                export OLD_CROSS="${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
+            fi
+    #        echo $XTOOL $VER
         fi
-#        echo $XTOOL $VER
-    fi
-
-    if [[ $ARCH != arm ]] && [[ $(echo $XTOOL | grep arm) ]]; then
-        [[ $(echo $XTOOLS_ARM_SUFFIX | grep arm) ]] && _XTOOLS_ARM_SUFFIX=$XTOOLS_ARM_SUFFIX
-#        VER=$(echo $XTOOL | cut -f3 -d "-")
-        VER=$(echo $XTOOL | sed 's/^.*-\([0-9].[0-9].[0-9]*\)-.*/\1/')
-        if [[ $VER > 6 ]]; then
-            export CROSS32="${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
-        else
-            export OLD_CROSS32="${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
+        if [[ $ARCH != "arm" ]] && [[ $XTOOL =~ "arm" ]]; then
+            [[ $XTOOLS_ARM_SUFFIX =~ "arm" ]] && _XTOOLS_ARM_SUFFIX=$XTOOLS_ARM_SUFFIX
+    #        VER=$(echo $XTOOL | cut -f3 -d "-")
+            VER=$(echo $XTOOL | sed 's/^.*-\([0-9].[0-9].[0-9]*\)-.*/\1/')
+            if [[ $VER > 6 ]]; then
+                export CROSS32="${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
+            else
+                export OLD_CROSS32="${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
+            fi
+    #        echo $XTOOL $VER
         fi
-#        echo $XTOOL $VER
-    fi
-done
+    done
+fi
 
 [[ $ARCH != "x86_64" ]] && export CROSS="" OLD_CROSS=""
 

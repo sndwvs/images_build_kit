@@ -134,7 +134,7 @@ compile_kernel() {
     # delete previous creations
     if [[ $SOCFAMILY != rk3288 || $KERNEL_SOURCE != next ]]; then
         message "" "clean" "$KERNEL_DIR"
-        make CROSS_COMPILE=$CROSS clean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        make ARCH=$KARCH CROSS_COMPILE=$CROSS clean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
     # use proven config
