@@ -26,7 +26,7 @@ case $(cat /proc/device-tree/compatible | tr -d [:cntrl:]) in
             LOADER="idbloader.img:uboot.img:trust.img"
             FIX_BOOT_DISK=1
     ;;
-    *rock*64*|rock*pi*)
+    *rock*64*|rock*pi*|pinebook*pro)
             OFFSET_LOADER="64"
             LOADER="rksd_loader.img"
             FIX_BOOT_DISK=1
@@ -40,6 +40,11 @@ case $(cat /proc/device-tree/compatible | tr -d [:cntrl:]) in
             OFFSET_LOADER="8::"
             LOADER="u-boot-sunxi-with-spl.bin::"
             BS=1024
+    ;;
+    pinebook)
+            OFFSET_LOADER="1:5:"
+            LOADER="sunxi-spl.bin:u-boot.itb:"
+            BS=8k
     ;;
     *)
             exit
