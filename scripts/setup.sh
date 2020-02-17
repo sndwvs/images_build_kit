@@ -41,10 +41,11 @@ case $(cat /proc/device-tree/compatible | tr -d [:cntrl:]) in
             LOADER="u-boot-sunxi-with-spl.bin::"
             BS=1024
     ;;
-    pinebook)
+    *pinebookallwinner*)
             OFFSET_LOADER="1:5:"
             LOADER="sunxi-spl.bin:u-boot.itb:"
             BS=8k
+            FIX_BOOT_DISK=1
     ;;
     *)
             exit
