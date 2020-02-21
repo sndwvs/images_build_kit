@@ -24,17 +24,17 @@ case $(cat /proc/device-tree/compatible | tr -d [:cntrl:]) in
     *firefly*rk33*)
             OFFSET_LOADER="64:16384:24576"
             LOADER="idbloader.img:uboot.img:trust.img"
-            FIX_BOOT_DISK=1
+            FIX_BOOT_DISK=true
     ;;
     *rock*64*|rock*pi*|pinebook*pro)
             OFFSET_LOADER="64"
             LOADER="rksd_loader.img"
-            FIX_BOOT_DISK=1
+            FIX_BOOT_DISK=true
     ;;
     *rk32*)
             OFFSET_LOADER="64::"
             LOADER="idbloader.img::"
-            FIX_BOOT_DISK=1
+            FIX_BOOT_DISK=true
     ;;
     *cubietruck*|*orange*pi*plus*2e*)
             OFFSET_LOADER="8::"
@@ -45,7 +45,7 @@ case $(cat /proc/device-tree/compatible | tr -d [:cntrl:]) in
             OFFSET_LOADER="1:5:"
             LOADER="sunxi-spl.bin:u-boot.itb:"
             BS=8k
-            FIX_BOOT_DISK=1
+            FIX_BOOT_DISK=true
     ;;
     *)
             exit
