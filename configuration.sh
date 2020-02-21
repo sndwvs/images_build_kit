@@ -53,7 +53,7 @@ get_config
 #---------------------------------------------
 # xtools configuration
 #---------------------------------------------
-if [[ $ARCH == "x86_64" ]]; then
+if [[ $MARCH == "x86_64" ]]; then
     BASE_URL_XTOOLS="https://releases.linaro.org/components/toolchain/binaries"
     XTOOLS_ARM_SUFFIX="arm-linux-gnueabihf"
     XTOOLS_ARM64_SUFFIX="aarch64-linux-gnu"
@@ -72,7 +72,7 @@ if [[ $ARCH == "x86_64" ]]; then
     URL_XTOOLS+=("$BASE_URL_XTOOLS/$BASE_VERSION_XTOOLS/$XTOOLS_ARM64_SUFFIX")
     URL_XTOOLS+=("$BASE_URL_XTOOLS/$OLD_BASE_VERSION_XTOOLS/$XTOOLS_ARM_SUFFIX")
     URL_XTOOLS+=("$BASE_URL_XTOOLS/$OLD_BASE_VERSION_XTOOLS/$XTOOLS_ARM64_SUFFIX")
-elif [[ $ARCH == "aarch64" ]]; then
+elif [[ $MARCH == "aarch64" ]]; then
     # https://developer.arm.com/-/media/Files/downloads/gnu-a/9.2-2019.12/binrel/gcc-arm-9.2-2019.12-aarch64-arm-none-linux-gnueabihf.tar.xz
     BASE_URL_XTOOLS="https://developer.arm.com/-/media/Files/downloads/gnu-a"
     XTOOLS_ARM_SUFFIX="arm-none-linux-gnueabihf"
@@ -98,7 +98,7 @@ ROOTFS_VERSION=$(date +%Y%m%d)
 #---------------------------------------------
 # cross compilation
 #---------------------------------------------
-if [[ $ARCH == "x86_64" || $ARCH == "aarch64" ]]; then
+if [[ $MARCH == "x86_64" || $MARCH == "aarch64" ]]; then
     for XTOOL in ${XTOOLS[*]}; do
         if [[ $XTOOL =~ "aarch64" ]]; then
             [[ $XTOOLS_ARM_SUFFIX =~ "arm" ]] && _XTOOLS_ARM_SUFFIX=$XTOOLS_ARM_SUFFIX
@@ -126,7 +126,7 @@ if [[ $ARCH == "x86_64" || $ARCH == "aarch64" ]]; then
     done
 fi
 
-[[ $ARCH != "x86_64" ]] && export CROSS="" OLD_CROSS=""
+[[ $MARCH != "x86_64" ]] && export CROSS="" OLD_CROSS=""
 
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin:$BUILD/$OUTPUT/$TOOLS/
 #export PATH=/bin:/sbin:/usr/bin:/usr/sbin:$SOURCE/$ARM_XTOOLS/bin:$SOURCE/$ARM64_XTOOLS/bin:$BUILD/$OUTPUT/$TOOLS/

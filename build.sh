@@ -99,6 +99,36 @@ for arg in ${result[*]}; do
     esac
 done
 
+#---------------------------------------------
+# select build arch on x86_64
+#---------------------------------------------
+if [[ $MARCH == "x86_64" ]]; then
+    # Duplicate file descriptor 1 on descriptor 3
+    exec 3>&1
+    while true; do
+        result=$(dialog --title "build $KERNEL_SOURCE for $BOARD_NAME" \
+                --radiolist "select build architecture" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
+                "arm" "ARM-v7 32-bit architecture" "off" \
+                "aarch64" "ARM-v8 64-bit architecture" "off" \
+        2>&1 1>&3)
+        if [[ ! -z $result ]]; then break; fi
+    done
+
+    exit_status=$?
+    # Close file descriptor 3
+    exec 3>&-
+
+    for arg in $result; do
+        if [ "$arg" == "arm" ]; then
+                ARCH=$arg
+        elif [ "$arg" == "aarch64" ]; then
+                ARCH=$arg
+        fi
+    done
+fi
+
+
+
 
 #---------------------------------------------
 # clean terminal

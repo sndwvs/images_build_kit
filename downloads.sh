@@ -73,7 +73,7 @@ download_xtools() {
 
 download() {
 
-    [[ $ARCH == "x86_64" || $ARCH == aarch64 ]] && download_xtools
+    [[ $MARCH == "x86_64" || $MARCH == aarch64 ]] && download_xtools
 
     message "" "download" "$BOOT_LOADER_DIR"
     # git_fetch <dir> <url> <branch>
