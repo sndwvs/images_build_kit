@@ -42,12 +42,11 @@ create_uboot()
     if [[ $SOCFAMILY == rk32* ]]; then
         # U-Boot SPL, with SPL_BACK_TO_BROM option enabled
         tools/mkimage -n $SOCFAMILY -T rksd -d spl/u-boot-spl-dtb.bin $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-#        tools/mkimage -n $SOCFAMILY -T rksd -d $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$DDR $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         cat u-boot-dtb.bin >> $BOOT_LOADER_BIN || exit 1
     fi
 
     if [[ $SOCFAMILY == rk33* ]]; then
-        if [[ $BOARD_NAME == rockpro64 || $BOARD_NAME == rock_pi_4 || $BOARD_NAME == pinebook_pro ]]; then
+        if [[ $BOARD_NAME == rockpro64 || $BOARD_NAME == rock_pi_4 ]]; then
             tools/mkimage -n $SOCFAMILY -T rksd -d $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$DDR $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             cat spl/u-boot-spl.bin >> rksd_loader.img || exit 1
             dd if=u-boot.itb of=rksd_loader.img seek=448 conv=notrunc >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
@@ -56,6 +55,13 @@ create_uboot()
 #            for i in `seq 1 128`; do dd count=4 status=none; dd if=/dev/zero count=4 status=none; done < rkspi_loader.img > rkspi_loader.tmp
 #            mv rkspi_loader.tmp rkspi_loader.img
 #            dd if=u-boot.itb of=rkspi_loader.img seek=1024 conv=notrunc
+        elif [[ $BOARD_NAME == pinebook_pro ]]; then
+            tools/mkimage -n $SOCFAMILY -T rksd -d tpl/u-boot-tpl.bin $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            cat spl/u-boot-spl.bin >> $BOOT_LOADER_BIN || exit 1
+            install -Dm644 u-boot.itb $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/u-boot.itb >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
+            # remove ATF because it is included in u-boot.itb
+            [[ -f $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img ]] && rm $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         else
             # The ddr binary files for ARM64 platforms from Rockchip, likes RK3399 and RK3328 should not skip first 4 bytes.
             # U-Boot SPL, with SPL_BACK_TO_BROM option disabled SD
@@ -83,11 +89,21 @@ write_uboot()
     # clear u-boot
 #    dd if=/dev/zero of=$1 bs=1k count=$((${IMAGE_OFFSET}-1)) seek=1 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    dd if=$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN of=$1 seek=64 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    if [[ $SOCFAMILY == rk33* && $BOARD_NAME != rockpro64 && $BOARD_NAME != rock_pi_4 && $BOARD_NAME != pinebook_pro ]]; then
-        dd if=$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/uboot.img of=$1 seek=16384 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        dd if=$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img of=$1 seek=24576 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    if [[ -f $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN ]]; then
+        dd if=$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN of=$1 seek=64 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        message "" "write" "bootloader: $BOOT_LOADER_BIN"
     fi
-    message "" "write" "$BOOT_LOADER_DIR"
+    if [[ -f $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/u-boot.itb ]]; then
+        dd if=$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/u-boot.itb of=$1 seek=16384 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        message "" "write" "bootloader: u-boot-itb"
+    fi
+    if [[ -f $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/uboot.img ]]; then
+        dd if=$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/uboot.img of=$1 seek=16384 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        message "" "write" "bootloader: uboot-img"
+    fi
+    if [[ -f $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img ]]; then
+        dd if=$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img of=$1 seek=24576 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        message "" "write" "bootloader: trust.img"
+    fi
 }
 
