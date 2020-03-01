@@ -102,7 +102,7 @@ done
 #---------------------------------------------
 # select build arch on x86_64
 #---------------------------------------------
-if [[ $MARCH == "x86_64" ]]; then
+if [[ $(uname -m) == "x86_64" ]]; then
     # Duplicate file descriptor 1 on descriptor 3
     exec 3>&1
     while true; do
