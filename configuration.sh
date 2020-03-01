@@ -37,7 +37,7 @@ BOOT_LOADER_BRANCH=${BOOT_LOADER_BRANCH:-"master::"} #"master:tag:v2017.05"
 #---------------------------------------------
 ATF_SOURCE=${ATF_SOURCE:-"https://github.com/ARM-software/arm-trusted-firmware.git"}
 ATF_DIR=${ATF_DIR:-"arm-trusted-firmware"}
-ATF_BRANCH=${ATF_BRANCH:-"master::"}
+ATF_BRANCH=${ATF_BRANCH:-"master:commit:22d12c4148c373932a7a81e5d1c59a767e143ac2"}
 
 
 
@@ -145,7 +145,7 @@ DISTR_URL="http://dl.fail.pp.ua/slackware/${DISTR}-${DISTR_VERSION}/${DISTR_DIR}
 DISTR_EXTRA_URL="http://dl.fail.pp.ua/slackware/packages/${ARCH}"
 
 #---------------------------------------------
-# claear enviroment
+# clean enviroment
 #---------------------------------------------
 clean_sources (){
     rm -rf $BUILD/ || exit 1
