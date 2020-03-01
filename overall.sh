@@ -24,6 +24,7 @@ message() {
         printf '|\e[0;31m%s \x1B[0m| \e[0;32m%-12s\x1B[0m %s\n' "$1" "$ACTION" "$LOG"
     elif [[ "$1" == "info" || -z "$1" ]]; then
         printf '|\e[0;36minfo\x1B[0m| \e[0;32m%-12s\x1B[0m %s\n' "$ACTION" "$MESSAGE"
+        [[ -f $LOG ]] && echo "|----------- delimiter ----------- \"$ACTION\" \"$MESSAGE\" -----------|" >> $LOG
     fi
 }
 
@@ -60,31 +61,31 @@ get_config() {
         for file in ${dir}/*.conf; do
             _file=$(basename ${file})
             if $(echo "${dir}" | grep -q "environment"); then
-                message "" "add" "configuration file $_file"
+                message "" "added" "configuration file $_file"
                 source "$file" || exit 1
             fi
             if [[ -n ${BOARD_NAME} && ! ${_file%%${BOARD_NAME}*} ]]; then
-                message "" "add" "configuration file $_file"
+                message "" "added" "configuration file $_file"
                 source "$file" || exit 1
             fi
             if [[ -n ${SOCFAMILY} && ! ${_file%%${SOCFAMILY}*} ]]; then
-                message "" "add" "configuration file $_file"
+                message "" "added" "configuration file $_file"
                 source "$file" || exit 1
             fi
             #---- packages
 #            for image_type in ${CREATE_IMAGE[@]}; do
 #                if [[ $image_type = xfce ]]; then
 #                    if [[ -n ${BOARD_NAME} && ! ${_file%%*-${BOARD_NAME}*} ]]; then
-#                         message "" "add" "configuration file $_file"
+#                         message "" "added" "configuration file $_file"
 #                         source "$file" || exit 1
 #                    fi
 
 #                    [[ $file = *extra* ]] && source "$file" && \
-#                                            message "" "add" "configuration file $(basename $file)"
+#                                            message "" "added" "configuration file $(basename $file)"
 
 #                fi
 #                if [[ ! ${_file%%*-${image_type}*} ]]; then
-#                     message "" "add" "configuration file $_file"
+#                     message "" "added" "configuration file $_file"
 #                     source "$file" || exit 1
 #                fi
 #            done
@@ -156,6 +157,8 @@ patching_source() {
             fi
         done
     done
+
+    popd >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 #---------------------------------------------
@@ -200,6 +203,16 @@ change_interpreter_path() {
     find $EXECUTE_PATH | xargs file | grep -e "executable\(.*\)interpreter" \
     | grep ELF | cut -f1 -d ':' \
     | xargs -I '{}' patchelf --set-interpreter /lib64/ld-linux-aarch64.so.1 '{}' >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+}
+
+
+#---------------------------------------------
+# clear boot tools
+#---------------------------------------------
+clear_boot_tools() {
+    message "" "clear" "boot tools"
+    [[ -d $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot ]] && rm -rf $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot
+    return 0
 }
 
 

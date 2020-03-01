@@ -174,6 +174,7 @@ fi
 #---------------------------------------------
 message "" "start" "build $DISTR ARCH $ARCH"
 if [[ $COMPILE_BINARIES == true ]]; then
+    clear_boot_tools
     [[ ! -z $ATF && $SOCFAMILY == rk33* ]] && compile_boot_tools
     [[ ! -z $ATF ]] && ( patching_source "atf" && compile_atf )
 
