@@ -91,21 +91,10 @@ download() {
         git_fetch $SOURCE/$ATF_DIR $ATF_SOURCE ${ATF_BRANCH}
     fi
 
-# after changes start
     if [[ $SOCFAMILY == rk3* ]]; then
-        if [[ ! -z $XTOOLS_OLD ]]; then
-            message "" "download" "$XTOOLS_OLD"
-            if [[ -d $SOURCE/$XTOOLS_OLD ]]; then
-                cd $SOURCE/$XTOOLS_OLD && ( git fetch && git pull origin HEAD ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-            else
-                git clone $URL_XTOOLS_OLD $SOURCE/$XTOOLS_OLD >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-            fi
-        fi
-
         message "" "download" "$RKBIN_DIR"
         # git_fetch <dir> <url> <branch>
         git_fetch $SOURCE/$RKBIN_DIR $RKBIN_SOURCE ${RKBIN_BRANCH}
-# after changes end
     fi
 
     message "" "download" "$KERNEL_DIR"
@@ -114,10 +103,7 @@ download() {
 
     if [[ $SOCFAMILY == sun* ]]; then
         message "" "download" "$SUNXI_TOOLS"
-        if [ -d $SOURCE/$SUNXI_TOOLS ];then
-            cd $SOURCE/$SUNXI_TOOLS && ( git fetch && git checkout -f ${SUNXI_TOOLS_BRANCH:-master} && git clean -df && git pull origin ${SUNXI_TOOLS_BRANCH:-master} ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        else
-            git clone $URL_SUNXI_TOOLS/$SUNXI_TOOLS $SOURCE/$SUNXI_TOOLS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        fi
+        # git_fetch <dir> <url> <branch>
+        git_fetch $SOURCE/$SUNXI_TOOLS_DIR $SUNXI_TOOLS_SOURCE ${SUNXI_TOOLS_BRANCH}
     fi
 }

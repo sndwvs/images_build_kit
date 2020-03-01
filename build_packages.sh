@@ -148,19 +148,19 @@ build_kernel_pkg() {
 
 
 build_sunxi_tools() {
-    message "" "build" "package ${SUNXI_TOOLS}"
-    mkdir -p $BUILD/$PKG/${SUNXI_TOOLS}/{sbin,install}
+    message "" "build" "package ${SUNXI_TOOLS_DIR}"
+    mkdir -p $BUILD/$PKG/${SUNXI_TOOLS_DIR}/{sbin,install}
 
-    install -m644 -D "$CWD/packages/${SUNXI_TOOLS}/slack-desc" "$BUILD/$PKG/${SUNXI_TOOLS}/install/slack-desc"
+    install -m644 -D "$CWD/packages/${SUNXI_TOOLS_DIR}/slack-desc" "$BUILD/$PKG/${SUNXI_TOOLS_DIR}/install/slack-desc"
 
-    cp -P $SOURCE/${SUNXI_TOOLS}/{bin2fex,fex2bin,sunxi-fexc,sunxi-nand-part} \
-          $BUILD/$PKG/${SUNXI_TOOLS}/sbin/
+    cp -P $SOURCE/${SUNXI_TOOLS_DIR}/{bin2fex,fex2bin,sunxi-fexc,sunxi-nand-part} \
+          $BUILD/$PKG/${SUNXI_TOOLS_DIR}/sbin/
 
-    cd $BUILD/$PKG/${SUNXI_TOOLS}/
-    makepkg -l n -c n $BUILD/$PKG/${SUNXI_TOOLS}-git_$(date +%Y%m%d)_$(cat $SOURCE/${SUNXI_TOOLS}/.git/packed-refs | grep refs/remotes/origin/master | cut -b1-7)-${ARCH}-${PKG_BUILD}${PACKAGER}.txz \
+    cd $BUILD/$PKG/${SUNXI_TOOLS_DIR}/
+    makepkg -l n -c n $BUILD/$PKG/${SUNXI_TOOLS_DIR}-git_$(date +%Y%m%d)_$(cat $SOURCE/${SUNXI_TOOLS_DIR}/.git/packed-refs | grep refs/remotes/origin/master | cut -b1-7)-${ARCH}-${PKG_BUILD}${PACKAGER}.txz \
     >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    [[ -d $BUILD/$PKG/${SUNXI_TOOLS} ]] && rm -rf $BUILD/$PKG/${SUNXI_TOOLS}
+    [[ -d $BUILD/$PKG/${SUNXI_TOOLS_DIR} ]] && rm -rf $BUILD/$PKG/${SUNXI_TOOLS_DIR}
 }
 
 

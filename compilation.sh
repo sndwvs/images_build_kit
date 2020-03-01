@@ -8,8 +8,8 @@ fi
 
 
 compile_sunxi_tools() {
-    message "" "compiling" "$SUNXI_TOOLS"
-    cd $SOURCE/$SUNXI_TOOLS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    message "" "compiling" "$SUNXI_TOOLS_DIR"
+    cd $SOURCE/$SUNXI_TOOLS_DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     # for host
     make -s clean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
@@ -154,7 +154,7 @@ compile_kernel() {
 
 #    make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS menuconfig  || exit 1
     make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS oldconfig || (message "err" "details" && exit 1) || exit 1
-    make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS $KERNEL modules | tee $LOG
+    make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS $KERNEL modules | tee -a $LOG
     [[ ${PIPESTATUS[0]} != 0 ]] && ( message "err" "details" && exit 1 )
     make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS dtbs || (message "err" "details" && exit 1) || exit 1
 
