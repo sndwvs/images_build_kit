@@ -25,8 +25,9 @@ git_fetch() {
     [[ -z $DIR || -z $URL ]] && ( message "err" "details" && exit 1 )
 
     if [[ ! -d $DIR ]]; then
-        git clone -b ${BRANCH} --depth 1 $URL $DIR 2>/dev/null || status=$?
-        [[ 0 -ne $status ]] && ( git clone -b ${BRANCH} $URL $DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+        git clone -b ${BRANCH} --depth 1 $URL $DIR 2>/dev/null || status="$?"
+        # fixed: fatal dumb http transport does not support shallow capabilities
+        [[ 0 -ne $status && ! -d $DIR ]] && ( git clone -b ${BRANCH} $URL $DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
     else
         cd $DIR && ( git reset --hard && git clean -xdfq && git checkout -f ${BRANCH} && git fetch && git pull origin ${BRANCH} ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
