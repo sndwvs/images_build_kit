@@ -46,16 +46,16 @@ create_uboot()
     fi
 
     if [[ $SOCFAMILY == rk33* ]]; then
-        if [[ $BOARD_NAME == rockpro64 || $BOARD_NAME == rock_pi_4 ]]; then
-            tools/mkimage -n $SOCFAMILY -T rksd -d $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$DDR $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-            cat spl/u-boot-spl.bin >> rksd_loader.img || exit 1
-            dd if=u-boot.itb of=rksd_loader.img seek=448 conv=notrunc >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+#        if [[ $BOARD_NAME == rockpro64 || $BOARD_NAME == rock_pi_4 ]]; then
+#            tools/mkimage -n $SOCFAMILY -T rksd -d $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$DDR $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+#            cat spl/u-boot-spl.bin >> rksd_loader.img || exit 1
+#            dd if=u-boot.itb of=rksd_loader.img seek=448 conv=notrunc >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 #            tools/mkimage -n $SOCFAMILY -T rksd -d $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$DDR rkspi_loader.img
 #            cat spl/u-boot-spl.bin >> rkspi_loader.img
 #            for i in `seq 1 128`; do dd count=4 status=none; dd if=/dev/zero count=4 status=none; done < rkspi_loader.img > rkspi_loader.tmp
 #            mv rkspi_loader.tmp rkspi_loader.img
 #            dd if=u-boot.itb of=rkspi_loader.img seek=1024 conv=notrunc
-        elif [[ $BOARD_NAME == pinebook_pro ]]; then
+        if [[ $BOARD_NAME == rockpro64 || $BOARD_NAME == rock_pi_4 || $BOARD_NAME == pinebook_pro ]]; then
             tools/mkimage -n $SOCFAMILY -T rksd -d tpl/u-boot-tpl.bin $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             cat spl/u-boot-spl.bin >> $BOOT_LOADER_BIN || exit 1
             install -Dm644 u-boot.itb $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/u-boot.itb >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
