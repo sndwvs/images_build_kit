@@ -26,6 +26,7 @@ message() {
         printf '|\e[0;36minfo\x1B[0m| \e[0;32m%-12s\x1B[0m %s\n' "$ACTION" "$MESSAGE"
         [[ -f $LOG ]] && echo "|----------- delimiter ----------- \"$ACTION\" \"$MESSAGE\" -----------|" >> $LOG
     fi
+    return 0
 }
 
 #---------------------------------------------
