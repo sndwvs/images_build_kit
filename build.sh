@@ -169,12 +169,15 @@ message "" "start" "build $DISTR ARCH $ARCH"
 if [[ $COMPILE_BINARIES == true ]]; then
     clear_boot_tools
     [[ ! -z $ATF && $SOCFAMILY == rk33* ]] && compile_boot_tools
-    [[ ! -z $ATF ]] && ( patching_source "atf" && compile_atf )
+    if [[ ! -z $ATF ]]; then
+        [[ $DOWNLOAD_SOURCE_BINARIES == true ]] && patching_source "atf"
+        compile_atf
+    fi
 
-    patching_source "u-boot"
+    [[ $DOWNLOAD_SOURCE_BINARIES == true ]] && patching_source "u-boot"
     compile_boot_loader
 
-    patching_source "kernel"
+    [[ $DOWNLOAD_SOURCE_BINARIES == true ]] && patching_source "kernel"
     compile_kernel
 
     if [[ $SOCFAMILY == sun* && $TOOLS_PACK == true ]]; then
