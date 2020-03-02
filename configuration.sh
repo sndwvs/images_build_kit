@@ -54,24 +54,20 @@ get_config
 # xtools configuration
 #---------------------------------------------
 if [[ $MARCH == "x86_64" ]]; then
-    BASE_URL_XTOOLS="https://releases.linaro.org/components/toolchain/binaries"
-    XTOOLS_ARM_SUFFIX="arm-linux-gnueabihf"
-    XTOOLS_ARM64_SUFFIX="aarch64-linux-gnu"
-    XTOOLS_PREFIX="gcc-linaro"
+    # https://developer.arm.com/-/media/Files/downloads/gnu-a/9.2-2019.12/binrel/gcc-arm-9.2-2019.12-x86_64-arm-none-linux-gnueabihf.tar.xz
+    # https://developer.arm.com/-/media/Files/downloads/gnu-a/9.2-2019.12/binrel/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu.tar.xz
+    BASE_URL_XTOOLS="https://developer.arm.com/-/media/Files/downloads/gnu-a"
+    XTOOLS_ARM_SUFFIX="arm-none-linux-gnueabihf"
+    XTOOLS_ARM64_SUFFIX="aarch64-none-linux-gnu"
+    XTOOLS_PREFIX="gcc-arm"
 
-    OLD_BASE_VERSION_XTOOLS="5.5-2017.10"
-    OLD_VERSION_XTOOLS="5.5.0-2017.10"
-    BASE_VERSION_XTOOLS="7.2-2017.11"
-    VERSION_XTOOLS="7.2.1-2017.11"
+    BASE_VERSION_XTOOLS="9.2-2019.12"
+    VERSION_XTOOLS=$BASE_VERSION_XTOOLS
 
-    XTOOLS+=("$XTOOLS_PREFIX-$VERSION_XTOOLS-${MARCH}_$XTOOLS_ARM_SUFFIX")
-    XTOOLS+=("$XTOOLS_PREFIX-$VERSION_XTOOLS-${MARCH}_$XTOOLS_ARM64_SUFFIX")
-    XTOOLS+=("$XTOOLS_PREFIX-$OLD_VERSION_XTOOLS-${MARCH}_$XTOOLS_ARM_SUFFIX")
-    XTOOLS+=("$XTOOLS_PREFIX-$OLD_VERSION_XTOOLS-${MARCH}_$XTOOLS_ARM64_SUFFIX")
-    URL_XTOOLS+=("$BASE_URL_XTOOLS/$BASE_VERSION_XTOOLS/$XTOOLS_ARM_SUFFIX")
-    URL_XTOOLS+=("$BASE_URL_XTOOLS/$BASE_VERSION_XTOOLS/$XTOOLS_ARM64_SUFFIX")
-    URL_XTOOLS+=("$BASE_URL_XTOOLS/$OLD_BASE_VERSION_XTOOLS/$XTOOLS_ARM_SUFFIX")
-    URL_XTOOLS+=("$BASE_URL_XTOOLS/$OLD_BASE_VERSION_XTOOLS/$XTOOLS_ARM64_SUFFIX")
+    XTOOLS+=("$XTOOLS_PREFIX-$VERSION_XTOOLS-${MARCH}-$XTOOLS_ARM_SUFFIX")
+    XTOOLS+=("$XTOOLS_PREFIX-$VERSION_XTOOLS-${MARCH}-$XTOOLS_ARM64_SUFFIX")
+    URL_XTOOLS+=("$BASE_URL_XTOOLS/$BASE_VERSION_XTOOLS/binrel")
+    URL_XTOOLS+=("$BASE_URL_XTOOLS/$BASE_VERSION_XTOOLS/binrel")
 elif [[ $MARCH == "aarch64" ]]; then
     # https://developer.arm.com/-/media/Files/downloads/gnu-a/9.2-2019.12/binrel/gcc-arm-9.2-2019.12-aarch64-arm-none-linux-gnueabihf.tar.xz
     BASE_URL_XTOOLS="https://developer.arm.com/-/media/Files/downloads/gnu-a"
@@ -103,30 +99,16 @@ if [[ $MARCH == "x86_64" || $MARCH == "aarch64" ]]; then
         if [[ $XTOOL =~ "aarch64" ]]; then
             [[ $XTOOLS_ARM_SUFFIX =~ "arm" ]] && _XTOOLS_ARM_SUFFIX=$XTOOLS_ARM_SUFFIX
             [[ $XTOOLS_ARM64_SUFFIX =~ "aarch64" ]] && _XTOOLS_ARM_SUFFIX=$XTOOLS_ARM64_SUFFIX
-    #        VER=$(echo $XTOOL | cut -f3 -d "-")
-            VER=$(echo $XTOOL | sed 's/^.*-\([0-9].[0-9].[0-9]*\)-.*/\1/')
-            if [[ $VER > 6 ]]; then
-                export CROSS="${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
-            else
-                export OLD_CROSS="${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
-            fi
-    #        echo $XTOOL $VER
+            export CROSS="${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
         fi
         if [[ $ARCH != "arm" ]] && [[ $XTOOL =~ "arm" ]]; then
             [[ $XTOOLS_ARM_SUFFIX =~ "arm" ]] && _XTOOLS_ARM_SUFFIX=$XTOOLS_ARM_SUFFIX
-    #        VER=$(echo $XTOOL | cut -f3 -d "-")
-            VER=$(echo $XTOOL | sed 's/^.*-\([0-9].[0-9].[0-9]*\)-.*/\1/')
-            if [[ $VER > 6 ]]; then
-                export CROSS32="${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
-            else
-                export OLD_CROSS32="${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
-            fi
-    #        echo $XTOOL $VER
+            export CROSS32="${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
         fi
     done
 fi
 
-[[ $MARCH != "x86_64" ]] && export CROSS="" OLD_CROSS=""
+[[ $MARCH != "x86_64" ]] && export CROSS=""
 
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin:$BUILD/$OUTPUT/$TOOLS/
 #export PATH=/bin:/sbin:/usr/bin:/usr/sbin:$SOURCE/$ARM_XTOOLS/bin:$SOURCE/$ARM64_XTOOLS/bin:$BUILD/$OUTPUT/$TOOLS/

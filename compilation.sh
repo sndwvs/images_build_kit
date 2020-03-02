@@ -126,10 +126,7 @@ compile_kernel() {
 
     local KERNEL=zImage
 
-    if [[ $KARCH == arm64 ]]; then
-        [[ $SOCFAMILY == rk33* ]] && local CROSS=$OLD_CROSS
-        local KERNEL=Image
-    fi
+    [[ $KARCH == arm64 ]] && local KERNEL=Image
 
     # delete previous creations
     if [[ $SOCFAMILY != rk3288 || $KERNEL_SOURCE != next ]]; then
@@ -140,7 +137,6 @@ compile_kernel() {
     # use proven config
     install -D $CWD/config/kernel/$LINUX_CONFIG $SOURCE/$KERNEL_DIR/.config || (message "err" "details" && exit 1) || exit 1
 
-    [[ "$KERNEL_SOURCE" != next && $SOCFAMILY == sun* ]] && local CROSS=$OLD_CROSS
     gcc_version "$CROSS" GCC_VERSION
     message "" "version" "$GCC_VERSION"
 
