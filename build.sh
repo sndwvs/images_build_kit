@@ -169,10 +169,7 @@ message "" "start" "build $DISTR ARCH $ARCH"
 if [[ $COMPILE_BINARIES == true ]]; then
     clear_boot_tools
     [[ ! -z $ATF && $SOCFAMILY == rk33* ]] && compile_boot_tools
-    if [[ ! -z $ATF ]]; then
-        [[ $DOWNLOAD_SOURCE_BINARIES == true ]] && patching_source "atf"
-        compile_atf
-    fi
+    [[ ! -z $ATF && $DOWNLOAD_SOURCE_BINARIES == true ]] && ( patching_source "atf" && compile_atf )
 
     [[ $DOWNLOAD_SOURCE_BINARIES == true ]] && patching_source "u-boot"
     compile_boot_loader
