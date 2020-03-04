@@ -66,8 +66,6 @@ download_xtools() {
                 [[ -f $SOURCE/$XTOOLS.tar.xz ]] && tar xpf $SOURCE/$XTOOLS.tar.xz -C "$SOURCE/" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             fi
         fi
-        # aarch64 change interpreter path
-        [[ $ARCH == aarch64 ]] && change_interpreter_path "$SOURCE/$XTOOLS"
         ((c+=1))
     done
 }

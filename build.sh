@@ -167,6 +167,8 @@ fi
 #---------------------------------------------
 message "" "start" "build $DISTR ARCH $ARCH"
 if [[ $COMPILE_BINARIES == true ]]; then
+    # aarch64 change interpreter path
+    [[ $MARCH == aarch64 ]] && change_interpreter_path "${XTOOLS[@]}"
     clear_boot_tools
     [[ ! -z $ATF && $SOCFAMILY == rk33* ]] && compile_boot_tools
     [[ ! -z $ATF && $DOWNLOAD_SOURCE_BINARIES == true ]] && ( patching_source "atf" && compile_atf )
