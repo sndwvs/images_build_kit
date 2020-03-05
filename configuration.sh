@@ -96,13 +96,12 @@ ROOTFS_VERSION=$(date +%Y%m%d)
 #---------------------------------------------
 if [[ $MARCH == "x86_64" || $MARCH == "aarch64" ]]; then
     for XTOOL in ${XTOOLS[*]}; do
-        if [[ $XTOOL =~ "aarch64" ]]; then
-            [[ $XTOOLS_ARM_SUFFIX =~ "arm" ]] && _XTOOLS_ARM_SUFFIX=$XTOOLS_ARM_SUFFIX
+        if [[ $MARCH == "x86_64" && $XTOOL =~ "aarch64" ]]; then
             [[ $XTOOLS_ARM64_SUFFIX =~ "aarch64" ]] && _XTOOLS_ARM_SUFFIX=$XTOOLS_ARM64_SUFFIX
             export CROSS="${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
         fi
-        if [[ $ARCH != "arm" ]] && [[ $XTOOL =~ "arm" ]]; then
-            [[ $XTOOLS_ARM_SUFFIX =~ "arm" ]] && _XTOOLS_ARM_SUFFIX=$XTOOLS_ARM_SUFFIX
+        if [[ $XTOOL =~ "gnueabihf" ]]; then
+            [[ $XTOOLS_ARM_SUFFIX =~ "gnueabihf" ]] && _XTOOLS_ARM_SUFFIX=$XTOOLS_ARM_SUFFIX
             export CROSS32="${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
         fi
     done

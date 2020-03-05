@@ -202,9 +202,11 @@ change_name_version() {
 change_interpreter_path() {
     local EXECUTE_PATH="$@"
     for dir in ${EXECUTE_PATH[@]}; do
-        find "$SOURCE/$dir" | xargs file | grep -e "executable\(.*\)interpreter" \
-        | grep ELF | cut -f1 -d ':' \
-        | xargs -I '{}' patchelf --set-interpreter /lib64/ld-linux-aarch64.so.1 '{}' >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        if [[ -d $dir ]]; then
+            find "$SOURCE/$dir" | xargs file | grep -e "executable\(.*\)interpreter" \
+            | grep ELF | cut -f1 -d ':' \
+            | xargs -I '{}' patchelf --set-interpreter /lib64/ld-linux-aarch64.so.1 '{}' >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        fi
     done
 }
 
