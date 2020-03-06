@@ -114,6 +114,13 @@ compile_atf() {
 compile_boot_tools() {
     message "" "compiling" "$BOOT_LOADER_TOOLS_DIR $BOOT_LOADER_TOOLS_BRANCH"
     cd $SOURCE/$BOOT_LOADER_TOOLS_DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
+    if [[ $MARCH == "x86_64" ]]; then
+        ln -sf ../../rkbin/tools/boot_merger tools/boot_merger
+        ln -sf ../../rkbin/tools/trust_merger tools/trust_merger
+        return 0
+    fi
+
     make clean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     make ${SOCFAMILY}_defconfig >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     make $CTHREADS tools >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
