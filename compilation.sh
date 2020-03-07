@@ -41,7 +41,7 @@ compile_boot_loader() {
     change_name_version "-$SOCFAMILY"
 
     [[ ! -z $ATF && ! -z $BL31 ]] && export BL31=$SOURCE/$ATF_DIR/bl31.${BL31##*.}
-    [[ ! -z $ATF && -z $BL31 ]] && export BL31=$SOURCE/$ATF_DIR/bl31.bin
+    [[ ! -z $ATF && -z $BL31 ]] && export BL31=$SOURCE/$ATF_DIR/bl31.*
 
     if [[ $SOCFAMILY == rk3* ]]; then
         # u-boot-firefly-rk3288 2016.03 package contains backports
