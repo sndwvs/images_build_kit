@@ -76,7 +76,7 @@ compile_atf() {
     message "" "compiling" "$ATF_DIR $ATF_BRANCH"
     cd $SOURCE/$ATF_DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    if [[ $SOCFAMILY == rk33* ]]; then
+    if [[ -z $BL31 && $SOCFAMILY == rk33* ]]; then
         make realclean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         CFLAGS='-gdwarf-2' \
         CROSS_COMPILE=$CROSS \
@@ -89,21 +89,19 @@ compile_atf() {
         make PLAT=$ATF_PLAT DEBUG=0 bl31 >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
-#    if [[ ! -z $BL31 && $NATIVE_ARCH == true ]]; then
-#        if [[ $SOCFAMILY == rk3* ]]; then
-#            ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL31 bl31.elf
-#            [[ ! -z $BL32 ]] && ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL32 bl32.bin
-#        fi
-#    else
-        if [[ $SOCFAMILY == rk3* ]]; then
-#            ln -fs ./build/$SOCFAMILY/release/bl31/bl31.elf bl31.elf
-#            ln -fs ./build/$SOCFAMILY/release/bl32/bl32.bin bl32.bin
-#            ln -fs ./build/$ATF_PLAT/debug/bl31/bl31.elf bl31.elf
+    if [[ $SOCFAMILY == rk3* ]]; then
+#        ln -fs ./build/$SOCFAMILY/release/bl31/bl31.elf bl31.elf
+#        ln -fs ./build/$SOCFAMILY/release/bl32/bl32.bin bl32.bin
+#        ln -fs ./build/$ATF_PLAT/debug/bl31/bl31.elf bl31.elf
+        if [[ -z $BL31 ]]; then
             ln -fs ./build/$ATF_PLAT/release/bl31/bl31.elf bl31.elf
-        elif [[ $SOCFAMILY == sun50* ]]; then
-            [[ -e ./build/$ATF_PLAT/release/bl31.bin ]] && ln -fs ./build/sun50i_a64/release/bl31.bin bl31.bin
+        else
+            ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL31 bl31.elf
+#            [[ ! -z $BL32 ]] && ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL32 bl32.bin
         fi
-#    fi
+    elif [[ $SOCFAMILY == sun50* ]]; then
+        [[ -e ./build/$ATF_PLAT/release/bl31.bin ]] && ln -fs ./build/sun50i_a64/release/bl31.bin bl31.bin
+    fi
 
     if [[ $SOCFAMILY == rk3* ]]; then
         $SOURCE/$BOOT_LOADER_TOOLS_DIR/tools/trust_merger $CWD/config/atf/$SOCFAMILY/trust.ini >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
