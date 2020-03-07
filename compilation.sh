@@ -35,7 +35,7 @@ compile_boot_loader() {
 
     make ARCH=$ARCH CROSS_COMPILE=$CROSS clean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    make ARCH=$ARCH $BOOT_LOADER_CONFIG CROSS_COMPILE=$CROSS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make ARCH=$ARCH CROSS_COMPILE=$CROSS $BOOT_LOADER_CONFIG >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     # added in name suffix
     change_name_version "-$SOCFAMILY"

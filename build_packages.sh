@@ -87,9 +87,9 @@ build_kernel_pkg() {
     [[ ! -d "$BUILD/$PKG/kernel-source" ]] && mkdir -p $BUILD/$PKG/kernel-source/usr/src/linux-${KERNEL_VERSION}
     rsync -a --exclude .git --delete $SOURCE/$KERNEL_DIR/ $BUILD/$PKG/kernel-source/usr/src/linux-${KERNEL_VERSION}/
     cd $BUILD/$PKG/kernel-source/usr/src/linux-${KERNEL_VERSION}/
-    make ARCH=$KARCH clean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make ARCH=$KARCH CROSS_COMPILE=$CROSS clean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     # Make sure header files aren't missing...
-    make ARCH=$KARCH prepare >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make ARCH=$KARCH CROSS_COMPILE=$CROSS prepare >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     # Don't package the kernel in the sources:
     find . -name "*Image" -exec rm "{}" \+
     # No need for these:
