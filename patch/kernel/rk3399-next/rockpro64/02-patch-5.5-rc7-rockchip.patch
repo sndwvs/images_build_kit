@@ -1,0 +1,3241 @@
+diff --no-dereference -Naur linux-5.5-rc7/Documentation/admin-guide/kernel-parameters.txt linux-5.5-rc7-rockchip/Documentation/admin-guide/kernel-parameters.txt
+--- linux-5.5-rc7/Documentation/admin-guide/kernel-parameters.txt	2020-01-20 02:02:49.000000000 +0200
++++ linux-5.5-rc7-rockchip/Documentation/admin-guide/kernel-parameters.txt	2020-01-25 00:08:09.342292724 +0200
+@@ -2702,6 +2702,14 @@
+ 			log everything. Information is printed at KERN_DEBUG
+ 			so loglevel=8 may also need to be specified.
+ 
++	mmc_cmdqueue= [MMC]
++			Enable or disable MMC command queue (CMDQ) support. When
++			enabled MMC driver will try to enable CMDQ for cards that
++			support it. When disabled CMDQ will not be enabled for any
++			card.
++			Format: <bool>  (1/y/on=enable, 0/n/off=disable)
++			default: enabled
++
+ 	module.sig_enforce
+ 			[KNL] When CONFIG_MODULE_SIG is set, this means that
+ 			modules without (valid) signatures will fail to load.
+diff --no-dereference -Naur linux-5.5-rc7/Documentation/admin-guide/kernel-parameters.txt.orig linux-5.5-rc7-rockchip/Documentation/admin-guide/kernel-parameters.txt.orig
+diff --no-dereference -Naur linux-5.5-rc7/Documentation/devicetree/bindings/usb/rockchip,dwc3.txt linux-5.5-rc7-rockchip/Documentation/devicetree/bindings/usb/rockchip,dwc3.txt
+--- linux-5.5-rc7/Documentation/devicetree/bindings/usb/rockchip,dwc3.txt	2020-01-20 02:02:49.000000000 +0200
++++ linux-5.5-rc7-rockchip/Documentation/devicetree/bindings/usb/rockchip,dwc3.txt	2020-01-25 00:08:09.346292721 +0200
+@@ -1,7 +1,9 @@
+ Rockchip SuperSpeed DWC3 USB SoC controller
+ 
+ Required properties:
+-- compatible:	should contain "rockchip,rk3399-dwc3" for rk3399 SoC
++- compatible:	should be one of the following:
++  - "rockchip,rk3399-dwc3": for rk3399 SoC
++  - "rockchip,rk3328-dwc3", "rockchip,rk3399-dwc3": for rk3328 SoC
+ - clocks:	A list of phandle + clock-specifier pairs for the
+ 		clocks listed in clock-names
+ - clock-names:	Should contain the following:
+diff --no-dereference -Naur linux-5.5-rc7/Documentation/devicetree/configfs-overlays.txt linux-5.5-rc7-rockchip/Documentation/devicetree/configfs-overlays.txt
+--- linux-5.5-rc7/Documentation/devicetree/configfs-overlays.txt	1970-01-01 03:00:00.000000000 +0300
++++ linux-5.5-rc7-rockchip/Documentation/devicetree/configfs-overlays.txt	2020-01-25 00:08:09.354292716 +0200
+@@ -0,0 +1,31 @@
++Howto use the configfs overlay interface.
++
++A device-tree configfs entry is created in /config/device-tree/overlays
++and and it is manipulated using standard file system I/O.
++Note that this is a debug level interface, for use by developers and
++not necessarily something accessed by normal users due to the
++security implications of having direct access to the kernel's device tree.
++
++* To create an overlay you mkdir the directory:
++
++	# mkdir /config/device-tree/overlays/foo
++
++* Either you echo the overlay firmware file to the path property file.
++
++	# echo foo.dtbo >/config/device-tree/overlays/foo/path
++
++* Or you cat the contents of the overlay to the dtbo file
++
++	# cat foo.dtbo >/config/device-tree/overlays/foo/dtbo
++
++The overlay file will be applied, and devices will be created/destroyed
++as required.
++
++To remove it simply rmdir the directory.
++
++	# rmdir /config/device-tree/overlays/foo
++
++The rationalle of the dual interface (firmware & direct copy) is that each is
++better suited to different use patterns. The firmware interface is what's
++intended to be used by hardware managers in the kernel, while the copy interface
++make sense for developers (since it avoids problems with namespaces).
+diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/Makefile linux-5.5-rc7-rockchip/arch/arm64/Makefile
+--- linux-5.5-rc7/arch/arm64/Makefile	2020-01-20 02:02:49.000000000 +0200
++++ linux-5.5-rc7-rockchip/arch/arm64/Makefile	2020-01-25 00:08:09.358292714 +0200
+@@ -130,7 +130,7 @@
+ 
+ # Default target when executing plain make
+ boot		:= arch/arm64/boot
+-KBUILD_IMAGE	:= $(boot)/Image.gz
++KBUILD_IMAGE	:= $(boot)/Image
+ 
+ all:	Image.gz
+ 
+diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/Makefile.orig linux-5.5-rc7-rockchip/arch/arm64/Makefile.orig
+diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi linux-5.5-rc7-rockchip/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi
+--- linux-5.5-rc7/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi	2020-01-20 02:02:49.000000000 +0200
++++ linux-5.5-rc7-rockchip/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi	2020-01-25 00:08:09.362292711 +0200
+@@ -79,6 +79,11 @@
+ 		};
+ 	};
+ 
++	aliases {
++		// This allows setting ethaddr from u-boot command line
++		ethernet0 = &emac;
++	};
++
+ 	cpus {
+ 		#address-cells = <1>;
+ 		#size-cells = <0>;
+diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/boot/dts/rockchip/Makefile linux-5.5-rc7-rockchip/arch/arm64/boot/dts/rockchip/Makefile
+--- linux-5.5-rc7/arch/arm64/boot/dts/rockchip/Makefile	2020-01-20 02:02:49.000000000 +0200
++++ linux-5.5-rc7-rockchip/arch/arm64/boot/dts/rockchip/Makefile	2020-01-25 00:08:09.366292709 +0200
+@@ -28,6 +28,7 @@
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-nanopi-m4.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-nanopi-neo4.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-orangepi.dtb
++dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-pinebook-pro.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-puma-haikou.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-roc-pc.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-roc-pc-mezzanine.dtb
+diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/boot/dts/rockchip/Makefile.orig linux-5.5-rc7-rockchip/arch/arm64/boot/dts/rockchip/Makefile.orig
+diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/boot/dts/rockchip/rk3328-rock64.dts linux-5.5-rc7-rockchip/arch/arm64/boot/dts/rockchip/rk3328-rock64.dts
+--- linux-5.5-rc7/arch/arm64/boot/dts/rockchip/rk3328-rock64.dts	2020-01-20 02:02:49.000000000 +0200
++++ linux-5.5-rc7-rockchip/arch/arm64/boot/dts/rockchip/rk3328-rock64.dts	2020-01-25 00:08:09.370292706 +0200
+@@ -11,9 +11,36 @@
+ 	compatible = "pine64,rock64", "rockchip,rk3328";
+ 
+ 	chosen {
++		bootargs = "earlycon=uart8250,mmio32,0xff130000";
+ 		stdout-path = "serial2:1500000n8";
+ 	};
+ 
++	leds {
++		compatible = "gpio-leds";
++
++		standby-led {
++			linux,default-trigger = "disk-activity";
++			gpios = <&rk805 0 GPIO_ACTIVE_LOW>;
++			default-state = "on";
++		};
++
++		power-led {
++			gpios = <&rk805 1 GPIO_ACTIVE_LOW>;
++			default-state = "on";
++		};
++	};
++
++	leds {
++		compatible = "gpio-leds";
++
++		usb-switch {
++			linux,default-trigger = "none";
++			gpios = <&gpio0 2 1>;
++			mode = <0x23>;
++			default-state = "on";
++		};
++	};
++
+ 	gmac_clkin: external-gmac-clock {
+ 		compatible = "fixed-clock";
+ 		clock-frequency = <125000000>;
+@@ -45,7 +72,8 @@
+ 
+ 	vcc_host1_5v: vcc_otg_5v: vcc-host1-5v-regulator {
+ 		compatible = "regulator-fixed";
+-		gpio = <&gpio0 RK_PA2 GPIO_ACTIVE_LOW>;
++		enable-active-high;
++		gpio = <&gpio0 RK_PA2 GPIO_ACTIVE_HIGH>;
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&usb20_host_drv>;
+ 		regulator-name = "vcc_host1_5v";
+@@ -87,7 +115,8 @@
+ 	sound {
+ 		compatible = "audio-graph-card";
+ 		label = "rockchip,rk3328";
+-		dais = <&i2s1_p0
++		dais = <&i2s0_p0
++			&i2s1_p0
+ 			&spdif_p0>;
+ 	};
+ 
+@@ -101,6 +130,13 @@
+ 			};
+ 		};
+ 	};
++
++	vcc_phy: vcc-phy-regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc_phy";
++		regulator-always-on;
++		regulator-boot-on;
++	};
+ };
+ 
+ &codec {
+@@ -130,26 +166,30 @@
+ };
+ 
+ &emmc {
++	max-frequency = <200000000>;
+ 	bus-width = <8>;
+ 	cap-mmc-highspeed;
+ 	mmc-hs200-1_8v;
+ 	non-removable;
++	num-slots = <1>;
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&emmc_clk &emmc_cmd &emmc_bus8>;
+-	vmmc-supply = <&vcc_io>;
+-	vqmmc-supply = <&vcc18_emmc>;
+ 	status = "okay";
++	supports-emmc;
++	clocks = <&cru HCLK_EMMC>, <&cru SCLK_EMMC>,
++	         <&cru SCLK_EMMC_DRV>, <&cru SCLK_EMMC_SAMPLE>;
++	clock-names = "biu", "ciu", "ciu-drv", "ciu-sample";
+ };
+ 
+ &gmac2io {
+ 	assigned-clocks = <&cru SCLK_MAC2IO>, <&cru SCLK_MAC2IO_EXT>;
+ 	assigned-clock-parents = <&gmac_clkin>, <&gmac_clkin>;
+ 	clock_in_out = "input";
+-	phy-supply = <&vcc_io>;
++	phy-supply = <&vcc_phy>;
+ 	phy-mode = "rgmii";
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&rgmiim1_pins>;
+-	snps,force_thresh_dma_mode;
++	rockchip,bugged_tx_coe;
+ 	snps,reset-gpio = <&gpio1 RK_PC2 GPIO_ACTIVE_LOW>;
+ 	snps,reset-active-low;
+ 	snps,reset-delays-us = <0 10000 50000>;
+@@ -160,12 +200,28 @@
+ 
+ &hdmi {
+ 	status = "okay";
++
++	port@0 {
++		hdmi_p0_0: endpoint {
++			remote-endpoint = <&i2s0_p0_0>;
++		};
++	};
+ };
+ 
+ &hdmiphy {
+ 	status = "okay";
+ };
+ 
++&gmac2phy {
++	phy-supply = <&vcc_phy>;
++	clock_in_out = "output";
++	assigned-clocks = <&cru SCLK_MAC2PHY_SRC>;
++	assigned-clock-rate = <50000000>;
++	assigned-clocks = <&cru SCLK_MAC2PHY>;
++	assigned-clock-parents = <&cru SCLK_MAC2PHY_SRC>;
++	status = "disabled";
++};
++
+ &i2c1 {
+ 	status = "okay";
+ 
+@@ -195,10 +251,12 @@
+ 				regulator-name = "vdd_logic";
+ 				regulator-min-microvolt = <712500>;
+ 				regulator-max-microvolt = <1450000>;
++				regulator-initial-mode = <0x1>;
+ 				regulator-ramp-delay = <12500>;
+ 				regulator-always-on;
+ 				regulator-boot-on;
+ 				regulator-state-mem {
++					regulator-mode = <0x2>;
+ 					regulator-on-in-suspend;
+ 					regulator-suspend-microvolt = <1000000>;
+ 				};
+@@ -208,10 +266,12 @@
+ 				regulator-name = "vdd_arm";
+ 				regulator-min-microvolt = <712500>;
+ 				regulator-max-microvolt = <1450000>;
++				regulator-initial-mode = <0x1>;
+ 				regulator-ramp-delay = <12500>;
+ 				regulator-always-on;
+ 				regulator-boot-on;
+ 				regulator-state-mem {
++					regulator-mode = <0x2>;
+ 					regulator-on-in-suspend;
+ 					regulator-suspend-microvolt = <950000>;
+ 				};
+@@ -219,9 +279,11 @@
+ 
+ 			vcc_ddr: DCDC_REG3 {
+ 				regulator-name = "vcc_ddr";
++				regulator-initial-mode = <0x1>;
+ 				regulator-always-on;
+ 				regulator-boot-on;
+ 				regulator-state-mem {
++					regulator-mode = <0x2>;
+ 					regulator-on-in-suspend;
+ 				};
+ 			};
+@@ -230,9 +292,11 @@
+ 				regulator-name = "vcc_io";
+ 				regulator-min-microvolt = <3300000>;
+ 				regulator-max-microvolt = <3300000>;
++				regulator-initial-mode = <0x1>;
+ 				regulator-always-on;
+ 				regulator-boot-on;
+ 				regulator-state-mem {
++					regulator-mode = <0x2>;
+ 					regulator-on-in-suspend;
+ 					regulator-suspend-microvolt = <3300000>;
+ 				};
+@@ -277,6 +341,18 @@
+ 	};
+ };
+ 
++&i2s0 {
++	status = "okay";
++
++	i2s0_p0: port {
++		i2s0_p0_0: endpoint {
++			dai-format = "i2s";
++			mclk-fs = <256>;
++			remote-endpoint = <&hdmi_p0_0>;
++		};
++	};
++};
++
+ &i2s1 {
+ 	status = "okay";
+ 
+@@ -325,11 +401,15 @@
+ 	bus-width = <4>;
+ 	cap-mmc-highspeed;
+ 	cap-sd-highspeed;
++	cd-gpios = <&gpio1 RK_PA5 GPIO_ACTIVE_LOW>;
+ 	disable-wp;
+ 	max-frequency = <150000000>;
++	num-slots = <1>;
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&sdmmc0_clk &sdmmc0_cmd &sdmmc0_dectn &sdmmc0_bus4>;
++	supports-sd;
+ 	vmmc-supply = <&vcc_sd>;
++	vqmmc-supply = <&vcc_sd>;
+ 	status = "okay";
+ };
+ 
+@@ -348,11 +428,23 @@
+ 	status = "okay";
+ 
+ 	spiflash@0 {
+-		compatible = "jedec,spi-nor";
++		compatible = "gigadevice,gd25q128", "jedec,spi-nor";
+ 		reg = <0>;
++		m25p,fast-read;
+ 
+ 		/* maximum speed for Rockchip SPI */
+ 		spi-max-frequency = <50000000>;
++
++		partitions {
++			compatible = "fixed-partitions";
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			loader@8000 {
++				label = "loader";
++				reg = <0x8000 0x3F0000>;
++			};
++		};
+ 	};
+ };
+ 
+@@ -368,14 +460,14 @@
+ 
+ &u2phy {
+ 	status = "okay";
++};
+ 
+-	u2phy_host: host-port {
+-		status = "okay";
+-	};
++&u2phy_host {
++	status = "okay";
++};
+ 
+-	u2phy_otg: otg-port {
+-		status = "okay";
+-	};
++&u2phy_otg {
++	status = "okay";
+ };
+ 
+ &usb20_otg {
+@@ -398,3 +490,42 @@
+ &vop_mmu {
+ 	status = "okay";
+ };
++
++&usbdrd3 {
++	status = "okay";
++};
++
++&usbdrd_dwc3 {
++	dr_mode = "host";
++	status = "okay";
++};
++
++&spi0 {
++	status = "okay";
++
++	/* SPI DMA does not work currently */
++	/delete-property/ dmas;
++	/delete-property/ #dma-cells;
++	/delete-property/ dma-names;
++
++	 spi-flash@0 {
++		#address-cells = <0x1>;
++		#size-cells = <1>;
++		compatible = "jedec,spi-nor";
++		reg = <0x0>;
++		spi-max-frequency = <25000000>;
++		status = "okay";
++		m25p,fast-read;
++
++		partitions {
++			compatible = "fixed-partitions";
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			loader@8000 {
++				label = "loader";
++				reg = <0x8000 0x3F0000>;
++			};
++		};
++	};
++};
+diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/boot/dts/rockchip/rk3328.dtsi linux-5.5-rc7-rockchip/arch/arm64/boot/dts/rockchip/rk3328.dtsi
+--- linux-5.5-rc7/arch/arm64/boot/dts/rockchip/rk3328.dtsi	2020-01-20 02:02:49.000000000 +0200
++++ linux-5.5-rc7-rockchip/arch/arm64/boot/dts/rockchip/rk3328.dtsi	2020-01-25 00:08:09.374292704 +0200
+@@ -27,6 +27,8 @@
+ 		i2c1 = &i2c1;
+ 		i2c2 = &i2c2;
+ 		i2c3 = &i2c3;
++		mmc0 = &emmc;
++		mmc1 = &sdmmc;
+ 		ethernet0 = &gmac2io;
+ 		ethernet1 = &gmac2phy;
+ 	};
+@@ -837,12 +839,12 @@
+ 		};
+ 	};
+ 
+-	sdmmc: dwmmc@ff500000 {
++	emmc: dwmmc@ff520000 {
+ 		compatible = "rockchip,rk3328-dw-mshc", "rockchip,rk3288-dw-mshc";
+-		reg = <0x0 0xff500000 0x0 0x4000>;
+-		interrupts = <GIC_SPI 12 IRQ_TYPE_LEVEL_HIGH>;
+-		clocks = <&cru HCLK_SDMMC>, <&cru SCLK_SDMMC>,
+-			 <&cru SCLK_SDMMC_DRV>, <&cru SCLK_SDMMC_SAMPLE>;
++		reg = <0x0 0xff520000 0x0 0x4000>;
++		interrupts = <GIC_SPI 14 IRQ_TYPE_LEVEL_HIGH>;
++		clocks = <&cru HCLK_EMMC>, <&cru SCLK_EMMC>,
++			 <&cru SCLK_EMMC_DRV>, <&cru SCLK_EMMC_SAMPLE>;
+ 		clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
+ 		fifo-depth = <0x100>;
+ 		max-frequency = <150000000>;
+@@ -861,12 +863,12 @@
+ 		status = "disabled";
+ 	};
+ 
+-	emmc: dwmmc@ff520000 {
++	sdmmc: dwmmc@ff500000 {
+ 		compatible = "rockchip,rk3328-dw-mshc", "rockchip,rk3288-dw-mshc";
+-		reg = <0x0 0xff520000 0x0 0x4000>;
+-		interrupts = <GIC_SPI 14 IRQ_TYPE_LEVEL_HIGH>;
+-		clocks = <&cru HCLK_EMMC>, <&cru SCLK_EMMC>,
+-			 <&cru SCLK_EMMC_DRV>, <&cru SCLK_EMMC_SAMPLE>;
++		reg = <0x0 0xff500000 0x0 0x4000>;
++		interrupts = <GIC_SPI 12 IRQ_TYPE_LEVEL_HIGH>;
++		clocks = <&cru HCLK_SDMMC>, <&cru SCLK_SDMMC>,
++			 <&cru SCLK_SDMMC_DRV>, <&cru SCLK_SDMMC_SAMPLE>;
+ 		clock-names = "biu", "ciu", "ciu-drive", "ciu-sample";
+ 		fifo-depth = <0x100>;
+ 		max-frequency = <150000000>;
+@@ -968,6 +970,33 @@
+ 		status = "disabled";
+ 	};
+ 
++	usbdrd3: usb@ff600000 {
++		compatible = "rockchip,rk3328-dwc3", "rockchip,rk3399-dwc3";
++		clocks = <&cru SCLK_USB3OTG_REF>, <&cru SCLK_USB3OTG_SUSPEND>,
++			 <&cru ACLK_USB3OTG>;
++		clock-names = "ref_clk", "suspend_clk",
++			      "bus_clk";
++		#address-cells = <2>;
++		#size-cells = <2>;
++		ranges;
++		status = "disabled";
++
++		usbdrd_dwc3: dwc3@ff600000 {
++			compatible = "snps,dwc3";
++			reg = <0x0 0xff600000 0x0 0x100000>;
++			interrupts = <GIC_SPI 67 IRQ_TYPE_LEVEL_HIGH>;
++			dr_mode = "otg";
++			phy_type = "utmi_wide";
++			snps,dis_enblslpm_quirk;
++			snps,dis-u2-freeclk-exists-quirk;
++			snps,dis_u2_susphy_quirk;
++			snps,dis_u3_susphy_quirk;
++			snps,dis-del-phy-power-chg-quirk;
++			snps,dis-tx-ipgap-linecheck-quirk;
++			status = "disabled";
++		};
++	};
++
+ 	gic: interrupt-controller@ff811000 {
+ 		compatible = "arm,gic-400";
+ 		#interrupt-cells = <3>;
+diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/boot/dts/rockchip/rk3328.dtsi.orig linux-5.5-rc7-rockchip/arch/arm64/boot/dts/rockchip/rk3328.dtsi.orig
+diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/boot/dts/rockchip/rk3399-pinebook-pro.dts linux-5.5-rc7-rockchip/arch/arm64/boot/dts/rockchip/rk3399-pinebook-pro.dts
+--- linux-5.5-rc7/arch/arm64/boot/dts/rockchip/rk3399-pinebook-pro.dts	1970-01-01 03:00:00.000000000 +0300
++++ linux-5.5-rc7-rockchip/arch/arm64/boot/dts/rockchip/rk3399-pinebook-pro.dts	2020-01-25 00:08:09.378292701 +0200
+@@ -0,0 +1,833 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright (c) 2017 Fuzhou Rockchip Electronics Co., Ltd.
++ * Copyright (c) 2018 Akash Gajjar <Akash_Gajjar@mentor.com>
++ */
++
++/dts-v1/;
++#include <dt-bindings/input/linux-event-codes.h>
++#include <dt-bindings/pwm/pwm.h>
++#include "rk3399.dtsi"
++#include "rk3399-opp.dtsi"
++
++/ {
++	model = "Pine64 Pinebook Pro";
++	compatible = "pine64,pinebook-pro", "rockchip,rk3399";
++
++	chosen {
++		bootargs = "earlycon=uart8250,mmio32,0xff1a0000";
++		stdout-path = "serial2:1500000n8";
++	};
++
++	dc_12v: dc-12v {
++		compatible = "regulator-fixed";
++		regulator-name = "dc_12v";
++		regulator-always-on;
++		regulator-boot-on;
++		regulator-min-microvolt = <12000000>;
++		regulator-max-microvolt = <12000000>;
++	};
++
++	gpio-keys {
++		compatible = "gpio-keys";
++		autorepeat;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pwrbtn>;
++
++		power {
++			debounce-interval = <100>;
++			gpios = <&gpio0 RK_PA5 GPIO_ACTIVE_LOW>;
++			label = "GPIO Key Power";
++			linux,code = <KEY_POWER>;
++			wakeup-source;
++		};
++	};
++
++	leds {
++		compatible = "gpio-leds";
++		pinctrl-names = "default";
++		pinctrl-0 = <&work_led_gpio>, <&diy_led_gpio>;
++
++		work-led {
++			label = "work";
++			default-state = "on";
++			gpios = <&gpio0 RK_PB3 GPIO_ACTIVE_HIGH>;
++		};
++
++		diy-led {
++			label = "diy";
++			default-state = "off";
++			gpios = <&gpio0 RK_PA2 GPIO_ACTIVE_HIGH>;
++		};
++	};
++
++	es8316-sound {
++		status = "okay";
++		compatible = "simple-audio-card";
++		simple-audio-card,name = "rockchip,es8316-codec";
++		simple-audio-card,format = "i2s";
++		simple-audio-card,mclk-fs = <256>;
++		simple-audio-card,widgets =
++			"Microphone", "Mic Jack",
++			"Headphone", "Headphone Jack";
++		simple-audio-card,routing =
++			"Mic Jack", "MICBIAS1",
++			"IN1P", "Mic Jack",
++			"Headphone Jack", "HPOL",
++			"Headphone Jack", "HPOR";
++
++		simple-audio-card,cpu {
++			sound-dai = <&i2s1>;
++		};
++
++		simple-audio-card,codec {
++			sound-dai = <&es8316>;
++		};
++	};
++
++	sdio_pwrseq: sdio-pwrseq {
++		compatible = "mmc-pwrseq-simple";
++		clocks = <&rk808 1>;
++		clock-names = "ext_clock";
++		pinctrl-names = "default";
++		pinctrl-0 = <&wifi_enable_h>;
++
++		/*
++		 * On the module itself this is one of these (depending
++		 * on the actual card populated):
++		 * - SDIO_RESET_L_WL_REG_ON
++		 * - PDN (power down when low)
++		 */
++		reset-gpios = <&gpio0 RK_PB2 GPIO_ACTIVE_LOW>;
++	};
++
++	fan0: pwm-fan {
++		compatible = "pwm-fan";
++		pwms = <&pwm1 0 10000 0>;
++		cooling-min-state = <0>;
++		cooling-max-state = <3>;
++		#cooling-cells = <2>;
++		cooling-levels = <0 102 170 230>;
++	};
++
++	/* switched by pmic_sleep */
++	vcc1v8_s3: vcca1v8_s3: vcc1v8-s3 {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc1v8_s3";
++		regulator-always-on;
++		regulator-boot-on;
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <1800000>;
++		vin-supply = <&vcc_1v8>;
++	};
++
++	vcc3v3_pcie: vcc3v3-pcie-regulator {
++		compatible = "regulator-fixed";
++		enable-active-high;
++		gpio = <&gpio1 RK_PD0 GPIO_ACTIVE_HIGH>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&pcie_pwr_en>;
++		regulator-name = "vcc3v3_pcie";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		vin-supply = <&dc_12v>;
++	};
++
++	vcc_phy: vcc-phy-regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc_phy";
++		regulator-always-on;
++		regulator-boot-on;
++	};
++
++	vcc3v3_sys: vcc3v3-sys {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc3v3_sys";
++		regulator-always-on;
++		regulator-boot-on;
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		vin-supply = <&vcc_sys>;
++	};
++
++	/* Actually 3 regulators (host0, 1, 2) controlled by the same gpio */
++	vcc5v0_host: vcc5v0-host-regulator {
++		compatible = "regulator-fixed";
++		enable-active-high;
++		gpio = <&gpio4 RK_PC5 GPIO_ACTIVE_HIGH>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&vcc5v0_host_en>;
++		regulator-name = "vcc5v0_host";
++		regulator-always-on;
++		vin-supply = <&vcc_sys>;
++	};
++
++	vcc5v0_typec: vcc5v0-typec-regulator {
++		compatible = "regulator-fixed";
++		enable-active-high;
++		gpio = <&gpio1 RK_PA3 GPIO_ACTIVE_HIGH>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&vcc5v0_typec_en>;
++		regulator-name = "vcc5v0_typec";
++		regulator-always-on;
++		vin-supply = <&vcc_sys>;
++	};
++
++	vcc_sys: vcc-sys {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc_sys";
++		regulator-always-on;
++		regulator-boot-on;
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++		vin-supply = <&dc_12v>;
++	};
++
++	vdd_log: vdd-log {
++		compatible = "pwm-regulator";
++		pwms = <&pwm2 0 25000 1>;
++		pwm-supply = <&vcc_sys>;
++		regulator-name = "vdd_log";
++		regulator-always-on;
++		regulator-boot-on;
++		regulator-min-microvolt = <800000>;
++		regulator-max-microvolt = <1400000>;
++	};
++};
++
++&cpu_l0 {
++	cpu-supply = <&vdd_cpu_l>;
++};
++
++&cpu_l1 {
++	cpu-supply = <&vdd_cpu_l>;
++};
++
++&cpu_l2 {
++	cpu-supply = <&vdd_cpu_l>;
++};
++
++&cpu_l3 {
++	cpu-supply = <&vdd_cpu_l>;
++};
++
++&cpu_b0 {
++	cpu-supply = <&vdd_cpu_b>;
++};
++
++&cpu_b1 {
++	cpu-supply = <&vdd_cpu_b>;
++};
++
++&cpu_alert0 {
++	temperature = <80000>;
++};
++
++&cpu_alert1 {
++	temperature = <95000>;
++};
++
++&cpu_crit {
++	temperature = <100000>;
++};
++
++&cooling_maps {
++	map2 {
++		trip = <&cpu_alert0>;
++		cooling-device = <&fan0 0 1>;
++	};
++	map3 {
++		trip = <&cpu_alert1>;
++		cooling-device = <&fan0 1 2>;
++	};
++	map4 {
++		trip = <&cpu_crit>;
++		cooling-device = <&fan0 2 3>;
++	};
++};
++
++&emmc_phy {
++	status = "okay";
++};
++
++&hdmi_sound {
++	status = "okay";
++};
++
++&hdmi {
++	ddc-i2c-bus = <&i2c3>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&hdmi_cec>;
++	status = "okay";
++};
++
++&gpu {
++	mali-supply = <&vdd_gpu>;
++	status = "okay";
++};
++
++&i2c0 {
++	clock-frequency = <400000>;
++	i2c-scl-rising-time-ns = <168>;
++	i2c-scl-falling-time-ns = <4>;
++	status = "okay";
++
++	rk808: pmic@1b {
++		compatible = "rockchip,rk808";
++		reg = <0x1b>;
++		interrupt-parent = <&gpio1>;
++		interrupts = <21 IRQ_TYPE_LEVEL_LOW>;
++		#clock-cells = <1>;
++		clock-output-names = "xin32k", "rk808-clkout2";
++		pinctrl-names = "default";
++		pinctrl-0 = <&pmic_int_l>;
++		rockchip,system-power-controller;
++		wakeup-source;
++
++		vcc1-supply = <&vcc_sys>;
++		vcc2-supply = <&vcc_sys>;
++		vcc3-supply = <&vcc_sys>;
++		vcc4-supply = <&vcc_sys>;
++		vcc6-supply = <&vcc_sys>;
++		vcc7-supply = <&vcc_sys>;
++		vcc8-supply = <&vcc3v3_sys>;
++		vcc9-supply = <&vcc_sys>;
++		vcc10-supply = <&vcc_sys>;
++		vcc11-supply = <&vcc_sys>;
++		vcc12-supply = <&vcc3v3_sys>;
++		vddio-supply = <&vcc1v8_pmu>;
++
++		regulators {
++			vdd_center: DCDC_REG1 {
++				regulator-name = "vdd_center";
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-min-microvolt = <750000>;
++				regulator-max-microvolt = <1350000>;
++				regulator-ramp-delay = <6001>;
++				regulator-state-mem {
++					regulator-off-in-suspend;
++				};
++			};
++
++			vdd_cpu_l: DCDC_REG2 {
++				regulator-name = "vdd_cpu_l";
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-min-microvolt = <750000>;
++				regulator-max-microvolt = <1350000>;
++				regulator-ramp-delay = <6001>;
++				regulator-state-mem {
++					regulator-off-in-suspend;
++				};
++			};
++
++			vcc_ddr: DCDC_REG3 {
++				regulator-name = "vcc_ddr";
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-state-mem {
++					regulator-on-in-suspend;
++				};
++			};
++
++			vcc_1v8: DCDC_REG4 {
++				regulator-name = "vcc_1v8";
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-state-mem {
++					regulator-on-in-suspend;
++					regulator-suspend-microvolt = <1800000>;
++				};
++			};
++
++			vcc1v8_dvp: LDO_REG1 {
++				regulator-name = "vcc1v8_dvp";
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-state-mem {
++					regulator-off-in-suspend;
++				};
++			};
++
++			vcc3v0_touch: LDO_REG2 {
++				regulator-name = "vcc3v0_touch";
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-min-microvolt = <3000000>;
++				regulator-max-microvolt = <3000000>;
++				regulator-state-mem {
++					regulator-off-in-suspend;
++				};
++			};
++
++			vcc1v8_pmu: LDO_REG3 {
++				regulator-name = "vcc1v8_pmu";
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-state-mem {
++					regulator-on-in-suspend;
++					regulator-suspend-microvolt = <1800000>;
++				};
++			};
++
++			vcc_sdio: LDO_REG4 {
++				regulator-name = "vcc_sdio";
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <3000000>;
++				regulator-state-mem {
++					regulator-on-in-suspend;
++					regulator-suspend-microvolt = <3000000>;
++				};
++			};
++
++			vcca3v0_codec: LDO_REG5 {
++				regulator-name = "vcca3v0_codec";
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-min-microvolt = <3000000>;
++				regulator-max-microvolt = <3000000>;
++				regulator-state-mem {
++					regulator-off-in-suspend;
++				};
++			};
++
++			vcc_1v5: LDO_REG6 {
++				regulator-name = "vcc_1v5";
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-min-microvolt = <1500000>;
++				regulator-max-microvolt = <1500000>;
++				regulator-state-mem {
++					regulator-on-in-suspend;
++					regulator-suspend-microvolt = <1500000>;
++				};
++			};
++
++			vcca1v8_codec: LDO_REG7 {
++				regulator-name = "vcca1v8_codec";
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++				regulator-state-mem {
++					regulator-off-in-suspend;
++				};
++			};
++
++			vcc_3v0: LDO_REG8 {
++				regulator-name = "vcc_3v0";
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-min-microvolt = <3000000>;
++				regulator-max-microvolt = <3000000>;
++				regulator-state-mem {
++					regulator-on-in-suspend;
++					regulator-suspend-microvolt = <3000000>;
++				};
++			};
++
++			vcc3v3_s3: vcc_lan: SWITCH_REG1 {
++				regulator-name = "vcc3v3_s3";
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-state-mem {
++					regulator-off-in-suspend;
++				};
++			};
++
++			vcc3v3_s0: SWITCH_REG2 {
++				regulator-name = "vcc3v3_s0";
++				regulator-always-on;
++				regulator-boot-on;
++				regulator-state-mem {
++					regulator-off-in-suspend;
++				};
++			};
++		};
++	};
++
++	vdd_cpu_b: regulator@40 {
++		compatible = "silergy,syr827";
++		reg = <0x40>;
++		fcs,suspend-voltage-selector = <1>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&vsel1_gpio>;
++		vsel-gpios = <&gpio1 RK_PC1 GPIO_ACTIVE_HIGH>;
++		regulator-compatible = "fan53555-reg";
++		regulator-name = "vdd_cpu_b";
++		regulator-min-microvolt = <712500>;
++		regulator-max-microvolt = <1500000>;
++		regulator-ramp-delay = <1000>;
++		regulator-always-on;
++		regulator-boot-on;
++		vin-supply = <&vcc_sys>;
++
++		regulator-state-mem {
++			regulator-off-in-suspend;
++		};
++	};
++
++	vdd_gpu: regulator@41 {
++		compatible = "silergy,syr828";
++		reg = <0x41>;
++		fcs,suspend-voltage-selector = <1>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&vsel2_gpio>;
++		vsel-gpios = <&gpio1 RK_PB6 GPIO_ACTIVE_HIGH>;
++		regulator-compatible = "fan53555-reg";
++		regulator-name = "vdd_gpu";
++		regulator-min-microvolt = <712500>;
++		regulator-max-microvolt = <1500000>;
++		regulator-ramp-delay = <1000>;
++		regulator-always-on;
++		regulator-boot-on;
++		vin-supply = <&vcc_sys>;
++
++		regulator-state-mem {
++			regulator-off-in-suspend;
++		};
++	};
++};
++
++&i2c1 {
++	i2c-scl-rising-time-ns = <300>;
++	i2c-scl-falling-time-ns = <15>;
++	status = "okay";
++
++	es8316: es8316@10 {
++		#sound-dai-cells = <0>;
++		compatible = "everest,es8316";
++		reg = <0x10>;
++		clocks = <&cru SCLK_I2S_8CH_OUT>;
++		clock-names = "mclk";
++		pinctrl-names = "default";
++		pinctrl-0 = <&i2s_8ch_mclk>;
++		hp-det-gpio = <&gpio0 RK_PB0 GPIO_ACTIVE_LOW>;
++	};
++};
++
++&i2c3 {
++	i2c-scl-rising-time-ns = <450>;
++	i2c-scl-falling-time-ns = <15>;
++	status = "okay";
++};
++
++&i2c4 {
++	i2c-scl-rising-time-ns = <600>;
++	i2c-scl-falling-time-ns = <20>;
++	status = "okay";
++};
++
++&i2s0 {
++	rockchip,playback-channels = <8>;
++	rockchip,capture-channels = <8>;
++	#sound-dai-cells = <0>;
++	status = "okay";
++};
++
++&i2s1 {
++	rockchip,playback-channels = <2>;
++	rockchip,capture-channels = <2>;
++	#sound-dai-cells = <0>;
++	status = "okay";
++};
++
++&i2s2 {
++	#sound-dai-cells = <0>;
++	status = "okay";
++};
++
++&io_domains {
++	status = "okay";
++
++	bt656-supply = <&vcc1v8_dvp>;
++	audio-supply = <&vcca1v8_codec>;
++	sdmmc-supply = <&vcc_sdio>;
++	gpio1830-supply = <&vcc_3v0>;
++};
++
++&pcie_phy {
++	status = "okay";
++};
++
++&pcie0 {
++	ep-gpios = <&gpio2 RK_PD4 GPIO_ACTIVE_HIGH>;
++	num-lanes = <4>;
++	max-link-speed = <2>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&pcie_clkreqn_cpm>;
++	vpcie3v3-supply = <&vcc3v3_pcie>;
++	status = "okay";
++};
++
++&pmu_io_domains {
++	pmu1830-supply = <&vcc_3v0>;
++	status = "okay";
++};
++
++&pinctrl {
++	buttons {
++		pwrbtn: pwrbtn {
++			rockchip,pins = <0 RK_PA5 RK_FUNC_GPIO &pcfg_pull_up>;
++		};
++	};
++
++	fusb302x {
++		fusb0_int: fusb0-int {
++			rockchip,pins = <1 RK_PA2 RK_FUNC_GPIO &pcfg_pull_up>;
++		};
++	};
++
++	leds {
++		work_led_gpio: work_led-gpio {
++			rockchip,pins = <0 RK_PB3 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++
++		diy_led_gpio: diy_led-gpio {
++			rockchip,pins = <0 RK_PA2 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++	};
++
++	lcd-panel {
++		lcd_panel_reset: lcd-panel-reset {
++			rockchip,pins = <4 RK_PD6 RK_FUNC_GPIO &pcfg_pull_up>;
++		};
++	};
++
++	pcie {
++		pcie_pwr_en: pcie-pwr-en {
++			rockchip,pins = <1 RK_PD0 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++	};
++
++	pmic {
++		pmic_int_l: pmic-int-l {
++			rockchip,pins = <3 RK_PB2 RK_FUNC_GPIO &pcfg_pull_up>;
++		};
++
++		vsel1_gpio: vsel1-gpio {
++			rockchip,pins = <1 RK_PC1 RK_FUNC_GPIO &pcfg_pull_down>;
++		};
++
++		vsel2_gpio: vsel2-gpio {
++			rockchip,pins = <1 RK_PB6 RK_FUNC_GPIO &pcfg_pull_down>;
++		};
++	};
++
++	sdio-pwrseq {
++		wifi_enable_h: wifi-enable-h {
++			rockchip,pins = <0 RK_PB2 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++	};
++
++	usb-typec {
++		vcc5v0_typec_en: vcc5v0_typec_en {
++			rockchip,pins = <1 RK_PA3 RK_FUNC_GPIO &pcfg_pull_up>;
++		};
++	};
++
++	rt5640 {
++		rt5640_hpcon: rt5640-hpcon {
++			rockchip,pins = <4 RK_PC5 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++	};
++
++	usb2 {
++		vcc5v0_host_en: vcc5v0-host-en {
++			rockchip,pins = <4 RK_PC5 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++	};
++
++	i2s0 {
++		i2s_8ch_mclk: i2s-8ch-mclk {
++			rockchip,pins = <4 0 RK_FUNC_1 &pcfg_pull_none>;
++		};
++	};
++};
++
++&pwm0 {
++	status = "okay";
++};
++
++&pwm1 {
++	status = "okay";
++};
++
++&pwm2 {
++	status = "okay";
++};
++
++&saradc {
++	vref-supply = <&vcca1v8_s3>;
++	status = "okay";
++};
++
++&sdmmc {
++	bus-width = <4>;
++	cap-mmc-highspeed;
++	cap-sd-highspeed;
++	cd-gpios = <&gpio0 7 GPIO_ACTIVE_LOW>;
++	disable-wp;
++	sd-uhs-sdr104;
++	max-frequency = <150000000>;
++	vqmmc-supply = <&vcc_sdio>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&sdmmc_clk &sdmmc_cmd &sdmmc_bus4>;
++	status = "okay";
++};
++
++&sdhci {
++	bus-width = <8>;
++	//mmc-hs400-1_8v;
++	mmc-hs200-1_8v;
++	//mmc-hs400-enhanced-strobe;
++	non-removable;
++	status = "okay";
++};
++
++&tcphy0 {
++	status = "okay";
++};
++
++&tcphy1 {
++	status = "okay";
++};
++
++&tsadc {
++	/* tshut mode 0:CRU 1:GPIO */
++	rockchip,hw-tshut-mode = <1>;
++	/* tshut polarity 0:LOW 1:HIGH */
++	rockchip,hw-tshut-polarity = <1>;
++	status = "okay";
++};
++
++&u2phy0 {
++	status = "okay";
++
++	u2phy0_otg: otg-port {
++		status = "okay";
++	};
++
++	u2phy0_host: host-port {
++		phy-supply = <&vcc5v0_host>;
++		status = "okay";
++	};
++};
++
++&u2phy1 {
++	status = "okay";
++
++	u2phy1_otg: otg-port {
++		status = "okay";
++	};
++
++	u2phy1_host: host-port {
++		phy-supply = <&vcc5v0_host>;
++		status = "okay";
++	};
++};
++
++&uart0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&uart0_xfer &uart0_cts>;
++	status = "okay";
++};
++
++&uart2 {
++	status = "okay";
++};
++
++&usb_host0_ehci {
++	status = "okay";
++};
++
++&usb_host0_ohci {
++	status = "okay";
++};
++
++&usb_host1_ehci {
++	status = "okay";
++};
++
++&usb_host1_ohci {
++	status = "okay";
++};
++
++&usbdrd3_0 {
++	status = "okay";
++};
++
++&usbdrd_dwc3_0 {
++	status = "okay";
++	dr_mode = "otg";
++};
++
++&usbdrd3_1 {
++	status = "okay";
++};
++
++&usbdrd_dwc3_1 {
++	status = "okay";
++	dr_mode = "host";
++};
++
++&vopb {
++	status = "okay";
++};
++
++&vopb_mmu {
++	status = "okay";
++};
++
++&vopl {
++	status = "okay";
++};
++
++&vopl_mmu {
++	status = "okay";
++};
++
++&spi1 {
++	status = "okay";
++	max-freq = <10000000>;
++
++	spiflash: spi-flash@0 {
++		#address-cells = <0x1>;
++		#size-cells = <1>;
++		compatible = "jedec,spi-nor";
++		reg = <0x0>;
++		spi-max-frequency = <10000000>;
++		status = "okay";
++		m25p,fast-read;
++
++		partitions {
++			compatible = "fixed-partitions";
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			loader@8000 {
++				label = "loader";
++				reg = <0x0 0x3F8000>;
++			};
++
++			env@3f8000 {
++				label = "env";
++				reg = <0x3F8000 0x8000>;
++			};
++
++			vendor@7c0000 {
++				label = "vendor";
++				reg = <0x7C0000 0x40000>;
++			};
++		};
++	};
++};
+diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/boot/dts/rockchip/rk3399-rockpro64.dts linux-5.5-rc7-rockchip/arch/arm64/boot/dts/rockchip/rk3399-rockpro64.dts
+--- linux-5.5-rc7/arch/arm64/boot/dts/rockchip/rk3399-rockpro64.dts	2020-01-20 02:02:49.000000000 +0200
++++ linux-5.5-rc7-rockchip/arch/arm64/boot/dts/rockchip/rk3399-rockpro64.dts	2020-01-25 00:02:29.770498840 +0200
+@@ -15,6 +15,7 @@
+ 	compatible = "pine64,rockpro64", "rockchip,rk3399";
+ 
+ 	chosen {
++		bootargs = "earlycon=uart8250,mmio32,0xff1a0000";
+ 		stdout-path = "serial2:1500000n8";
+ 	};
+ 
+@@ -65,6 +66,30 @@
+ 		pwms = <&pwm1 0 50000 0>;
+ 	};
+ 
++	es8316-sound {
++		status = "okay";
++		compatible = "simple-audio-card";
++		simple-audio-card,name = "rockchip,es8316-codec";
++		simple-audio-card,format = "i2s";
++		simple-audio-card,mclk-fs = <256>;
++		simple-audio-card,widgets =
++			"Microphone", "Mic Jack",
++			"Headphone", "Headphone Jack";
++		simple-audio-card,routing =
++			"Mic Jack", "MICBIAS1",
++			"IN1P", "Mic Jack",
++			"Headphone Jack", "HPOL",
++			"Headphone Jack", "HPOR";
++
++		simple-audio-card,cpu {
++			sound-dai = <&i2s1>;
++		};
++
++		simple-audio-card,codec {
++			sound-dai = <&es8316>;
++		};
++	};
++
+ 	sdio_pwrseq: sdio-pwrseq {
+ 		compatible = "mmc-pwrseq-simple";
+ 		clocks = <&rk808 1>;
+@@ -81,12 +106,6 @@
+ 		reset-gpios = <&gpio0 RK_PB2 GPIO_ACTIVE_LOW>;
+ 	};
+ 
+-	sound {
+-		compatible = "audio-graph-card";
+-		label = "rockchip,rk3399";
+-		dais = <&i2s1_p0>;
+-	};
+-
+ 	vcc12v_dcin: vcc12v-dcin {
+ 		compatible = "regulator-fixed";
+ 		regulator-name = "vcc12v_dcin";
+@@ -96,6 +115,15 @@
+ 		regulator-max-microvolt = <12000000>;
+ 	};
+ 
++	fan0: pwm-fan {
++		compatible = "pwm-fan";
++		pwms = <&pwm1 0 10000 0>;
++		cooling-min-state = <0>;
++		cooling-max-state = <3>;
++		#cooling-cells = <2>;
++		cooling-levels = <0 102 170 230>;
++	};
++
+ 	/* switched by pmic_sleep */
+ 	vcc1v8_s3: vcca1v8_s3: vcc1v8-s3 {
+ 		compatible = "regulator-fixed";
+@@ -119,6 +147,13 @@
+ 		vin-supply = <&vcc12v_dcin>;
+ 	};
+ 
++	vcc_phy: vcc-phy-regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc_phy";
++		regulator-always-on;
++		regulator-boot-on;
++	};
++
+ 	vcc3v3_sys: vcc3v3-sys {
+ 		compatible = "regulator-fixed";
+ 		regulator-name = "vcc3v3_sys";
+@@ -208,6 +243,33 @@
+ 	cpu-supply = <&vdd_cpu_b>;
+ };
+ 
++&cpu_alert0 {
++	temperature = <80000>;
++};
++
++&cpu_alert1 {
++	temperature = <95000>;
++};
++
++&cpu_crit {
++	temperature = <100000>;
++};
++
++&cooling_maps {
++	map2 {
++		trip = <&cpu_alert0>;
++		cooling-device = <&fan0 0 1>;
++	};
++	map3 {
++		trip = <&cpu_alert1>;
++		cooling-device = <&fan0 1 2>;
++	};
++	map4 {
++		trip = <&cpu_crit>;
++		cooling-device = <&fan0 2 3>;
++	};
++};
++
+ &emmc_phy {
+ 	status = "okay";
+ };
+@@ -216,15 +278,20 @@
+ 	assigned-clocks = <&cru SCLK_RMII_SRC>;
+ 	assigned-clock-parents = <&clkin_gmac>;
+ 	clock_in_out = "input";
+-	phy-supply = <&vcc_lan>;
++	phy-supply = <&vcc_phy>;
+ 	phy-mode = "rgmii";
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&rgmii_pins>;
++	rockchip,bugged_tx_coe;
+ 	snps,reset-gpio = <&gpio3 RK_PB7 GPIO_ACTIVE_LOW>;
+ 	snps,reset-active-low;
+ 	snps,reset-delays-us = <0 10000 50000>;
+ 	tx_delay = <0x28>;
+-	rx_delay = <0x11>;
++	rx_delay = <0x20>;
++	status = "okay";
++};
++
++&hdmi_sound {
+ 	status = "okay";
+ };
+ 
+@@ -439,6 +506,8 @@
+ 		fcs,suspend-voltage-selector = <1>;
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&vsel1_gpio>;
++		vsel-gpios = <&gpio1 RK_PC1 GPIO_ACTIVE_HIGH>;
++		regulator-compatible = "fan53555-reg";
+ 		regulator-name = "vdd_cpu_b";
+ 		regulator-min-microvolt = <712500>;
+ 		regulator-max-microvolt = <1500000>;
+@@ -458,6 +527,8 @@
+ 		fcs,suspend-voltage-selector = <1>;
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&vsel2_gpio>;
++		vsel-gpios = <&gpio1 RK_PB6 GPIO_ACTIVE_HIGH>;
++		regulator-compatible = "fan53555-reg";
+ 		regulator-name = "vdd_gpu";
+ 		regulator-min-microvolt = <712500>;
+ 		regulator-max-microvolt = <1500000>;
+@@ -477,18 +548,15 @@
+ 	i2c-scl-falling-time-ns = <15>;
+ 	status = "okay";
+ 
+-	es8316: codec@11 {
++	es8316: es8316@10 {
++		#sound-dai-cells = <0>;
+ 		compatible = "everest,es8316";
+-		reg = <0x11>;
++		reg = <0x10>;
+ 		clocks = <&cru SCLK_I2S_8CH_OUT>;
+ 		clock-names = "mclk";
+-		#sound-dai-cells = <0>;
+-
+-		port {
+-			es8316_p0_0: endpoint {
+-				remote-endpoint = <&i2s1_p0_0>;
+-			};
+-		};
++		pinctrl-names = "default";
++		pinctrl-0 = <&i2s_8ch_mclk>;
++		hp-det-gpio = <&gpio0 RK_PB0 GPIO_ACTIVE_LOW>;
+ 	};
+ };
+ 
+@@ -503,46 +571,31 @@
+ 	i2c-scl-falling-time-ns = <20>;
+ 	status = "okay";
+ 
+-	fusb0: typec-portc@22 {
+-		compatible = "fcs,fusb302";
+-		reg = <0x22>;
+-		interrupt-parent = <&gpio1>;
+-		interrupts = <RK_PA2 IRQ_TYPE_LEVEL_LOW>;
+-		pinctrl-names = "default";
+-		pinctrl-0 = <&fusb0_int>;
+-		vbus-supply = <&vcc5v0_typec>;
+-		status = "okay";
+-	};
+ };
+ 
+ &i2s0 {
+ 	rockchip,playback-channels = <8>;
+ 	rockchip,capture-channels = <8>;
++	#sound-dai-cells = <0>;
+ 	status = "okay";
+ };
+ 
+ &i2s1 {
+ 	rockchip,playback-channels = <2>;
+ 	rockchip,capture-channels = <2>;
++	#sound-dai-cells = <0>;
+ 	status = "okay";
+-
+-	i2s1_p0: port {
+-		i2s1_p0_0: endpoint {
+-			dai-format = "i2s";
+-			mclk-fs = <256>;
+-			remote-endpoint = <&es8316_p0_0>;
+-		};
+-	};
+ };
+ 
+ &i2s2 {
++	#sound-dai-cells = <0>;
+ 	status = "okay";
+ };
+ 
+ &io_domains {
+ 	status = "okay";
+ 
+-	bt656-supply = <&vcc1v8_dvp>;
++	bt656-supply = <&vcc_3v0>;
+ 	audio-supply = <&vcc_3v0>;
+ 	sdmmc-supply = <&vcc_sdio>;
+ 	gpio1830-supply = <&vcc_3v0>;
+@@ -626,11 +680,23 @@
+ 		};
+ 	};
+ 
++	rt5640 {
++		rt5640_hpcon: rt5640-hpcon {
++			rockchip,pins = <4 RK_PC5 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++	};
++
+ 	usb2 {
+ 		vcc5v0_host_en: vcc5v0-host-en {
+ 			rockchip,pins = <4 RK_PD2 RK_FUNC_GPIO &pcfg_pull_none>;
+ 		};
+ 	};
++
++	i2s0 {
++		i2s_8ch_mclk: i2s-8ch-mclk {
++			rockchip,pins = <4 0 RK_FUNC_1 &pcfg_pull_none>;
++		};
++	};
+ };
+ 
+ &pwm0 {
+@@ -641,6 +707,10 @@
+ 	status = "okay";
+ };
+ 
++&pwm1 {
++	status = "okay";
++};
++
+ &pwm2 {
+ 	status = "okay";
+ };
+@@ -650,12 +720,30 @@
+ 	status = "okay";
+ };
+ 
++&sdio0 {
++	bus-width = <4>;
++	cap-sd-highspeed;
++	cap-sdio-irq;
++	clock-frequency = <50000000>;
++	disable-wp;
++	keep-power-in-suspend;
++	max-frequency = <50000000>;
++	mmc-pwrseq = <&sdio_pwrseq>;
++	non-removable;
++	pinctrl-names = "default";
++	pinctrl-0 = <&sdio0_bus4 &sdio0_cmd &sdio0_clk>;
++	sd-uhs-sdr104;
++	status = "okay";
++};
++
+ &sdmmc {
+ 	bus-width = <4>;
+ 	cap-sd-highspeed;
+ 	cd-gpios = <&gpio0 7 GPIO_ACTIVE_LOW>;
+ 	disable-wp;
++	sd-uhs-sdr104;
+ 	max-frequency = <150000000>;
++	vqmmc-supply = <&vcc_sdio>;
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&sdmmc_clk &sdmmc_cmd &sdmmc_bus4>;
+ 	status = "okay";
+@@ -663,7 +751,9 @@
+ 
+ &sdhci {
+ 	bus-width = <8>;
++	//mmc-hs400-1_8v;
+ 	mmc-hs200-1_8v;
++	//mmc-hs400-enhanced-strobe;
+ 	non-removable;
+ 	status = "okay";
+ };
+@@ -779,3 +869,39 @@
+ &vopl_mmu {
+ 	status = "okay";
+ };
++
++&spi1 {
++	status = "okay";
++	max-freq = <10000000>;
++
++	spiflash: spi-flash@0 {
++		#address-cells = <0x1>;
++		#size-cells = <1>;
++		compatible = "jedec,spi-nor";
++		reg = <0x0>;
++		spi-max-frequency = <10000000>;
++		status = "okay";
++		m25p,fast-read;
++
++		partitions {
++			compatible = "fixed-partitions";
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			loader@8000 {
++				label = "loader";
++				reg = <0x0 0x3F8000>;
++			};
++
++			env@3f8000 {
++				label = "env";
++				reg = <0x3F8000 0x8000>;
++			};
++
++			vendor@7c0000 {
++				label = "vendor";
++				reg = <0x7C0000 0x40000>;
++			};
++		};
++	};
++};
+diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/boot/dts/rockchip/rk3399.dtsi linux-5.5-rc7-rockchip/arch/arm64/boot/dts/rockchip/rk3399.dtsi
+--- linux-5.5-rc7/arch/arm64/boot/dts/rockchip/rk3399.dtsi	2020-01-20 02:02:49.000000000 +0200
++++ linux-5.5-rc7-rockchip/arch/arm64/boot/dts/rockchip/rk3399.dtsi	2020-01-25 00:08:09.386292696 +0200
+@@ -790,7 +790,7 @@
+ 				};
+ 			};
+ 
+-			cooling-maps {
++			cooling_maps: cooling-maps {
+ 				map0 {
+ 					trip = <&cpu_alert0>;
+ 					cooling-device =
+diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/boot/dts/rockchip/rk3399.dtsi.orig linux-5.5-rc7-rockchip/arch/arm64/boot/dts/rockchip/rk3399.dtsi.orig
+diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/configs/defconfig linux-5.5-rc7-rockchip/arch/arm64/configs/defconfig
+--- linux-5.5-rc7/arch/arm64/configs/defconfig	2020-01-20 02:02:49.000000000 +0200
++++ linux-5.5-rc7-rockchip/arch/arm64/configs/defconfig	2020-01-25 00:08:09.390292694 +0200
+@@ -791,6 +791,7 @@
+ CONFIG_PHY_ROCKCHIP_EMMC=y
+ CONFIG_PHY_ROCKCHIP_INNO_HDMI=m
+ CONFIG_PHY_ROCKCHIP_INNO_USB2=y
++CONFIG_PHY_ROCKCHIP_INNO_HDMI=m
+ CONFIG_PHY_ROCKCHIP_PCIE=m
+ CONFIG_PHY_ROCKCHIP_TYPEC=y
+ CONFIG_PHY_UNIPHIER_USB2=y
+diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/configs/defconfig.orig linux-5.5-rc7-rockchip/arch/arm64/configs/defconfig.orig
+diff --no-dereference -Naur linux-5.5-rc7/arch/arm64/configs/rockchip_linux_defconfig linux-5.5-rc7-rockchip/arch/arm64/configs/rockchip_linux_defconfig
+--- linux-5.5-rc7/arch/arm64/configs/rockchip_linux_defconfig	1970-01-01 03:00:00.000000000 +0300
++++ linux-5.5-rc7-rockchip/arch/arm64/configs/rockchip_linux_defconfig	2020-01-25 00:08:09.394292691 +0200
+@@ -0,0 +1,1000 @@
++CONFIG_SYSVIPC=y
++CONFIG_POSIX_MQUEUE=y
++CONFIG_AUDIT=y
++CONFIG_NO_HZ_IDLE=y
++CONFIG_HIGH_RES_TIMERS=y
++CONFIG_PREEMPT=y
++CONFIG_BSD_PROCESS_ACCT=y
++CONFIG_BSD_PROCESS_ACCT_V3=y
++CONFIG_TASKSTATS=y
++CONFIG_TASK_DELAY_ACCT=y
++CONFIG_TASK_XACCT=y
++CONFIG_TASK_IO_ACCOUNTING=y
++CONFIG_IKCONFIG=y
++CONFIG_IKCONFIG_PROC=y
++CONFIG_NUMA_BALANCING=y
++CONFIG_MEMCG=y
++CONFIG_MEMCG_SWAP=y
++CONFIG_BLK_CGROUP=y
++CONFIG_CFS_BANDWIDTH=y
++CONFIG_RT_GROUP_SCHED=y
++CONFIG_CGROUP_PIDS=y
++CONFIG_CGROUP_FREEZER=y
++CONFIG_CGROUP_HUGETLB=y
++CONFIG_CPUSETS=y
++CONFIG_CGROUP_DEVICE=y
++CONFIG_CGROUP_CPUACCT=y
++CONFIG_CGROUP_PERF=y
++CONFIG_NAMESPACES=y
++CONFIG_USER_NS=y
++CONFIG_SCHED_AUTOGROUP=y
++CONFIG_BLK_DEV_INITRD=y
++CONFIG_EXPERT=y
++CONFIG_KALLSYMS_ALL=y
++# CONFIG_COMPAT_BRK is not set
++CONFIG_PROFILING=y
++CONFIG_ARCH_SUNXI=y
++CONFIG_ARCH_ALPINE=y
++CONFIG_ARCH_BCM2835=y
++CONFIG_ARCH_BCM_IPROC=y
++CONFIG_ARCH_BERLIN=y
++CONFIG_ARCH_BRCMSTB=y
++CONFIG_ARCH_EXYNOS=y
++CONFIG_ARCH_LAYERSCAPE=y
++CONFIG_ARCH_LG1K=y
++CONFIG_ARCH_HISI=y
++CONFIG_ARCH_MEDIATEK=y
++CONFIG_ARCH_MESON=y
++CONFIG_ARCH_MVEBU=y
++CONFIG_ARCH_QCOM=y
++CONFIG_ARCH_RENESAS=y
++CONFIG_ARCH_ROCKCHIP=y
++CONFIG_ARCH_SEATTLE=y
++CONFIG_ARCH_STRATIX10=y
++CONFIG_ARCH_TEGRA=y
++CONFIG_ARCH_SPRD=y
++CONFIG_ARCH_THUNDER=y
++CONFIG_ARCH_THUNDER2=y
++CONFIG_ARCH_UNIPHIER=y
++CONFIG_ARCH_VEXPRESS=y
++CONFIG_ARCH_XGENE=y
++CONFIG_ARCH_ZX=y
++CONFIG_ARCH_ZYNQMP=y
++CONFIG_ARM64_VA_BITS_48=y
++CONFIG_SCHED_MC=y
++CONFIG_NUMA=y
++CONFIG_SECCOMP=y
++CONFIG_KEXEC=y
++CONFIG_CRASH_DUMP=y
++CONFIG_XEN=y
++CONFIG_COMPAT=y
++CONFIG_HIBERNATION=y
++CONFIG_ARM_CPUIDLE=y
++CONFIG_CPU_FREQ=y
++CONFIG_CPU_FREQ_STAT=y
++CONFIG_CPU_FREQ_DEFAULT_GOV_ONDEMAND=y
++CONFIG_CPU_FREQ_GOV_POWERSAVE=y
++CONFIG_CPU_FREQ_GOV_USERSPACE=m
++CONFIG_CPU_FREQ_GOV_CONSERVATIVE=y
++CONFIG_CPU_FREQ_GOV_SCHEDUTIL=y
++CONFIG_CPUFREQ_DT=y
++CONFIG_ACPI_CPPC_CPUFREQ=y
++CONFIG_ARM_SCPI_CPUFREQ=y
++CONFIG_ARM_SCPI_PROTOCOL=y
++CONFIG_RASPBERRYPI_FIRMWARE=y
++CONFIG_EFI_CAPSULE_LOADER=y
++CONFIG_ACPI=y
++CONFIG_ACPI_APEI=y
++CONFIG_ACPI_APEI_GHES=y
++CONFIG_VIRTUALIZATION=y
++CONFIG_KVM=y
++CONFIG_ARM64_CRYPTO=y
++CONFIG_CRYPTO_SHA1_ARM64_CE=y
++CONFIG_CRYPTO_SHA2_ARM64_CE=y
++CONFIG_CRYPTO_GHASH_ARM64_CE=y
++CONFIG_CRYPTO_AES_ARM64_CE_CCM=y
++CONFIG_CRYPTO_AES_ARM64_CE_BLK=y
++CONFIG_JUMP_LABEL=y
++CONFIG_MODULES=y
++CONFIG_MODULE_UNLOAD=y
++CONFIG_BLK_DEV_THROTTLING=y
++# CONFIG_CORE_DUMP_DEFAULT_ELF_HEADERS is not set
++CONFIG_KSM=y
++CONFIG_TRANSPARENT_HUGEPAGE=y
++CONFIG_CMA=y
++CONFIG_ZSMALLOC=y
++CONFIG_PGTABLE_MAPPING=y
++CONFIG_ZSMALLOC_STAT=y
++CONFIG_NET=y
++CONFIG_PACKET=y
++CONFIG_UNIX=y
++CONFIG_XFRM_USER=y
++CONFIG_INET=y
++CONFIG_IP_MULTICAST=y
++CONFIG_IP_ADVANCED_ROUTER=y
++CONFIG_IP_MULTIPLE_TABLES=y
++CONFIG_IP_ROUTE_MULTIPATH=y
++CONFIG_IP_ROUTE_VERBOSE=y
++CONFIG_IP_PNP=y
++CONFIG_IP_PNP_DHCP=y
++CONFIG_IP_PNP_BOOTP=y
++CONFIG_INET_ESP=y
++CONFIG_INET_ESP_OFFLOAD=y
++CONFIG_IPV6_MULTIPLE_TABLES=y
++CONFIG_IPV6_SUBTREES=y
++CONFIG_NETFILTER=y
++CONFIG_NF_CONNTRACK=y
++CONFIG_NF_CONNTRACK_EVENTS=y
++CONFIG_NF_CONNTRACK_TIMEOUT=y
++CONFIG_NF_CONNTRACK_AMANDA=y
++CONFIG_NF_CONNTRACK_FTP=y
++CONFIG_NF_CONNTRACK_H323=y
++CONFIG_NF_CONNTRACK_IRC=y
++CONFIG_NF_CONNTRACK_NETBIOS_NS=y
++CONFIG_NF_CONNTRACK_SNMP=y
++CONFIG_NF_CONNTRACK_PPTP=y
++CONFIG_NF_CONNTRACK_SANE=y
++CONFIG_NF_CONNTRACK_SIP=y
++CONFIG_NF_CONNTRACK_TFTP=y
++CONFIG_NF_CT_NETLINK=y
++CONFIG_NF_CT_NETLINK_TIMEOUT=y
++CONFIG_NF_TABLES=y
++CONFIG_NF_TABLES_INET=y
++CONFIG_NF_TABLES_NETDEV=y
++CONFIG_NFT_NUMGEN=y
++CONFIG_NFT_CT=y
++CONFIG_NFT_COUNTER=y
++CONFIG_NFT_LOG=y
++CONFIG_NFT_LIMIT=y
++CONFIG_NFT_MASQ=y
++CONFIG_NFT_REDIR=y
++CONFIG_NFT_NAT=y
++CONFIG_NFT_OBJREF=y
++CONFIG_NFT_QUEUE=y
++CONFIG_NFT_QUOTA=y
++CONFIG_NFT_REJECT=y
++CONFIG_NFT_COMPAT=y
++CONFIG_NFT_HASH=y
++CONFIG_NFT_DUP_NETDEV=y
++CONFIG_NFT_FWD_NETDEV=y
++CONFIG_NETFILTER_XT_TARGET_AUDIT=y
++CONFIG_NETFILTER_XT_TARGET_CHECKSUM=y
++CONFIG_NETFILTER_XT_TARGET_CLASSIFY=y
++CONFIG_NETFILTER_XT_TARGET_CONNMARK=y
++CONFIG_NETFILTER_XT_TARGET_DSCP=y
++CONFIG_NETFILTER_XT_TARGET_HMARK=y
++CONFIG_NETFILTER_XT_TARGET_IDLETIMER=y
++CONFIG_NETFILTER_XT_TARGET_LED=y
++CONFIG_NETFILTER_XT_TARGET_LOG=y
++CONFIG_NETFILTER_XT_TARGET_MARK=y
++CONFIG_NETFILTER_XT_TARGET_NFLOG=y
++CONFIG_NETFILTER_XT_TARGET_NFQUEUE=y
++CONFIG_NETFILTER_XT_TARGET_TEE=y
++CONFIG_NETFILTER_XT_TARGET_TPROXY=y
++CONFIG_NETFILTER_XT_TARGET_SECMARK=y
++CONFIG_NETFILTER_XT_TARGET_TCPMSS=y
++CONFIG_NETFILTER_XT_TARGET_TCPOPTSTRIP=y
++CONFIG_NETFILTER_XT_MATCH_ADDRTYPE=y
++CONFIG_NETFILTER_XT_MATCH_BPF=y
++CONFIG_NETFILTER_XT_MATCH_CGROUP=y
++CONFIG_NETFILTER_XT_MATCH_CLUSTER=y
++CONFIG_NETFILTER_XT_MATCH_COMMENT=y
++CONFIG_NETFILTER_XT_MATCH_CONNBYTES=y
++CONFIG_NETFILTER_XT_MATCH_CONNLABEL=y
++CONFIG_NETFILTER_XT_MATCH_CONNLIMIT=y
++CONFIG_NETFILTER_XT_MATCH_CONNMARK=y
++CONFIG_NETFILTER_XT_MATCH_CONNTRACK=y
++CONFIG_NETFILTER_XT_MATCH_CPU=y
++CONFIG_NETFILTER_XT_MATCH_DCCP=y
++CONFIG_NETFILTER_XT_MATCH_DEVGROUP=y
++CONFIG_NETFILTER_XT_MATCH_DSCP=y
++CONFIG_NETFILTER_XT_MATCH_ESP=y
++CONFIG_NETFILTER_XT_MATCH_HASHLIMIT=y
++CONFIG_NETFILTER_XT_MATCH_HELPER=y
++CONFIG_NETFILTER_XT_MATCH_IPCOMP=y
++CONFIG_NETFILTER_XT_MATCH_IPRANGE=y
++CONFIG_NETFILTER_XT_MATCH_IPVS=y
++CONFIG_NETFILTER_XT_MATCH_L2TP=y
++CONFIG_NETFILTER_XT_MATCH_LENGTH=y
++CONFIG_NETFILTER_XT_MATCH_LIMIT=y
++CONFIG_NETFILTER_XT_MATCH_MAC=y
++CONFIG_NETFILTER_XT_MATCH_MARK=y
++CONFIG_NETFILTER_XT_MATCH_MULTIPORT=y
++CONFIG_NETFILTER_XT_MATCH_NFACCT=y
++CONFIG_NETFILTER_XT_MATCH_OSF=y
++CONFIG_NETFILTER_XT_MATCH_OWNER=y
++CONFIG_NETFILTER_XT_MATCH_POLICY=y
++CONFIG_NETFILTER_XT_MATCH_PHYSDEV=m
++CONFIG_NETFILTER_XT_MATCH_PKTTYPE=y
++CONFIG_NETFILTER_XT_MATCH_QUOTA=y
++CONFIG_NETFILTER_XT_MATCH_RATEEST=y
++CONFIG_NETFILTER_XT_MATCH_REALM=y
++CONFIG_NETFILTER_XT_MATCH_RECENT=y
++CONFIG_NETFILTER_XT_MATCH_SCTP=y
++CONFIG_NETFILTER_XT_MATCH_STATE=y
++CONFIG_NETFILTER_XT_MATCH_STATISTIC=y
++CONFIG_NETFILTER_XT_MATCH_STRING=y
++CONFIG_NETFILTER_XT_MATCH_TCPMSS=y
++CONFIG_NETFILTER_XT_MATCH_TIME=y
++CONFIG_NETFILTER_XT_MATCH_U32=y
++CONFIG_IP_SET=y
++CONFIG_IP_SET_BITMAP_IP=y
++CONFIG_IP_SET_BITMAP_IPMAC=y
++CONFIG_IP_SET_BITMAP_PORT=y
++CONFIG_IP_SET_HASH_IP=y
++CONFIG_IP_SET_HASH_IPMARK=y
++CONFIG_IP_SET_HASH_IPPORT=y
++CONFIG_IP_SET_HASH_IPPORTIP=y
++CONFIG_IP_SET_HASH_IPPORTNET=y
++CONFIG_IP_SET_HASH_IPMAC=y
++CONFIG_IP_SET_HASH_MAC=y
++CONFIG_IP_SET_HASH_NETPORTNET=y
++CONFIG_IP_SET_HASH_NET=y
++CONFIG_IP_SET_HASH_NETNET=y
++CONFIG_IP_SET_HASH_NETPORT=y
++CONFIG_IP_SET_HASH_NETIFACE=y
++CONFIG_IP_SET_LIST_SET=y
++CONFIG_IP_VS=y
++CONFIG_IP_VS_IPV6=y
++CONFIG_IP_VS_PROTO_TCP=y
++CONFIG_IP_VS_PROTO_UDP=y
++CONFIG_IP_VS_PROTO_ESP=y
++CONFIG_IP_VS_PROTO_AH=y
++CONFIG_IP_VS_PROTO_SCTP=y
++CONFIG_IP_VS_RR=y
++CONFIG_IP_VS_WRR=y
++CONFIG_IP_VS_LC=y
++CONFIG_IP_VS_WLC=y
++CONFIG_IP_VS_FO=y
++CONFIG_IP_VS_OVF=y
++CONFIG_IP_VS_LBLC=y
++CONFIG_IP_VS_LBLCR=y
++CONFIG_IP_VS_DH=y
++CONFIG_IP_VS_SH=y
++CONFIG_IP_VS_SED=y
++CONFIG_IP_VS_NQ=y
++CONFIG_IP_VS_NFCT=y
++CONFIG_IP_NF_IPTABLES=y
++CONFIG_IP_NF_MATCH_AH=y
++CONFIG_IP_NF_MATCH_ECN=y
++CONFIG_IP_NF_MATCH_RPFILTER=y
++CONFIG_IP_NF_MATCH_TTL=y
++CONFIG_IP_NF_FILTER=y
++CONFIG_IP_NF_TARGET_REJECT=y
++CONFIG_IP_NF_TARGET_SYNPROXY=y
++CONFIG_IP_NF_NAT=y
++CONFIG_IP_NF_TARGET_MASQUERADE=y
++CONFIG_IP_NF_TARGET_NETMAP=y
++CONFIG_IP_NF_TARGET_REDIRECT=y
++CONFIG_IP_NF_MANGLE=y
++CONFIG_IP_NF_TARGET_CLUSTERIP=y
++CONFIG_IP_NF_TARGET_ECN=y
++CONFIG_IP_NF_TARGET_TTL=y
++CONFIG_IP_NF_ARPTABLES=y
++CONFIG_IP_NF_ARPFILTER=y
++CONFIG_IP_NF_ARP_MANGLE=y
++CONFIG_IP6_NF_MATCH_AH=y
++CONFIG_IP6_NF_MATCH_EUI64=y
++CONFIG_IP6_NF_MATCH_FRAG=y
++CONFIG_IP6_NF_MATCH_OPTS=y
++CONFIG_IP6_NF_MATCH_HL=y
++CONFIG_IP6_NF_MATCH_IPV6HEADER=y
++CONFIG_IP6_NF_MATCH_MH=y
++CONFIG_IP6_NF_MATCH_RPFILTER=y
++CONFIG_IP6_NF_MATCH_RT=y
++CONFIG_IP6_NF_TARGET_HL=y
++CONFIG_IP6_NF_FILTER=y
++CONFIG_IP6_NF_TARGET_REJECT=y
++CONFIG_IP6_NF_TARGET_SYNPROXY=y
++CONFIG_IP6_NF_MANGLE=y
++CONFIG_IP6_NF_RAW=y
++CONFIG_IP6_NF_NAT=y
++CONFIG_IP6_NF_TARGET_MASQUERADE=y
++CONFIG_NF_TABLES_BRIDGE=y
++CONFIG_NFT_BRIDGE_REJECT=y
++CONFIG_BRIDGE_NF_EBTABLES=y
++CONFIG_BRIDGE_EBT_BROUTE=y
++CONFIG_BRIDGE_EBT_T_FILTER=y
++CONFIG_BRIDGE_EBT_T_NAT=y
++CONFIG_BRIDGE_EBT_802_3=y
++CONFIG_BRIDGE_EBT_AMONG=y
++CONFIG_BRIDGE_EBT_ARP=y
++CONFIG_BRIDGE_EBT_IP=y
++CONFIG_BRIDGE_EBT_IP6=y
++CONFIG_BRIDGE_EBT_LIMIT=y
++CONFIG_BRIDGE_EBT_MARK=y
++CONFIG_BRIDGE_EBT_PKTTYPE=y
++CONFIG_BRIDGE_EBT_STP=y
++CONFIG_BRIDGE_EBT_VLAN=y
++CONFIG_BRIDGE_EBT_ARPREPLY=y
++CONFIG_BRIDGE_EBT_DNAT=y
++CONFIG_BRIDGE_EBT_MARK_T=y
++CONFIG_BRIDGE_EBT_REDIRECT=y
++CONFIG_BRIDGE_EBT_SNAT=y
++CONFIG_BRIDGE_EBT_LOG=y
++CONFIG_BRIDGE_EBT_NFLOG=y
++CONFIG_BRIDGE=y
++CONFIG_BRIDGE_VLAN_FILTERING=y
++CONFIG_VLAN_8021Q=y
++CONFIG_VLAN_8021Q_GVRP=y
++CONFIG_VLAN_8021Q_MVRP=y
++CONFIG_NET_SCHED=y
++CONFIG_NET_CLS_CGROUP=y
++CONFIG_CGROUP_NET_PRIO=y
++CONFIG_BPF_JIT=y
++CONFIG_BT=y
++CONFIG_BT_HIDP=y
++# CONFIG_BT_HS is not set
++# CONFIG_BT_LE is not set
++CONFIG_BT_LEDS=y
++# CONFIG_BT_DEBUGFS is not set
++CONFIG_BT_HCIUART=y
++CONFIG_CFG80211=y
++CONFIG_CFG80211_CERTIFICATION_ONUS=y
++# CONFIG_CFG80211_REQUIRE_SIGNED_REGDB is not set
++CONFIG_MAC80211=y
++CONFIG_RFKILL=y
++CONFIG_NET_9P=y
++CONFIG_NET_9P_VIRTIO=y
++CONFIG_PCI=y
++CONFIG_PCI_IOV=y
++CONFIG_HOTPLUG_PCI=y
++CONFIG_HOTPLUG_PCI_ACPI=y
++CONFIG_PCI_AARDVARK=y
++CONFIG_PCIE_RCAR=y
++CONFIG_PCI_HOST_GENERIC=y
++CONFIG_PCI_XGENE=y
++CONFIG_PCIE_ROCKCHIP_HOST=m
++CONFIG_PCIE_ROCKCHIP_EP=y
++CONFIG_PCI_LAYERSCAPE=y
++CONFIG_PCI_HISI=y
++CONFIG_PCIE_QCOM=y
++CONFIG_PCIE_ARMADA_8K=y
++CONFIG_PCI_ENDPOINT=y
++CONFIG_PCI_ENDPOINT_CONFIGFS=y
++CONFIG_DEVTMPFS=y
++CONFIG_DEVTMPFS_MOUNT=y
++CONFIG_MTD=y
++CONFIG_MTD_BLOCK=y
++CONFIG_MTD_M25P80=y
++CONFIG_MTD_SPI_NOR=y
++CONFIG_OF_CONFIGFS=y
++CONFIG_BLK_DEV_LOOP=y
++CONFIG_BLK_DEV_CRYPTOLOOP=y
++CONFIG_BLK_DEV_NBD=y
++CONFIG_BLK_DEV_RAM=y
++CONFIG_ATA_OVER_ETH=m
++CONFIG_VIRTIO_BLK=y
++CONFIG_BLK_DEV_NVME=y
++CONFIG_SRAM=y
++CONFIG_EEPROM_AT25=y
++# CONFIG_SCSI_PROC_FS is not set
++CONFIG_BLK_DEV_SD=y
++CONFIG_SCSI_SAS_ATA=y
++CONFIG_SCSI_HISI_SAS=y
++CONFIG_ATA=y
++CONFIG_SATA_AHCI=y
++CONFIG_SATA_AHCI_PLATFORM=y
++CONFIG_AHCI_CEVA=y
++CONFIG_AHCI_MVEBU=y
++CONFIG_AHCI_XGENE=y
++CONFIG_AHCI_QORIQ=y
++CONFIG_SATA_SIL24=y
++CONFIG_SATA_RCAR=y
++CONFIG_PATA_PLATFORM=y
++CONFIG_PATA_OF_PLATFORM=y
++CONFIG_MD=y
++CONFIG_MD_LINEAR=m
++CONFIG_MD_MULTIPATH=m
++CONFIG_MD_FAULTY=m
++CONFIG_BCACHE=m
++CONFIG_BCACHE_DEBUG=y
++CONFIG_BCACHE_CLOSURES_DEBUG=y
++CONFIG_BLK_DEV_DM=m
++CONFIG_DM_DEBUG=y
++CONFIG_DM_CRYPT=m
++CONFIG_DM_SNAPSHOT=m
++CONFIG_DM_THIN_PROVISIONING=m
++CONFIG_DM_CACHE=m
++# CONFIG_DM_CACHE_SMQ is not set
++CONFIG_DM_ERA=m
++CONFIG_DM_MIRROR=m
++CONFIG_DM_LOG_USERSPACE=m
++CONFIG_DM_RAID=m
++CONFIG_DM_ZERO=m
++CONFIG_DM_DELAY=m
++CONFIG_DM_UEVENT=y
++CONFIG_DM_FLAKEY=m
++CONFIG_DM_VERITY=m
++CONFIG_DM_VERITY_FEC=y
++CONFIG_DM_SWITCH=m
++CONFIG_DM_LOG_WRITES=m
++CONFIG_DM_INTEGRITY=m
++CONFIG_NETDEVICES=y
++CONFIG_DUMMY=y
++CONFIG_MACVLAN=y
++CONFIG_MACVTAP=y
++CONFIG_IPVLAN=y
++CONFIG_IPVTAP=y
++CONFIG_VXLAN=y
++CONFIG_GENEVE=y
++CONFIG_TUN=y
++CONFIG_VETH=y
++CONFIG_VIRTIO_NET=y
++CONFIG_AMD_XGBE=y
++CONFIG_NET_XGENE=y
++CONFIG_MACB=y
++CONFIG_HNS_DSAF=y
++CONFIG_HNS_ENET=y
++CONFIG_E1000E=y
++CONFIG_IGB=y
++CONFIG_IGBVF=y
++CONFIG_MVNETA=y
++CONFIG_MVPP2=y
++CONFIG_SKY2=y
++CONFIG_QCOM_EMAC=y
++CONFIG_RAVB=y
++CONFIG_SMC91X=y
++CONFIG_SMSC911X=y
++CONFIG_STMMAC_ETH=y
++CONFIG_MDIO_BUS_MUX_MMIOREG=y
++CONFIG_AT803X_PHY=y
++CONFIG_MARVELL_PHY=y
++CONFIG_MESON_GXL_PHY=y
++CONFIG_MICREL_PHY=y
++CONFIG_REALTEK_PHY=y
++CONFIG_ROCKCHIP_PHY=y
++CONFIG_USB_PEGASUS=y
++CONFIG_USB_RTL8150=y
++CONFIG_USB_RTL8152=y
++CONFIG_USB_USBNET=y
++CONFIG_USB_NET_DM9601=y
++CONFIG_USB_NET_SR9800=y
++CONFIG_USB_NET_SMSC75XX=y
++CONFIG_USB_NET_SMSC95XX=y
++CONFIG_USB_NET_PLUSB=y
++CONFIG_USB_NET_MCS7830=y
++CONFIG_USB_NET_ZAURUS=m
++CONFIG_USB_NET_CX82310_ETH=m
++CONFIG_USB_NET_KALMIA=m
++CONFIG_USB_NET_QMI_WWAN=m
++CONFIG_USB_HSO=m
++CONFIG_USB_NET_INT51X1=m
++CONFIG_USB_IPHETH=m
++CONFIG_USB_SIERRA_NET=m
++CONFIG_USB_VL600=m
++CONFIG_USB_NET_CH9200=m
++CONFIG_ATH9K=m
++CONFIG_ATH9K_HTC=m
++CONFIG_ATH6KL=y
++CONFIG_AR5523=m
++CONFIG_WIL6210=m
++# CONFIG_WIL6210_ISR_COR is not set
++CONFIG_ATH10K=m
++CONFIG_BRCMFMAC=y
++CONFIG_RTL8187=m
++CONFIG_RTL8192CU=m
++# CONFIG_RTLWIFI_DEBUG is not set
++CONFIG_RTL8XXXU=m
++CONFIG_WL18XX=y
++CONFIG_WLCORE_SDIO=y
++CONFIG_USB_NET_RNDIS_WLAN=m
++CONFIG_INPUT_EVDEV=y
++CONFIG_KEYBOARD_ADC=y
++CONFIG_KEYBOARD_GPIO=y
++CONFIG_KEYBOARD_CROS_EC=y
++CONFIG_INPUT_MISC=y
++CONFIG_INPUT_PM8941_PWRKEY=y
++CONFIG_INPUT_RK805_PWRKEY=y
++CONFIG_INPUT_HISI_POWERKEY=y
++# CONFIG_SERIO_SERPORT is not set
++CONFIG_SERIO_AMBAKMI=y
++CONFIG_LEGACY_PTY_COUNT=16
++CONFIG_SERIAL_8250=y
++CONFIG_SERIAL_8250_CONSOLE=y
++CONFIG_SERIAL_8250_EXTENDED=y
++CONFIG_SERIAL_8250_SHARE_IRQ=y
++CONFIG_SERIAL_8250_BCM2835AUX=y
++CONFIG_SERIAL_8250_DW=y
++CONFIG_SERIAL_8250_MT6577=y
++CONFIG_SERIAL_8250_UNIPHIER=y
++CONFIG_SERIAL_OF_PLATFORM=y
++CONFIG_SERIAL_AMBA_PL011=y
++CONFIG_SERIAL_AMBA_PL011_CONSOLE=y
++CONFIG_SERIAL_MESON=y
++CONFIG_SERIAL_MESON_CONSOLE=y
++CONFIG_SERIAL_SAMSUNG=y
++CONFIG_SERIAL_SAMSUNG_CONSOLE=y
++CONFIG_SERIAL_TEGRA=y
++CONFIG_SERIAL_SH_SCI=y
++CONFIG_SERIAL_SH_SCI_NR_UARTS=11
++CONFIG_SERIAL_MSM=y
++CONFIG_SERIAL_MSM_CONSOLE=y
++CONFIG_SERIAL_XILINX_PS_UART=y
++CONFIG_SERIAL_XILINX_PS_UART_CONSOLE=y
++CONFIG_SERIAL_MVEBU_UART=y
++CONFIG_VIRTIO_CONSOLE=y
++CONFIG_I2C_CHARDEV=y
++CONFIG_I2C_MUX_PCA954x=y
++CONFIG_I2C_BCM2835=y
++CONFIG_I2C_DESIGNWARE_PLATFORM=y
++CONFIG_I2C_IMX=y
++CONFIG_I2C_MESON=y
++CONFIG_I2C_MV64XXX=y
++CONFIG_I2C_PXA=y
++CONFIG_I2C_QUP=y
++CONFIG_I2C_RK3X=y
++CONFIG_I2C_SH_MOBILE=y
++CONFIG_I2C_TEGRA=y
++CONFIG_I2C_UNIPHIER_F=y
++CONFIG_I2C_RCAR=y
++CONFIG_I2C_CROS_EC_TUNNEL=y
++CONFIG_SPI=y
++CONFIG_SPI_BCM2835=y
++CONFIG_SPI_BCM2835AUX=y
++CONFIG_SPI_MESON_SPICC=y
++CONFIG_SPI_MESON_SPIFC=y
++CONFIG_SPI_ORION=y
++CONFIG_SPI_PL022=y
++CONFIG_SPI_ROCKCHIP=y
++CONFIG_SPI_QUP=y
++CONFIG_SPI_S3C64XX=y
++CONFIG_SPI_SPIDEV=y
++CONFIG_SPMI=y
++CONFIG_PINCTRL_SINGLE=y
++CONFIG_PINCTRL_MAX77620=y
++CONFIG_PINCTRL_RK805=y
++CONFIG_PINCTRL_MSM8916=y
++CONFIG_PINCTRL_MSM8994=y
++CONFIG_PINCTRL_MSM8996=y
++CONFIG_PINCTRL_QDF2XXX=y
++CONFIG_PINCTRL_QCOM_SPMI_PMIC=y
++CONFIG_GPIO_SYSFS=y
++CONFIG_GPIO_DWAPB=y
++CONFIG_GPIO_PL061=y
++CONFIG_GPIO_RCAR=y
++CONFIG_GPIO_XGENE=y
++CONFIG_GPIO_XGENE_SB=y
++CONFIG_GPIO_PCA953X=y
++CONFIG_GPIO_PCA953X_IRQ=y
++CONFIG_GPIO_MAX77620=y
++CONFIG_POWER_AVS=y
++CONFIG_ROCKCHIP_IODOMAIN=y
++CONFIG_POWER_RESET_MSM=y
++CONFIG_POWER_RESET_XGENE=y
++CONFIG_POWER_RESET_SYSCON=y
++CONFIG_BATTERY_BQ27XXX=y
++CONFIG_SENSORS_ARM_SCPI=y
++CONFIG_SENSORS_LM90=y
++CONFIG_SENSORS_PWM_FAN=y
++CONFIG_SENSORS_INA2XX=y
++CONFIG_THERMAL_GOV_POWER_ALLOCATOR=y
++CONFIG_CPU_THERMAL=y
++CONFIG_THERMAL_EMULATION=y
++CONFIG_ROCKCHIP_THERMAL=y
++CONFIG_EXYNOS_THERMAL=y
++CONFIG_WATCHDOG=y
++CONFIG_S3C2410_WATCHDOG=y
++CONFIG_MESON_GXBB_WATCHDOG=y
++CONFIG_MESON_WATCHDOG=y
++CONFIG_RENESAS_WDT=y
++CONFIG_BCM2835_WDT=y
++CONFIG_MFD_CROS_EC=y
++CONFIG_MFD_EXYNOS_LPASS=y
++CONFIG_MFD_HI655X_PMIC=y
++CONFIG_MFD_MAX77620=y
++CONFIG_MFD_SPMI_PMIC=y
++CONFIG_MFD_RK808=y
++CONFIG_MFD_SEC_CORE=y
++CONFIG_REGULATOR_FIXED_VOLTAGE=y
++CONFIG_REGULATOR_FAN53555=y
++CONFIG_REGULATOR_GPIO=y
++CONFIG_REGULATOR_HI655X=y
++CONFIG_REGULATOR_MAX77620=y
++CONFIG_REGULATOR_PWM=y
++CONFIG_REGULATOR_QCOM_SPMI=y
++CONFIG_REGULATOR_RK808=y
++CONFIG_REGULATOR_S2MPS11=y
++CONFIG_MEDIA_SUPPORT=y
++CONFIG_MEDIA_CAMERA_SUPPORT=y
++CONFIG_MEDIA_ANALOG_TV_SUPPORT=y
++CONFIG_MEDIA_DIGITAL_TV_SUPPORT=y
++CONFIG_MEDIA_CONTROLLER=y
++CONFIG_VIDEO_V4L2_SUBDEV_API=y
++# CONFIG_DVB_NET is not set
++CONFIG_V4L_MEM2MEM_DRIVERS=y
++CONFIG_VIDEO_SAMSUNG_S5P_JPEG=y
++CONFIG_VIDEO_SAMSUNG_S5P_MFC=y
++CONFIG_VIDEO_SAMSUNG_EXYNOS_GSC=y
++CONFIG_VIDEO_RENESAS_FCP=y
++CONFIG_VIDEO_RENESAS_VSP1=y
++CONFIG_VIDEO_ROCKCHIP_RGA=y
++CONFIG_DRM=y
++CONFIG_DRM_NOUVEAU=y
++CONFIG_DRM_EXYNOS=y
++CONFIG_DRM_EXYNOS5433_DECON=y
++CONFIG_DRM_EXYNOS7_DECON=y
++CONFIG_DRM_EXYNOS_DSI=y
++# CONFIG_DRM_EXYNOS_DP is not set
++CONFIG_DRM_EXYNOS_HDMI=y
++CONFIG_DRM_EXYNOS_MIC=y
++CONFIG_DRM_ROCKCHIP=m
++CONFIG_ROCKCHIP_ANALOGIX_DP=y
++CONFIG_ROCKCHIP_CDN_DP=y
++CONFIG_ROCKCHIP_DW_HDMI=y
++CONFIG_ROCKCHIP_DW_MIPI_DSI=y
++CONFIG_ROCKCHIP_INNO_HDMI=y
++CONFIG_ROCKCHIP_LVDS=y
++CONFIG_DRM_RCAR_DU=y
++CONFIG_DRM_TEGRA=y
++CONFIG_DRM_PANEL_SIMPLE=y
++CONFIG_DRM_I2C_ADV7511=y
++CONFIG_DRM_VC4=y
++CONFIG_DRM_HISI_KIRIN=y
++CONFIG_DRM_MESON=y
++CONFIG_DRM_LIMA=m
++CONFIG_DRM_PANFROST=m
++CONFIG_FB_ARMCLCD=y
++CONFIG_BACKLIGHT_LP855X=y
++CONFIG_FRAMEBUFFER_CONSOLE=y
++CONFIG_LOGO=y
++# CONFIG_LOGO_LINUX_MONO is not set
++# CONFIG_LOGO_LINUX_VGA16 is not set
++CONFIG_SOUND=y
++CONFIG_SND=y
++CONFIG_SND_USB_AUDIO=m
++CONFIG_SND_USB_UA101=m
++CONFIG_SND_USB_CAIAQ=m
++CONFIG_SND_USB_CAIAQ_INPUT=y
++CONFIG_SND_USB_6FIRE=m
++CONFIG_SND_USB_HIFACE=m
++CONFIG_SND_BCD2000=m
++CONFIG_SND_USB_POD=m
++CONFIG_SND_USB_PODHD=m
++CONFIG_SND_USB_TONEPORT=m
++CONFIG_SND_USB_VARIAX=m
++CONFIG_SND_SOC=y
++CONFIG_SND_BCM2835_SOC_I2S=y
++CONFIG_SND_SOC_ROCKCHIP=y
++CONFIG_SND_SOC_ROCKCHIP_PDM=y
++CONFIG_SND_SOC_ROCKCHIP_SPDIF=y
++CONFIG_SND_SOC_ROCKCHIP_MAX98090=y
++CONFIG_SND_SOC_ROCKCHIP_RT5645=y
++CONFIG_SND_SOC_RK3288_HDMI_ANALOG=y
++CONFIG_SND_SOC_RK3399_GRU_SOUND=y
++CONFIG_SND_SOC_SAMSUNG=y
++CONFIG_SND_SOC_RCAR=y
++CONFIG_SND_SOC_AK4613=y
++CONFIG_SND_SOC_ES8316=m
++CONFIG_SND_SIMPLE_CARD=y
++CONFIG_HID_A4TECH=y
++CONFIG_HID_APPLE=y
++CONFIG_HID_BELKIN=y
++CONFIG_HID_CHERRY=y
++CONFIG_HID_CHICONY=y
++CONFIG_HID_CYPRESS=y
++CONFIG_HID_EZKEY=y
++CONFIG_HID_ITE=y
++CONFIG_HID_KENSINGTON=y
++CONFIG_HID_LOGITECH=y
++CONFIG_HID_MICROSOFT=y
++CONFIG_HID_MONTEREY=y
++CONFIG_USB=y
++CONFIG_USB_OTG=y
++CONFIG_USB_XHCI_HCD=y
++CONFIG_USB_XHCI_TEGRA=y
++CONFIG_USB_EHCI_HCD=y
++CONFIG_USB_EHCI_EXYNOS=y
++CONFIG_USB_EHCI_HCD_PLATFORM=y
++CONFIG_USB_OHCI_HCD=y
++CONFIG_USB_OHCI_EXYNOS=y
++CONFIG_USB_OHCI_HCD_PLATFORM=y
++CONFIG_USB_RENESAS_USBHS=y
++CONFIG_USB_PRINTER=m
++CONFIG_USB_STORAGE=y
++CONFIG_USB_STORAGE_REALTEK=m
++# CONFIG_REALTEK_AUTOPM is not set
++CONFIG_USB_STORAGE_DATAFAB=m
++CONFIG_USB_STORAGE_FREECOM=m
++CONFIG_USB_STORAGE_ISD200=m
++CONFIG_USB_STORAGE_USBAT=m
++CONFIG_USB_STORAGE_SDDR09=m
++CONFIG_USB_STORAGE_SDDR55=m
++CONFIG_USB_STORAGE_JUMPSHOT=m
++CONFIG_USB_STORAGE_ALAUDA=m
++CONFIG_USB_STORAGE_ONETOUCH=m
++CONFIG_USB_STORAGE_KARMA=m
++CONFIG_USB_STORAGE_CYPRESS_ATACB=m
++CONFIG_USB_STORAGE_ENE_UB6250=m
++CONFIG_USB_UAS=m
++CONFIG_USB_MDC800=m
++CONFIG_USB_MICROTEK=m
++CONFIG_USBIP_CORE=m
++CONFIG_USBIP_VHCI_HCD=m
++CONFIG_USBIP_HOST=m
++CONFIG_USBIP_VUDC=m
++CONFIG_USB_DWC3=y
++CONFIG_USB_DWC2=y
++CONFIG_USB_CHIPIDEA=y
++CONFIG_USB_CHIPIDEA_UDC=y
++CONFIG_USB_CHIPIDEA_HOST=y
++CONFIG_USB_ISP1760=y
++CONFIG_USB_SERIAL=m
++CONFIG_USB_EMI62=m
++CONFIG_USB_EMI26=m
++CONFIG_USB_ADUTUX=m
++CONFIG_USB_SEVSEG=m
++CONFIG_USB_RIO500=m
++CONFIG_USB_LEGOTOWER=m
++CONFIG_USB_LCD=m
++CONFIG_USB_CYPRESS_CY7C63=m
++CONFIG_USB_CYTHERM=m
++CONFIG_USB_IDMOUSE=m
++CONFIG_USB_FTDI_ELAN=m
++CONFIG_USB_APPLEDISPLAY=m
++CONFIG_USB_SISUSBVGA=m
++CONFIG_USB_LD=m
++CONFIG_USB_TRANCEVIBRATOR=m
++CONFIG_USB_IOWARRIOR=m
++CONFIG_USB_TEST=m
++CONFIG_USB_EHSET_TEST_FIXTURE=m
++CONFIG_USB_ISIGHTFW=m
++CONFIG_USB_YUREX=m
++CONFIG_USB_EZUSB_FX2=m
++CONFIG_USB_HUB_USB251XB=m
++CONFIG_USB_HSIC_USB3503=y
++CONFIG_USB_LINK_LAYER_TEST=m
++CONFIG_USB_CHAOSKEY=m
++CONFIG_USB_ULPI=y
++CONFIG_USB_GADGET=y
++CONFIG_USB_RENESAS_USBHS_UDC=y
++CONFIG_USB_CONFIGFS=m
++CONFIG_USB_CONFIGFS_SERIAL=y
++CONFIG_USB_CONFIGFS_ACM=y
++CONFIG_USB_CONFIGFS_OBEX=y
++CONFIG_USB_CONFIGFS_NCM=y
++CONFIG_USB_CONFIGFS_ECM=y
++CONFIG_USB_CONFIGFS_ECM_SUBSET=y
++CONFIG_USB_CONFIGFS_RNDIS=y
++CONFIG_USB_CONFIGFS_EEM=y
++CONFIG_USB_CONFIGFS_MASS_STORAGE=y
++CONFIG_USB_CONFIGFS_F_LB_SS=y
++CONFIG_USB_CONFIGFS_F_FS=y
++CONFIG_USB_CONFIGFS_F_UAC1=y
++CONFIG_USB_CONFIGFS_F_UAC1_LEGACY=y
++CONFIG_USB_CONFIGFS_F_UAC2=y
++CONFIG_USB_CONFIGFS_F_MIDI=y
++CONFIG_USB_CONFIGFS_F_HID=y
++CONFIG_USB_CONFIGFS_F_UVC=y
++CONFIG_USB_CONFIGFS_F_PRINTER=y
++CONFIG_MMC=y
++CONFIG_MMC_BLOCK_MINORS=32
++CONFIG_MMC_ARMMMCI=y
++CONFIG_MMC_SDHCI=y
++CONFIG_MMC_SDHCI_ACPI=y
++CONFIG_MMC_SDHCI_PLTFM=y
++CONFIG_MMC_SDHCI_OF_ARASAN=y
++CONFIG_MMC_SDHCI_OF_ESDHC=y
++CONFIG_MMC_SDHCI_CADENCE=y
++CONFIG_MMC_SDHCI_TEGRA=y
++CONFIG_MMC_MESON_GX=y
++CONFIG_MMC_SDHCI_MSM=y
++CONFIG_MMC_SPI=y
++CONFIG_MMC_SDHI=y
++CONFIG_MMC_DW=y
++CONFIG_MMC_DW_EXYNOS=y
++CONFIG_MMC_DW_K3=y
++CONFIG_MMC_DW_ROCKCHIP=y
++CONFIG_MMC_SUNXI=y
++CONFIG_MMC_BCM2835=y
++CONFIG_MMC_SDHCI_XENON=y
++CONFIG_LEDS_CLASS=y
++CONFIG_LEDS_GPIO=y
++CONFIG_LEDS_PWM=y
++CONFIG_LEDS_SYSCON=y
++CONFIG_LEDS_TRIGGER_TIMER=y
++CONFIG_LEDS_TRIGGER_ONESHOT=y
++CONFIG_LEDS_TRIGGER_DISK=y
++CONFIG_LEDS_TRIGGER_HEARTBEAT=y
++CONFIG_LEDS_TRIGGER_BACKLIGHT=y
++CONFIG_LEDS_TRIGGER_CPU=y
++CONFIG_LEDS_TRIGGER_ACTIVITY=y
++CONFIG_LEDS_TRIGGER_GPIO=y
++CONFIG_LEDS_TRIGGER_DEFAULT_ON=y
++CONFIG_RTC_CLASS=y
++CONFIG_RTC_DRV_MAX77686=y
++CONFIG_RTC_DRV_RK808=y
++CONFIG_RTC_DRV_S5M=y
++CONFIG_RTC_DRV_DS3232=y
++CONFIG_RTC_DRV_EFI=y
++CONFIG_RTC_DRV_S3C=y
++CONFIG_RTC_DRV_PL031=y
++CONFIG_RTC_DRV_SUN6I=y
++CONFIG_RTC_DRV_TEGRA=y
++CONFIG_RTC_DRV_XGENE=y
++CONFIG_DMADEVICES=y
++CONFIG_DMA_BCM2835=y
++CONFIG_MV_XOR_V2=y
++CONFIG_PL330_DMA=y
++CONFIG_TEGRA20_APB_DMA=y
++CONFIG_QCOM_BAM_DMA=y
++CONFIG_QCOM_HIDMA_MGMT=y
++CONFIG_QCOM_HIDMA=y
++CONFIG_RCAR_DMAC=y
++CONFIG_VFIO=y
++CONFIG_VFIO_PCI=y
++CONFIG_VIRT_DRIVERS=y
++CONFIG_VIRTIO_PCI=y
++CONFIG_VIRTIO_BALLOON=y
++CONFIG_VIRTIO_MMIO=y
++CONFIG_XEN_GNTDEV=y
++CONFIG_XEN_GRANT_DEV_ALLOC=y
++CONFIG_COMMON_CLK_RK808=y
++CONFIG_COMMON_CLK_SCPI=y
++CONFIG_COMMON_CLK_CS2000_CP=y
++CONFIG_COMMON_CLK_S2MPS11=y
++CONFIG_CLK_QORIQ=y
++CONFIG_COMMON_CLK_PWM=y
++CONFIG_COMMON_CLK_QCOM=y
++CONFIG_MSM_GCC_8916=y
++CONFIG_MSM_GCC_8994=y
++CONFIG_MSM_MMCC_8996=y
++CONFIG_ARM_MHU=y
++CONFIG_PLATFORM_MHU=y
++CONFIG_ROCKCHIP_MBOX=y
++CONFIG_BCM2835_MBOX=y
++CONFIG_ROCKCHIP_IOMMU=y
++CONFIG_ARM_SMMU=y
++CONFIG_ARM_SMMU_V3=y
++CONFIG_RASPBERRYPI_POWER=y
++CONFIG_ARCH_R8A7795=y
++CONFIG_ARCH_R8A7796=y
++CONFIG_ROCKCHIP_PM_DOMAINS=y
++CONFIG_ARCH_TEGRA_132_SOC=y
++CONFIG_ARCH_TEGRA_210_SOC=y
++CONFIG_ARCH_TEGRA_186_SOC=y
++CONFIG_DEVFREQ_GOV_PERFORMANCE=y
++CONFIG_DEVFREQ_GOV_POWERSAVE=y
++CONFIG_DEVFREQ_GOV_USERSPACE=y
++CONFIG_DEVFREQ_GOV_PASSIVE=y
++CONFIG_ARM_RK3399_DMC_DEVFREQ=y
++CONFIG_EXTCON_USB_GPIO=y
++CONFIG_IIO=y
++CONFIG_EXYNOS_ADC=y
++CONFIG_ROCKCHIP_SARADC=y
++CONFIG_PWM=y
++CONFIG_PWM_BCM2835=y
++CONFIG_PWM_CROS_EC=y
++CONFIG_PWM_MESON=y
++CONFIG_PWM_ROCKCHIP=y
++CONFIG_PWM_SAMSUNG=y
++CONFIG_PWM_TEGRA=y
++CONFIG_PHY_XGENE=y
++CONFIG_PHY_SUN4I_USB=y
++CONFIG_PHY_HI6220_USB=y
++CONFIG_PHY_RCAR_GEN3_USB2=y
++CONFIG_PHY_ROCKCHIP_DP=y
++CONFIG_PHY_ROCKCHIP_EMMC=y
++CONFIG_PHY_ROCKCHIP_INNO_HDMI=m
++CONFIG_PHY_ROCKCHIP_INNO_USB2=y
++CONFIG_PHY_ROCKCHIP_PCIE=m
++CONFIG_PHY_ROCKCHIP_TYPEC=y
++CONFIG_PHY_ROCKCHIP_USB=y
++CONFIG_PHY_TEGRA_XUSB=y
++CONFIG_QCOM_L2_PMU=y
++CONFIG_QCOM_L3_PMU=y
++CONFIG_ROCKCHIP_EFUSE=y
++CONFIG_TEE=m
++CONFIG_OPTEE=m
++CONFIG_EXT2_FS=y
++CONFIG_EXT2_FS_XATTR=y
++CONFIG_EXT2_FS_POSIX_ACL=y
++CONFIG_EXT2_FS_SECURITY=y
++CONFIG_EXT3_FS=y
++CONFIG_EXT3_FS_POSIX_ACL=y
++CONFIG_EXT3_FS_SECURITY=y
++CONFIG_BTRFS_FS=y
++CONFIG_BTRFS_FS_POSIX_ACL=y
++CONFIG_F2FS_FS=y
++CONFIG_F2FS_FS_SECURITY=y
++CONFIG_FANOTIFY=y
++CONFIG_FANOTIFY_ACCESS_PERMISSIONS=y
++CONFIG_QUOTA=y
++CONFIG_QFMT_V1=y
++CONFIG_QFMT_V2=y
++CONFIG_AUTOFS4_FS=y
++CONFIG_FUSE_FS=y
++CONFIG_CUSE=y
++CONFIG_OVERLAY_FS=y
++CONFIG_FSCACHE=m
++CONFIG_MSDOS_FS=m
++CONFIG_VFAT_FS=y
++CONFIG_NTFS_FS=m
++CONFIG_TMPFS_POSIX_ACL=y
++CONFIG_HUGETLBFS=y
++CONFIG_EFIVAR_FS=y
++CONFIG_SQUASHFS=y
++CONFIG_NFS_FS=y
++CONFIG_NFS_V4=y
++CONFIG_NFS_V4_1=y
++CONFIG_NFS_V4_2=y
++CONFIG_ROOT_NFS=y
++CONFIG_NFSD=y
++CONFIG_NFSD_V3_ACL=y
++CONFIG_NFSD_V4=y
++CONFIG_NFSD_BLOCKLAYOUT=y
++CONFIG_NFSD_SCSILAYOUT=y
++CONFIG_NFSD_FLEXFILELAYOUT=y
++CONFIG_NFSD_V4_SECURITY_LABEL=y
++CONFIG_CIFS=m
++CONFIG_CIFS_XATTR=y
++CONFIG_CIFS_POSIX=y
++CONFIG_9P_FS=y
++CONFIG_NLS_CODEPAGE_437=y
++CONFIG_NLS_ASCII=y
++CONFIG_NLS_ISO8859_1=y
++CONFIG_NLS_UTF8=y
++CONFIG_SECURITY=y
++CONFIG_SECURITYFS=y
++CONFIG_SECURITY_NETWORK_XFRM=y
++CONFIG_SECURITY_PATH=y
++CONFIG_SECURITY_SELINUX=y
++CONFIG_SECURITY_SMACK=y
++CONFIG_SECURITY_SMACK_BRINGUP=y
++CONFIG_SECURITY_SMACK_NETFILTER=y
++CONFIG_SECURITY_SMACK_APPEND_SIGNALS=y
++CONFIG_DEFAULT_SECURITY_DAC=y
++CONFIG_CRYPTO_USER=y
++CONFIG_CRYPTO_PCRYPT=y
++CONFIG_CRYPTO_TEST=m
++CONFIG_CRYPTO_RSA=y
++CONFIG_CRYPTO_DH=y
++CONFIG_CRYPTO_CHACHA20POLY1305=y
++CONFIG_CRYPTO_LRW=y
++CONFIG_CRYPTO_PCBC=y
++CONFIG_CRYPTO_KEYWRAP=y
++CONFIG_CRYPTO_XCBC=y
++CONFIG_CRYPTO_VMAC=y
++CONFIG_CRYPTO_MD4=y
++CONFIG_CRYPTO_MICHAEL_MIC=y
++CONFIG_CRYPTO_RMD128=y
++CONFIG_CRYPTO_RMD160=y
++CONFIG_CRYPTO_RMD256=y
++CONFIG_CRYPTO_RMD320=y
++CONFIG_CRYPTO_SHA512=y
++CONFIG_CRYPTO_SHA3=y
++CONFIG_CRYPTO_TGR192=y
++CONFIG_CRYPTO_WP512=y
++CONFIG_CRYPTO_AES_TI=y
++CONFIG_CRYPTO_ANUBIS=y
++CONFIG_CRYPTO_BLOWFISH=y
++CONFIG_CRYPTO_CAMELLIA=y
++CONFIG_CRYPTO_CAST5=y
++CONFIG_CRYPTO_CAST6=y
++CONFIG_CRYPTO_FCRYPT=y
++CONFIG_CRYPTO_KHAZAD=y
++CONFIG_CRYPTO_SALSA20=y
++CONFIG_CRYPTO_SEED=y
++CONFIG_CRYPTO_SERPENT=y
++CONFIG_CRYPTO_TEA=y
++CONFIG_CRYPTO_TWOFISH=y
++CONFIG_CRYPTO_842=y
++CONFIG_CRYPTO_LZ4=y
++CONFIG_CRYPTO_LZ4HC=y
++CONFIG_CRYPTO_ANSI_CPRNG=y
++CONFIG_CRYPTO_USER_API_HASH=y
++CONFIG_CRYPTO_USER_API_SKCIPHER=y
++CONFIG_CRYPTO_USER_API_RNG=y
++CONFIG_CRYPTO_USER_API_AEAD=y
++CONFIG_ASYMMETRIC_KEY_TYPE=y
++CONFIG_ASYMMETRIC_PUBLIC_KEY_SUBTYPE=y
++CONFIG_X509_CERTIFICATE_PARSER=y
++CONFIG_PKCS7_MESSAGE_PARSER=y
++CONFIG_DMA_CMA=y
++CONFIG_PRINTK_TIME=y
++CONFIG_DEBUG_INFO=y
++CONFIG_MAGIC_SYSRQ=y
++# CONFIG_SCHED_DEBUG is not set
++# CONFIG_DEBUG_PREEMPT is not set
++# CONFIG_FTRACE is not set
++CONFIG_MEMTEST=y
+diff --no-dereference -Naur linux-5.5-rc7/drivers/cpufreq/cpufreq-dt-platdev.c linux-5.5-rc7-rockchip/drivers/cpufreq/cpufreq-dt-platdev.c
+--- linux-5.5-rc7/drivers/cpufreq/cpufreq-dt-platdev.c	2020-01-20 02:02:49.000000000 +0200
++++ linux-5.5-rc7-rockchip/drivers/cpufreq/cpufreq-dt-platdev.c	2020-01-25 00:08:09.402292686 +0200
+@@ -72,7 +72,6 @@
+ 	{ .compatible = "rockchip,rk3188", },
+ 	{ .compatible = "rockchip,rk3228", },
+ 	{ .compatible = "rockchip,rk3288", },
+-	{ .compatible = "rockchip,rk3328", },
+ 	{ .compatible = "rockchip,rk3366", },
+ 	{ .compatible = "rockchip,rk3368", },
+ 	{ .compatible = "rockchip,rk3399",
+diff --no-dereference -Naur linux-5.5-rc7/drivers/mmc/core/mmc.c linux-5.5-rc7-rockchip/drivers/mmc/core/mmc.c
+--- linux-5.5-rc7/drivers/mmc/core/mmc.c	2020-01-20 02:02:49.000000000 +0200
++++ linux-5.5-rc7-rockchip/drivers/mmc/core/mmc.c	2020-01-25 00:08:09.406292684 +0200
+@@ -6,7 +6,7 @@
+  *  Copyright (C) 2005-2007 Pierre Ossman, All Rights Reserved.
+  *  MMCv4 support Copyright (C) 2006 Philip Langdale, All Rights Reserved.
+  */
+-
++#include <linux/moduleparam.h>
+ #include <linux/err.h>
+ #include <linux/of.h>
+ #include <linux/slab.h>
+@@ -62,6 +62,10 @@
+ 		__res & __mask;						\
+ 	})
+ 
++/* Enable / disable command queue support */
++static bool mmc_cmdqueue_support = true;
++core_param(mmc_cmdqueue, mmc_cmdqueue_support, bool, S_IRUGO);
++
+ /*
+  * Given the decoded CSD structure, decode the raw CID to our CID structure.
+  */
+@@ -1833,15 +1837,20 @@
+ 	 */
+ 	card->ext_csd.cmdq_en = false;
+ 	if (card->ext_csd.cmdq_support && host->caps2 & MMC_CAP2_CQE) {
+-		err = mmc_cmdq_enable(card);
+-		if (err && err != -EBADMSG)
+-			goto free_card;
+-		if (err) {
+-			pr_warn("%s: Enabling CMDQ failed\n",
+-				mmc_hostname(card->host));
+-			card->ext_csd.cmdq_support = false;
+-			card->ext_csd.cmdq_depth = 0;
+-			err = 0;
++		if (mmc_cmdqueue_support) {
++			err = mmc_cmdq_enable(card);
++			if (err && err != -EBADMSG)
++				 goto free_card;
++			if (err) {
++				pr_warn("%s: Enabling CMDQ failed\n",
++					mmc_hostname(card->host));
++				card->ext_csd.cmdq_support = false;
++				card->ext_csd.cmdq_depth = 0;
++				err = 0;
++			}
++		} else {
++			pr_info("%s: CMDQ support disabled in kernel\n",
++				mmc_hostname(host));
+ 		}
+ 	}
+ 	/*
+diff --no-dereference -Naur linux-5.5-rc7/drivers/mmc/core/mmc.c.orig linux-5.5-rc7-rockchip/drivers/mmc/core/mmc.c.orig
+diff --no-dereference -Naur linux-5.5-rc7/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c linux-5.5-rc7-rockchip/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c
+--- linux-5.5-rc7/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c	2020-01-20 02:02:49.000000000 +0200
++++ linux-5.5-rc7-rockchip/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c	2020-01-25 00:08:09.418292676 +0200
+@@ -3873,6 +3873,10 @@
+ 	if (priv->plat->bugged_jumbo && (dev->mtu > ETH_DATA_LEN))
+ 		features &= ~NETIF_F_CSUM_MASK;
+ 
++	/* Including very small MTUs of 1498 for Rockchip devices */
++	if (priv->plat->bugged_tx_coe && (dev->mtu > ETH_DATA_LEN - 2))
++		features &= ~NETIF_F_CSUM_MASK;
++
+ 	/* Disable tso if asked by ethtool */
+ 	if ((priv->plat->tso_en) && (priv->dma_cap.tsoen)) {
+ 		if (features & NETIF_F_TSO)
+diff --no-dereference -Naur linux-5.5-rc7/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c.orig linux-5.5-rc7-rockchip/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c.orig
+diff --no-dereference -Naur linux-5.5-rc7/drivers/net/ethernet/stmicro/stmmac/stmmac_platform.c linux-5.5-rc7-rockchip/drivers/net/ethernet/stmicro/stmmac/stmmac_platform.c
+--- linux-5.5-rc7/drivers/net/ethernet/stmicro/stmmac/stmmac_platform.c	2020-01-20 02:02:49.000000000 +0200
++++ linux-5.5-rc7-rockchip/drivers/net/ethernet/stmicro/stmmac/stmmac_platform.c	2020-01-25 00:08:09.422292673 +0200
+@@ -553,6 +553,8 @@
+ 			 "force_sf_dma_mode is ignored if force_thresh_dma_mode is set.\n");
+ 	}
+ 
++	plat->bugged_tx_coe = of_property_read_bool(np, "rockchip,bugged_tx_coe");
++
+ 	of_property_read_u32(np, "snps,ps-speed", &plat->mac_port_sel_speed);
+ 
+ 	plat->axi = stmmac_axi_setup(pdev);
+diff --no-dereference -Naur linux-5.5-rc7/drivers/net/phy/realtek.c linux-5.5-rc7-rockchip/drivers/net/phy/realtek.c
+--- linux-5.5-rc7/drivers/net/phy/realtek.c	2020-01-20 02:02:49.000000000 +0200
++++ linux-5.5-rc7-rockchip/drivers/net/phy/realtek.c	2020-01-25 00:08:09.426292671 +0200
+@@ -19,7 +19,14 @@
+ #define RTL821x_INER				0x12
+ #define RTL8211B_INER_INIT			0x6400
+ #define RTL8211E_INER_LINK_STATUS		BIT(10)
++#define RTL8211E_INER_ANEG_COMPLETED		BIT(11)
++#define RTL8211E_INER_PAGE_RECEIVED		BIT(12)
++#define RTL8211E_INER_ANEG_ERROR		BIT(15)
+ #define RTL8211F_INER_LINK_STATUS		BIT(4)
++#define RTL8211F_INER_PHY_REGISTER_ACCESSIBLE	BIT(5)
++#define RTL8211F_INER_WOL_PME			BIT(7)
++#define RTL8211F_INER_ALDPS_STATE_CHANGE	BIT(9)
++#define RTL8211F_INER_JABBER			BIT(10)
+ 
+ #define RTL821x_INSR				0x13
+ 
+@@ -36,6 +43,9 @@
+ #define RTL8201F_ISR				0x1e
+ #define RTL8201F_IER				0x13
+ 
++#define RTL8211F_INTBCR				0x16
++#define RTL8211F_INTBCR_INTB_PMEB		BIT(5)
++
+ #define RTL8366RB_POWER_SAVE			0x15
+ #define RTL8366RB_POWER_SAVE_ON			BIT(12)
+ 
+@@ -130,12 +140,32 @@
+ 
+ static int rtl8211f_config_intr(struct phy_device *phydev)
+ {
++	int err;
+ 	u16 val;
+ 
+-	if (phydev->interrupts == PHY_INTERRUPT_ENABLED)
++	if (phydev->interrupts == PHY_INTERRUPT_ENABLED) {
++		/*
++		 * The interrupt pin has two functions:
++		 * 0: INTB: it acts as interrupt pin which can be configured
++		 *    through RTL821x_INER and the status can be read through
++		 *    RTL8211F_INSR
++		 * 1: PMEB: a special "Power Management Event" mode for
++		 *    Wake-on-LAN operation (with support for a "pulse low"
++		 *    wave format). Interrupts configured through RTL821x_INER
++		 *    will not work in this mode
++		 *
++		 * select INTB mode in the "INTB pin control" register to
++		 * ensure that the interrupt pin is in the correct mode.
++		 */
++		err = phy_modify_paged(phydev, 0xd40, RTL8211F_INTBCR,
++					      RTL8211F_INTBCR_INTB_PMEB, 0);
++		if (err)
++			return err;
++
+ 		val = RTL8211F_INER_LINK_STATUS;
+-	else
++	} else {
+ 		val = 0;
++	}
+ 
+ 	return phy_write_paged(phydev, 0xa42, RTL821x_INER, val);
+ }
+diff --no-dereference -Naur linux-5.5-rc7/drivers/of/Kconfig linux-5.5-rc7-rockchip/drivers/of/Kconfig
+--- linux-5.5-rc7/drivers/of/Kconfig	2020-01-20 02:02:49.000000000 +0200
++++ linux-5.5-rc7-rockchip/drivers/of/Kconfig	2020-01-25 00:08:09.430292668 +0200
+@@ -103,4 +103,11 @@
+ config OF_NUMA
+ 	bool
+ 
++config OF_CONFIGFS
++	bool "Device Tree Overlay ConfigFS interface"
++	select CONFIGFS_FS
++	select OF_OVERLAY
++	help
++	  Enable a simple user-space driven DT overlay interface.
++
+ endif # OF
+diff --no-dereference -Naur linux-5.5-rc7/drivers/of/Makefile linux-5.5-rc7-rockchip/drivers/of/Makefile
+--- linux-5.5-rc7/drivers/of/Makefile	2020-01-20 02:02:49.000000000 +0200
++++ linux-5.5-rc7-rockchip/drivers/of/Makefile	2020-01-25 00:08:09.430292668 +0200
+@@ -1,6 +1,7 @@
+ # SPDX-License-Identifier: GPL-2.0
+ obj-y = base.o device.o platform.o property.o
+ obj-$(CONFIG_OF_KOBJ) += kobj.o
++obj-$(CONFIG_OF_CONFIGFS) += configfs.o
+ obj-$(CONFIG_OF_DYNAMIC) += dynamic.o
+ obj-$(CONFIG_OF_FLATTREE) += fdt.o
+ obj-$(CONFIG_OF_EARLY_FLATTREE) += fdt_address.o
+diff --no-dereference -Naur linux-5.5-rc7/drivers/of/configfs.c linux-5.5-rc7-rockchip/drivers/of/configfs.c
+--- linux-5.5-rc7/drivers/of/configfs.c	1970-01-01 03:00:00.000000000 +0300
++++ linux-5.5-rc7-rockchip/drivers/of/configfs.c	2020-01-25 00:08:09.434292666 +0200
+@@ -0,0 +1,290 @@
++/*
++ * Configfs entries for device-tree
++ *
++ * Copyright (C) 2013 - Pantelis Antoniou <panto@antoniou-consulting.com>
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License
++ * as published by the Free Software Foundation; either version
++ * 2 of the License, or (at your option) any later version.
++ */
++#include <linux/ctype.h>
++#include <linux/cpu.h>
++#include <linux/module.h>
++#include <linux/of.h>
++#include <linux/of_fdt.h>
++#include <linux/spinlock.h>
++#include <linux/slab.h>
++#include <linux/proc_fs.h>
++#include <linux/configfs.h>
++#include <linux/types.h>
++#include <linux/stat.h>
++#include <linux/limits.h>
++#include <linux/file.h>
++#include <linux/vmalloc.h>
++#include <linux/firmware.h>
++#include <linux/sizes.h>
++
++#include "of_private.h"
++
++struct cfs_overlay_item {
++	struct config_item	item;
++
++	char			path[PATH_MAX];
++
++	const struct firmware	*fw;
++	struct device_node	*overlay;
++	int			ov_id;
++
++	void			*dtbo;
++	int			dtbo_size;
++};
++
++static int create_overlay(struct cfs_overlay_item *overlay, void *blob, u32 blob_size)
++{
++	int err;
++
++	err = of_overlay_fdt_apply(blob, blob_size, &overlay->ov_id);
++	if (err < 0) {
++		pr_err("%s: Failed to create overlay (err=%d)\n",
++				__func__, err);
++		goto out_err;
++	}
++
++out_err:
++	return err;
++}
++
++static inline struct cfs_overlay_item *to_cfs_overlay_item(
++		struct config_item *item)
++{
++	return item ? container_of(item, struct cfs_overlay_item, item) : NULL;
++}
++
++static ssize_t cfs_overlay_item_path_show(struct config_item *item,
++		char *page)
++{
++	struct cfs_overlay_item *overlay = to_cfs_overlay_item(item);
++	return sprintf(page, "%s\n", overlay->path);
++}
++
++static ssize_t cfs_overlay_item_path_store(struct config_item *item,
++		const char *page, size_t count)
++{
++	struct cfs_overlay_item *overlay = to_cfs_overlay_item(item);
++	const char *p = page;
++	char *s;
++	int err;
++
++	/* if it's set do not allow changes */
++	if (overlay->path[0] != '\0' || overlay->dtbo_size > 0)
++		return -EPERM;
++
++	/* copy to path buffer (and make sure it's always zero terminated */
++	count = snprintf(overlay->path, sizeof(overlay->path) - 1, "%s", p);
++	overlay->path[sizeof(overlay->path) - 1] = '\0';
++
++	/* strip trailing newlines */
++	s = overlay->path + strlen(overlay->path);
++	while (s > overlay->path && *--s == '\n')
++		*s = '\0';
++
++	pr_debug("%s: path is '%s'\n", __func__, overlay->path);
++
++	err = request_firmware(&overlay->fw, overlay->path, NULL);
++	if (err != 0)
++		goto out_err;
++
++	err = create_overlay(overlay, (void *)overlay->fw->data, overlay->fw->size);
++	if (err != 0)
++		goto out_err;
++
++	return count;
++
++out_err:
++
++	release_firmware(overlay->fw);
++	overlay->fw = NULL;
++
++	overlay->path[0] = '\0';
++	return err;
++}
++
++static ssize_t cfs_overlay_item_status_show(struct config_item *item,
++		char *page)
++{
++	struct cfs_overlay_item *overlay = to_cfs_overlay_item(item);
++
++	return sprintf(page, "%s\n",
++			overlay->ov_id >= 0 ? "applied" : "unapplied");
++}
++
++CONFIGFS_ATTR(cfs_overlay_item_, path);
++CONFIGFS_ATTR_RO(cfs_overlay_item_, status);
++
++static struct configfs_attribute *cfs_overlay_attrs[] = {
++	&cfs_overlay_item_attr_path,
++	&cfs_overlay_item_attr_status,
++	NULL,
++};
++
++ssize_t cfs_overlay_item_dtbo_read(struct config_item *item,
++		void *buf, size_t max_count)
++{
++	struct cfs_overlay_item *overlay = to_cfs_overlay_item(item);
++
++	pr_debug("%s: buf=%p max_count=%zu\n", __func__,
++			buf, max_count);
++
++	if (overlay->dtbo == NULL)
++		return 0;
++
++	/* copy if buffer provided */
++	if (buf != NULL) {
++		/* the buffer must be large enough */
++		if (overlay->dtbo_size > max_count)
++			return -ENOSPC;
++
++		memcpy(buf, overlay->dtbo, overlay->dtbo_size);
++	}
++
++	return overlay->dtbo_size;
++}
++
++ssize_t cfs_overlay_item_dtbo_write(struct config_item *item,
++		const void *buf, size_t count)
++{
++	struct cfs_overlay_item *overlay = to_cfs_overlay_item(item);
++	int err;
++
++	/* if it's set do not allow changes */
++	if (overlay->path[0] != '\0' || overlay->dtbo_size > 0)
++		return -EPERM;
++
++	/* copy the contents */
++	overlay->dtbo = kmemdup(buf, count, GFP_KERNEL);
++	if (overlay->dtbo == NULL)
++		return -ENOMEM;
++
++	overlay->dtbo_size = count;
++
++	err = create_overlay(overlay, overlay->dtbo, overlay->dtbo_size);
++	if (err != 0)
++		goto out_err;
++
++	return count;
++
++out_err:
++	kfree(overlay->dtbo);
++	overlay->dtbo = NULL;
++	overlay->dtbo_size = 0;
++
++	return err;
++}
++
++CONFIGFS_BIN_ATTR(cfs_overlay_item_, dtbo, NULL, SZ_1M);
++
++static struct configfs_bin_attribute *cfs_overlay_bin_attrs[] = {
++	&cfs_overlay_item_attr_dtbo,
++	NULL,
++};
++
++static void cfs_overlay_release(struct config_item *item)
++{
++	struct cfs_overlay_item *overlay = to_cfs_overlay_item(item);
++
++	if (overlay->ov_id >= 0)
++		of_overlay_remove(&overlay->ov_id);
++	if (overlay->fw)
++		release_firmware(overlay->fw);
++	/* kfree with NULL is safe */
++	kfree(overlay->dtbo);
++	kfree(overlay);
++}
++
++static struct configfs_item_operations cfs_overlay_item_ops = {
++	.release	= cfs_overlay_release,
++};
++
++static struct config_item_type cfs_overlay_type = {
++	.ct_item_ops	= &cfs_overlay_item_ops,
++	.ct_attrs	= cfs_overlay_attrs,
++	.ct_bin_attrs	= cfs_overlay_bin_attrs,
++	.ct_owner	= THIS_MODULE,
++};
++
++static struct config_item *cfs_overlay_group_make_item(
++		struct config_group *group, const char *name)
++{
++	struct cfs_overlay_item *overlay;
++
++	overlay = kzalloc(sizeof(*overlay), GFP_KERNEL);
++	if (!overlay)
++		return ERR_PTR(-ENOMEM);
++	overlay->ov_id = -1;
++
++	config_item_init_type_name(&overlay->item, name, &cfs_overlay_type);
++	return &overlay->item;
++}
++
++static void cfs_overlay_group_drop_item(struct config_group *group,
++		struct config_item *item)
++{
++	struct cfs_overlay_item *overlay = to_cfs_overlay_item(item);
++
++	config_item_put(&overlay->item);
++}
++
++static struct configfs_group_operations overlays_ops = {
++	.make_item	= cfs_overlay_group_make_item,
++	.drop_item	= cfs_overlay_group_drop_item,
++};
++
++static struct config_item_type overlays_type = {
++	.ct_group_ops   = &overlays_ops,
++	.ct_owner       = THIS_MODULE,
++};
++
++static struct configfs_group_operations of_cfs_ops = {
++	/* empty - we don't allow anything to be created */
++};
++
++static struct config_item_type of_cfs_type = {
++	.ct_group_ops   = &of_cfs_ops,
++	.ct_owner       = THIS_MODULE,
++};
++
++struct config_group of_cfs_overlay_group;
++
++static struct configfs_subsystem of_cfs_subsys = {
++	.su_group = {
++		.cg_item = {
++			.ci_namebuf = "device-tree",
++			.ci_type = &of_cfs_type,
++		},
++	},
++	.su_mutex = __MUTEX_INITIALIZER(of_cfs_subsys.su_mutex),
++};
++
++static int __init of_cfs_init(void)
++{
++	int ret;
++
++	pr_info("%s\n", __func__);
++
++	config_group_init(&of_cfs_subsys.su_group);
++	config_group_init_type_name(&of_cfs_overlay_group, "overlays",
++			&overlays_type);
++	configfs_add_default_group(&of_cfs_overlay_group,
++			&of_cfs_subsys.su_group);
++
++	ret = configfs_register_subsystem(&of_cfs_subsys);
++	if (ret != 0) {
++		pr_err("%s: failed to register subsys\n", __func__);
++		goto out;
++	}
++	pr_info("%s: OK\n", __func__);
++out:
++	return ret;
++}
++late_initcall(of_cfs_init);
+diff --no-dereference -Naur linux-5.5-rc7/drivers/usb/storage/uas-detect.h linux-5.5-rc7-rockchip/drivers/usb/storage/uas-detect.h
+--- linux-5.5-rc7/drivers/usb/storage/uas-detect.h	2020-01-20 02:02:49.000000000 +0200
++++ linux-5.5-rc7-rockchip/drivers/usb/storage/uas-detect.h	2020-01-25 00:08:14.786289300 +0200
+@@ -116,6 +116,14 @@
+ 	if (le16_to_cpu(udev->descriptor.idVendor) == 0x0bc2)
+ 		flags |= US_FL_NO_ATA_1X;
+ 
++	/* ayufan: All Seagate disk do probably have broken UAS support */
++	if (le16_to_cpu(udev->descriptor.idVendor) == 0x0bc2)
++		flags |= US_FL_IGNORE_UAS;
++
++	/* ayufan: All WD disk do probably have broken UAS support */
++	if (le16_to_cpu(udev->descriptor.idVendor) == 0x1058)
++		flags |= US_FL_IGNORE_UAS;
++
+ 	usb_stor_adjust_quirks(udev, &flags);
+ 
+ 	if (flags & US_FL_IGNORE_UAS) {
+diff --no-dereference -Naur linux-5.5-rc7/drivers/usb/storage/unusual_uas.h linux-5.5-rc7-rockchip/drivers/usb/storage/unusual_uas.h
+--- linux-5.5-rc7/drivers/usb/storage/unusual_uas.h	2020-01-20 02:02:49.000000000 +0200
++++ linux-5.5-rc7-rockchip/drivers/usb/storage/unusual_uas.h	2020-01-25 00:08:14.790289297 +0200
+@@ -119,3 +119,10 @@
+ 		"External HDD",
+ 		USB_SC_DEVICE, USB_PR_DEVICE, NULL,
+ 		US_FL_ALWAYS_SYNC),
++
++/* Reported-by: Thomas Kaiser and Kamil Trzciński <ayufan@ayufan.eu> */
++UNUSUAL_DEV(0x2537, 0x1066, 0x0000, 0x9999,
++		"Norelsys",
++		"NS1066X",
++		USB_SC_DEVICE, USB_PR_DEVICE, NULL,
++		US_FL_IGNORE_UAS),
+diff --no-dereference -Naur linux-5.5-rc7/drivers/usb/storage/unusual_uas.h.orig linux-5.5-rc7-rockchip/drivers/usb/storage/unusual_uas.h.orig
+diff --no-dereference -Naur linux-5.5-rc7/include/linux/stmmac.h linux-5.5-rc7-rockchip/include/linux/stmmac.h
+--- linux-5.5-rc7/include/linux/stmmac.h	2020-01-20 02:02:49.000000000 +0200
++++ linux-5.5-rc7-rockchip/include/linux/stmmac.h	2020-01-25 00:08:14.806289287 +0200
+@@ -148,6 +148,7 @@
+ 	int pmt;
+ 	int force_sf_dma_mode;
+ 	int force_thresh_dma_mode;
++	int bugged_tx_coe;
+ 	int riwt_off;
+ 	int max_speed;
+ 	int maxmtu;
+diff --no-dereference -Naur linux-5.5-rc7/include/linux/stmmac.h.orig linux-5.5-rc7-rockchip/include/linux/stmmac.h.orig
