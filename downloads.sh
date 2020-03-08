@@ -101,7 +101,7 @@ download() {
     git_fetch $SOURCE/$KERNEL_DIR $LINUX_SOURCE ${KERNEL_BRANCH}
 
     if [[ $SOCFAMILY == sun* ]]; then
-        message "" "download" "$SUNXI_TOOLS"
+        message "" "download" "$SUNXI_TOOLS_DIR"
         # git_fetch <dir> <url> <branch>
         git_fetch $SOURCE/$SUNXI_TOOLS_DIR $SUNXI_TOOLS_SOURCE ${SUNXI_TOOLS_BRANCH}
     fi
