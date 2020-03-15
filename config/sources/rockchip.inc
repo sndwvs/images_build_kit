@@ -1,4 +1,6 @@
 
+ATF_BRANCH="master:commit:22d12c4148c373932a7a81e5d1c59a767e143ac2"
+
 RKBIN_SOURCE="https://github.com/rockchip-linux/rkbin.git"
 RKBIN_DIR="rkbin"
 RKBIN_BRANCH="master::"
