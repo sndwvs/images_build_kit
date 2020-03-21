@@ -1,0 +1,101 @@
+--- a/arch/arm/dts/rk3399-rockpro64.dts	2020-03-19 19:50:10.357107238 +0200
++++ b/arch/arm/dts/rk3399-rockpro64.dts	2020-02-18 19:56:00.021770065 +0200
+@@ -7,6 +7,7 @@
+ /dts-v1/;
+ #include <dt-bindings/input/linux-event-codes.h>
+ #include <dt-bindings/pwm/pwm.h>
++#include <dt-bindings/pinctrl/rockchip.h>
+ #include "rk3399.dtsi"
+ #include "rk3399-opp.dtsi"
+ 
+@@ -108,6 +109,8 @@
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&pcie_pwr_en>;
+ 		regulator-name = "vcc3v3_pcie";
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
+ 		regulator-always-on;
+ 		regulator-boot-on;
+ 		vin-supply = <&vcc12v_dcin>;
+@@ -172,8 +175,9 @@
+ 		regulator-name = "vdd_log";
+ 		regulator-always-on;
+ 		regulator-boot-on;
++		regulator-init-microvolt = <900000>;
+ 		regulator-min-microvolt = <800000>;
+-		regulator-max-microvolt = <1700000>;
++		regulator-max-microvolt = <1400000>;
+ 		vin-supply = <&vcc5v0_sys>;
+ 	};
+ };
+@@ -218,7 +222,7 @@
+ 	snps,reset-active-low;
+ 	snps,reset-delays-us = <0 10000 50000>;
+ 	tx_delay = <0x28>;
+-	rx_delay = <0x11>;
++	rx_delay = <0x20>;
+ 	status = "okay";
+ };
+ 
+@@ -247,8 +251,8 @@
+ 	rk808: pmic@1b {
+ 		compatible = "rockchip,rk808";
+ 		reg = <0x1b>;
+-		interrupt-parent = <&gpio3>;
+-		interrupts = <10 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&gpio1>;
++		interrupts = <21 IRQ_TYPE_LEVEL_LOW>;
+ 		#clock-cells = <1>;
+ 		clock-output-names = "xin32k", "rk808-clkout2";
+ 		pinctrl-names = "default";
+@@ -333,7 +337,8 @@
+ 				regulator-min-microvolt = <3000000>;
+ 				regulator-max-microvolt = <3000000>;
+ 				regulator-state-mem {
+-					regulator-off-in-suspend;
++					regulator-on-in-suspend;
++					regulator-suspend-microvolt = <3000000>;
+ 				};
+ 			};
+ 
+@@ -353,11 +358,11 @@
+ 				regulator-name = "vcc_sdio";
+ 				regulator-always-on;
+ 				regulator-boot-on;
+-				regulator-min-microvolt = <1800000>;
+-				regulator-max-microvolt = <3000000>;
++				regulator-min-microvolt = <3300000>;
++				regulator-max-microvolt = <3300000>;
+ 				regulator-state-mem {
+ 					regulator-on-in-suspend;
+-					regulator-suspend-microvolt = <3000000>;
++					regulator-suspend-microvolt = <3300000>;
+ 				};
+ 			};
+ 
+@@ -623,19 +628,18 @@
+ };
+ 
+ &sdmmc {
++	u-boot,dm-spl;
+ 	bus-width = <4>;
+-	cap-sd-highspeed;
+-	cd-gpios = <&gpio0 7 GPIO_ACTIVE_LOW>;
+-	disable-wp;
+-	max-frequency = <150000000>;
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&sdmmc_clk &sdmmc_cmd &sdmmc_bus4>;
+ 	status = "okay";
++	max-frequency = <20000000>;
+ };
+ 
+ &sdhci {
++	u-boot,dm-spl;
+ 	bus-width = <8>;
+-	mmc-hs200-1_8v;
++	max-frequency = <25000000>;
++	mmc-hs400-1_8v;
++	mmc-hs400-enhanced-strobe;
+ 	non-removable;
+ 	status = "okay";
+ };
