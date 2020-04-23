@@ -2,7 +2,7 @@ diff --git a/arch/arm64/boot/dts/rockchip/rk3328-roc-cc.dts b/arch/arm64/boot/dt
 index f4b6799a8..a1041ec3e 100644
 --- a/arch/arm64/boot/dts/rockchip/rk3328-roc-cc.dts
 +++ b/arch/arm64/boot/dts/rockchip/rk3328-roc-cc.dts
-@@ -21,18 +21,9 @@
+@@ -21,33 +21,24 @@
  		#clock-cells = <0>;
  	};
  
@@ -22,7 +22,9 @@ index f4b6799a8..a1041ec3e 100644
  		pinctrl-names = "default";
  		pinctrl-0 = <&sdmmc0m1_gpio>;
  		regulator-boot-on;
-@@ -42,12 +33,12 @@
+ 		regulator-name = "vcc_sd";
+ 		regulator-min-microvolt = <3300000>;
+ 		regulator-max-microvolt = <3300000>;
  		vin-supply = <&vcc_io>;
  	};
  
@@ -33,11 +35,11 @@ index f4b6799a8..a1041ec3e 100644
  		states = <1800000 0x1
  			  3300000 0x0>;
 -		regulator-name = "vcc_sdio";
-+		regulator-name = "vccio_sd"
++		regulator-name = "vccio_sd";
  		regulator-type = "voltage";
  		regulator-min-microvolt = <1800000>;
  		regulator-max-microvolt = <3300000>;
-@@ -69,11 +60,8 @@
+@@ -68,11 +60,8 @@
  	vcc_sys: vcc-sys {
  		compatible = "regulator-fixed";
  		regulator-name = "vcc_sys";
@@ -49,24 +51,20 @@ index f4b6799a8..a1041ec3e 100644
  	};
  
  	vcc_phy: vcc-phy-regulator {
-@@ -83,6 +71,13 @@
+@@ -82,7 +71,24 @@
+ 		regulator-always-on;
  		regulator-boot-on;
  	};
- 
+-};
++
 +	ir-receiver {
 +		compatible = "gpio-ir-receiver";
 +		gpios = <&gpio2 RK_PA2 GPIO_ACTIVE_LOW>;
 +		pinctrl-0 = <&ir_int>;
 +		pinctrl-names = "default";
 +	};
++};
 +
- 	leds {
- 		compatible = "gpio-leds";
- 
-@@ -104,6 +99,15 @@
- 	};
- };
- 
 +&analog_sound {
 +	simple-audio-card,name = "TRS Jack";
 +	status = "okay";
@@ -76,10 +74,10 @@ index f4b6799a8..a1041ec3e 100644
 +	status = "okay";
 +};
 +
+
  &cpu0 {
  	cpu-supply = <&vdd_arm>;
- };
-@@ -123,7 +127,6 @@
+@@ -122,7 +127,6 @@
  &emmc {
  	bus-width = <8>;
  	cap-mmc-highspeed;
@@ -87,7 +85,7 @@ index f4b6799a8..a1041ec3e 100644
  	mmc-ddr-1_8v;
  	mmc-hs200-1_8v;
  	non-removable;
-@@ -153,6 +156,10 @@
+@@ -152,6 +156,10 @@
  	status = "okay";
  };
  
@@ -98,7 +96,7 @@ index f4b6799a8..a1041ec3e 100644
  &hdmi {
  	status = "okay";
  };
-@@ -161,6 +168,10 @@
+@@ -160,6 +168,10 @@
  	status = "okay";
  };
  
@@ -109,7 +107,7 @@ index f4b6799a8..a1041ec3e 100644
  &i2c1 {
  	status = "okay";
  
-@@ -188,8 +199,9 @@
+@@ -187,8 +199,9 @@
  		regulators {
  			vdd_logic: DCDC_REG1 {
  				regulator-name = "vdd_logic";
@@ -121,7 +119,7 @@ index f4b6799a8..a1041ec3e 100644
  				regulator-always-on;
  				regulator-boot-on;
  				regulator-state-mem {
-@@ -200,8 +212,9 @@
+@@ -199,8 +212,9 @@
  
  			vdd_arm: DCDC_REG2 {
  				regulator-name = "vdd_arm";
@@ -133,7 +131,7 @@ index f4b6799a8..a1041ec3e 100644
  				regulator-always-on;
  				regulator-boot-on;
  				regulator-state-mem {
-@@ -270,12 +283,20 @@
+@@ -269,12 +283,20 @@
  	};
  };
  
@@ -155,7 +153,7 @@ index f4b6799a8..a1041ec3e 100644
  	vccio4-supply = <&vcc_18>;
  	vccio5-supply = <&vcc_io>;
  	vccio6-supply = <&vcc_io>;
-@@ -283,6 +304,12 @@
+@@ -282,6 +304,12 @@
  };
  
  &pinctrl {
@@ -168,7 +166,7 @@ index f4b6799a8..a1041ec3e 100644
  	pmic {
  		pmic_int_l: pmic-int-l {
  			rockchip,pins = <1 RK_PD0 RK_FUNC_GPIO &pcfg_pull_up>;
-@@ -309,11 +336,26 @@
+@@ -308,11 +336,26 @@
  	sd-uhs-sdr50;
  	sd-uhs-sdr104;
  	vmmc-supply = <&vcc_sd>;
