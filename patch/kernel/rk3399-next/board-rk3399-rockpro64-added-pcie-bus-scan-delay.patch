@@ -1,0 +1,10 @@
+--- a/arch/arm64/boot/dts/rockchip/rk3399-rockpro64.dtsi	2020-04-24 20:09:48.778758856 +0300
++++ b/arch/arm64/boot/dts/rockchip/rk3399-rockpro64.dtsi	2020-04-24 20:11:02.870609375 +0300
+@@ -530,6 +530,7 @@
+ 	pinctrl-0 = <&pcie_perst>;
+ 	vpcie12v-supply = <&vcc12v_dcin>;
+ 	vpcie3v3-supply = <&vcc3v3_pcie>;
++	bus-scan-delay-ms = <1000>;
+ 	status = "okay";
+ };
+ 
