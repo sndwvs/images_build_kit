@@ -1,4 +1,6 @@
 
+INITRD_MODULES="tun:btrfs:xfs"
+
 FIRMWARE="firmware"
 
 SERIAL_CONSOLE_SPEED=115200

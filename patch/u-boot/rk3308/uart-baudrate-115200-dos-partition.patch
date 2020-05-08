@@ -1,5 +1,5 @@
---- a/configs/rockpi-s-rk3308_defconfig	2019-08-19 18:38:55.664754530 +0300
-+++ b/configs/rockpi-s-rk3308_defconfig	2019-08-19 18:41:07.860581485 +0300
+--- a/configs/rock-pi-s-rk3308_defconfig	2019-08-19 18:38:55.664754530 +0300
++++ b/configs/rock-pi-s-rk3308_defconfig	2019-08-19 18:41:07.860581485 +0300
 @@ -14,7 +14,7 @@
  CONFIG_FIT=y
  CONFIG_FIT_VERBOSE=y

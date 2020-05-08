@@ -32,10 +32,11 @@ if test "${devtype}" = "mmc"; then part uuid mmc 0:1 partuuid; fi
 setenv bootargs "root=${rootdev} ro rootwait rootfstype=${rootfstype} ${consoleargs} consoleblank=0 loglevel=${verbosity} ubootpart=${partuuid} usb-storage.quirks=${usbstoragequirks} ${extraargs} ${extraboardargs}"
 
 load ${devtype} ${devnum} ${fdt_addr_r} ${prefix}dtb/${fdtfile}
+load ${devtype} ${devnum} ${ramdisk_addr_r} ${prefix}uInitrd
 fdt addr ${fdt_addr_r}
 fdt resize 65536
 load ${devtype} ${devnum} ${kernel_addr_r} ${prefix}Image
-booti ${kernel_addr_r} - ${fdt_addr_r}
+booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r}
 
 # Recompile with:
 # mkimage -C none -A arm -T script -d /boot/boot.cmd /boot/boot.scr

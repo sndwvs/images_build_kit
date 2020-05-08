@@ -212,6 +212,7 @@ for image_type in ${DISTR_IMAGES[@]}; do
         setting_move_to_internal
         download_pkg $DISTR_URL "$image_type"
         install_pkg "$image_type"
+        [[ $MARCH != "x86_64" ]] && create_initrd
         create_img
     fi
 
