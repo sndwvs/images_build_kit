@@ -507,5 +507,7 @@ create_initrd() {
     umount "$SOURCE/$ROOTFS/dev"
 
     ln -sf "$SOURCE/$ROOTFS/boot/uInitrd-${KERNEL_VERSION}" -r "$SOURCE/$ROOTFS/boot/uInitrd" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
+    install -m755 -D "$CWD/scripts/rebuild-initrd.sh" "$SOURCE/$ROOTFS/boot/rebuild-initrd.sh" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
