@@ -28,7 +28,7 @@ read_param() {
 }
 
 # backup uInitrd
-cp ${INITRD_NAME}-${KERNEL_VERSION} ${INITRD_NAME}-${KERNEL_VERSION}.$(date +'%Y%m%d%H%M')
+[[ -f ${INITRD_NAME}-${KERNEL_VERSION} ]] && cp ${INITRD_NAME}-${KERNEL_VERSION} ${INITRD_NAME}-${KERNEL_VERSION}.$(date +'%Y%m%d%H%M')
 
 for msg in ${MESSAGES[*]}; do
     [[ $msg == "kernel" ]] && PARAM=${KERNEL_VERSION}
