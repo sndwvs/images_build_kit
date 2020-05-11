@@ -1,0 +1,25 @@
+From 43e39ab4891191cf06e76d31e85491eceb9e767d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Kamil=20Trzci=C5=84ski?= <ayufan@ayufan.eu>
+Date: Sun, 5 Apr 2020 17:08:35 +0200
+Subject: [PATCH] ayufan: rockchip-pcie: add 100ms delay to increase
+ compatibility with nvme drives
+
+---
+ drivers/pci/pcie_rockchip.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/drivers/pci/pcie_rockchip.c b/drivers/pci/pcie_rockchip.c
+index e4e696f4b95..1c01ce4ccf8 100644
+--- a/drivers/pci/pcie_rockchip.c
++++ b/drivers/pci/pcie_rockchip.c
+@@ -980,6 +980,10 @@ static int pcie_rockchip_probe(struct udevice *dev)
+ 		return err;
+ 	}
+ 
++	// TODO(ayufan):
++	// inject delay to increase compatibility with nvme
++	mdelay(100);
++
+ 	config_link(dev);
+ 	return 0;
+ }
