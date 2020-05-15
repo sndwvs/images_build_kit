@@ -21,12 +21,12 @@ RUNLEVEL=${RUNLEVEL#* }
 
 
 case $(cat /proc/device-tree/compatible | tr -d [:cntrl:]) in
-    *firefly*rk33*)
-            OFFSET_LOADER="64:16384:24576"
-            LOADER="idbloader.img:uboot.img:trust.img"
-            FIX_BOOT_DISK=true
-    ;;
-    *rock*64*|rock*pi*|pinebook*pro)
+#    *firefly*rk33*)
+#            OFFSET_LOADER="64:16384:24576"
+#            LOADER="idbloader.img:uboot.img:trust.img"
+#            FIX_BOOT_DISK=true
+#    ;;
+    *rock*64*|rock*pi*|pinebook*pro|*firefly*rk33*)
             OFFSET_LOADER="64:16384:"
             LOADER="idbloader.img:u-boot.itb:"
             FIX_BOOT_DISK=true
