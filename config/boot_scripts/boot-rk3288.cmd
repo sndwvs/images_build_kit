@@ -31,8 +31,12 @@ setenv bootargs "consoleblank=0 scandelay root=${rootdev} ro rootwait rootfstype
 
 load ${devtype} ${devnum}:1 ${fdt_addr_r} ${prefix}dtb/${fdtfile}
 load ${devtype} ${devnum}:1 ${kernel_addr_r} ${prefix}zImage
-load ${devtype} ${devnum}:1 ${ramdisk_addr_r} ${prefix}uInitrd
-bootz ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r}
+
+if ${devtype} ${devnum}:1 ${ramdisk_addr_r} ${prefix}uInitrd; then
+    bootz ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r};
+else
+    bootz ${kernel_addr_r} - ${fdt_addr_r};
+fi
 
 # Recompile with:
 # mkimage -C none -A arm -T script -d /boot/boot.cmd /boot/boot.scr
