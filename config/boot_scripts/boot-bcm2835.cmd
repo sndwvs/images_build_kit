@@ -19,16 +19,16 @@ if test "${console}" = "serial" || test "${console}" = "both"; then setenv conso
 setenv bootargs "consoleblank=0 root=${rootdev} ro rootwait rootfstype=${rootfstype} init=/sbin/init ${consoleargs} loglevel=${verbosity} ${extraargs}"
 
 load ${devtype} ${devnum}:1 ${fdt_addr_r} ${prefix}dtb/${fdtfile}
-load ${devtype} ${devnum}:1 ${kernel_addr_r} ${prefix}uImage
+load ${devtype} ${devnum}:1 ${kernel_addr_r} ${prefix}Image
 
 fdt addr ${fdt_addr_r}
 #fdt get value bootargs /chosen bootargs
 fdt resize 65536
 
 if load ${devtype} ${devnum}:1 ${ramdisk_addr_r} ${prefix}uInitrd; then
-    bootm ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r};
+    booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r};
 else
-    bootm ${kernel_addr_r} - ${fdt_addr_r};
+    booti ${kernel_addr_r} - ${fdt_addr_r};
 fi
 
 # Recompile with:
