@@ -29,11 +29,15 @@ if test "${console}" = "serial" || test "${console}" = "both"; then setenv conso
 setenv bootargs "root=${rootdev} ro rootwait rootfstype=${rootfstype} init=/sbin/init ${consoleargs} panic=10 consoleblank=0 loglevel=${verbosity} ${extraargs}"
 
 load ${devtype} ${devnum}:1 ${fdt_addr_r} ${prefix}dtb/${fdtfile}
-load ${devtype} ${devnum}:1 ${ramdisk_addr_r} ${prefix}uInitrd
 load ${devtype} ${devnum}:1 ${kernel_addr_r} ${prefix}Image
 fdt addr ${fdt_addr_r}
 fdt resize 65536
-booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r}
+
+if load ${devtype} ${devnum}:1 ${ramdisk_addr_r} ${prefix}uInitrd; then
+    booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r};
+else
+    booti ${kernel_addr_r} - ${fdt_addr_r};
+fi
 
 # Recompile with:
 # mkimage -C none -A arm -T script -d /boot/boot.cmd /boot/boot.scr

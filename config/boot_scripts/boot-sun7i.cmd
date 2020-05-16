@@ -35,14 +35,17 @@ setenv bootargs "root=${rootdev} ro rootwait rootfstype=${rootfstype} ${consolea
 
 if test "${disp_mem_reserves}" = "off"; then setenv bootargs "${bootargs} sunxi_ve_mem_reserve=0 sunxi_g2d_mem_reserve=0 sunxi_fb_mem_reserve=16"; fi
 
-load ${devtype} ${devnum} ${ramdisk_addr_r} ${prefix}uInitrd
-load ${devtype} ${devnum} ${kernel_addr_r} ${prefix}zImage
 
-echo "Found mainline kernel configuration"
 load ${devtype} ${devnum} ${fdt_addr_r} ${prefix}dtb/${fdtfile}
+load ${devtype} ${devnum} ${kernel_addr_r} ${prefix}zImage
 fdt addr ${fdt_addr_r}
 fdt resize 65536
-bootz ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r}
+
+if load ${devtype} ${devnum} ${ramdisk_addr_r} ${prefix}uInitrd; then
+    bootz ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r};
+else
+    bootz ${kernel_addr_r} - ${fdt_addr_r};
+fi
 
 # Recompile with:
 # mkimage -C none -A arm -T script -d /boot/boot.cmd /boot/boot.scr
