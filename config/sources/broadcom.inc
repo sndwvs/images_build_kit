@@ -1,7 +1,5 @@
 
-INITRD_MODULES="tun:btrfs:xfs"
-
-FIRMWARE="firmware"
+INITRD_MODULES="ext4:btrfs:xfs"
 
 SERIAL_CONSOLE_SPEED=115200
 SERIAL_CONSOLE=ttyAMA0
@@ -35,12 +33,9 @@ create_uboot()
 
 write_uboot()
 {
-    # clear u-boot
-#    dd if=/dev/zero of=$1 bs=1k count=$((${IMAGE_OFFSET}-1)) seek=1 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
-#    if [[ -f $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN ]]; then
-#        dd if=$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN of=$1 seek=64 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    if [[ -f $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN ]]; then
+        install -Dm644 $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN $SOURCE/$IMAGE/boot/$BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         message "" "write" "bootloader: $BOOT_LOADER_BIN"
-#    fi
+    fi
 }
 
