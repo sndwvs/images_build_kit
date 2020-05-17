@@ -40,7 +40,7 @@ write_uboot()
 
 #    if [[ -f $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN ]]; then
 #        dd if=$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN of=$1 seek=64 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-#        message "" "write" "bootloader: $BOOT_LOADER_BIN"
+        message "" "write" "bootloader: $BOOT_LOADER_BIN"
 #    fi
 }
 
