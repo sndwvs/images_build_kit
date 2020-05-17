@@ -34,4 +34,7 @@ password: **password**
         + [ROCKPro64](http://wiki.pine64.org/index.php/ROCKPro64_Main_Page#SoC_and_Memory_Specification)
         + [Rock Pi 4](http://rockpi.org/#spec-section)
         + [Pinebook Pro](https://wiki.pine64.org/index.php/Pinebook_Pro#SoC_and_Memory_Specification)
+* Broadcom
+    * BCM2711
+        + [Raspberry Pi 4](https://www.raspberrypi.org/products/raspberry-pi-4-model-b/specifications/)
 

@@ -38,7 +38,7 @@ build_kernel_pkg() {
                 install -dm755 "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/overlays/"
                 cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/broadcom/*.dtb \
                         $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-                ln -fs $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/* -r $BUILD/$PKG/kernel-${SOCFAMILY}/boot/
+                cp -a $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/*.dtb $BUILD/$PKG/kernel-${SOCFAMILY}/boot/
                 cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/overlays/{*.dtbo,README} \
                         $BUILD/$PKG/kernel-${SOCFAMILY}/boot/overlays/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             fi

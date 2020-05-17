@@ -65,6 +65,7 @@ setting_fstab() {
     if [[ ! $(cat $SOURCE/$ROOTFS/etc/fstab | grep $ROOT_DISK) ]];then
         message "" "setting" "fstab"
         sed -i "s:# tmpfs:tmpfs:" $SOURCE/$ROOTFS/etc/fstab
+        [[ $SOCFAMILY == bcm2* ]] && echo "/dev/mmcblk0p1    /boot      vfat    defaults       0       1" >> $SOURCE/$ROOTFS/etc/fstab
         echo "/dev/$ROOT_DISK    /          ext4    noatime,nodiratime,data=writeback,errors=remount-ro       0       1" >> $SOURCE/$ROOTFS/etc/fstab || exit 1
     fi
 }
@@ -74,6 +75,8 @@ setting_debug() {
     message "" "setting" "uart debugging"
     sed -e 's/#\(ttyS[0-2]\)/\1/' \
         -e '/#ttyS3/{n;/^#/i ttyFIQ0
+             }' \
+        -e '/#ttyp7/{n;/^#/i ttyAMA0
              }' \
         -i "$SOURCE/$ROOTFS/etc/securetty"
 
@@ -185,6 +188,8 @@ EOF
 
 
 create_img() {
+
+    [[ $SOCFAMILY == bcm2* ]] && create_img_rpi "$1" && return 1
 
     if [[ $1 == xfce ]]; then
         IMAGE="$ROOTFS_XFCE"
@@ -506,7 +511,12 @@ create_initrd() {
     umount "$SOURCE/$ROOTFS/proc"
     umount "$SOURCE/$ROOTFS/dev"
 
-    ln -sf "$SOURCE/$ROOTFS/boot/uInitrd-${KERNEL_VERSION}" -r "$SOURCE/$ROOTFS/boot/uInitrd" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    if [[ $SOCFAMILY == bcm2* ]]; then
+        cp -a "$SOURCE/$ROOTFS/boot/uInitrd-${KERNEL_VERSION}" "$SOURCE/$ROOTFS/boot/uInitrd" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        find "$SOURCE/$ROOTFS/boot/" -type l -exec rm -rf {} \+ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    else
+        ln -sf "$SOURCE/$ROOTFS/boot/uInitrd-${KERNEL_VERSION}" -r "$SOURCE/$ROOTFS/boot/uInitrd" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
 
     install -m755 -D "$CWD/scripts/rebuild-initrd.sh" "$SOURCE/$ROOTFS/boot/rebuild-initrd.sh" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
