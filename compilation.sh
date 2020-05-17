@@ -57,7 +57,7 @@ compile_boot_loader() {
         fi
     fi
 
-    if [[ $SOCFAMILY == sun* ]]; then
+    if [[ $SOCFAMILY == sun* || $SOCFAMILY == bcm2* ]]; then
         if [ "$KERNEL_SOURCE" != "next" ] ; then
             # patch mainline uboot configuration to boot with old kernels
             if [ "$(cat $SOURCE/$BOOT_LOADER_DIR/.config | grep CONFIG_ARMV7_BOOT_SEC_DEFAULT=y)" == "" ]; then
