@@ -4,7 +4,7 @@
 #
 
 setenv load_addr "0x39000000"
-setenv rootdev "/dev/mmcblk0p1"
+setenv rootdev "/dev/mmcblk0p2"
 setenv console "both"
 setenv verbosity "4"
 setenv rootfstype "ext4"
@@ -22,8 +22,7 @@ load ${devtype} ${devnum}:1 ${fdt_addr_r} ${prefix}dtb/${fdtfile}
 load ${devtype} ${devnum}:1 ${kernel_addr_r} ${prefix}Image
 
 fdt addr ${fdt_addr_r}
-#fdt get value bootargs /chosen bootargs
-fdt resize 65536
+fdt get value bootargs /chosen bootargs
 
 if load ${devtype} ${devnum}:1 ${ramdisk_addr_r} ${prefix}uInitrd; then
     booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r};
