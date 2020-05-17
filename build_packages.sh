@@ -34,6 +34,14 @@ build_kernel_pkg() {
               $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
             [[ $SOCFAMILY == sun* ]] && ( cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/allwinner/*.dtb \
               $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+            if [[ $SOCFAMILY == bcm2* ]]; then
+                install -dm755 "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/overlays/"
+                cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/broadcom/*.dtb \
+                        $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+                ln -fs $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/* -r $BUILD/$PKG/kernel-${SOCFAMILY}/boot/
+                cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/overlays/{*.dtbo,README} \
+                        $BUILD/$PKG/kernel-${SOCFAMILY}/boot/overlays/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            fi
     else
         cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/*${SOCFAMILY}*dtb \
               $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
