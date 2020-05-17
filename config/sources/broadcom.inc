@@ -55,6 +55,11 @@ hdmi_drive=2
 #enable vc4
 dtoverlay=vc4-fkms-v3d
 max_framebuffers=2
+
+# The enable_uart setting is required because U-Boot assumes the VideoCore
+# firmware is configured to use the mini UART (rather than PL011) for the serial console.
+# Without this, U-Boot will not boot at all.
+enable_uart=1
 EOF
 
     echo "root=/dev/mmcblk0p2 rw rootwait console=ttyAMA0,115200 console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 kgdboc=ttyAMA0,115200 elevator=noop snd-bcm2835.enable_compat_alsa=0" \
