@@ -118,15 +118,6 @@ case "\$0" in
 esac
 
 
-# start pppd c 20130914
-if [ -x /etc/rc.d/rc.netd ]; then
-    /etc/rc.d/rc.netd
-fi
-
-if [ -x /etc/rc.d/rc.pun ]; then
-  . /etc/rc.d/rc.pun \$command
-fi
-
 if [ -x /etc/rc.d/rc.settings ]; then
   . /etc/rc.d/rc.settings
 fi
@@ -395,29 +386,11 @@ setting_for_desktop() {
 
 
 setting_move_to_internal() {
-    message "" "setting" "data move to nand"
-    install -m755 -D "$CWD/scripts/setup.sh" "$SOURCE/$ROOTFS/root/setup.sh"
-
+    message "" "save" "bootloader data for move to nand"
     rsync -ar $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/ $SOURCE/$ROOTFS/boot >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    if [[ ! $(cat $SOURCE/$ROOTFS/etc/issue 2>&1 | grep setup.sh) ]];then
-        cat <<EOF >$SOURCE/$ROOTFS/etc/issue
-
-[0;36m=======================================================================[0;39m
-
-if you want to transfer the system to SD card to internal memory (eMMC or NAND),
-follow [1;36msetup[0;39m
-
-login: root
-password: password
-
-[0;36m=======================================================================[0;39m
-
-Slackware GNU/\s (\l)
-Kernel \r (\m)
-
-EOF
-    fi
+    message "" "setting" "setup.sh move to nand"
+    install -m755 -D "$CWD/scripts/setup.sh" "$SOURCE/$ROOTFS/root/setup.sh"
 
     if [[ ! $(cat $SOURCE/$ROOTFS/root/.bashrc 2>&1 | grep setup.sh) ]];then
         cat <<EOF >$SOURCE/$ROOTFS/root/.bashrc

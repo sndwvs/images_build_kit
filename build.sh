@@ -143,7 +143,7 @@ source $CWD/configuration.sh || exit 1
 source $CWD/downloads.sh || exit 1
 source $CWD/compilation.sh || exit 1
 source $CWD/build_packages.sh || exit 1
-source $CWD/build_slackware_rootfs.sh || exit 1
+source $CWD/build_rootfs.sh || exit 1
 
 
 
