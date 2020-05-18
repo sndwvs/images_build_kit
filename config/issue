@@ -1,6 +1,9 @@
 
 [0;36m=======================================================================[0;39m
 
+if you want to transfer the system to SD card to internal memory (eMMC or NAND),
+follow [1;36msetup[0;39m
+
 login: root
 password: password
 
