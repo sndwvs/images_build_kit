@@ -9,22 +9,22 @@ setenv console "both"
 setenv verbosity "4"
 setenv rootfstype "ext4"
 
-if load ${devtype} ${devnum}:1 ${load_addr} ${prefix}uEnv.txt; then
+if load ${devtype} ${devnum}:1 ${load_addr} uEnv.txt; then
     env import -t ${load_addr} ${filesize}
 fi
 
 if test "${console}" = "display" || test "${console}" = "both"; then setenv consoleargs "console=%SERIAL_CONSOLE%,%SERIAL_CONSOLE_SPEED%n8"; fi
 if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "${consoleargs} earlyprintk console=tty1"; fi
 
-setenv bootargs "consoleblank=0 root=${rootdev} ro rootwait rootfstype=${rootfstype} init=/sbin/init ${consoleargs} loglevel=${verbosity} ${extraargs}"
+setenv bootargs "root=${rootdev} ro rootwait rootfstype=${rootfstype} init=/sbin/init ${consoleargs} loglevel=${verbosity} ${extraargs}"
 
-load ${devtype} ${devnum}:1 ${kernel_addr_r} ${prefix}Image
-load ${devtype} ${devnum}:1 ${fdt_addr_r} ${prefix}${fdtfile}
+load ${devtype} ${devnum}:1 ${kernel_addr_r} Image
+load ${devtype} ${devnum}:1 ${fdt_addr_r} ${fdtfile}
 
 #fdt addr ${fdt_addr_r}
 #fdt get value bootargs /chosen bootargs
 
-if load ${devtype} ${devnum}:1 ${ramdisk_addr_r} ${prefix}uInitrd; then
+if load ${devtype} ${devnum}:1 ${ramdisk_addr_r} uInitrd; then
     booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r};
 else
     booti ${kernel_addr_r} - ${fdt_addr_r};
