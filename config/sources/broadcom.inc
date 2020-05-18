@@ -41,20 +41,20 @@ write_uboot()
     cat <<EOF >"$SOURCE/$IMAGE/boot/config.txt"
 # See /boot/overlays/README for all available options
 
-#gpu_mem=64
+gpu_mem=64
 #initramfs initramfs-linux.img followkernel
 kernel=$BOOT_LOADER_BIN
-#arm_64bit=1
-#enable_gic=1
-#disable_overscan=1
+arm_64bit=1
+enable_gic=1
+disable_overscan=1
 
 #enable sound
-#dtparam=audio=on
-#hdmi_drive=2
+dtparam=audio=on
+hdmi_drive=2
 
 #enable vc4
-#dtoverlay=vc4-fkms-v3d
-#max_framebuffers=2
+dtoverlay=vc4-fkms-v3d
+max_framebuffers=2
 
 # The enable_uart setting is required because U-Boot assumes the VideoCore
 # firmware is configured to use the mini UART (rather than PL011) for the serial console.
