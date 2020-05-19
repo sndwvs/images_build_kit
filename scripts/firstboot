@@ -31,9 +31,10 @@ case "$1" in
                     # change root password
                     usermod -p 'password' root
 
+                    [[ ${partition/[!0-9]/} -gt 1 ]] && _partition=${partition/[!0-9]/}
                     echo -e "\e[0;37mResizing partition SD card\x1B[0m"
-                    offset=$(fdisk -l /dev/${device} | tac | head -n 1 | awk '{print $2}')
-                    (echo -e "\nd\np\nn\np\n$(echo ${partition} | sed 's/[a-z]//')\n${offset}\n\nw" | fdisk /dev/$device)>/dev/null 2>&1
+                    offset=$(fdisk -l /dev/${device} | grep -P "${device}.*${partition}" | tac | head -n 1 | awk '{print $2}')
+                    (echo -e "\nd\n${_partition}\np\nn\np\n${_partition}\n${offset}\n\nw" | fdisk /dev/$device)>/dev/null 2>&1
 
                     # add part one
                     touch /tmp/part
