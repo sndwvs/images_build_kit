@@ -43,7 +43,8 @@ write_uboot()
 
 gpu_mem=64
 #initramfs initramfs-linux.img followkernel
-kernel=$BOOT_LOADER_BIN
+#kernel=$BOOT_LOADER_BIN
+kernel=Image
 arm_64bit=1
 enable_gic=1
 disable_overscan=1
@@ -62,7 +63,7 @@ max_framebuffers=2
 enable_uart=1
 EOF
 
-    echo "root=/dev/mmcblk0p2 rw rootwait console=ttyAMA0,115200 console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 kgdboc=ttyAMA0,115200 elevator=noop snd-bcm2835.enable_compat_alsa=0" \
+    echo "root=/dev/mmcblk0p2 rw rootwait nofont console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 elevator=noop snd-bcm2835.enable_compat_alsa=0" \
     > "$SOURCE/$IMAGE/boot/cmdline.txt"
 
     install -m644 -D $CWD/blobs/broadcom/boot/* -t $SOURCE/$ROOTFS/boot
