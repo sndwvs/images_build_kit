@@ -158,9 +158,6 @@ setting_firstboot() {
         install -m755 -D "$CWD/scripts/firstboot" "$SOURCE/$ROOTFS/tmp/firstboot"
     fi
 
-    # add root password
-    sed -i "s#password#$(openssl passwd -1 password)#" "$SOURCE/$ROOTFS/tmp/firstboot"
-
     # resize fs
     sed -i "s#mmcblk[0-9]p[0-9]#$ROOT_DISK#" "$SOURCE/$ROOTFS/tmp/firstboot"
 
