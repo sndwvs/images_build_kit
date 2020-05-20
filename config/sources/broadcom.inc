@@ -63,7 +63,7 @@ max_framebuffers=2
 enable_uart=1
 EOF
 
-    echo "root=/dev/mmcblk0p2 rw rootwait nofont console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 elevator=noop snd-bcm2835.enable_compat_alsa=0" \
+    echo "root=/dev/mmcblk0p2 ro rootwait nofont console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 elevator=noop snd-bcm2835.enable_compat_alsa=0" \
     > "$SOURCE/$IMAGE/boot/cmdline.txt"
 
     install -m644 -D $CWD/blobs/broadcom/boot/* -t $SOURCE/$ROOTFS/boot
