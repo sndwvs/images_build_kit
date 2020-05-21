@@ -196,6 +196,7 @@ for image_type in ${DISTR_IMAGES[@]}; do
         download_rootfs
         prepare_rootfs
         create_bootloader_pack
+        setting_bootloader
         setting_hostname
         setting_fstab
         setting_debug

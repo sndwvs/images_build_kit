@@ -481,3 +481,25 @@ create_initrd() {
     install -m755 -D "$CWD/scripts/rebuild-initrd.sh" "$SOURCE/$ROOTFS/boot/rebuild-initrd.sh" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
+
+setting_bootloader() {
+    message "" "setting" "bootloader"
+    # u-boot config
+    install -Dm644 $CWD/config/boot_scripts/boot-$SOCFAMILY.cmd "$SOURCE/$ROOTFS/boot/boot.cmd"
+    # u-boot serial inteface config
+    sed -e "s:%SERIAL_CONSOLE%:${SERIAL_CONSOLE}:g" \
+        -e "s:%SERIAL_CONSOLE_SPEED%:${SERIAL_CONSOLE_SPEED}:g" \
+        -i "$SOURCE/$ROOTFS/boot/boot.cmd"
+    # compile boot script
+    [[ -f $SOURCE/$ROOTFS/boot/boot.cmd ]] && ( $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A arm -T script -d $SOURCE/$ROOTFS/boot/boot.cmd \
+                                                                        "$SOURCE/$ROOTFS/boot/boot.scr" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+    # u-boot
+    if [[ -f "$CWD/config/boot_scripts/uEnv-$SOCFAMILY.txt" ]]; then
+        install -Dm644 $CWD/config/boot_scripts/uEnv-$SOCFAMILY.txt "$SOURCE/$ROOTFS/boot/uEnv.txt"
+        echo "fdtfile=${DEVICE_TREE_BLOB}" >> "$SOURCE/$ROOTFS/boot/uEnv.txt"
+    fi
+    # change root disk if disk not default
+    [[ -n ${ROOT_DISK##*mmcblk0p1} ]] && echo "rootdev=/dev/$ROOT_DISK" >> "$SOURCE/$ROOTFS/boot/uEnv.txt"
+    return 0
+}
+
