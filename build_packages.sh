@@ -47,22 +47,6 @@ build_kernel_pkg() {
               $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
-    # u-boot config
-    install -Dm644 $CWD/config/boot_scripts/boot-$SOCFAMILY.cmd "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd"
-    # u-boot serial inteface config
-    sed -e "s:%SERIAL_CONSOLE%:${SERIAL_CONSOLE}:g" \
-        -e "s:%SERIAL_CONSOLE_SPEED%:${SERIAL_CONSOLE_SPEED}:g" \
-        -i "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd"
-    # compile boot script
-    [[ -f $BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd ]] && ( $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A arm -T script -d $BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.cmd \
-                                                                        "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/boot.scr" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
-    # u-boot
-    if [[ -f "$CWD/config/boot_scripts/uEnv-$SOCFAMILY.txt" ]]; then
-        install -Dm644 $CWD/config/boot_scripts/uEnv-$SOCFAMILY.txt "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/uEnv.txt.new"
-        echo "fdtfile=${DEVICE_TREE_BLOB}" >> "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/uEnv.txt.new"
-    fi
-    # change root disk if disk not default
-    [[ -n ${ROOT_DISK##*mmcblk0p1} ]] && echo "rootdev=/dev/$ROOT_DISK" >> "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/uEnv.txt.new"
     cd "$CWD" # fix actual current directory
     # clean-up unnecessary files generated during install
     find "$BUILD/$PKG/kernel-modules" "$BUILD/$PKG/kernel-headers" \( -name .install -o -name ..install.cmd \) -delete
@@ -111,8 +95,6 @@ build_kernel_pkg() {
     # create kernel package
     cd $BUILD/$PKG/kernel-${SOCFAMILY}/ && mkdir "install"
     cat "$CWD/packages/kernel/slack-desc.kernel-template" | sed "s:%SOCFAMILY%:${SOCFAMILY}:g" > "$BUILD/$PKG/kernel-${SOCFAMILY}/install/slack-desc"
-    install -m644 -D "$CWD/packages/kernel/doinst.sh.kernel" "$BUILD/$PKG/kernel-${SOCFAMILY}/install/doinst.sh"
-
     makepkg -l n -c n $BUILD/$PKG/kernel-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     # create kernel-modules package
