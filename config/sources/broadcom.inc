@@ -41,26 +41,45 @@ write_uboot()
     cat <<EOF >"$SOURCE/$IMAGE/boot/config.txt"
 # See /boot/overlays/README for all available options
 
-gpu_mem=64
-#initramfs initramfs-linux.img followkernel
-#kernel=$BOOT_LOADER_BIN
-kernel=Image
+# Our kernels are located on a Linux partition. Chainload U-Boot to load them.
+kernel=$BOOT_LOADER_BIN
+#kernel=Image
+
+# Use 32 MB for GPU for all RPis (Min 16 - Max 192 MB)
+# We don't need that much memory reserved for it, because we drive most hardware
+# from Linux, not the VPU OS
+gpu_mem=32
+
 arm_64bit=1
-enable_gic=1
+
+# Turbo mode: 0 = enable dynamic freq/voltage - 1 = always max
+force_turbo=0
+# Start in turbo mode for 30 seconds or until cpufreq sets a frequency
+initial_turbo=30
+
+# DO NOT overvoltage manually to not void warranty!
+over_voltage=0
+
+# Fix mini UART input frequency, and setup/enable up the UART.
+enable_uart=1
+
+# Disable warning overlays as they don't work well together with linux's graphical output
+avoid_warnings=1
+
+# This overlay fixes divergences between the RPi device tree and what
+# upstream provides
+dtoverlay=upstream
+
+# overscan is only needed on old TV sets and if analog gear is in the chain (e.g. DPI)
 disable_overscan=1
 
-#enable sound
-dtparam=audio=on
-hdmi_drive=2
+[pi3]
+# These are not applied automatically? Needed to use respective upstream drivers.
+dtoverlay=vc4-kms-v3d,cma-default
+dtoverlay=dwc2
 
-#enable vc4
-dtoverlay=vc4-fkms-v3d
-max_framebuffers=2
-
-# The enable_uart setting is required because U-Boot assumes the VideoCore
-# firmware is configured to use the mini UART (rather than PL011) for the serial console.
-# Without this, U-Boot will not boot at all.
-enable_uart=1
+[pi4]
+dtoverlay=disable-vc4
 EOF
 
     echo "root=/dev/mmcblk0p2 ro rootwait nofont console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 elevator=noop snd-bcm2835.enable_compat_alsa=0" \
