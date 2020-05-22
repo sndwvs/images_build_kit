@@ -93,7 +93,7 @@ EOF
     fi
 }
 
-create_img_rpi() {
+create_img() {
 
     if [[ $1 == xfce ]]; then
         IMAGE="$ROOTFS_XFCE"

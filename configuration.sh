@@ -45,6 +45,7 @@ ATF_BRANCH=${ATF_BRANCH:-"master::"}
 #---------------------------------------------
 # board configuration
 #---------------------------------------------
+source $CWD/overall.sh || exit 1
 get_config
 
 
