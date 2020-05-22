@@ -126,7 +126,7 @@ compile_boot_tools() {
 
 
 compile_kernel() {
-    message "" "compiling" "$KERNEL_DIR"
+    message "" "compiling" "$KERNEL_DIR $KERNEL_BRANCH"
     cd "$SOURCE/$KERNEL_DIR" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     local KERNEL=zImage
