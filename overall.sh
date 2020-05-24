@@ -178,7 +178,7 @@ gcc_version() {
 read_packages() {
     local TYPE="$1"
     local PKG
-    PKG=( $(cat $CWD/config/packages/packages-${TYPE}.conf | grep -v "^#") )
+    [[ -f $CWD/config/packages/packages-${TYPE}.conf ]] && PKG=( $(cat $CWD/config/packages/packages-${TYPE}.conf | grep -v "^#") )
     eval "$2=\${PKG[*]}"
 }
 
