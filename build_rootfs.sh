@@ -263,15 +263,6 @@ install_pkg(){
 }
 
 
-setting_default_theme_xfce() {
-    if [[ ! -d "$SOURCE/$ROOTFS_XFCE/etc/skel/.config/xfce4" ]];then
-        message "" "setting" "default settings xfce"
-        rsync -a "$CWD/config/xfce/" "$SOURCE/$ROOTFS_XFCE/etc/skel/" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        rsync -a "$CWD/config/xfce/" "$SOURCE/$ROOTFS_XFCE/root/" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    fi
-}
-
-
 setting_default_start_x() {
     sed "s#id:3#id:4#" -i $SOURCE/$ROOTFS_XFCE/etc/inittab
 
