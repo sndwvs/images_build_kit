@@ -92,69 +92,11 @@ setting_motd() {
 }
 
 
-setting_rc_local() {
-    message "" "setting" "rc.local"
-    cat <<EOF >"$SOURCE/$ROOTFS/etc/rc.d/rc.local"
-#!/bin/sh
-#
-# /etc/rc.d/rc.local:  Local system initialization script.
-#
-# Put any local setup commands in here:
-
-echo "Running script \$0:"
-
-# Find out how we were called.
-case "\$0" in
-        *local|*M) # if booting name script rc.M
-                command="start"
-                ;;
-        *local_shutdown)
-                command="stop"
-                ;;
-        *)
-                echo "\$0: call me as \"rc.local_shutdown\" or \"rc.local\" please!"
-                exit 1
-                ;;
-esac
-
-
-if [ -x /etc/rc.d/rc.settings ]; then
-  . /etc/rc.d/rc.settings
-fi
-EOF
-
-        ln -s "$SOURCE/$ROOTFS/etc/rc.d/rc.local" \
-           -r "$SOURCE/$ROOTFS/etc/rc.d/rc.local_shutdown"
-
-}
-
-
 setting_wifi() {
     message "" "setting" "wifi"
     # fix wifi driver
     if [[ $SOCFAMILY != rk3288 && $KERNEL_SOURCE != next ]]; then
         sed -i "s#wext#nl80211#" $SOURCE/$ROOTFS/etc/rc.d/rc.inet1.conf >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    fi
-}
-
-
-setting_firstboot() {
-    if [[ ! -x $SOURCE/$ROOTFS/tmp/firstboot ]]; then
-        message "" "setting" "firstboot"
-        # add start wifi boot
-        install -m755 -D "$CWD/scripts/firstboot" "$SOURCE/$ROOTFS/tmp/firstboot"
-    fi
-
-    # resize fs
-    sed -i "s#mmcblk[0-9]p[0-9]#$ROOT_DISK#" "$SOURCE/$ROOTFS/tmp/firstboot"
-
-    if [[ ! $(cat $SOURCE/$ROOTFS/etc/rc.d/rc.local | grep firstboot) ]]; then
-        cat <<EOF >>"$SOURCE/$ROOTFS/etc/rc.d/rc.local"
-
-if [ -x /tmp/firstboot ]; then
-  . /tmp/firstboot \$command
-fi
-EOF
     fi
 }
 
@@ -366,37 +308,19 @@ setting_for_desktop() {
 }
 
 
-setting_move_to_internal() {
-    message "" "save" "bootloader data for move to nand"
+setting_bootloader_move_to_disk() {
+    message "" "save" "bootloader data for move to disk"
     rsync -ar $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/ $SOURCE/$ROOTFS/boot >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
-    message "" "setting" "setup.sh move to nand"
-    install -m755 -D "$CWD/scripts/setup.sh" "$SOURCE/$ROOTFS/root/setup.sh"
-
-    if [[ ! $(cat $SOURCE/$ROOTFS/root/.bashrc 2>&1 | grep setup.sh) ]];then
-        cat <<EOF >$SOURCE/$ROOTFS/root/.bashrc
-alias setup='/root/setup.sh'
-EOF
-    fi
-
-    if [[ ! $(cat $SOURCE/$ROOTFS/root/.bash_profile 2>&1 | grep setup.sh) ]];then
-        cat <<EOF >$SOURCE/$ROOTFS/root/.bash_profile
-source ~/.bashrc
-EOF
-    fi
 }
 
 
-setting_first_login() {
-    message "" "setting" "first login"
-    install -m755 -D "$CWD/scripts/check_first_login.sh" "$SOURCE/$ROOTFS/etc/profile.d/check_first_login.sh"
-    touch "$SOURCE/$ROOTFS/root/.never_logged"
-}
+setting_system() {
+    message "" "setting" "system"
+    rsync -a $CWD/config/system/overall/ $SOURCE/$ROOTFS/
 
-
-setting_issue() {
-    message "" "setting" "issue message"
-    install -m644 -D "$CWD/config/issue" "$SOURCE/$ROOTFS/etc/issue"
+    if [[ -d $CWD/config/system/$SOCFAMILY ]]; then
+        rsync -a $CWD/config/system/$SOCFAMILY/ $SOURCE/$ROOTFS/
+    fi
 }
 
 
@@ -410,35 +334,9 @@ setting_alsa() {
 }
 
 
-setting_sysctl() {
-    message "" "setting" "sysctl"
-    cat <<EOF >$SOURCE/$ROOTFS/etc/sysctl.d/ext4_tune.conf
-vm.dirty_writeback_centisecs = 100
-vm.dirty_expire_centisecs = 100
-EOF
-}
-
-
-setting_udev() {
-    if [[ -d $CWD/config/udev/$SOCFAMILY ]]; then
-        message "" "setting" "udev"
-        install -m644 -D $CWD/config/udev/$SOCFAMILY/* -t $SOURCE/$ROOTFS/etc/udev/rules.d/
-    fi
-}
-
-
 setting_hostname() {
     message "" "setting" "hostname"
     echo $BOARD_NAME | sed 's/_/-/g' > "$SOURCE/$ROOTFS/etc/HOSTNAME"
-}
-
-
-install_scripts() {
-    if [[ -d $CWD/scripts/$SOCFAMILY ]]; then
-        message "" "install" "scripts"
-        install -d $SOURCE/$ROOTFS/usr/local/bin
-        install -m755 -D $CWD/scripts/$SOCFAMILY/* -t $SOURCE/$ROOTFS/usr/local/bin
-    fi
 }
 
 
@@ -476,8 +374,6 @@ create_initrd() {
     else
         ln -sf "$SOURCE/$ROOTFS/boot/uInitrd-${KERNEL_VERSION}" -r "$SOURCE/$ROOTFS/boot/uInitrd" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
-
-    install -m755 -D "$CWD/scripts/rebuild-initrd.sh" "$SOURCE/$ROOTFS/boot/rebuild-initrd.sh" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 

@@ -200,16 +200,10 @@ for image_type in ${DISTR_IMAGES[@]}; do
         setting_fstab
         setting_debug
         setting_motd
-        setting_issue
-        setting_rc_local
-        setting_firstboot
+        setting_system
         setting_settings
-        setting_sysctl
-        setting_first_login
         setting_wifi
-        setting_udev
-        install_scripts
-        setting_move_to_internal
+        setting_bootloader_move_to_disk
         download_pkg $DISTR_URL "$image_type"
         install_pkg "$image_type"
         create_initrd
