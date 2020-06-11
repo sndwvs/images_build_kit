@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-USER="$(who | grep :0\.0\) | cut -f 1 -d ' ' | uniq)"
+USER="$(who | grep '(:.*)' | cut -f 1 -d ' ' | uniq)"
 export XAUTHORITY=/home/$USER/.Xauthority
-export DISPLAY=:0.0
+export DISPLAY=$(who | grep '(:.*)' | grep -oP '(?<=\().*(?=\))' | uniq)
 HDMI_STATUS="$(cat /sys/class/drm/card0-HDMI-A-1/status)"
 
 # Check to see if HDMI connected or not and toggle if change
