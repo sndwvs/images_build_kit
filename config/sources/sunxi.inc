@@ -14,7 +14,7 @@ SUNXI_TOOLS_SOURCE="https://github.com/linux-sunxi/sunxi-tools.git"
 SUNXI_TOOLS_DIR="sunxi-tools"
 SUNXI_TOOLS_BRANCH="master::" #"v1.2"
 
-BOOT_LOADER_BRANCH="master:tag:v2020.01"
+BOOT_LOADER_BRANCH="master:tag:v2020.07-rc4"
 BOOT_LOADER_BIN="u-boot-sunxi-with-spl.bin"
 
 
