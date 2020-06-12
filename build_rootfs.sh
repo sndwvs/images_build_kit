@@ -307,10 +307,10 @@ setting_bootloader_move_to_disk() {
 
 setting_system() {
     message "" "setting" "system"
-    rsync -a $CWD/config/system/overall/ $SOURCE/$ROOTFS/
+    rsync -a $CWD/system/overall/ $SOURCE/$ROOTFS/
 
-    if [[ -d $CWD/config/system/$SOCFAMILY ]]; then
-        rsync -a $CWD/config/system/$SOCFAMILY/ $SOURCE/$ROOTFS/
+    if [[ -d $CWD/system/$SOCFAMILY ]]; then
+        rsync -a $CWD/system/$SOCFAMILY/ $SOURCE/$ROOTFS/
     fi
 }
 
