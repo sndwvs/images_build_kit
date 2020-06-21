@@ -1,5 +1,5 @@
---- a/arch/arm/dts/rk3399-rockpro64.dts	2020-03-19 19:50:10.357107238 +0200
-+++ b/arch/arm/dts/rk3399-rockpro64.dts	2020-02-18 19:56:00.021770065 +0200
+--- a/arch/arm/dts/rk3399-rockpro64.dtsi	2020-03-19 19:50:10.357107238 +0200
++++ b/arch/arm/dts/rk3399-rockpro64.dtsi	2020-02-18 19:56:00.021770065 +0200
 @@ -7,6 +7,7 @@
  /dts-v1/;
  #include <dt-bindings/input/linux-event-codes.h>
