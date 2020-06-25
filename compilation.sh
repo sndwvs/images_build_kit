@@ -100,7 +100,7 @@ compile_atf() {
 #            [[ ! -z $BL32 ]] && ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL32 bl32.bin
         fi
     elif [[ $SOCFAMILY == sun50* ]]; then
-        [[ -e ./build/$ATF_PLAT/release/bl31.bin ]] && ln -fs ./build/sun50i_a64/release/bl31.bin bl31.bin
+        [[ -e ./build/$ATF_PLAT/release/bl31.bin ]] && ln -fs ./build/$ATF_PLAT/release/bl31.bin bl31.bin
     fi
 
     if [[ $SOCFAMILY == rk3* ]]; then
