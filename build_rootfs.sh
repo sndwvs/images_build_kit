@@ -51,9 +51,6 @@ prepare_rootfs() {
     mkdir -p $SOURCE/$ROOTFS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     tar xpf $SOURCE/$ROOTFS_NAME.tar.xz -C "$SOURCE/$ROOTFS" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    message "" "install" "kernel for $ROOTFS"
-    ROOT=$SOURCE/$ROOTFS upgradepkg --install-new $BUILD/$PKG/*${SOCFAMILY}*${KERNEL_VERSION}*.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
     if [[ ! -z $TOOLS_PACK ]] && [[ $SOCFAMILY == sun* ]]; then
         message "" "install" "${SUNXI_TOOLS}"
         ROOT=$SOURCE/$ROOTFS upgradepkg --install-new $BUILD/$PKG/*${SUNXI_TOOLS}*.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
@@ -260,6 +257,12 @@ install_pkg(){
             ROOT=$SOURCE/$ROOTFS upgradepkg --install-new $BUILD/$PKG/${type}/${ARCH}/$category/${pkg}-* >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
     done
+}
+
+
+install_kernel() {
+    message "" "install" "kernel ${KERNEL_VERSION}"
+    ROOT=$SOURCE/$ROOTFS upgradepkg --install-new $BUILD/$PKG/*${SOCFAMILY}*${KERNEL_VERSION}*.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 

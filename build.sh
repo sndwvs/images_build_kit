@@ -206,6 +206,7 @@ for image_type in ${DISTR_IMAGES[@]}; do
         setting_bootloader_move_to_disk
         download_pkg $DISTR_URL "$image_type"
         install_pkg "$image_type"
+        install_kernel
         create_initrd
         create_img
     fi
