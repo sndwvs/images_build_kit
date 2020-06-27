@@ -79,7 +79,12 @@ dtoverlay=vc4-kms-v3d,cma-default
 dtoverlay=dwc2
 
 [pi4]
-dtoverlay=disable-vc4
+dtoverlay=vc4-fkms-v3d
+
+[all]
+dtparam=i2c_arm=on
+dtparam=spi=on
+dtparam=audio=on
 EOF
 
     echo "root=/dev/mmcblk0p2 ro rootwait nofont console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 elevator=noop snd-bcm2835.enable_compat_alsa=0" \
