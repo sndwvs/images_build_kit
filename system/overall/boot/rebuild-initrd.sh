@@ -52,7 +52,7 @@ popd
 mkimage -A $KARCH -O linux -T ramdisk -C gzip -n ${INITRD_NAME} -d "/tmp/initrd-${KERNEL_VERSION}.img" "/boot/uInitrd-${KERNEL_VERSION}" || exit 1
 rm -rf /tmp/initrd* || exit 1
 
-if [[ ! -z $(mount | grep -P "mmcblk0p1.*media.*fat") ]]; then
+if [[ ! -z $(mount | grep -P "mmcblk0p1.*boot.*fat") ]]; then
     cp -a "/boot/${INITRD_NAME}-${KERNEL_VERSION}" "/boot/${INITRD_NAME}" || exit 1
 else
     ln -sf "/boot/${INITRD_NAME}-${KERNEL_VERSION}" -r "/boot/${INITRD_NAME}" || exit 1
