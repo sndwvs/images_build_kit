@@ -243,10 +243,10 @@ transfer() {
 #---------------------------------------------
 fix_config() {
     DISK="$1"
-    DISK=${DISK/[0-9]*/}
+    DISK=${DISK%[0-9]*}
     if [[ ! -z $FIX_BOOT_DISK ]]; then
-        [[ ! $(grep "${DISK}" $OUTPUT/boot/uEnv.txt) ]] && sed -i "s#/dev/\([a-z0-9]\)*#/dev/${DISK/[0-9]*/}\1#g" $OUTPUT/boot/uEnv.txt
-        [[ ! $(grep "^/dev/${DISK}" $OUTPUT/etc/fstab) ]] && sed -i "s#^/dev/\([a-z0-9]\)*#/dev/${DISK/[0-9]*/}\1    #g" $OUTPUT/etc/fstab
+        [[ ! $(grep "${DISK}" $OUTPUT/boot/uEnv.txt) ]] && sed -i "s#/dev/\([a-z0-9]\)*#/dev/${DISK}\1#g" $OUTPUT/boot/uEnv.txt
+        [[ ! $(grep "^/dev/${DISK}" $OUTPUT/etc/fstab) ]] && sed -i "s#^/dev/\([a-z0-9]\)*#/dev/${DISK}\1    #g" $OUTPUT/etc/fstab
     fi
     sed -i '/^if*/,/^$/d' $OUTPUT/etc/issue
 }
