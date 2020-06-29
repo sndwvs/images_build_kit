@@ -18,9 +18,10 @@ OFFSET=$(fdisk -l /dev/$ROOT_DISK | tac | head -n 1 | awk '{print $2}')
 PART=1
 RUNLEVEL=$(runlevel)
 RUNLEVEL=${RUNLEVEL#* }
+COMPATIBLE=$(cat /proc/device-tree/compatible | tr -d [:cntrl:])
 
 
-case $(cat /proc/device-tree/compatible | tr -d [:cntrl:]) in
+case ${COMPATIBLE} in
 #    *firefly*rk33*)
 #            OFFSET_LOADER="64:16384:24576"
 #            LOADER="idbloader.img:uboot.img:trust.img"
@@ -45,6 +46,9 @@ case $(cat /proc/device-tree/compatible | tr -d [:cntrl:]) in
             OFFSET_LOADER="1:5:"
             LOADER="sunxi-spl.bin:u-boot.itb:"
             BS=8k
+            FIX_BOOT_DISK=true
+    ;;
+    *raspberry*pi*)
             FIX_BOOT_DISK=true
     ;;
     *)
@@ -161,7 +165,7 @@ prepare_disk() {
     TRUST_OFFSET_LOADER=$(echo $OFFSET_LOADER | cut -d ':' -f3)
 
     # clear partition
-    dd if=/dev/zero of=/dev/$DISK bs=1k count=446 status=noxfer >/dev/null 2>&1
+    sfdisk --delete /dev/$DISK >/dev/null 2>&1
 
     # save u-boot
     if [[ ! -z $SPL_LOADER && ! -z $BS ]]; then
@@ -180,12 +184,24 @@ prepare_disk() {
         dd if=/boot/$TRUST_LOADER of=/dev/$DISK seek=$TRUST_OFFSET_LOADER status=noxfer >/dev/null 2>&1
     fi
 
-    echo -e "\nn\np\n${PART}\n${OFFSET}\n\nw" | fdisk "/dev/$DISK" >/dev/null 2>&1
+    [[ ${COMPATIBLE} =~ raspberry*pi ]] && unset OFFSET && SIZE="+150M"
+
+    echo -e "\nn\np\n${PART}\n${OFFSET}\n${SIZE}\nw" | fdisk "/dev/$DISK" >/dev/null 2>&1
+
+    if [[ ${COMPATIBLE} =~ raspberry*pi ]] ;then
+        echo -e "\nn\np\n\n\n\nt\n${PART}\nc\nw" | fdisk "/dev/$DISK" >/dev/null 2>&1
+    fi
 
     if [[ $DISK =~ mmc* ]] ;then
         DISK=${DISK}p${PART}
     else
         DISK=${DISK}${PART}
+    fi
+
+    if [[ ${COMPATIBLE} =~ raspberry*pi ]] ;then
+        DISK0=$DISK
+        DISK=${DISK/1/2}
+        mkfs.vfat -F 32 "/dev/$DISK0" >/dev/null 2>&1
     fi
 
     echo y | mkfs.ext4 -F -m 0 -L linuxroot "/dev/$DISK" >/dev/null 2>&1
@@ -226,9 +242,11 @@ transfer() {
 # fix fstab/boot partition
 #---------------------------------------------
 fix_config() {
+    DISK="$1"
+    DISK=${DISK/[0-9]*/}
     if [[ ! -z $FIX_BOOT_DISK ]]; then
-        [[ ! $(grep "$1" $OUTPUT/boot/uEnv.txt) ]] && ( echo "rootdev=/dev/$1" >> $OUTPUT/boot/uEnv.txt )
-        [[ ! $(grep "^/dev/$1" $OUTPUT/etc/fstab) ]] && sed -i "s#^\/dev\/\([a-z0-9]*\)*#\/dev\/$1    #" $OUTPUT/etc/fstab
+        [[ ! $(grep "${DISK}" $OUTPUT/boot/uEnv.txt) ]] && sed -i "s#/dev/\([a-z0-9]\)*#/dev/${DISK/[0-9]*/}\1#g" $OUTPUT/boot/uEnv.txt
+        [[ ! $(grep "^/dev/${DISK}" $OUTPUT/etc/fstab) ]] && sed -i "s#^/dev/\([a-z0-9]\)*#/dev/${DISK/[0-9]*/}\1    #g" $OUTPUT/etc/fstab
     fi
     sed -i '/^if*/,/^$/d' $OUTPUT/etc/issue
 }
@@ -241,16 +259,12 @@ fix_config() {
 #---------------------------------------------
 [[ $RUNLEVEL > 2 ]] && ( msginfo " ATTENTION " "\ncurrent runlevel $RUNLEVEL\nin order to correctly transfer the system,\nyou must go to runlevel 2 or lower\nbash$ init 2" && exit 1 )
 
-options+=("1" "system moving on the emmc or nand")
-#options+=("2" "system moving on the nand")
-#options+=("3" "system moving on the sata")
+options+=("1" "system moving on the emmc, hdd, ssd or nand")
 
 menu "system configuration" "\nselect one of the items" options[@] OUT
 
 case "$OUT" in
     1) get_disks DISK ;;
-#    2) get_disks DISK ;;
-#    3)  get_disks DISK ;;
 esac
 
 msginfo " ATTENTION " "\ndisk preparation in progress..."
@@ -261,13 +275,21 @@ DISK=$OUT
 
 mount /dev/$DISK $OUTPUT
 
+if [[ ${COMPATIBLE} =~ raspberry*pi ]] ;then
+    mkdir -p $OUTPUT/boot
+    mount /dev/${DISK/2/1} $OUTPUT/boot
+fi
+
 transfer
 
 fix_config "$DISK"
+
+[[ ${COMPATIBLE} =~ raspberry*pi ]] && umount $OUTPUT/boot
 
 umount $OUTPUT
 
 rmdir $OUTPUT
 
 msginfo " CONGRATULATIONS " "\nremove the memory card and restart the system"
+
 
