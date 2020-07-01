@@ -334,6 +334,13 @@ setting_hostname() {
 }
 
 
+setting_ntp() {
+    message "" "setting" "ntp"
+    chmod 755 "$SOURCE/$ROOTFS/etc/rc.d/rc.ntpd" || exit 1
+    sed 's:^#server:server:g' -i "$SOURCE/$ROOTFS/etc/ntp.conf" || exit 1
+}
+
+
 create_initrd() {
     if [[ $MARCH == "x86_64" ]]; then
         [[ $SOCFAMILY == bcm2* ]] && find "$SOURCE/$ROOTFS/boot/" -type l -exec rm -rf {} \+ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
