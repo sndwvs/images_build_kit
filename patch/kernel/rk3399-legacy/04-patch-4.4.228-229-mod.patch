@@ -1390,9 +1390,9 @@ diff --git a/drivers/usb/dwc2/platform.c b/drivers/usb/dwc2/platform.c
 index 39c1cbf0e75d..5e554b1d5a8f 100644
 --- a/drivers/usb/dwc2/platform.c
 +++ b/drivers/usb/dwc2/platform.c
-@@ -452,6 +452,17 @@ static int dwc2_driver_probe(struct platform_device *dev)
- 	if (hsotg->dr_mode == USB_DR_MODE_PERIPHERAL)
- 		dwc2_lowlevel_hw_disable(hsotg);
+@@ -675,6 +675,17 @@
+ 		}
+ 	}
  
 +#if IS_ENABLED(CONFIG_USB_DWC2_PERIPHERAL) || \
 +	IS_ENABLED(CONFIG_USB_DWC2_DUAL_ROLE)
