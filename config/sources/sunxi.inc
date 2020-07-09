@@ -1,6 +1,8 @@
 
 INITRD_MODULES="tun:btrfs:xfs"
 
+ATF_BRANCH="master:tag:v2.3"
+
 FIRMWARE="firmware"
 
 SERIAL_CONSOLE_SPEED=115200
