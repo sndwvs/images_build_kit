@@ -69,9 +69,9 @@ create_uboot()
 
             tools/mkimage -n $SOCFAMILY -T rksd -d tpl/u-boot-tpl.bin rkspi_loader.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             cat spl/u-boot-spl.bin >> rkspi_loader.img
-            for i in `seq 1 128`; do dd count=4 status=none; dd if=/dev/zero count=4 status=none >> $LOG 2>&1; done < rkspi_loader.img > rkspi_loader.tmp
-            mv rkspi_loader.tmp rkspi_loader.img
-            dd if=u-boot.itb of=rkspi_loader.img seek=1024 conv=notrunc
+            for i in `seq 1 128`; do dd count=4 status=none; dd if=/dev/zero count=4 status=none; done < rkspi_loader.img > rkspi_loader.tmp
+            mv rkspi_loader.tmp rkspi_loader.img || (message "err" "details" && exit 1) || exit 1
+            dd if=u-boot.itb of=rkspi_loader.img seek=1024 conv=notrunc >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             install -Dm644 rkspi_loader.img $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/rkspi_loader.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         else
             # The ddr binary files for ARM64 platforms from Rockchip, likes RK3399 and RK3328 should not skip first 4 bytes.
