@@ -40,3 +40,8 @@ password: **password**
     * BCM2711
         + [Raspberry Pi 4](https://www.raspberrypi.org/products/raspberry-pi-4-model-b/specifications/) board provided by user [wowbaggerHU](https://www.linuxquestions.org/questions/user/wowbaggerhu-1042789/)
 
+
+# BUILD #
+
+## cross compilation arm on aarch64 architecture ##
+`ARCH=arm ./build.sh`

@@ -76,7 +76,7 @@ elif [[ $MARCH == "aarch64" ]]; then
     XTOOLS_PREFIX="gcc-arm"
     BASE_VERSION_XTOOLS="9.2-2019.12"
     VERSION_XTOOLS=$BASE_VERSION_XTOOLS
-    XTOOLS+=("$XTOOLS_PREFIX-$VERSION_XTOOLS-$ARCH-$XTOOLS_ARM_SUFFIX")
+    XTOOLS+=("$XTOOLS_PREFIX-$VERSION_XTOOLS-${MARCH}-$XTOOLS_ARM_SUFFIX")
     URL_XTOOLS+=("$BASE_URL_XTOOLS/$BASE_VERSION_XTOOLS/binrel")
 fi
 
@@ -109,6 +109,7 @@ if [[ $MARCH == "x86_64" || $MARCH == "aarch64" ]]; then
 fi
 
 [[ $MARCH != "x86_64" ]] && export CROSS=""
+[[ $MARCH == "aarch64" && $KARCH == "arm" ]] && export CROSS=$CROSS32
 
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin:$BUILD/$OUTPUT/$TOOLS/
 #export PATH=/bin:/sbin:/usr/bin:/usr/sbin:$SOURCE/$ARM_XTOOLS/bin:$SOURCE/$ARM64_XTOOLS/bin:$BUILD/$OUTPUT/$TOOLS/
