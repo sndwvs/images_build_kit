@@ -1,0 +1,13 @@
+This patch disables display driver in u-boot which improves EDID detection
+https://forum.armbian.com/topic/13651-pine-a64-no-hdmi-signal/?do=findComment&comment=99169
+
+--- a/configs/pinebook_defconfig	2020-07-25 02:39:23.124789376 +0300
++++ b/configs/pinebook_defconfig	2020-07-25 02:40:25.324722334 +0300
+@@ -14,6 +14,7 @@
+ CONFIG_PWM_SUNXI=y
+ CONFIG_USB_EHCI_HCD=y
+ CONFIG_USB_OHCI_HCD=y
++CONFIG_VIDEO_DE2=n
+ # CONFIG_USB_GADGET is not set
+ CONFIG_VIDEO_BRIDGE=y
+ CONFIG_VIDEO_BRIDGE_ANALOGIX_ANX6345=y
