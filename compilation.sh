@@ -41,7 +41,7 @@ compile_boot_loader() {
     change_name_version "-$SOCFAMILY"
 
     [[ ! -z $ATF && ! -z $BL31 ]] && export BL31=$SOURCE/$ATF_DIR/bl31.${BL31##*.}
-    [[ ! -z $ATF && -z $BL31 ]] && export BL31=$SOURCE/$ATF_DIR/bl31.{bin,elf}
+    [[ ! -z $ATF && -z $BL31 ]] && export BL31=$SOURCE/$ATF_DIR/bl31.bin
 
     if [[ $SOCFAMILY == rk3* ]]; then
         # u-boot-firefly-rk3288 2016.03 package contains backports
@@ -95,8 +95,10 @@ compile_atf() {
 #        ln -fs ./build/$ATF_PLAT/debug/bl31/bl31.elf bl31.elf
         if [[ -z $BL31 ]]; then
             ln -fs ./build/$ATF_PLAT/release/bl31/bl31.elf bl31.elf
+            ln -fs ./build/$ATF_PLAT/release/bl31/bl31.elf bl31.bin
         else
             ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL31 bl31.elf
+            ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL31 bl31.bin
 #            [[ ! -z $BL32 ]] && ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL32 bl32.bin
         fi
     elif [[ $SOCFAMILY == sun50* ]]; then
