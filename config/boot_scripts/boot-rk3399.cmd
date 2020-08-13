@@ -4,37 +4,34 @@
 #
 
 setenv load_addr "0x39000000"
+# default values
 setenv rootdev "/dev/mmcblk0p1"
+setenv verbosity "1"
 setenv console "both"
-setenv verbosity "4"
 setenv rootfstype "ext4"
+setenv earlycon "off"
 
-# boot from eMMC
-part uuid mmc 1 part_exists
+echo "Boot script loaded from ${devtype} ${devnum}"
 
-if test -n ${part_exists}; then
-    setenv rootdev "/dev/mmcblk0p1"
-    setenv devnum "1"
-fi
-
-itest.b ${devnum} == 0 && echo "U-boot loaded from eMMC"
-itest.b ${devnum} == 1 && echo "U-boot loaded from SD"
-
-if load ${devtype} ${devnum}:1 ${load_addr} ${prefix}uEnv.txt; then
+if load ${devtype} ${devnum} ${load_addr} ${prefix}uEnv.txt; then
     env import -t ${load_addr} ${filesize}
 fi
 
+# get PARTUUID of first partition on SD/eMMC the boot script was loaded from
+if test "${devtype}" = "mmc"; then part uuid mmc ${devnum}:1 partuuid; fi
+
 if test "${console}" = "display" || test "${console}" = "both"; then setenv consoleargs "console=%SERIAL_CONSOLE%,%SERIAL_CONSOLE_SPEED%n8"; fi
-if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "${consoleargs} earlyprintk console=tty1"; fi
+if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "${consoleargs} console=tty1"; fi
+if test "${earlycon}" = "on"; then setenv consoleargs "earlycon ${consoleargs}"; fi
 
-setenv bootargs "consoleblank=0 root=${rootdev} ro rootwait rootfstype=${rootfstype} init=/sbin/init ${consoleargs} loglevel=${verbosity} ${extraargs}"
+setenv bootargs "root=${rootdev} ro rootwait rootfstype=${rootfstype} init=/sbin/init ${consoleargs} consoleblank=0 loglevel=${verbosity} usb-storage.quirks=${usbstoragequirks} ${extraargs}"
 
-load ${devtype} ${devnum}:1 ${fdt_addr_r} ${prefix}dtb/${fdtfile}
-load ${devtype} ${devnum}:1 ${kernel_addr_r} ${prefix}Image
+load ${devtype} ${devnum} ${fdt_addr_r} ${prefix}dtb/${fdtfile}
+load ${devtype} ${devnum} ${kernel_addr_r} ${prefix}Image
 fdt addr ${fdt_addr_r}
 fdt resize 65536
 
-if load ${devtype} ${devnum}:1 ${ramdisk_addr_r} ${prefix}uInitrd; then
+if load ${devtype} ${devnum} ${ramdisk_addr_r} ${prefix}uInitrd; then
     booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r};
 else
     booti ${kernel_addr_r} - ${fdt_addr_r};
