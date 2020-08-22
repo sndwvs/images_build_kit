@@ -19,20 +19,20 @@ diff --git a/include/net/bluetooth/hci.h b/include/net/bluetooth/hci.h
 index 16ab6ce87883..8e4c16210d18 100644
 --- a/include/net/bluetooth/hci.h
 +++ b/include/net/bluetooth/hci.h
-@@ -227,6 +227,13 @@ enum {
- 	 * supported.
- 	 */
- 	HCI_QUIRK_VALID_LE_STATES,
-+
+@@ -224,6 +224,13 @@
+	 */
+	HCI_QUIRK_VALID_LE_STATES,
+ 
 +	/* When this quirk is set, max_page for local extended features
 +	 * is set to 1, even if controller reports higher number. Some
 +	 * controllers (e.g. RTL8723CS) report more pages, but they
 +	 * don't actually support features declared there.
 +	 */
 +	HCI_QUIRK_BROKEN_LOCAL_EXT_FTR_MAX_PAGE,
- };
- 
- /* HCI device flags */
++
+	/* When this quirk is set, then erroneous data reporting
+	 * is ignored. This is mainly due to the fact that the HCI
+	 * Read Default Erroneous Data Reporting command is advertised,
 diff --git a/net/bluetooth/hci_event.c b/net/bluetooth/hci_event.c
 index cfeaee347db3..df3232828978 100644
 --- a/net/bluetooth/hci_event.c
