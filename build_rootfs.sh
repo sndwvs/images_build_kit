@@ -16,10 +16,10 @@ get_name_rootfs() {
     else
         if [[ $ARCH == arm ]]; then
             # Slackware ARM
-            ROOTFS="${ROOTFS_NAME/miniroot/xfce}-$KERNEL_VERSION-$BOARD_NAME-build-$ROOTFS_VERSION"
+            ROOTFS_XFCE="${ROOTFS_NAME/miniroot/xfce}-$KERNEL_VERSION-$BOARD_NAME-build-$ROOTFS_VERSION"
         else
             # slarm64
-            ROOTFS="${ROOTFS_NAME/rootfs/xfce-rootfs}-$KERNEL_VERSION-$BOARD_NAME-build-$ROOTFS_VERSION"
+            ROOTFS_XFCE="${ROOTFS_NAME/rootfs/xfce-rootfs}-$KERNEL_VERSION-$BOARD_NAME-build-$ROOTFS_VERSION"
         fi
     fi
 }
@@ -33,10 +33,10 @@ clean_rootfs() {
         rm -rf $SOURCE/$ROOTFS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
-#    if [[ $image_type == xfce ]] && [[ ! -z $ROOTFS_XFCE ]] && [[ -d $SOURCE/$ROOTFS_XFCE ]] ;then
-#        message "" "clean" "$ROOTFS_XFCE"
-#        rm -rf $SOURCE/$ROOTFS_XFCE >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-#    fi
+    if [[ $image_type == xfce ]] && [[ ! -z $ROOTFS_XFCE ]] && [[ -d $SOURCE/$ROOTFS_XFCE ]] ;then
+        message "" "clean" "$ROOTFS_XFCE"
+        rm -rf $SOURCE/$ROOTFS_XFCE >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
 }
 
 

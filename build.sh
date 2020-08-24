@@ -88,13 +88,13 @@ for arg in ${result[*]}; do
                     COMPILE_BINARIES="true"
                 ;;
            mini*)
-                    DISTR_IMAGE=($(echo $arg | cut -f1 -d '-'))
+                    DISTR_IMAGES+=($(echo $arg | cut -f1 -d '-'))
                 ;;
            tools)
                     TOOLS_PACK="true"
                 ;;
            xfce*)
-                    DISTR_IMAGE=($(echo $arg | cut -f1 -d '-'))
+                    DISTR_IMAGES+=($(echo $arg | cut -f1 -d '-'))
                 ;;
     esac
 done
@@ -185,16 +185,6 @@ if [[ $COMPILE_BINARIES == true ]]; then
 
     build_kernel_pkg
 fi
-
-
-if [[ ! -z ${DISTR_IMAGE} ]]; then
-    get_name_rootfs ${DISTR_IMAGE}
-    echo "ROOTFS -> ${ROOTFS}"
-    echo "ROOTFS_XFCE -> ${ROOTFS_XFCE}"
-    clean_rootfs ${DISTR_IMAGE}
-fi
-exit
-
 
 for image_type in ${DISTR_IMAGES[@]}; do
 
