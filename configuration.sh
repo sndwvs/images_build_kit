@@ -36,7 +36,7 @@ DISTR_VERSION=${DISTR_VERSION:-"current"} # or 14.2
 # boot loader configuration
 #---------------------------------------------
 #BOOT_LOADER_SOURCE=${BOOT_LOADER_SOURCE:-"git://gitlab.denx.de/u-boot/u-boot.git"}
-BOOT_LOADER_SOURCE=${BOOT_LOADER_SOURCE:-"https://github.com/RobertCNelson/u-boot.git"}
+BOOT_LOADER_SOURCE=${BOOT_LOADER_SOURCE:-"https://github.com/u-boot/u-boot.git"}
 BOOT_LOADER_DIR=${BOOT_LOADER_DIR:-"u-boot"}
 BOOT_LOADER_BRANCH=${BOOT_LOADER_BRANCH:-"master::"} #"master:tag:v2017.05"
 
