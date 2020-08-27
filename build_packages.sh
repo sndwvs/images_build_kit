@@ -14,17 +14,15 @@ build_kernel_pkg() {
     KERNEL=zImage
     [[ $KARCH == arm64 ]] && KERNEL=Image
 
-    if [[ ! -z $FIRMWARE ]]; then
-        [[ ! -d "$BUILD/$PKG/kernel-modules/lib/firmware" ]] && mkdir -p $BUILD/$PKG/kernel-modules/lib/firmware
-        # adding custom firmware
-        cp -a $CWD/blobs/$FIRMWARE/* -d $BUILD/$PKG/kernel-modules/lib/firmware/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    fi
+    # create linux firmware
+    [[ ! -d "$BUILD/$PKG/kernel-modules/lib/firmware" ]] && mkdir -p $BUILD/$PKG/kernel-modules/lib/firmware
+    rsync -va --exclude .git $SOURCE/$KERNEL_FIRMWARE_DIR/ $BUILD/$PKG/kernel-modules/lib/firmware/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    # adding custom firmware
+    [[ ! -z $FIRMWARE ]] && ( rsync -va $CWD/blobs/$FIRMWARE/* -d $BUILD/$PKG/kernel-modules/lib/firmware/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
 
     # install kernel
     install -Dm644 $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/$KERNEL "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/$KERNEL"
 
-    # adding custom firmware
-    [[ ! -z $FIRMWARE ]] && ( cp -a $CWD/blobs/$FIRMWARE/* -d $BUILD/$PKG/kernel-modules/lib/firmware/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
 
 
     # add device tree
@@ -77,7 +75,7 @@ build_kernel_pkg() {
 
     # build kernel-source
     [[ ! -d "$BUILD/$PKG/kernel-source" ]] && mkdir -p $BUILD/$PKG/kernel-source/usr/src/linux-${KERNEL_VERSION}
-    rsync -a --exclude .git --delete $SOURCE/$KERNEL_DIR/ $BUILD/$PKG/kernel-source/usr/src/linux-${KERNEL_VERSION}/
+    rsync -va --exclude .git --delete $SOURCE/$KERNEL_DIR/ $BUILD/$PKG/kernel-source/usr/src/linux-${KERNEL_VERSION}/
     cd $BUILD/$PKG/kernel-source/usr/src/linux-${KERNEL_VERSION}/
     make ARCH=$KARCH CROSS_COMPILE=$CROSS clean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     # Make sure header files aren't missing...
