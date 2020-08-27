@@ -57,7 +57,7 @@ create_uboot()
 #            for i in `seq 1 128`; do dd count=4 status=none; dd if=/dev/zero count=4 status=none; done < rkspi_loader.img > rkspi_loader.tmp
 #            mv rkspi_loader.tmp rkspi_loader.img
 #            dd if=u-boot.itb of=rkspi_loader.img seek=1024 conv=notrunc
-        if [[ $BOARD_NAME == rockpro64 || $BOARD_NAME == rock_pi_4 || $BOARD_NAME == pinebook_pro || $BOARD_NAME == rock64 || $BOARD_NAME == firefly_rk3399 ]]; then
+        if [[ $BOARD_NAME == rockpro64 || $BOARD_NAME == rock_pi_4[abc] || $BOARD_NAME == pinebook_pro || $BOARD_NAME == rock64 || $BOARD_NAME == firefly_rk3399 || $BOARD_NAME == rock_pi_e ]]; then
             tools/mkimage -n $SOCFAMILY -T rksd -d tpl/u-boot-tpl.bin $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             cat spl/u-boot-spl.bin >> $BOOT_LOADER_BIN || exit 1
             install -Dm644 u-boot.itb $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/u-boot.itb >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
