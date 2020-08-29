@@ -310,10 +310,10 @@ setting_bootloader_move_to_disk() {
 
 setting_system() {
     message "" "setting" "system"
-    rsync -a $CWD/system/overall/ $SOURCE/$ROOTFS/
+    rsync -av --chown=root:root $CWD/system/overall/ $SOURCE/$ROOTFS/
 
     if [[ -d $CWD/system/$SOCFAMILY ]]; then
-        rsync -a $CWD/system/$SOCFAMILY/ $SOURCE/$ROOTFS/
+        rsync -av --chown=root:root $CWD/system/$SOCFAMILY/ $SOURCE/$ROOTFS/
     fi
 }
 
