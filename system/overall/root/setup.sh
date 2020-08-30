@@ -33,8 +33,8 @@ case ${COMPATIBLE} in
             FIX_BOOT_DISK=true
     ;;
     *rk32*)
-            OFFSET_LOADER="64::"
-            LOADER="idbloader.img::"
+            OFFSET_LOADER="64:16384:"
+            LOADER="idbloader.img:uboot.img:"
             FIX_BOOT_DISK=true
     ;;
     *cubietruck*|*orange*pi*plus*2e*)
