@@ -11,6 +11,14 @@ setenv console "both"
 setenv rootfstype "ext4"
 setenv earlycon "off"
 
+# boot from eMMC
+part uuid mmc 1 part_exists
+
+if test -n ${part_exists}; then
+        setenv rootdev "/dev/mmcblk0p1"
+        setenv devnum "1"
+fi
+
 echo "Boot script loaded from ${devtype} ${devnum}"
 
 if load ${devtype} ${devnum} ${load_addr} ${prefix}uEnv.txt; then
