@@ -33,6 +33,8 @@ setenv bootargs "root=${rootdev} ro rootwait rootfstype=${rootfstype} init=/sbin
 
 load ${devtype} ${devnum} ${fdt_addr_r} ${prefix}dtb/${fdtfile}
 load ${devtype} ${devnum} ${kernel_addr_r} ${prefix}zImage
+fdt addr ${fdt_addr_r}
+fdt resize 65536
 
 if ${devtype} ${devnum} ${ramdisk_addr_r} ${prefix}uInitrd; then
     bootz ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r};
