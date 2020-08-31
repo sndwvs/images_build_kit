@@ -8,6 +8,7 @@
 set -e
 CWD=$(pwd)
 
+[[ $EUID != 0 ]] && echo -e "\nThis script must be run with root privileges\n" && exit 1
 
 TTY_X=$(($(stty size | cut -f2 -d " ")-10)) # determine terminal width
 TTY_Y=$(($(stty size | cut -f1 -d " ")-10)) # determine terminal height
