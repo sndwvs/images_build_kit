@@ -8,23 +8,25 @@ fi
 
 
 build_kernel_pkg() {
+    cd $SOURCE
     # get kernel version
     kernel_version KERNEL_VERSION
 
     KERNEL=zImage
     [[ $KARCH == arm64 ]] && KERNEL=Image
 
+    message "" "copy" "linux-firmware"
     # create linux firmware
     [[ ! -d "$BUILD/$PKG/kernel-modules/lib/firmware" ]] && mkdir -p $BUILD/$PKG/kernel-modules/lib/firmware
     rsync -a --exclude .git $SOURCE/$KERNEL_FIRMWARE_DIR/ $BUILD/$PKG/kernel-modules/lib/firmware/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
     # adding custom firmware
     [[ ! -z $FIRMWARE ]] && ( rsync -va $CWD/blobs/$FIRMWARE/* -d $BUILD/$PKG/kernel-modules/lib/firmware/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
 
     # install kernel
     install -Dm644 $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/$KERNEL "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/$KERNEL"
 
-
-
+    message "" "copy" "device tree blob"
     # add device tree
     install -m755 -d "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/"
     if [[ ${KARCH} == arm64 ]]; then
