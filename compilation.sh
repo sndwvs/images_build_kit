@@ -19,7 +19,7 @@ compile_sunxi_tools() {
 
     # for destination
     make -s clean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    make $CTHREADS tools CC=${CROSS}gcc >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make $CTHREADS tools CROSS_COMPILE=${CROSS} >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 compile_boot_loader() {
