@@ -11,7 +11,7 @@ fi
 #---------------------------------------------
 LINUX_SOURCE=${LINUX_SOURCE:-"https://kernel.googlesource.com/pub/scm/linux/kernel/git/stable/linux-stable"}
 #LINUX_SOURCE='git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git'
-KERNEL_BRANCH=${KERNEL_BRANCH:-"linux-5.7.y::"}
+KERNEL_BRANCH=${KERNEL_BRANCH:-"linux-5.8.y::"}
 KERNEL_DIR=${KERNEL_DIR:-"linux-$KERNEL_SOURCE"}
 
 #---------------------------------------------
