@@ -52,8 +52,8 @@ prepare_rootfs() {
     tar xpf $SOURCE/$ROOTFS_NAME.tar.xz -C "$SOURCE/$ROOTFS" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     if [[ ! -z $TOOLS_PACK ]] && [[ $SOCFAMILY == sun* ]]; then
-        message "" "install" "${SUNXI_TOOLS}"
-        ROOT=$SOURCE/$ROOTFS upgradepkg --install-new $BUILD/$PKG/*${SUNXI_TOOLS}*.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        message "" "install" "${SUNXI_TOOLS_DIR}"
+        ROOT=$SOURCE/$ROOTFS upgradepkg --install-new $BUILD/$PKG/*${SUNXI_TOOLS_DIR}*.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 }
 
