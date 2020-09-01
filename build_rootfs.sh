@@ -100,8 +100,6 @@ setting_wifi() {
 
 create_img() {
 
-    [[ $SOCFAMILY == bcm2* ]] && create_img_rpi "$1" && return 1
-
     if [[ $1 == xfce ]]; then
         IMAGE="$ROOTFS_XFCE"
     else
