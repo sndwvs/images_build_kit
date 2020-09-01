@@ -37,65 +37,18 @@ create_uboot()
 
 write_uboot()
 {
-
-    cat <<EOF >"$SOURCE/$IMAGE/boot/config.txt"
-# See /boot/overlays/README for all available options
-
-# Our kernels are located on a Linux partition. Chainload U-Boot to load them.
-kernel=$BOOT_LOADER_BIN
-#kernel=Image
-
-# Use 32 MB for GPU for all RPis (Min 16 - Max 192 MB)
-# We don't need that much memory reserved for it, because we drive most hardware
-# from Linux, not the VPU OS
-gpu_mem=32
-
-arm_64bit=1
-
-# Turbo mode: 0 = enable dynamic freq/voltage - 1 = always max
-force_turbo=0
-# Start in turbo mode for 30 seconds or until cpufreq sets a frequency
-initial_turbo=30
-
-# DO NOT overvoltage manually to not void warranty!
-over_voltage=0
-
-# Fix mini UART input frequency, and setup/enable up the UART.
-enable_uart=1
-
-# Disable warning overlays as they don't work well together with linux's graphical output
-avoid_warnings=1
-
-# This overlay fixes divergences between the RPi device tree and what
-# upstream provides
-dtoverlay=upstream
-
-# overscan is only needed on old TV sets and if analog gear is in the chain (e.g. DPI)
-disable_overscan=1
-
-[pi3]
-# These are not applied automatically? Needed to use respective upstream drivers.
-dtoverlay=vc4-kms-v3d,cma-default
-dtoverlay=dwc2
-
-[pi4]
-#dtoverlay=vc4-fkms-v3d
-dtoverlay=vc4-kms-v3d
-
-[all]
-dtparam=i2c_arm=on
-dtparam=spi=on
-dtparam=audio=on
-EOF
-
     echo "root=/dev/mmcblk0p2 ro rootwait nofont console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 elevator=noop snd-bcm2835.enable_compat_alsa=0" \
     > "$SOURCE/$IMAGE/boot/cmdline.txt"
 
     install -m644 -D $CWD/blobs/broadcom/boot/* -t $SOURCE/$ROOTFS/boot
 
+    # set name boot kernel
+    sed -e "s:%BOOT_LOADER_BIN%:${BOOT_LOADER_BIN}:g" \
+        -i "$SOURCE/$ROOTFS/boot/config.txt"
+
     if [[ -f $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN ]]; then
-        install -Dm644 $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN $SOURCE/$IMAGE/boot/$BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         message "" "write" "bootloader: $BOOT_LOADER_BIN"
+        install -Dm644 $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN $SOURCE/$IMAGE/boot/$BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 }
 
