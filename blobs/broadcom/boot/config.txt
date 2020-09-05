@@ -38,8 +38,8 @@ dtoverlay=vc4-kms-v3d,cma-default
 dtoverlay=dwc2
 
 [pi4]
-#dtoverlay=vc4-fkms-v3d
-dtoverlay=vc4-kms-v3d
+dtoverlay=vc4-fkms-v3d
+#dtoverlay=vc4-kms-v3d
 
 [all]
 dtparam=i2c_arm=on
