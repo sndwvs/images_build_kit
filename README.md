@@ -40,6 +40,9 @@ password: **password**
         + [Raspberry Pi 3](https://www.raspberrypi.org/products/raspberry-pi-3-model-b/)
     * BCM2711
         + [Raspberry Pi 4](https://www.raspberrypi.org/products/raspberry-pi-4-model-b/specifications/) board provided by user [wowbaggerHU](https://www.linuxquestions.org/questions/user/wowbaggerhu-1042789/)
+* Amlogic
+    * S905X3
+        + [Odroid-C4](https://wiki.odroid.com/odroid-c4/hardware/hardware#specifications)
 
 
 # BUILD #

@@ -8,7 +8,7 @@ RKBIN_DIR="rkbin"
 RKBIN_BRANCH="master::"
 
 BOOT_LOADER_TOOLS_SOURCE="https://github.com/rockchip-linux/u-boot.git"
-BOOT_LOADER_TOOLS_DIR="u-boot-tools"
+BOOT_LOADER_TOOLS_DIR="u-boot-tools-rockchip"
 BOOT_LOADER_TOOLS_BRANCH="next-dev::"
 
 FIRMWARE="firmware"
