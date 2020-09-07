@@ -1,0 +1,132 @@
+diff -Naur Makefile Makefile
+--- a/Makefile	2020-09-06 06:02:23.834348950 +0300
+--- b/Makefile	2020-09-07 21:01:12.758985809 +0300
+@@ -246,7 +246,7 @@
+ CROSS_COMPILE ?=
+ endif
+ 
+-export CROSS_COMPILE=aarch64-none-elf-
++export CROSS_COMPILE=aarch64-unknown-linux-gnu-
+ 
+ KCONFIG_CONFIG	?= .config
+ export KCONFIG_CONFIG
+diff -Naur arch/arm/cpu/armv8/axg/firmware/scp_task/Makefile arch/arm/cpu/armv8/axg/firmware/scp_task/Makefile
+--- a/arch/arm/cpu/armv8/axg/firmware/scp_task/Makefile	2020-09-06 06:02:24.266348107 +0300
+--- b/arch/arm/cpu/armv8/axg/firmware/scp_task/Makefile	2020-09-07 21:01:06.110999072 +0300
+@@ -6,7 +6,7 @@
+ include $(buildtree)/.config
+ 
+ # Select ARMv7-m bare-metal toolchain
+-CROSS_COMPILE=arm-none-eabi-
++CROSS_COMPILE=arm-unknown-linux-gnueabi-
+ ASM=$(CROSS_COMPILE)as
+ CC=$(CROSS_COMPILE)gcc
+ CPP=$(CROSS_COMPILE)cpp
+diff -Naur arch/arm/cpu/armv8/g12a/firmware/scp_task/Makefile arch/arm/cpu/armv8/g12a/firmware/scp_task/Makefile
+--- a/arch/arm/cpu/armv8/g12a/firmware/scp_task/Makefile	2020-09-06 06:02:24.322347998 +0300
+--- b/arch/arm/cpu/armv8/g12a/firmware/scp_task/Makefile	2020-09-07 21:01:06.150998993 +0300
+@@ -6,7 +6,7 @@
+ include $(buildtree)/.config
+ 
+ # Select ARMv7-m bare-metal toolchain
+-CROSS_COMPILE=arm-none-eabi-
++CROSS_COMPILE=arm-unknown-linux-gnueabi-
+ ASM=$(CROSS_COMPILE)as
+ CC=$(CROSS_COMPILE)gcc
+ CPP=$(CROSS_COMPILE)cpp
+diff -Naur arch/arm/cpu/armv8/g12b/firmware/scp_task/Makefile arch/arm/cpu/armv8/g12b/firmware/scp_task/Makefile
+--- a/arch/arm/cpu/armv8/g12b/firmware/scp_task/Makefile	2020-09-06 06:02:24.342347958 +0300
+--- b/arch/arm/cpu/armv8/g12b/firmware/scp_task/Makefile	2020-09-07 21:01:06.178998937 +0300
+@@ -6,7 +6,7 @@
+ include $(buildtree)/.config
+ 
+ # Select ARMv7-m bare-metal toolchain
+-CROSS_COMPILE=arm-none-eabi-
++CROSS_COMPILE=arm-unknown-linux-gnueabi-
+ ASM=$(CROSS_COMPILE)as
+ CC=$(CROSS_COMPILE)gcc
+ CPP=$(CROSS_COMPILE)cpp
+diff -Naur arch/arm/cpu/armv8/gxb/firmware/scp_task/Makefile arch/arm/cpu/armv8/gxb/firmware/scp_task/Makefile
+--- a/arch/arm/cpu/armv8/gxb/firmware/scp_task/Makefile	2020-09-06 06:02:24.366347912 +0300
+--- b/arch/arm/cpu/armv8/gxb/firmware/scp_task/Makefile	2020-09-07 21:01:06.206998881 +0300
+@@ -6,7 +6,7 @@
+ include $(buildtree)/.config
+ 
+ # Select ARMv7-m bare-metal toolchain
+-CROSS_COMPILE=arm-none-eabi-
++CROSS_COMPILE=arm-unknown-linux-gnueabi-
+ ASM=$(CROSS_COMPILE)as
+ CC=$(CROSS_COMPILE)gcc
+ CPP=$(CROSS_COMPILE)cpp
+diff -Naur arch/arm/cpu/armv8/gxl/firmware/scp_task/Makefile arch/arm/cpu/armv8/gxl/firmware/scp_task/Makefile
+--- a/arch/arm/cpu/armv8/gxl/firmware/scp_task/Makefile	2020-09-06 06:02:24.386347873 +0300
+--- b/arch/arm/cpu/armv8/gxl/firmware/scp_task/Makefile	2020-09-07 21:01:06.234998825 +0300
+@@ -6,7 +6,7 @@
+ include $(buildtree)/.config
+ 
+ # Select ARMv7-m bare-metal toolchain
+-CROSS_COMPILE=arm-none-eabi-
++CROSS_COMPILE=arm-unknown-linux-gnueabi-
+ ASM=$(CROSS_COMPILE)as
+ CC=$(CROSS_COMPILE)gcc
+ CPP=$(CROSS_COMPILE)cpp
+diff -Naur arch/arm/cpu/armv8/gxtvbb/firmware/scp_task/Makefile arch/arm/cpu/armv8/gxtvbb/firmware/scp_task/Makefile
+--- a/arch/arm/cpu/armv8/gxtvbb/firmware/scp_task/Makefile	2020-09-06 06:02:24.406347834 +0300
+--- b/arch/arm/cpu/armv8/gxtvbb/firmware/scp_task/Makefile	2020-09-07 21:01:06.314998665 +0300
+@@ -6,7 +6,7 @@
+ include $(buildtree)/.config
+ 
+ # Select ARMv7-m bare-metal toolchain
+-CROSS_COMPILE=arm-none-eabi-
++CROSS_COMPILE=arm-unknown-linux-gnueabi-
+ ASM=$(CROSS_COMPILE)as
+ CC=$(CROSS_COMPILE)gcc
+ CPP=$(CROSS_COMPILE)cpp
+diff -Naur arch/arm/cpu/armv8/tl1/firmware/scp_task/Makefile arch/arm/cpu/armv8/tl1/firmware/scp_task/Makefile
+--- a/arch/arm/cpu/armv8/tl1/firmware/scp_task/Makefile	2020-09-06 06:02:24.422347802 +0300
+--- b/arch/arm/cpu/armv8/tl1/firmware/scp_task/Makefile	2020-09-07 21:01:06.346998602 +0300
+@@ -6,7 +6,7 @@
+ include $(buildtree)/.config
+ 
+ # Select ARMv7-m bare-metal toolchain
+-CROSS_COMPILE=arm-none-eabi-
++CROSS_COMPILE=arm-unknown-linux-gnueabi-
+ ASM=$(CROSS_COMPILE)as
+ CC=$(CROSS_COMPILE)gcc
+ CPP=$(CROSS_COMPILE)cpp
+diff -Naur arch/arm/cpu/armv8/txhd/firmware/scp_task/Makefile arch/arm/cpu/armv8/txhd/firmware/scp_task/Makefile
+--- a/arch/arm/cpu/armv8/txhd/firmware/scp_task/Makefile	2020-09-06 06:02:24.498347654 +0300
+--- b/arch/arm/cpu/armv8/txhd/firmware/scp_task/Makefile	2020-09-07 21:01:06.474998346 +0300
+@@ -6,7 +6,7 @@
+ include $(buildtree)/.config
+ 
+ # Select ARMv7-m bare-metal toolchain
+-CROSS_COMPILE=arm-none-eabi-
++CROSS_COMPILE=arm-unknown-linux-gnueabi-
+ ASM=$(CROSS_COMPILE)as
+ CC=$(CROSS_COMPILE)gcc
+ CPP=$(CROSS_COMPILE)cpp
+diff -Naur arch/arm/cpu/armv8/txl/firmware/scp_task/Makefile arch/arm/cpu/armv8/txl/firmware/scp_task/Makefile
+--- a/arch/arm/cpu/armv8/txl/firmware/scp_task/Makefile	2020-09-06 06:02:24.538347576 +0300
+--- b/arch/arm/cpu/armv8/txl/firmware/scp_task/Makefile	2020-09-07 21:01:06.522998250 +0300
+@@ -6,7 +6,7 @@
+ include $(buildtree)/.config
+ 
+ # Select ARMv7-m bare-metal toolchain
+-CROSS_COMPILE=arm-none-eabi-
++CROSS_COMPILE=arm-unknown-linux-gnueabi-
+ ASM=$(CROSS_COMPILE)as
+ CC=$(CROSS_COMPILE)gcc
+ CPP=$(CROSS_COMPILE)cpp
+diff -Naur arch/arm/cpu/armv8/txlx/firmware/scp_task/Makefile arch/arm/cpu/armv8/txlx/firmware/scp_task/Makefile
+--- a/arch/arm/cpu/armv8/txlx/firmware/scp_task/Makefile	2020-09-06 06:02:24.562347529 +0300
+--- b/arch/arm/cpu/armv8/txlx/firmware/scp_task/Makefile	2020-09-07 21:01:06.570998155 +0300
+@@ -6,7 +6,7 @@
+ include $(buildtree)/.config
+ 
+ # Select ARMv7-m bare-metal toolchain
+-CROSS_COMPILE=arm-none-eabi-
++CROSS_COMPILE=arm-unknown-linux-gnueabi-
+ ASM=$(CROSS_COMPILE)as
+ CC=$(CROSS_COMPILE)gcc
+ CPP=$(CROSS_COMPILE)cpp

@@ -116,9 +116,16 @@ patching_source() {
                             "$CWD/patch/u-boot/$SOCFAMILY"
                             "$CWD/patch/u-boot/$SOCFAMILY/$KERNEL_SOURCE"
                             "$CWD/patch/u-boot/$SOCFAMILY/$BOARD_NAME"
-                            "$CWD/patch/u-boot/$SOCFAMILY/$BOARD_NAME/$KERNEL_SOURCE"
                         )
                 PATCH_SOURCE="$SOURCE/$BOOT_LOADER_DIR"
+            ;;
+        u-boot-tools)
+                dirs=(
+                            "$CWD/patch/u-boot-tools/$SOCFAMILY"
+                            "$CWD/patch/u-boot-tools/$SOCFAMILY/$KERNEL_SOURCE"
+                            "$CWD/patch/u-boot-tools/$SOCFAMILY/$BOARD_NAME"
+                        )
+                PATCH_SOURCE="$SOURCE/$BOOT_LOADER_TOOLS_DIR"
             ;;
         atf)
                 dirs=(      "$CWD/patch/atf/$SOCFAMILY"
