@@ -170,7 +170,8 @@ if [[ $COMPILE_BINARIES == true ]]; then
     # aarch64 change interpreter path
     [[ $MARCH == aarch64 ]] && change_interpreter_path "${XTOOLS[@]}"
     clear_boot_tools
-    if [[ ! -z $ATF && $SOCFAMILY == rk33* ]] || [[ $SOCFAMILY == meson* ]]; then
+#    if [[ ! -z $ATF && $SOCFAMILY == rk33* ]] || [[ $SOCFAMILY == meson* ]]; then
+    if [[ ! -z $ATF && $SOCFAMILY == rk33* ]]; then
         [[ $DOWNLOAD_SOURCE_BINARIES == true ]] && patching_source "u-boot-tools"
         compile_boot_tools
     fi

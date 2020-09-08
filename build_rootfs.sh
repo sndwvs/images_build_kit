@@ -379,7 +379,8 @@ create_initrd() {
 setting_bootloader() {
     message "" "setting" "bootloader"
     # u-boot config
-    install -Dm644 $CWD/config/boot_scripts/boot-$SOCFAMILY.cmd "$SOURCE/$ROOTFS/boot/boot.cmd"
+    [[ -f $CWD/config/boot_scripts/boot-$SOCFAMILY.cmd ]] && install -Dm644 $CWD/config/boot_scripts/boot-$SOCFAMILY.cmd "$SOURCE/$ROOTFS/boot/boot.cmd"
+    [[ -f $CWD/config/boot_scripts/boot-$SOCFAMILY.ini ]] && install -Dm644 $CWD/config/boot_scripts/boot-$SOCFAMILY.ini "$SOURCE/$ROOTFS/boot/boot.ini"
     # u-boot serial inteface config
     sed -e "s:%SERIAL_CONSOLE%:${SERIAL_CONSOLE}:g" \
         -e "s:%SERIAL_CONSOLE_SPEED%:${SERIAL_CONSOLE_SPEED}:g" \
