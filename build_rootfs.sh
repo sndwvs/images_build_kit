@@ -379,12 +379,14 @@ create_initrd() {
 setting_bootloader() {
     message "" "setting" "bootloader"
     # u-boot config
-    [[ -f $CWD/config/boot_scripts/boot-$SOCFAMILY.cmd ]] && install -Dm644 $CWD/config/boot_scripts/boot-$SOCFAMILY.cmd "$SOURCE/$ROOTFS/boot/boot.cmd"
+    if [[ -f $CWD/config/boot_scripts/boot-$SOCFAMILY.cmd ]]; then
+        install -Dm644 $CWD/config/boot_scripts/boot-$SOCFAMILY.cmd "$SOURCE/$ROOTFS/boot/boot.cmd"
+        # u-boot serial inteface config
+        sed -e "s:%SERIAL_CONSOLE%:${SERIAL_CONSOLE}:g" \
+            -e "s:%SERIAL_CONSOLE_SPEED%:${SERIAL_CONSOLE_SPEED}:g" \
+            -i "$SOURCE/$ROOTFS/boot/boot.cmd"
+    fi
     [[ -f $CWD/config/boot_scripts/boot-$SOCFAMILY.ini ]] && install -Dm644 $CWD/config/boot_scripts/boot-$SOCFAMILY.ini "$SOURCE/$ROOTFS/boot/boot.ini"
-    # u-boot serial inteface config
-    sed -e "s:%SERIAL_CONSOLE%:${SERIAL_CONSOLE}:g" \
-        -e "s:%SERIAL_CONSOLE_SPEED%:${SERIAL_CONSOLE_SPEED}:g" \
-        -i "$SOURCE/$ROOTFS/boot/boot.cmd"
     # compile boot script
     [[ -f $SOURCE/$ROOTFS/boot/boot.cmd ]] && ( $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A arm -T script -d $SOURCE/$ROOTFS/boot/boot.cmd \
                                                                         "$SOURCE/$ROOTFS/boot/boot.scr" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
