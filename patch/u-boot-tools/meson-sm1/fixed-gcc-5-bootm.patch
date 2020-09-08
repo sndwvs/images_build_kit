@@ -1,0 +1,20 @@
+--- u-boot-tools-amlogic.1/common/bootm.c	2020-09-06 06:02:28.302340237 +0300
++++ u-boot-tools-amlogic/common/bootm.c	2020-09-08 20:19:51.522349607 +0300
+@@ -330,7 +330,7 @@
+ #ifdef CONFIG_OF_LIBFDT_OVERLAY
+ static int get_fdto_totalsize(u32 *tz)
+ {
+-	unsigned long long dtbo_mem_addr = NULL;
++	unsigned long long dtbo_mem_addr = 0;
+ 	int ret;
+ 
+ 	ret = read_fdto_partition();
+@@ -392,7 +392,7 @@
+ #ifdef CONFIG_OF_LIBFDT_OVERLAY
+ static int do_fdt_overlay(void)
+ {
+-	unsigned long long dtbo_mem_addr = NULL;
++	unsigned long long dtbo_mem_addr = 0;
+ 	int                dtbo_num = 0;
+ 	int                i;
+ 	char               cmd[128];
