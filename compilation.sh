@@ -26,15 +26,12 @@ compile_boot_loader() {
     message "" "compiling" "$BOOT_LOADER_DIR $BOOT_LOADER_BRANCH"
     cd $SOURCE/$BOOT_LOADER_DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-#    [[ $KARCH == arm64 ]] && local CROSS=$CROSS64
-
     gcc_version "$CROSS" GCC_VERSION
     message "" "version" "$GCC_VERSION"
 
     local ARCH=arm
 
     make ARCH=$ARCH CROSS_COMPILE=$CROSS clean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
     make ARCH=$ARCH CROSS_COMPILE=$CROSS $BOOT_LOADER_CONFIG >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     # added in name suffix
@@ -43,6 +40,7 @@ compile_boot_loader() {
     [[ ! -z $ATF && ! -z $BL31 ]] && export BL31=$SOURCE/$ATF_DIR/bl31.${BL31##*.}
     [[ ! -z $ATF && -z $BL31 ]] && export BL31=$SOURCE/$ATF_DIR/bl31.bin
 
+    # rockchip
     if [[ $SOCFAMILY == rk3* ]]; then
         # u-boot-firefly-rk3288 2016.03 package contains backports
         # of EFI support patches and fails to boot the kernel on the Firefly.
@@ -57,14 +55,8 @@ compile_boot_loader() {
         fi
     fi
 
-    if [[ $SOCFAMILY == sun* || $SOCFAMILY == bcm2* || $SOCFAMILY == meson* ]]; then
-        if [ "$KERNEL_SOURCE" != "next" ] ; then
-            # patch mainline uboot configuration to boot with old kernels
-            if [ "$(cat $SOURCE/$BOOT_LOADER_DIR/.config | grep CONFIG_ARMV7_BOOT_SEC_DEFAULT=y)" == "" ]; then
-                echo "CONFIG_ARMV7_BOOT_SEC_DEFAULT=y" >> $SOURCE/$BOOT_LOADER_DIR/.config
-                echo "CONFIG_OLD_SUNXI_KERNEL_COMPAT=y" >> $SOURCE/$BOOT_LOADER_DIR/.config
-            fi
-        fi
+    # allwinner, broadcom, amlogic
+    if [[ $SOCFAMILY == sun* || $SOCFAMILY == bcm2* || $SOCFAMILY == meson* && -z $BOOT_LOADER_BLOB ]]; then
         make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
