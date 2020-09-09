@@ -56,7 +56,7 @@ compile_boot_loader() {
     fi
 
     # allwinner, broadcom, amlogic
-    if [[ $SOCFAMILY == sun* || $SOCFAMILY == bcm2* || $SOCFAMILY == meson* && -z $BOOT_LOADER_BLOB ]]; then
+    if [[ $SOCFAMILY == sun* || $SOCFAMILY == bcm2* || $SOCFAMILY == meson* ]]; then
         make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
