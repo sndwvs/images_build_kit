@@ -23,9 +23,13 @@ git clone --depth 1 \
     https://gitlab.denx.de/u-boot/u-boot.git $DIR_MAINLINE || exit 1
 fi
 cd $DIR_MAINLINE
-git reset --hard
+git clean -xdfq && git reset --hard
 export CROSS_COMPILE=aarch64-none-linux-gnu-
 make clean
+for pth in $(ls $CWD/../../../patch/u-boot/meson-sm1/* | LC_ALL=C sort -u);do
+    echo "patching " ${pth##*/}
+    patch -p1 -i ${pth}
+done
 make odroid-c4_defconfig
 make -j4
 
@@ -39,13 +43,20 @@ git clone --depth 1 \
    $DIR || exit 1
 fi
 cd $DIR || exit 1
-git reset --hard
+git clean -xdfq && git reset --hard 
 
 # fixed CROCC_COMPILE prefix
 sed 's:aarch64-none-elf:aarch64-elf:g' -i Makefile
 find -name Makefile -exec sed 's:arm-none-eabi:arm-eabi:g' -i {} \+
 
 make clean
+for pth in $(ls $CWD/../../../patch/u-boot-tools/meson-sm1/* | LC_ALL=C sort -u);do
+    if [[ ! $pth =~ 'fixed-compiler-names' ]]; then
+        echo "patching " ${pth##*/}
+        patch -p1 -i ${pth}
+    fi
+done
+
 make odroidc4_defconfig || exit 1
 make -j4 || exit 1
 
@@ -130,3 +141,4 @@ $UBOOTDIR/fip/g12a/aml_encrypt_g12a --bootmk \
             --level v3 || exit 1
 
 echo -e "\n>>>>> build complite\n"
+
