@@ -68,11 +68,10 @@ create_uboot()
             # remove ATF because it is included in u-boot.itb
             [[ -f $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img ]] && rm $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-            tools/mkimage -n $SOCFAMILY -T rksd -d tpl/u-boot-tpl.bin rkspi_loader.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-            cat spl/u-boot-spl.bin >> rkspi_loader.img
-            for i in `seq 1 128`; do dd count=4 status=none; dd if=/dev/zero count=4 status=none; done < rkspi_loader.img > rkspi_loader.tmp
-            mv rkspi_loader.tmp rkspi_loader.img || (message "err" "details" && exit 1) || exit 1
-            dd if=u-boot.itb of=rkspi_loader.img seek=1024 conv=notrunc >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            tools/mkimage -n $SOCFAMILY -T rkspi -d tpl/u-boot-tpl.bin:spl/u-boot-spl.bin rkspi_tpl_spl.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            dd if=/dev/zero of=rkspi_loader.img count=8192 status=none >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            dd if=rkspi_tpl_spl.img of=rkspi_loader.img conv=notrunc status=none >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            dd if=u-boot.itb of=rkspi_loader.img seek=768 conv=notrunc status=none >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             install -Dm644 rkspi_loader.img $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/rkspi_loader.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         else
             # The ddr binary files for ARM64 platforms from Rockchip, likes RK3399 and RK3328 should not skip first 4 bytes.
