@@ -12,6 +12,8 @@ BOOT_LOADER_TOOLS_SOURCE="https://github.com/rockchip-linux/u-boot.git"
 BOOT_LOADER_TOOLS_DIR="u-boot-tools-rockchip"
 BOOT_LOADER_TOOLS_BRANCH="next-dev::"
 
+BOOT_LOADER_BRANCH="master:tag:v2020.07"
+
 FIRMWARE="firmware"
 
 SERIAL_CONSOLE_SPEED=115200
@@ -21,6 +23,7 @@ IMAGE_OFFSET=32768
 
 #BOOT_LOADER_BIN="idbloader.img:idbloader_mmc.img:uboot.img:trust.img"
 BOOT_LOADER_BIN="idbloader.img"
+
 
 
 case $KERNEL_SOURCE in

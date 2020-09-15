@@ -1,0 +1,14 @@
+--- a/arch/arm/dts/rk3328-rock-pi-e-u-boot.dtsi	2020-09-15 23:20:38.527298347 +0300
++++ b/arch/arm/dts/rk3328-rock-pi-e-u-boot.dtsi	2020-09-15 22:57:13.701129479 +0300
+@@ -5,6 +5,11 @@
+ 
+ #include "rk3328-u-boot.dtsi"
+ #include "rk3328-sdram-ddr3-666.dtsi"
++/ {
++	chosen {
++		u-boot,spl-boot-order = "same-as-spl", &sdmmc, &emmc;
++	};
++};
+ 
+ &gpio0 {
+ 	u-boot,dm-spl;
