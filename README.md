@@ -29,7 +29,7 @@ password: **password**
         + [Rock Pi S](https://wiki.radxa.com/RockpiS/getting_started#Features)
     * RK3328
         + [Rock64](http://wiki.pine64.org/index.php/ROCK64_Main_Page#SoC_and_Memory_Specification)
-        + [Rock Pi E](https://wiki.radxa.com/RockpiE/getting_started#Features)
+        + [Rock Pi E](https://wiki.radxa.com/RockpiE/getting_started#Features) board provided by [Radxa Team](https://forum.radxa.com/t/rock-pi-e-engineering-sample-is-available-now/3130)
     * RK3399
         + [Firefly-RK3399](http://en.t-firefly.com/product/rk3399.html)
         + [ROCKPro64](http://wiki.pine64.org/index.php/ROCKPro64_Main_Page#SoC_and_Memory_Specification)
