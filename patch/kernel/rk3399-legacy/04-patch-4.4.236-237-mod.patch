@@ -734,7 +734,7 @@ diff --git a/drivers/usb/core/message.c b/drivers/usb/core/message.c
 index f083ecfddd1b1..e568325cb6e15 100644
 --- a/drivers/usb/core/message.c
 +++ b/drivers/usb/core/message.c
-@@ -1141,6 +1141,34 @@ void usb_disable_interface(struct usb_device *dev, struct usb_interface *intf,
+@@ -1141,6 +1141,34 @@
  	}
  }
  
@@ -769,15 +769,45 @@ index f083ecfddd1b1..e568325cb6e15 100644
  /**
   * usb_disable_device - Disable all the endpoints for a USB device
   * @dev: the device whose endpoints are being disabled
-@@ -1154,7 +1182,6 @@ void usb_disable_interface(struct usb_device *dev, struct usb_interface *intf,
+@@ -1153,8 +1181,7 @@
+  */
  void usb_disable_device(struct usb_device *dev, int skip_ep0)
  {
- 	int i, j;
+-	int i, j;
 -	struct usb_hcd *hcd = bus_to_hcd(dev->bus);
++	int i;
  
  	/* getting rid of interfaces will disconnect
  	 * any drivers bound to them (a key side effect)
-@@ -1200,22 +1227,8 @@ void usb_disable_device(struct usb_device *dev, int skip_ep0)
+@@ -1178,27 +1205,6 @@
+ 			dev_dbg(&dev->dev, "unregistering interface %s\n",
+ 				dev_name(&interface->dev));
+ 			remove_intf_ep_devs(interface);
+-
+-			/*
+-			 * Some special SoCs (e.g. rk322xh) USB 3.0 module
+-			 * can't handle outstanding URBs by hardware when
+-			 * when USB 3.0 device disconnect, so we need to
+-			 * cancel all URBs pending on this device here.
+-			 *
+-			 * In addition, we just reuse the hub autosuspend
+-			 * quirk but not add a new quirk for this issue.
+-			 * Because it always occurs with autosuspend issue.
+-			 */
+-			if (hcd->self.root_hub->quirks &
+-			    USB_QUIRK_AUTO_SUSPEND) {
+-				for (j = skip_ep0; j < 16; ++j) {
+-					usb_hcd_flush_endpoint(dev,
+-							       dev->ep_out[j]);
+-					usb_hcd_flush_endpoint(dev,
+-							       dev->ep_in[j]);
+-				}
+-			}
+-
+ 			device_del(&interface->dev);
+ 		}
+ 
+@@ -1221,22 +1227,8 @@
  
  	dev_dbg(&dev->dev, "%s nuking %s URBs\n", __func__,
  		skip_ep0 ? "non-ep0" : "all");
@@ -802,7 +832,7 @@ index f083ecfddd1b1..e568325cb6e15 100644
  }
  
  /**
-@@ -1458,6 +1471,9 @@ EXPORT_SYMBOL_GPL(usb_set_interface);
+@@ -1479,6 +1471,9 @@
   * The caller must own the device lock.
   *
   * Return: Zero on success, else a negative error code.
@@ -812,7 +842,7 @@ index f083ecfddd1b1..e568325cb6e15 100644
   */
  int usb_reset_configuration(struct usb_device *dev)
  {
-@@ -1473,10 +1489,7 @@ int usb_reset_configuration(struct usb_device *dev)
+@@ -1494,10 +1489,7 @@
  	 * calls during probe() are fine
  	 */
  
@@ -824,7 +854,7 @@ index f083ecfddd1b1..e568325cb6e15 100644
  
  	config = dev->actconfig;
  	retval = 0;
-@@ -1489,34 +1502,10 @@ int usb_reset_configuration(struct usb_device *dev)
+@@ -1510,34 +1502,10 @@
  		mutex_unlock(hcd->bandwidth_mutex);
  		return -ENOMEM;
  	}
@@ -832,7 +862,7 @@ index f083ecfddd1b1..e568325cb6e15 100644
 -	for (i = 0; i < config->desc.bNumInterfaces; i++) {
 -		struct usb_interface *intf = config->interface[i];
 -		struct usb_host_interface *alt;
- 
+-
 -		alt = usb_altnum_to_altsetting(intf, 0);
 -		if (!alt)
 -			alt = &intf->altsetting[0];
@@ -843,6 +873,7 @@ index f083ecfddd1b1..e568325cb6e15 100644
 -			break;
 -	}
 -	/* If not, reinstate the old alternate settings */
++
 +	/* xHCI adds all endpoints in usb_hcd_alloc_bandwidth */
 +	retval = usb_hcd_alloc_bandwidth(dev, config, NULL, NULL);
  	if (retval < 0) {
@@ -861,7 +892,7 @@ index f083ecfddd1b1..e568325cb6e15 100644
  		usb_enable_lpm(dev);
  		mutex_unlock(hcd->bandwidth_mutex);
  		return retval;
-@@ -1525,8 +1514,12 @@ reset_old_alts:
+@@ -1546,8 +1514,12 @@
  			USB_REQ_SET_CONFIGURATION, 0,
  			config->desc.bConfigurationValue, 0,
  			NULL, 0, USB_CTRL_SET_TIMEOUT);
