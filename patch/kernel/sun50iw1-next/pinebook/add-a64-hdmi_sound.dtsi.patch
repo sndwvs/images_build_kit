@@ -1,0 +1,292 @@
+--- a/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi	2020-10-03 00:00:22.666353903 +0300
++++ b/arch/arm64/boot/dts/allwinner/sun50i-a64.dtsi	2020-10-02 22:44:22.921274640 +0300
+@@ -102,6 +102,25 @@
+ 		status = "disabled";
+ 	};
+ 
++	hdmi_sound: hdmi-sound {
++		compatible = "simple-audio-card";
++		simple-audio-card,format = "i2s";
++		simple-audio-card,name = "sun50i-a64-hdmi";
++		simple-audio-card,mclk-fs = <128>;
++		simple-audio-card,frame-inversion;
++		status = "disabled";
++
++		simple-audio-card,codec {
++			sound-dai = <&hdmi>;
++		};
++
++		simple-audio-card,cpu {
++			sound-dai = <&i2s2>;
++			dai-tdm-slot-num = <2>;
++			dai-tdm-slot-width = <32>;
++		};
++	};
++
+ 	osc24M: osc24M_clk {
+ 		#clock-cells = <0>;
+ 		compatible = "fixed-clock";
+@@ -130,33 +149,46 @@
+ 		method = "smc";
+ 	};
+ 
++	scpi_protocol: scpi {
++		compatible = "arm,scpi";
++		mboxes = <&msgbox 2>, <&msgbox 3>;
++		mbox-names = "tx", "rx";
++		shmem = <&scpi_sram>;
++	};
++
+ 	sound: sound {
++		#address-cells = <1>;
++		#size-cells = <0>;
+ 		compatible = "simple-audio-card";
+ 		simple-audio-card,name = "sun50i-a64-audio";
+-		simple-audio-card,format = "i2s";
+-		simple-audio-card,frame-master = <&cpudai>;
+-		simple-audio-card,bitclock-master = <&cpudai>;
+-		simple-audio-card,mclk-fs = <128>;
+ 		simple-audio-card,aux-devs = <&codec_analog>;
+ 		simple-audio-card,routing =
+-				"Left DAC", "AIF1 Slot 0 Left",
+-				"Right DAC", "AIF1 Slot 0 Right",
+-				"AIF1 Slot 0 Left ADC", "Left ADC",
+-				"AIF1 Slot 0 Right ADC", "Right ADC";
++				"Left DAC", "DAC Left",
++				"Right DAC", "DAC Right",
++				"ADC Left", "Left ADC",
++				"ADC Right", "Right ADC";
+ 		status = "disabled";
+ 
+-		cpudai: simple-audio-card,cpu {
+-			sound-dai = <&dai>;
+-		};
++		simple-audio-card,dai-link@0 {
++			format = "i2s";
++			frame-master = <&link0_cpu>;
++			bitclock-master = <&link0_cpu>;
++			mclk-fs = <128>;
+ 
+-		link_codec: simple-audio-card,codec {
+-			sound-dai = <&codec>;
++			link0_cpu: cpu {
++				sound-dai = <&dai>;
++			};
++
++			link0_codec: codec {
++				sound-dai = <&codec 0>;
++			};
+ 		};
+ 	};
+ 
+ 	timer {
+ 		compatible = "arm,armv8-timer";
+ 		allwinner,erratum-unknown1;
++		arm,no-tick-in-suspend;
+ 		interrupts = <GIC_PPI 13
+ 			(GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_HIGH)>,
+ 			     <GIC_PPI 14
+@@ -338,6 +370,19 @@
+ 			#size-cells = <1>;
+ 			ranges;
+ 
++			sram_a2: sram@40000 {
++				compatible = "mmio-sram";
++				reg = <0x00040000 0x14000>;
++				#address-cells = <1>;
++				#size-cells = <1>;
++				ranges = <0 0x00040000 0x14000>;
++
++				scpi_sram: scp-shmem@13c00 {
++					compatible = "arm,scp-shmem";
++					reg = <0x13c00 0x200>;
++				};
++			};
++
+ 			sram_c: sram@18000 {
+ 				compatible = "mmio-sram";
+ 				reg = <0x00018000 0x28000>;
+@@ -636,6 +681,7 @@
+ 			reg = <0x01c20000 0x400>;
+ 			clocks = <&osc24M>, <&rtc 0>;
+ 			clock-names = "hosc", "losc";
++			protected-clocks = <CLK_BUS_MSGBOX>;
+ 			#clock-cells = <1>;
+ 			#reset-cells = <1>;
+ 		};
+@@ -653,6 +699,18 @@
+ 			interrupt-controller;
+ 			#interrupt-cells = <3>;
+ 
++			/omit-if-no-ref/
++			aif2_pins: aif2-pins {
++				pins = "PB4", "PB5", "PB6", "PB7";
++				function = "aif2";
++			};
++
++			/omit-if-no-ref/
++			aif3_pins: aif3-pins {
++				pins = "PG10", "PG11", "PG12", "PG13";
++				function = "aif3";
++			};
++
+ 			csi_pins: csi-pins {
+ 				pins = "PE0", "PE2", "PE3", "PE4", "PE5", "PE6",
+ 				       "PE7", "PE8", "PE9", "PE10", "PE11";
+@@ -811,7 +869,7 @@
+ 
+ 		lradc: lradc@1c21800 {
+ 			compatible = "allwinner,sun50i-a64-lradc",
+-				     "allwinner,sun8i-a83t-r-lradc";
++				     "allwinner,sun4i-a10-lradc-keys";
+ 			reg = <0x01c21800 0x400>;
+ 			interrupts = <GIC_SPI 30 IRQ_TYPE_LEVEL_HIGH>;
+ 			status = "disabled";
+@@ -845,6 +903,21 @@
+ 			status = "disabled";
+ 		};
+ 
++		i2s2: i2s@1c22800 {
++			#sound-dai-cells = <0>;
++			compatible = "allwinner,sun50i-a64-i2s",
++				     "allwinner,sun8i-h3-i2s";
++			reg = <0x01c22800 0x400>;
++			interrupts = <GIC_SPI 15 IRQ_TYPE_LEVEL_HIGH>;
++			clocks = <&ccu CLK_BUS_I2S2>, <&ccu CLK_I2S2>;
++			clock-names = "apb", "mod";
++			resets = <&ccu RST_BUS_I2S2>;
++			dma-names = "tx";
++			dmas = <&dma 27>;
++			allwinner,playback-channels = <8>;
++			status = "disabled";
++		};
++
+ 		dai: dai@1c22c00 {
+ 			#sound-dai-cells = <0>;
+ 			compatible = "allwinner,sun50i-a64-codec-i2s";
+@@ -859,8 +932,8 @@
+ 		};
+ 
+ 		codec: codec@1c22e00 {
+-			#sound-dai-cells = <0>;
+-			compatible = "allwinner,sun8i-a33-codec";
++			#sound-dai-cells = <1>;
++			compatible = "allwinner,sun50i-a64-codec";
+ 			reg = <0x01c22e00 0x600>;
+ 			interrupts = <GIC_SPI 28 IRQ_TYPE_LEVEL_HIGH>;
+ 			clocks = <&ccu CLK_BUS_CODEC>, <&ccu CLK_AC_DIG>;
+@@ -886,6 +959,7 @@
+ 			interrupts = <GIC_SPI 0 IRQ_TYPE_LEVEL_HIGH>;
+ 			reg-shift = <2>;
+ 			reg-io-width = <4>;
++			fifo-size = <64>;
+ 			clocks = <&ccu CLK_BUS_UART0>;
+ 			resets = <&ccu RST_BUS_UART0>;
+ 			status = "disabled";
+@@ -897,6 +971,7 @@
+ 			interrupts = <GIC_SPI 1 IRQ_TYPE_LEVEL_HIGH>;
+ 			reg-shift = <2>;
+ 			reg-io-width = <4>;
++			fifo-size = <64>;
+ 			clocks = <&ccu CLK_BUS_UART1>;
+ 			resets = <&ccu RST_BUS_UART1>;
+ 			status = "disabled";
+@@ -908,6 +983,7 @@
+ 			interrupts = <GIC_SPI 2 IRQ_TYPE_LEVEL_HIGH>;
+ 			reg-shift = <2>;
+ 			reg-io-width = <4>;
++			fifo-size = <64>;
+ 			clocks = <&ccu CLK_BUS_UART2>;
+ 			resets = <&ccu RST_BUS_UART2>;
+ 			status = "disabled";
+@@ -919,6 +995,7 @@
+ 			interrupts = <GIC_SPI 3 IRQ_TYPE_LEVEL_HIGH>;
+ 			reg-shift = <2>;
+ 			reg-io-width = <4>;
++			fifo-size = <64>;
+ 			clocks = <&ccu CLK_BUS_UART3>;
+ 			resets = <&ccu RST_BUS_UART3>;
+ 			status = "disabled";
+@@ -930,6 +1007,7 @@
+ 			interrupts = <GIC_SPI 4 IRQ_TYPE_LEVEL_HIGH>;
+ 			reg-shift = <2>;
+ 			reg-io-width = <4>;
++			fifo-size = <64>;
+ 			clocks = <&ccu CLK_BUS_UART4>;
+ 			resets = <&ccu RST_BUS_UART4>;
+ 			status = "disabled";
+@@ -1061,8 +1139,7 @@
+ 		};
+ 
+ 		pwm: pwm@1c21400 {
+-			compatible = "allwinner,sun50i-a64-pwm",
+-				     "allwinner,sun5i-a13-pwm";
++			compatible = "allwinner,sun50i-a64-pwm";
+ 			reg = <0x01c21400 0x400>;
+ 			clocks = <&osc24M>;
+ 			pinctrl-names = "default";
+@@ -1141,6 +1218,7 @@
+ 		};
+ 
+ 		hdmi: hdmi@1ee0000 {
++			#sound-dai-cells = <0>;
+ 			compatible = "allwinner,sun50i-a64-dw-hdmi",
+ 				     "allwinner,sun8i-a83t-dw-hdmi";
+ 			reg = <0x01ee0000 0x10000>;
+@@ -1188,8 +1266,9 @@
+ 			compatible = "allwinner,sun50i-a64-rtc",
+ 				     "allwinner,sun8i-h3-rtc";
+ 			reg = <0x01f00000 0x400>;
+-			interrupts = <GIC_SPI 40 IRQ_TYPE_LEVEL_HIGH>,
+-				     <GIC_SPI 41 IRQ_TYPE_LEVEL_HIGH>;
++			interrupt-parent = <&r_intc>;
++			interrupts = <8 IRQ_TYPE_LEVEL_HIGH>,
++				     <9 IRQ_TYPE_LEVEL_HIGH>;
+ 			clock-output-names = "osc32k", "osc32k-out", "iosc";
+ 			clocks = <&osc32k>;
+ 			#clock-cells = <1>;
+@@ -1210,6 +1289,7 @@
+ 			clocks = <&osc24M>, <&rtc 0>, <&rtc 2>,
+ 				 <&ccu CLK_PLL_PERIPH0>;
+ 			clock-names = "hosc", "losc", "iosc", "pll-periph";
++			protected-clocks = <CLK_APB0_TWD>;
+ 			#clock-cells = <1>;
+ 			#reset-cells = <1>;
+ 		};
+@@ -1217,6 +1297,7 @@
+ 		codec_analog: codec-analog@1f015c0 {
+ 			compatible = "allwinner,sun50i-a64-codec-analog";
+ 			reg = <0x01f015c0 0x4>;
++			allwinner,codec = <&codec>;
+ 			status = "disabled";
+ 		};
+ 
+@@ -1239,15 +1320,15 @@
+ 			clocks = <&r_ccu CLK_APB0_IR>, <&r_ccu CLK_IR>;
+ 			clock-names = "apb", "ir";
+ 			resets = <&r_ccu RST_APB0_IR>;
+-			interrupts = <GIC_SPI 37 IRQ_TYPE_LEVEL_HIGH>;
++			interrupt-parent = <&r_intc>;
++			interrupts = <5 IRQ_TYPE_LEVEL_HIGH>;
+ 			pinctrl-names = "default";
+ 			pinctrl-0 = <&r_ir_rx_pin>;
+ 			status = "disabled";
+ 		};
+ 
+ 		r_pwm: pwm@1f03800 {
+-			compatible = "allwinner,sun50i-a64-pwm",
+-				     "allwinner,sun5i-a13-pwm";
++			compatible = "allwinner,sun50i-a64-pwm";
+ 			reg = <0x01f03800 0x400>;
+ 			clocks = <&osc24M>;
+ 			pinctrl-names = "default";
+@@ -1259,7 +1340,8 @@
+ 		r_pio: pinctrl@1f02c00 {
+ 			compatible = "allwinner,sun50i-a64-r-pinctrl";
+ 			reg = <0x01f02c00 0x400>;
+-			interrupts = <GIC_SPI 45 IRQ_TYPE_LEVEL_HIGH>;
++			interrupt-parent = <&r_intc>;
++			interrupts = <13 IRQ_TYPE_LEVEL_HIGH>;
+ 			clocks = <&r_ccu CLK_APB0_PIO>, <&osc24M>, <&osc32k>;
+ 			clock-names = "apb", "hosc", "losc";
+ 			gpio-controller;
