@@ -17,9 +17,6 @@ if load ${devtype} ${devnum} ${load_addr} ${prefix}uEnv.txt; then
     env import -t ${load_addr} ${filesize}
 fi
 
-# get PARTUUID of first partition on SD/eMMC the boot script was loaded from
-if test "${devtype}" = "mmc"; then part uuid mmc ${devnum}:1 partuuid; fi
-
 if test "${console}" = "display" || test "${console}" = "both"; then setenv consoleargs "console=%SERIAL_CONSOLE%,%SERIAL_CONSOLE_SPEED%n8"; fi
 if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "${consoleargs} console=tty1"; fi
 if test "${earlycon}" = "on"; then setenv consoleargs "earlycon ${consoleargs}"; fi
@@ -30,6 +27,10 @@ load ${devtype} ${devnum} ${fdt_addr_r} ${prefix}dtb/${fdtfile}
 load ${devtype} ${devnum} ${kernel_addr_r} ${prefix}Image
 fdt addr ${fdt_addr_r}
 fdt resize 65536
+
+# read "/chosen" node, property "bootargs", and store in var "dtb_bootargs"
+fdt get value dtb_bootargs /chosen bootargs
+if test "${dtb_bootargs}" != "" ; then setenv bootargs "${bootargs} ${dtb_bootargs}"; fi
 
 if load ${devtype} ${devnum} ${ramdisk_addr_r} ${prefix}uInitrd; then
     booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r};
