@@ -33,9 +33,9 @@ case $KERNEL_SOURCE in
 #            KERNEL_BRANCH="release-4.4:commit:763b2b0fabd8e52c38aa43b5eca9752073bd0993"
             KERNEL_DIR="linux-$SOCFAMILY-$KERNEL_SOURCE"
     ;;
-#    next)
-#            KERNEL_BRANCH="linux-5.8.y::"
-#    ;;
+    next)
+            KERNEL_BRANCH="linux-5.9.y::"
+    ;;
 esac
 
 
