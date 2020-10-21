@@ -1,0 +1,8 @@
+# /dev/serial0 -> ttyS0
+# /dev/serial1 -> ttyAMA0
+#
+KERNEL=="ttyS0", SYMLINK+="serial0"
+KERNEL=="ttyAMA0", SYMLINK+="serial1"
+
+# start only after initialization of both devices
+SUBSYSTEM=="tty", ACTION=="add", SYMLINK=="serial1", RUN+="/usr/local/bin/btuart"
