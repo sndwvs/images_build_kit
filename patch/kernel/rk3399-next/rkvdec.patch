@@ -871,141 +871,13 @@ diff -uNr '--exclude=.git*' '--exclude=include-prefixes' linux-5.8-rc4.orig/Docu
 +    pixfmt-nv15
 +    pixfmt-nv20
      pixfmt-m420
-diff -uNr '--exclude=.git*' '--exclude=include-prefixes' linux-5.8-rc4.orig/drivers/clk/rockchip/clk-pll.c linux-5.8-rc4/drivers/clk/rockchip/clk-pll.c
---- linux-5.8-rc4.orig/drivers/clk/rockchip/clk-pll.c	2020-07-10 01:23:29.006890186 -0700
-+++ linux-5.8-rc4/drivers/clk/rockchip/clk-pll.c	2020-07-10 15:46:58.877258931 -0700
-@@ -12,6 +12,7 @@
- #include <linux/io.h>
- #include <linux/delay.h>
- #include <linux/clk-provider.h>
-+#include <linux/iopoll.h>
- #include <linux/regmap.h>
- #include <linux/clk.h>
- #include "clk.h"
-@@ -86,23 +87,14 @@
- {
- 	struct regmap *grf = pll->ctx->grf;
- 	unsigned int val;
--	int delay = 24000000, ret;
--
--	while (delay > 0) {
--		ret = regmap_read(grf, pll->lock_offset, &val);
--		if (ret) {
--			pr_err("%s: failed to read pll lock status: %d\n",
--			       __func__, ret);
--			return ret;
--		}
-+	int ret;
- 
--		if (val & BIT(pll->lock_shift))
--			return 0;
--		delay--;
--	}
-+	ret = regmap_read_poll_timeout(grf, pll->lock_offset, val,
-+				       val & BIT(pll->lock_shift), 0, 1000);
-+	if (ret)
-+		pr_err("%s: timeout waiting for pll to lock\n", __func__);
- 
--	pr_err("%s: timeout waiting for pll to lock\n", __func__);
--	return -ETIMEDOUT;
-+	return ret;
- }
- 
- /**
-@@ -118,12 +110,31 @@
- #define RK3036_PLLCON1_REFDIV_SHIFT		0
- #define RK3036_PLLCON1_POSTDIV2_MASK		0x7
- #define RK3036_PLLCON1_POSTDIV2_SHIFT		6
-+#define RK3036_PLLCON1_LOCK_STATUS		BIT(10)
- #define RK3036_PLLCON1_DSMPD_MASK		0x1
- #define RK3036_PLLCON1_DSMPD_SHIFT		12
-+#define RK3036_PLLCON1_PWRDOWN			BIT(13)
- #define RK3036_PLLCON2_FRAC_MASK		0xffffff
- #define RK3036_PLLCON2_FRAC_SHIFT		0
- 
--#define RK3036_PLLCON1_PWRDOWN			(1 << 13)
-+static int rockchip_rk3036_pll_wait_lock(struct rockchip_clk_pll *pll)
-+{
-+	u32 pllcon;
-+	int ret;
-+
-+	/*
-+	 * Lock time typical 250, max 500 input clock cycles @24MHz
-+	 * So define a very safe maximum of 1000us, meaning 24000 cycles.
-+	 */
-+	ret = readl_relaxed_poll_timeout(pll->reg_base + RK3036_PLLCON(1),
-+					 pllcon,
-+					 pllcon & RK3036_PLLCON1_LOCK_STATUS,
-+					 0, 1000);
-+	if (ret)
-+		pr_err("%s: timeout waiting for pll to lock\n", __func__);
-+
-+	return ret;
-+}
- 
- static void rockchip_rk3036_pll_get_params(struct rockchip_clk_pll *pll,
- 					struct rockchip_pll_rate_table *rate)
-@@ -221,7 +232,7 @@
- 	writel_relaxed(pllcon, pll->reg_base + RK3036_PLLCON(2));
- 
- 	/* wait for the pll to lock */
--	ret = rockchip_pll_wait_lock(pll);
-+	ret = rockchip_rk3036_pll_wait_lock(pll);
- 	if (ret) {
- 		pr_warn("%s: pll update unsuccessful, trying to restore old params\n",
- 			__func__);
-@@ -260,7 +271,7 @@
- 
- 	writel(HIWORD_UPDATE(0, RK3036_PLLCON1_PWRDOWN, 0),
- 	       pll->reg_base + RK3036_PLLCON(1));
--	rockchip_pll_wait_lock(pll);
-+	rockchip_rk3036_pll_wait_lock(pll);
- 
- 	return 0;
- }
-@@ -589,19 +600,20 @@
- static int rockchip_rk3399_pll_wait_lock(struct rockchip_clk_pll *pll)
- {
- 	u32 pllcon;
--	int delay = 24000000;
-+	int ret;
- 
--	/* poll check the lock status in rk3399 xPLLCON2 */
--	while (delay > 0) {
--		pllcon = readl_relaxed(pll->reg_base + RK3399_PLLCON(2));
--		if (pllcon & RK3399_PLLCON2_LOCK_STATUS)
--			return 0;
-+	/*
-+	 * Lock time typical 250, max 500 input clock cycles @24MHz
-+	 * So define a very safe maximum of 1000us, meaning 24000 cycles.
-+	 */
-+	ret = readl_relaxed_poll_timeout(pll->reg_base + RK3399_PLLCON(2),
-+					 pllcon,
-+					 pllcon & RK3399_PLLCON2_LOCK_STATUS,
-+					 0, 1000);
-+	if (ret)
-+		pr_err("%s: timeout waiting for pll to lock\n", __func__);
- 
--		delay--;
--	}
--
--	pr_err("%s: timeout waiting for pll to lock\n", __func__);
--	return -ETIMEDOUT;
-+	return ret;
- }
- 
- static void rockchip_rk3399_pll_get_params(struct rockchip_clk_pll *pll,
 diff -uNr '--exclude=.git*' '--exclude=include-prefixes' linux-5.8-rc4.orig/drivers/gpu/drm/drm_fourcc.c linux-5.8-rc4/drivers/gpu/drm/drm_fourcc.c
 --- linux-5.8-rc4.orig/drivers/gpu/drm/drm_fourcc.c	2020-07-10 01:23:33.474938058 -0700
 +++ linux-5.8-rc4/drivers/gpu/drm/drm_fourcc.c	2020-07-10 15:45:59.024557933 -0700
-@@ -274,6 +274,26 @@
- 		{ .format = DRM_FORMAT_YUV420_10BIT,    .depth = 0,
- 		  .num_planes = 1, .cpp = { 0, 0, 0 }, .hsub = 2, .vsub = 2,
- 		  .is_yuv = true },
-+		{ .format = DRM_FORMAT_NV15,		.depth = 0,
-+		  .num_planes = 2, .char_per_block = { 5, 5, 0 },
-+		  .block_w = { 4, 2, 0 }, .block_h = { 1, 1, 0 }, .hsub = 2,
-+		  .vsub = 2, .is_yuv = true },
+@@ -278,6 +278,14 @@
+ 		  .num_planes = 2, .char_per_block = { 5, 5, 0 },
+ 		  .block_w = { 4, 2, 0 }, .block_h = { 1, 1, 0 }, .hsub = 2,
+ 		  .vsub = 2, .is_yuv = true },
 +		{ .format = DRM_FORMAT_NV20,		.depth = 0,
 +		  .num_planes = 2, .char_per_block = { 5, 5, 0 },
 +		  .block_w = { 4, 2, 0 }, .block_h = { 1, 1, 0 }, .hsub = 2,
@@ -1014,17 +886,10 @@ diff -uNr '--exclude=.git*' '--exclude=include-prefixes' linux-5.8-rc4.orig/driv
 +		  .num_planes = 2, .char_per_block = { 5, 5, 0 },
 +		  .block_w = { 4, 2, 0 }, .block_h = { 1, 1, 0 }, .hsub = 1,
 +		  .vsub = 1, .is_yuv = true },
-+		{ .format = DRM_FORMAT_Q410,		.depth = 0,
-+		  .num_planes = 3, .char_per_block = { 2, 2, 2 },
-+		  .block_w = { 1, 1, 1 }, .block_h = { 1, 1, 1 }, .hsub = 0,
-+		  .vsub = 0, .is_yuv = true },
-+		{ .format = DRM_FORMAT_Q401,		.depth = 0,
-+		  .num_planes = 3, .char_per_block = { 2, 2, 2 },
-+		  .block_w = { 1, 1, 1 }, .block_h = { 1, 1, 1 }, .hsub = 0,
-+		  .vsub = 0, .is_yuv = true },
- 	};
- 
- 	unsigned int i;
+ 		{ .format = DRM_FORMAT_Q410,		.depth = 0,
+ 		  .num_planes = 3, .char_per_block = { 2, 2, 2 },
+ 		  .block_w = { 1, 1, 1 }, .block_h = { 1, 1, 1 }, .hsub = 0,
+
 diff -uNr '--exclude=.git*' '--exclude=include-prefixes' linux-5.8-rc4.orig/drivers/gpu/drm/rockchip/rockchip_drm_vop.c linux-5.8-rc4/drivers/gpu/drm/rockchip/rockchip_drm_vop.c
 --- linux-5.8-rc4.orig/drivers/gpu/drm/rockchip/rockchip_drm_vop.c	2020-07-10 01:23:42.699036917 -0700
 +++ linux-5.8-rc4/drivers/gpu/drm/rockchip/rockchip_drm_vop.c	2020-07-10 15:45:59.028557980 -0700
@@ -6916,24 +6781,18 @@ diff -uNr '--exclude=.git*' '--exclude=include-prefixes' linux-5.8-rc4.orig/incl
 diff -uNr '--exclude=.git*' '--exclude=include-prefixes' linux-5.8-rc4.orig/include/uapi/drm/drm_fourcc.h linux-5.8-rc4/include/uapi/drm/drm_fourcc.h
 --- linux-5.8-rc4.orig/include/uapi/drm/drm_fourcc.h	2020-07-10 01:24:17.119406193 -0700
 +++ linux-5.8-rc4/include/uapi/drm/drm_fourcc.h	2020-07-10 15:45:59.040558120 -0700
-@@ -236,6 +236,14 @@
- #define DRM_FORMAT_NV61		fourcc_code('N', 'V', '6', '1') /* 2x1 subsampled Cb:Cr plane */
- #define DRM_FORMAT_NV24		fourcc_code('N', 'V', '2', '4') /* non-subsampled Cr:Cb plane */
- #define DRM_FORMAT_NV42		fourcc_code('N', 'V', '4', '2') /* non-subsampled Cb:Cr plane */
-+/*
-+ * 2 plane YCbCr
-+ * index 0 = Y plane, [39:0] Y3:Y2:Y1:Y0 little endian
-+ * index 1 = Cr:Cb plane, [39:0] Cr1:Cb1:Cr0:Cb0 little endian
-+ */
-+#define DRM_FORMAT_NV15		fourcc_code('N', 'V', '1', '5') /* 2x2 subsampled Cr:Cb plane */
+@@ -242,6 +242,8 @@
+  * index 1 = Cr:Cb plane, [39:0] Cr1:Cb1:Cr0:Cb0 little endian
+  */
+ #define DRM_FORMAT_NV15		fourcc_code('N', 'V', '1', '5') /* 2x2 subsampled Cr:Cb plane */
 +#define DRM_FORMAT_NV20		fourcc_code('N', 'V', '2', '0') /* 2x1 subsampled Cr:Cb plane */
 +#define DRM_FORMAT_NV30		fourcc_code('N', 'V', '3', '0') /* non-subsampled Cr:Cb plane */
  
  /*
   * 2 plane YCbCr MSB aligned
-@@ -265,6 +273,22 @@
+@@ -264,6 +266,22 @@
   */
- #define DRM_FORMAT_P016		fourcc_code('P', '0', '1', '6') /* 2x2 subsampled Cr:Cb plane 16 bits per channel */
+ #define DRM_FORMAT_P012		fourcc_code('P', '0', '1', '2') /* 2x2 subsampled Cr:Cb plane 12 bits per channel */
  
 +/* 3 plane non-subsampled (444) YCbCr
 + * 16 bits per component, but only 10 bits are used and 6 bits are padded
@@ -6952,8 +6811,9 @@ diff -uNr '--exclude=.git*' '--exclude=include-prefixes' linux-5.8-rc4.orig/incl
 +#define DRM_FORMAT_Q401		fourcc_code('Q', '4', '0', '1')
 +
  /*
-  * 3 plane YCbCr
-  * index 0: Y plane, [7:0] Y
+  * 2 plane YCbCr MSB aligned
+  * index 0 = Y plane, [15:0] Y little endian
+
 diff -uNr '--exclude=.git*' '--exclude=include-prefixes' linux-5.8-rc4.orig/include/uapi/linux/videodev2.h linux-5.8-rc4/include/uapi/linux/videodev2.h
 --- linux-5.8-rc4.orig/include/uapi/linux/videodev2.h	2020-07-10 01:24:17.403409242 -0700
 +++ linux-5.8-rc4/include/uapi/linux/videodev2.h	2020-07-10 15:45:59.040558120 -0700
