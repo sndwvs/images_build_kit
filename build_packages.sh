@@ -149,7 +149,8 @@ build_sunxi_tools() {
           $BUILD/$PKG/${SUNXI_TOOLS_DIR}/sbin/
 
     cd $BUILD/$PKG/${SUNXI_TOOLS_DIR}/
-    makepkg -l n -c n $BUILD/$PKG/${SUNXI_TOOLS_DIR}-git_$(date +%Y%m%d)_$(cat $SOURCE/${SUNXI_TOOLS_DIR}/.git/packed-refs | grep refs/remotes/origin/master | cut -b1-7)-${ARCH}-${PKG_BUILD}${PACKAGER}.txz \
+    local VERSION=$(printf "%s_%s\n" "$(git log -1 --pretty='format:%cd' --date=format:'%Y%m%d' HEAD)" "$(git rev-parse --short=7 HEAD)")
+    makepkg -l n -c n $BUILD/$PKG/${SUNXI_TOOLS_DIR}-$VERSION-${ARCH}-${PKG_BUILD}${PACKAGER}.txz \
     >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     [[ -d $BUILD/$PKG/${SUNXI_TOOLS_DIR} ]] && rm -rf $BUILD/$PKG/${SUNXI_TOOLS_DIR}
