@@ -148,8 +148,9 @@ build_sunxi_tools() {
     cp -P $SOURCE/${SUNXI_TOOLS_DIR}/{bin2fex,fex2bin,sunxi-fexc,sunxi-nand-part} \
           $BUILD/$PKG/${SUNXI_TOOLS_DIR}/sbin/
 
+    local VERSION=$(printf "%s_%s\n" "$(git log -1 --pretty='format:%cd' --date=format:'%Y%m%d' HEAD)" \
+                                     "$(git rev-parse --short=7 HEAD)")
     cd $BUILD/$PKG/${SUNXI_TOOLS_DIR}/
-    local VERSION=$(printf "%s_%s\n" "$(git log -1 --pretty='format:%cd' --date=format:'%Y%m%d' HEAD)" "$(git rev-parse --short=7 HEAD)")
     makepkg -l n -c n $BUILD/$PKG/${SUNXI_TOOLS_DIR}-$VERSION-${ARCH}-${PKG_BUILD}${PACKAGER}.txz \
     >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
