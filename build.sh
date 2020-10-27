@@ -210,6 +210,7 @@ for image_type in ${DISTR_IMAGES[@]}; do
         setting_wifi
         setting_ntp
         setting_bootloader_move_to_disk
+        setting_governor
         download_pkg $DISTR_URL "$image_type"
         install_pkg "$image_type"
         install_kernel

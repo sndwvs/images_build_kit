@@ -400,3 +400,10 @@ setting_bootloader() {
     return 0
 }
 
+
+setting_governor() {
+    if [[ ! -z $CPU_GOVERNOR ]]; then
+        message "" "setting" "governor"
+        sed "s:#SCALING_\(.*\)=\(.*\):SCALING_\1=$CPU_GOVERNOR:g" -i $SOURCE/$ROOTFS/etc/default/cpufreq
+    fi
+}
