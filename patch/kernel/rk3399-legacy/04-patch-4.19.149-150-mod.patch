@@ -802,7 +802,7 @@ index 61a52bb26d127..a4a32b79e8321 100644
 -	name = epi->ffd.file->f_path.dentry->d_name.name;
 -	ws = wakeup_source_register(NULL, name);
 +	take_dentry_name_snapshot(&n, epi->ffd.file->f_path.dentry);
-+	ws = wakeup_source_register(n.name);
++	ws = wakeup_source_register(NULL, n.name);
 +	release_dentry_name_snapshot(&n);
  
  	if (!ws)
