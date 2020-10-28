@@ -29,7 +29,7 @@ BOOT_LOADER_BIN="idbloader.img"
 case $KERNEL_SOURCE in
     legacy)
             LINUX_SOURCE="https://github.com/rockchip-linux/kernel"
-            KERNEL_BRANCH="develop-4.4::"
+            KERNEL_BRANCH="develop-4.19::"
 #            KERNEL_BRANCH="release-4.4:commit:763b2b0fabd8e52c38aa43b5eca9752073bd0993"
             KERNEL_DIR="linux-$SOCFAMILY-$KERNEL_SOURCE"
     ;;

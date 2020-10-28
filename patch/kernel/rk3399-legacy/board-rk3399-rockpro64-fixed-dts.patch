@@ -1,0 +1,39 @@
+--- a/arch/arm64/boot/dts/rockchip/Makefile.orig	2020-10-28 02:19:44.434417975 +0200
++++ b/arch/arm64/boot/dts/rockchip/Makefile.orig	2020-10-28 04:02:03.973280584 +0200
+@@ -57,6 +57,7 @@
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-ficus.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-firefly.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-puma-haikou.dtb
++dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-rockpro64.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-sapphire.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-sapphire-excavator.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-sapphire-excavator-edp-avb.dtb
+--- a/arch/arm64/boot/dts/rockchip/rk3399-rockpro64.dts	2020-10-27 21:03:57.323089688 +0200
++++ b/arch/arm64/boot/dts/rockchip/rk3399-rockpro64.dts	2020-10-27 21:03:03.503110219 +0200
+@@ -1076,7 +1076,7 @@
+ 	num-lanes = <4>;
+ 	max-link-speed = <2>;
+ 	pinctrl-names = "default";
+-	pinctrl-0 = <&pcie_clkreqn>;
++	pinctrl-0 = <&pcie_clkreqn_cpm>;
+ 	vpcie3v3-supply = <&vcc3v3_pcie>;
+ 	status = "okay";
+ };
+@@ -1114,11 +1114,15 @@
+ 		<&gpio1 RK_PB6 GPIO_ACTIVE_HIGH>;
+ };
+ 
+-&vdec_mmu {
++&rkvdec_mmu {
+ 	status = "okay";
+ };
+ 
+-&vpu {
++&vdpu {
++	status = "okay";
++};
++
++&vepu {
+ 	status = "okay";
+ };
+ 

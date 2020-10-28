@@ -1,15 +1,12 @@
-diff --git a/drivers/net/wireless/rockchip_wlan/rkwifi/rk_wifi_config.c b/drivers/net/wireless/rockchip_wlan/rkwifi/rk_wifi_config.c
-index fa07a94c..2377a34e 100644
---- a/drivers/net/wireless/rockchip_wlan/rkwifi/rk_wifi_config.c
-+++ b/drivers/net/wireless/rockchip_wlan/rkwifi/rk_wifi_config.c
-@@ -17,8 +17,8 @@
+--- a/drivers/net/wireless/rockchip_wlan/rkwifi/rk_wifi_config.c	2020-10-27 21:23:00.051060797 +0200
++++ b/drivers/net/wireless/rockchip_wlan/rkwifi/rk_wifi_config.c	2020-10-27 21:36:48.731118697 +0200
+@@ -17,7 +17,7 @@
   * Set Firmware Path
   */
   
 -#define VENDOR_ETC_FIRMWARE "/vendor/etc/firmware/"
--#define SYSTEM_ETC_FIRMWARE "/system/etc/firmware/"
 +#define VENDOR_ETC_FIRMWARE "/lib/firmware/"
-+#define SYSTEM_ETC_FIRMWARE "/lib/firmware/"
- char ANDROID_FW_PATH[64] = {0};
  
- extern int get_wifi_chip_type(void);
+ int rkwifi_set_firmware(char *fw, char *nvram)
+ {
+
