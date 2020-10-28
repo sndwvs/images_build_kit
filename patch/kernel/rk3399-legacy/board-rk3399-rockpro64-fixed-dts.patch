@@ -1,5 +1,5 @@
---- a/arch/arm64/boot/dts/rockchip/Makefile.orig	2020-10-28 02:19:44.434417975 +0200
-+++ b/arch/arm64/boot/dts/rockchip/Makefile.orig	2020-10-28 04:02:03.973280584 +0200
+--- a/arch/arm64/boot/dts/rockchip/Makefile	2020-10-28 02:19:44.434417975 +0200
++++ b/arch/arm64/boot/dts/rockchip/Makefile	2020-10-28 04:02:03.973280584 +0200
 @@ -57,6 +57,7 @@
  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-ficus.dtb
  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-firefly.dtb
