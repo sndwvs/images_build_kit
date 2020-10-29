@@ -155,7 +155,7 @@ compile_kernel() {
 
 #    make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS menuconfig  || exit 1
     make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS oldconfig || (message "err" "details" && exit 1) || exit 1
-    make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS $KERNEL modules | tee -a $LOG
+    make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS $KERNEL modules 2>&1 | tee -a $LOG
     [[ ${PIPESTATUS[0]} != 0 ]] && ( message "err" "details" && exit 1 )
     make $CTHREADS ARCH=$KARCH CROSS_COMPILE=$CROSS dtbs || (message "err" "details" && exit 1) || exit 1
 
