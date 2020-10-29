@@ -1,0 +1,171 @@
+diff -Naur a/drivers/net/wireless/rockchip_wlan/rtl8188eu/core/rtw_ieee80211.c b/drivers/net/wireless/rockchip_wlan/rtl8188eu/core/rtw_ieee80211.c
+--- a/drivers/net/wireless/rockchip_wlan/rtl8188eu/core/rtw_ieee80211.c	2020-10-28 02:21:13.846334401 +0200
++++ b/drivers/net/wireless/rockchip_wlan/rtl8188eu/core/rtw_ieee80211.c	2020-10-28 02:23:24.430201644 +0200
+@@ -1,4 +1,4 @@
+-/******************************************************************************
++W/******************************************************************************
+  *
+  * Copyright(c) 2007 - 2011 Realtek Corporation. All rights reserved.
+  *
+@@ -1379,7 +1379,10 @@
+  */
+ void rtw_macaddr_cfg(u8 *out, const u8 *hw_mac_addr)
+ {
+-#define DEFAULT_RANDOM_MACADDR 1
++#ifndef WIFI_GENERATE_RANDOM_MAC_ADDR
++    #define WIFI_GENERATE_RANDOM_MAC_ADDR 0
++#endif
++#define DEFAULT_RANDOM_MACADDR WIFI_GENERATE_RANDOM_MAC_ADDR
+ 	u8 mac[ETH_ALEN];
+ 
+ 	if (out == NULL) {
+diff -Naur a/drivers/net/wireless/rockchip_wlan/rtl8188fu/core/rtw_ieee80211.c b/drivers/net/wireless/rockchip_wlan/rtl8188fu/core/rtw_ieee80211.c
+--- a/drivers/net/wireless/rockchip_wlan/rtl8188fu/core/rtw_ieee80211.c	2020-10-28 02:21:14.098334156 +0200
++++ b/drivers/net/wireless/rockchip_wlan/rtl8188fu/core/rtw_ieee80211.c	2020-10-28 02:23:58.642165086 +0200
+@@ -1486,7 +1486,10 @@
+  */
+ void rtw_macaddr_cfg(u8 *out, const u8 *hw_mac_addr)
+ {
+-#define DEFAULT_RANDOM_MACADDR 1
++#ifndef WIFI_GENERATE_RANDOM_MAC_ADDR
++    #define WIFI_GENERATE_RANDOM_MAC_ADDR 0
++#endif
++#define DEFAULT_RANDOM_MACADDR WIFI_GENERATE_RANDOM_MAC_ADDR
+ 	u8 mac[ETH_ALEN];
+ 
+ 	if (out == NULL) {
+diff -Naur a/drivers/net/wireless/rockchip_wlan/rtl8189es/core/rtw_ieee80211.c b/drivers/net/wireless/rockchip_wlan/rtl8189es/core/rtw_ieee80211.c
+--- a/drivers/net/wireless/rockchip_wlan/rtl8189es/core/rtw_ieee80211.c	2020-10-28 02:21:14.254334004 +0200
++++ b/drivers/net/wireless/rockchip_wlan/rtl8189es/core/rtw_ieee80211.c	2020-10-28 02:24:26.266135094 +0200
+@@ -1464,7 +1464,10 @@
+  */
+ void rtw_macaddr_cfg(u8 *out, const u8 *hw_mac_addr)
+ {
+-#define DEFAULT_RANDOM_MACADDR 1
++#ifndef WIFI_GENERATE_RANDOM_MAC_ADDR
++    #define WIFI_GENERATE_RANDOM_MAC_ADDR 0
++#endif
++#define DEFAULT_RANDOM_MACADDR WIFI_GENERATE_RANDOM_MAC_ADDR
+ 	u8 mac[ETH_ALEN];
+ 
+ 	if (out == NULL) {
+diff -Naur a/drivers/net/wireless/rockchip_wlan/rtl8189fs/core/rtw_ieee80211.c b/drivers/net/wireless/rockchip_wlan/rtl8189fs/core/rtw_ieee80211.c
+--- a/drivers/net/wireless/rockchip_wlan/rtl8189fs/core/rtw_ieee80211.c	2020-10-28 02:21:14.382333880 +0200
++++ b/drivers/net/wireless/rockchip_wlan/rtl8189fs/core/rtw_ieee80211.c	2020-10-28 02:24:48.430110740 +0200
+@@ -1552,7 +1552,10 @@
+  */
+ void rtw_macaddr_cfg(u8 *out, const u8 *hw_mac_addr)
+ {
+-#define DEFAULT_RANDOM_MACADDR 1
++#ifndef WIFI_GENERATE_RANDOM_MAC_ADDR
++    #define WIFI_GENERATE_RANDOM_MAC_ADDR 0
++#endif
++#define DEFAULT_RANDOM_MACADDR WIFI_GENERATE_RANDOM_MAC_ADDR
+ 	u8 mac[ETH_ALEN];
+ 
+ 	if (out == NULL) {
+diff -Naur a/drivers/net/wireless/rockchip_wlan/rtl8723bs/core/rtw_ieee80211.c b/drivers/net/wireless/rockchip_wlan/rtl8723bs/core/rtw_ieee80211.c
+--- a/drivers/net/wireless/rockchip_wlan/rtl8723bs/core/rtw_ieee80211.c	2020-10-28 02:21:14.554333713 +0200
++++ b/drivers/net/wireless/rockchip_wlan/rtl8723bs/core/rtw_ieee80211.c	2020-10-28 02:25:13.722082649 +0200
+@@ -1377,7 +1377,10 @@
+  */
+ void rtw_macaddr_cfg(u8 *out, const u8 *hw_mac_addr)
+ {
+-#define DEFAULT_RANDOM_MACADDR 1
++#ifndef WIFI_GENERATE_RANDOM_MAC_ADDR
++    #define WIFI_GENERATE_RANDOM_MAC_ADDR 0
++#endif
++#define DEFAULT_RANDOM_MACADDR WIFI_GENERATE_RANDOM_MAC_ADDR
+ 	u8 mac[ETH_ALEN];
+ 
+ 	if (out == NULL) {
+diff -Naur a/drivers/net/wireless/rockchip_wlan/rtl8723bu/core/rtw_ieee80211.c b/drivers/net/wireless/rockchip_wlan/rtl8723bu/core/rtw_ieee80211.c
+--- a/drivers/net/wireless/rockchip_wlan/rtl8723bu/core/rtw_ieee80211.c	2020-10-28 02:21:14.714333558 +0200
++++ b/drivers/net/wireless/rockchip_wlan/rtl8723bu/core/rtw_ieee80211.c	2020-10-28 02:25:36.530057055 +0200
+@@ -1486,7 +1486,10 @@
+  */
+ void rtw_macaddr_cfg(u8 *out, const u8 *hw_mac_addr)
+ {
+-#define DEFAULT_RANDOM_MACADDR 1
++#ifndef WIFI_GENERATE_RANDOM_MAC_ADDR
++    #define WIFI_GENERATE_RANDOM_MAC_ADDR 0
++#endif
++#define DEFAULT_RANDOM_MACADDR WIFI_GENERATE_RANDOM_MAC_ADDR
+ 	u8 mac[ETH_ALEN];
+ 
+ 	if (out == NULL) {
+diff -Naur a/drivers/net/wireless/rockchip_wlan/rtl8723cs/core/rtw_ieee80211.c b/drivers/net/wireless/rockchip_wlan/rtl8723cs/core/rtw_ieee80211.c
+--- a/drivers/net/wireless/rockchip_wlan/rtl8723cs/core/rtw_ieee80211.c	2020-10-28 02:21:14.846333429 +0200
++++ b/drivers/net/wireless/rockchip_wlan/rtl8723cs/core/rtw_ieee80211.c	2020-10-28 02:25:57.054033821 +0200
+@@ -1745,7 +1745,10 @@
+  */
+ void rtw_macaddr_cfg(u8 *out, const u8 *hw_mac_addr)
+ {
+-#define DEFAULT_RANDOM_MACADDR 1
++#ifndef WIFI_GENERATE_RANDOM_MAC_ADDR
++    #define WIFI_GENERATE_RANDOM_MAC_ADDR 0
++#endif
++#define DEFAULT_RANDOM_MACADDR WIFI_GENERATE_RANDOM_MAC_ADDR
+ 	u8 mac[ETH_ALEN];
+ 
+ 	if (out == NULL) {
+diff -Naur a/drivers/net/wireless/rockchip_wlan/rtl8723ds/core/rtw_ieee80211.c b/drivers/net/wireless/rockchip_wlan/rtl8723ds/core/rtw_ieee80211.c
+--- a/drivers/net/wireless/rockchip_wlan/rtl8723ds/core/rtw_ieee80211.c	2020-10-28 02:21:14.982333297 +0200
++++ b/drivers/net/wireless/rockchip_wlan/rtl8723ds/core/rtw_ieee80211.c	2020-10-28 02:26:19.018008753 +0200
+@@ -1717,7 +1717,10 @@
+  */
+ void rtw_macaddr_cfg(u8 *out, const u8 *hw_mac_addr)
+ {
+-#define DEFAULT_RANDOM_MACADDR 1
++#ifndef WIFI_GENERATE_RANDOM_MAC_ADDR
++    #define WIFI_GENERATE_RANDOM_MAC_ADDR 0
++#endif
++#define DEFAULT_RANDOM_MACADDR WIFI_GENERATE_RANDOM_MAC_ADDR
+ 	u8 mac[ETH_ALEN];
+ 
+ 	if (out == NULL) {
+diff -Naur a/drivers/net/wireless/rockchip_wlan/rtl8821cs/core/rtw_ieee80211.c b/drivers/net/wireless/rockchip_wlan/rtl8821cs/core/rtw_ieee80211.c
+--- a/drivers/net/wireless/rockchip_wlan/rtl8821cs/core/rtw_ieee80211.c	2020-10-28 02:21:15.126333157 +0200
++++ b/drivers/net/wireless/rockchip_wlan/rtl8821cs/core/rtw_ieee80211.c	2020-10-28 02:27:05.189985109 +0200
+@@ -1717,7 +1717,10 @@
+  */
+ void rtw_macaddr_cfg(u8 *out, const u8 *hw_mac_addr)
+ {
+-#define DEFAULT_RANDOM_MACADDR 1
++#ifndef WIFI_GENERATE_RANDOM_MAC_ADDR
++    #define WIFI_GENERATE_RANDOM_MAC_ADDR 0
++#endif
++#define DEFAULT_RANDOM_MACADDR WIFI_GENERATE_RANDOM_MAC_ADDR
+ 	u8 mac[ETH_ALEN];
+ 
+ 	if (out == NULL) {
+diff -Naur a/drivers/net/wireless/rockchip_wlan/rtl8822be/core/rtw_ieee80211.c b/drivers/net/wireless/rockchip_wlan/rtl8822be/core/rtw_ieee80211.c
+--- a/drivers/net/wireless/rockchip_wlan/rtl8822be/core/rtw_ieee80211.c	2020-10-28 02:21:15.386332905 +0200
++++ b/drivers/net/wireless/rockchip_wlan/rtl8822be/core/rtw_ieee80211.c	2020-10-28 02:27:30.273973279 +0200
+@@ -1425,7 +1425,10 @@
+  */
+ void rtw_macaddr_cfg(u8 *out, const u8 *hw_mac_addr)
+ {
+-#define DEFAULT_RANDOM_MACADDR 1
++#ifndef WIFI_GENERATE_RANDOM_MAC_ADDR
++    #define WIFI_GENERATE_RANDOM_MAC_ADDR 0
++#endif
++#define DEFAULT_RANDOM_MACADDR WIFI_GENERATE_RANDOM_MAC_ADDR
+ 	u8 mac[ETH_ALEN];
+ 
+ 	if (out == NULL) {
+diff -Naur a/drivers/net/wireless/rockchip_wlan/rtl8822bs/core/rtw_ieee80211.c b/drivers/net/wireless/rockchip_wlan/rtl8822bs/core/rtw_ieee80211.c
+--- a/drivers/net/wireless/rockchip_wlan/rtl8822bs/core/rtw_ieee80211.c	2020-10-28 02:21:15.566332730 +0200
++++ b/drivers/net/wireless/rockchip_wlan/rtl8822bs/core/rtw_ieee80211.c	2020-10-28 02:27:50.645962979 +0200
+@@ -1682,7 +1682,10 @@
+  */
+ void rtw_macaddr_cfg(u8 *out, const u8 *hw_mac_addr)
+ {
+-#define DEFAULT_RANDOM_MACADDR 1
++#ifndef WIFI_GENERATE_RANDOM_MAC_ADDR
++    #define WIFI_GENERATE_RANDOM_MAC_ADDR 0
++#endif
++#define DEFAULT_RANDOM_MACADDR WIFI_GENERATE_RANDOM_MAC_ADDR
+ 	u8 mac[ETH_ALEN];
+ 
+ 	if (out == NULL) {

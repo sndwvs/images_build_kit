@@ -1,0 +1,61 @@
+--- a/arch/arm64/boot/dts/rockchip/rk3328-rock64.dts	2020-10-29 19:10:23.870183240 +0200
++++ b/arch/arm64/boot/dts/rockchip/rk3328-rock64.dts	2020-10-29 19:24:27.724983877 +0200
+@@ -5,6 +5,8 @@
+ 
+ /dts-v1/;
+ #include "rk3328.dtsi"
++#include <dt-bindings/pwm/pwm.h>
++#include <dt-bindings/input/input.h>
+ 
+ / {
+ 	model = "Pine64 Rock64";
+@@ -88,6 +90,14 @@
+ 	cpu-supply = <&vdd_arm>;
+ };
+ 
++&dfi {
++	status = "okay";
++};
++
++&display_subsystem {
++	status = "okay";
++};
++
+ &emmc {
+ 	bus-width = <8>;
+ 	cap-mmc-highspeed;
+@@ -117,6 +127,22 @@
+ 	status = "okay";
+ };
+ 
++&gpu {
++	status = "okay";
++	mali-supply = <&vdd_logic>;
++};
++
++&hdmi {
++	#sound-dai-cells = <0>;
++	ddc-i2c-scl-high-time-ns = <9625>;
++	ddc-i2c-scl-low-time-ns = <10000>;
++	status = "okay";
++};
++
++&hdmiphy {
++	status = "okay";
++};
++
+ &i2c1 {
+ 	status = "okay";
+ 
+@@ -300,3 +326,11 @@
+ &usb_host0_ohci {
+ 	status = "okay";
+ };
++
++&vop {
++	status = "okay";
++};
++
++&vop_mmu {
++	status = "okay";
++};

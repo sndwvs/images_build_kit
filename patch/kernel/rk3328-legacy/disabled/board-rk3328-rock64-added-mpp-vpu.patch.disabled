@@ -1,0 +1,54 @@
+--- a/arch/arm64/boot/dts/rockchip/rk3328-rock64.dts	2020-10-29 20:04:16.455362382 +0200
++++ b/arch/arm64/boot/dts/rockchip/rk3328-rock64.dts	2020-10-29 20:08:33.329676303 +0200
+@@ -276,6 +276,23 @@
+ 	status = "okay";
+ };
+ 
++&mpp_srv {
++	status = "okay";
++};
++
++&rga {
++	status = "okay";
++};
++
++&rkvdec {
++	status = "okay";
++	vcodec-supply = <&vdd_logic>;
++};
++
++&rkvdec_mmu {
++	status = "okay";
++};
++
+ &u2phy {
+ 	status = "okay";
+ 
+@@ -300,3 +317,27 @@
+ &usb_host0_ohci {
+ 	status = "okay";
+ };
++
++&vdpu {
++	status = "okay";
++};
++
++&vpu_mmu {
++	status = "okay";
++};
++
++&vepu {
++	status = "okay";
++};
++
++&vepu_mmu {
++	status = "okay";
++};
++
++&vepu22 {
++	status = "okay";
++};
++
++&vepu22_mmu {
++	status = "okay";
++};

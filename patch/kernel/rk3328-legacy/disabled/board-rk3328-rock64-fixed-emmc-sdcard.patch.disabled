@@ -1,0 +1,28 @@
+--- a/arch/arm64/boot/dts/rockchip/rk3328-rock64.dts	2020-10-29 19:10:23.870183240 +0200
++++ b/arch/arm64/boot/dts/rockchip/rk3328-rock64.dts	2020-10-29 19:13:15.188629721 +0200
+@@ -92,11 +90,12 @@
+ 	bus-width = <8>;
+ 	cap-mmc-highspeed;
+ 	mmc-hs200-1_8v;
++	supports-emmc;
++	disable-wp;
+ 	non-removable;
++	num-slots = <1>;
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&emmc_clk &emmc_cmd &emmc_bus8>;
+-	vmmc-supply = <&vcc_io>;
+-	vqmmc-supply = <&vcc18_emmc>;
+ 	status = "okay";
+ };
+ 
+@@ -264,8 +269,10 @@
+ 	cap-sd-highspeed;
+ 	disable-wp;
+ 	max-frequency = <150000000>;
++	num-slots = <1>;
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&sdmmc0_clk &sdmmc0_cmd &sdmmc0_dectn &sdmmc0_bus4>;
++	supports-sd;
+ 	vmmc-supply = <&vcc_sd>;
+ 	status = "okay";
+ };

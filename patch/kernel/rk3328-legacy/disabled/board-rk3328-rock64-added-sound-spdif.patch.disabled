@@ -1,0 +1,114 @@
+--- a/arch/arm64/boot/dts/rockchip/rk3328-rock64.dts	2020-10-29 18:16:33.700021277 +0200
++++ b/arch/arm64/boot/dts/rockchip/rk3328-rock64.dts	2020-10-29 20:36:29.842906357 +0200
+@@ -70,6 +70,69 @@
+ 		clock-output-names = "xin32k";
+ 		#clock-cells = <0>;
+ 	};
++
++	dummy_codec: dummy-codec {
++		compatible = "linux,snd-soc-dummy";
++		#sound-dai-cells = <0>;
++	};
++
++	hdmi-sound {
++		compatible = "simple-audio-card";
++		simple-audio-card,format = "i2s";
++		simple-audio-card,mclk-fs = <256>;
++		simple-audio-card,name = "rk-hdmi-sound";
++		simple-audio-card,cpu {
++			sound-dai = <&i2s0>;
++		};
++		simple-audio-card,codec {
++			sound-dai = <&hdmi>;
++		};
++	};
++
++	headphones-sound {
++		compatible = "simple-audio-card";
++		simple-audio-card,mclk-fs = <256>;
++		simple-audio-card,name = "rk-i2s-sound";
++		simple-audio-card,dai-link@0 {
++			format = "i2s";
++			cpu {
++				sound-dai = <&i2s1>;
++			};
++			codec {
++				sound-dai = <&codec>;
++			};
++		};
++		simple-audio-card,dai-link@1 {
++			format = "i2s";
++			cpu {
++				sound-dai = <&i2s1>;
++			};
++			codec {
++				sound-dai = <&dummy_codec>;
++			};
++		};
++	};
++
++	spdif-sound {
++		compatible = "simple-audio-card";
++		simple-audio-card,name = "rk-spdif-sound";
++		simple-audio-card,cpu {
++			sound-dai = <&spdif>;
++		};
++		simple-audio-card,codec {
++			sound-dai = <&spdif_out>;
++		};
++	};
++
++	spdif_out: spdif-out {
++		compatible = "linux,spdif-dit";
++		#sound-dai-cells = <0>;
++	};
++};
++
++&codec {
++	#sound-dai-cells = <0>;
++	status = "okay";
+ };
+ 
+ &cpu0 {
+@@ -226,6 +289,27 @@
+ 	};
+ };
+ 
++&i2s0 {
++	#sound-dai-cells = <0>;
++	rockchip,bclk-fs = <128>;
++	status = "okay";
++};
++
++&i2s1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&i2s1_mclk
++			 &i2s1_sclk
++			 &i2s1_lrcktx
++			 &i2s1_lrckrx
++			 &i2s1_sdo
++			 &i2s1_sdi
++			 &i2s1_sdio1
++			 &i2s1_sdio2
++			 &i2s1_sdio3>;
++	#sound-dai-cells = <0>;
++	status = "okay";
++};
++
+ &io_domains {
+ 	status = "okay";
+ 
+@@ -270,6 +354,13 @@
+ 	status = "okay";
+ };
+ 
++&spdif {
++	pinctrl-names = "default";
++	pinctrl-0 = <&spdifm0_tx>;
++	#sound-dai-cells = <0>;
++	status = "okay";
++};
++
+ &tsadc {
+ 	rockchip,hw-tshut-mode = <0>;
+ 	rockchip,hw-tshut-polarity = <0>;

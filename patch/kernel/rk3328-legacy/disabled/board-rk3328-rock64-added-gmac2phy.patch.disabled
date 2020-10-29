@@ -1,0 +1,52 @@
+--- a/arch/arm64/boot/dts/rockchip/rk3328-rock64.dts	2020-10-29 20:15:36.394834431 +0200
++++ b/arch/arm64/boot/dts/rockchip/rk3328-rock64.dts	2020-10-29 20:24:48.009657192 +0200
+@@ -64,6 +64,13 @@
+ 		regulator-max-microvolt = <5000000>;
+ 	};
+ 
++	vcc_phy: vcc-phy-regulator {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc_phy";
++		regulator-always-on;
++		regulator-boot-on;
++	};
++
+ 	xin32k: xin32k {
+ 		compatible = "fixed-clock";
+ 		clock-frequency = <32768>;
+@@ -104,7 +111,9 @@
+ 	assigned-clocks = <&cru SCLK_MAC2IO>, <&cru SCLK_MAC2IO_EXT>;
+ 	assigned-clock-parents = <&gmac_clkin>, <&gmac_clkin>;
+ 	clock_in_out = "input";
+-	phy-supply = <&vcc_io>;
++	rockchip,bugged_tx_coe;
++	disable,wake-on-lan; // device does not resume
++	phy-supply = <&vcc_phy>;
+ 	phy-mode = "rgmii";
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&rgmiim1_pins>;
+@@ -112,11 +121,22 @@
+ 	snps,reset-gpio = <&gpio1 RK_PC2 GPIO_ACTIVE_LOW>;
+ 	snps,reset-active-low;
+ 	snps,reset-delays-us = <0 10000 50000>;
+-	tx_delay = <0x24>;
+-	rx_delay = <0x18>;
++	tx_delay = <0x26>;
++	rx_delay = <0x11>;
+ 	status = "okay";
+ };
+ 
++&gmac2phy {
++	phy-supply = <&vcc_phy>;
++	clock_in_out = "output";
++	assigned-clocks = <&cru SCLK_MAC2PHY_SRC>;
++	assigned-clock-rate = <50000000>;
++	assigned-clocks = <&cru SCLK_MAC2PHY>;
++	assigned-clock-parents = <&cru SCLK_MAC2PHY_SRC>;
++	disable,wake-on-lan; // device does not resume
++	status = "disabled";
++};
++
+ &i2c1 {
+ 	status = "okay";
+ 

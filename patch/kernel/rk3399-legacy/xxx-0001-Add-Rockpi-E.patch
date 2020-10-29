@@ -222,7 +222,7 @@ index 00000000..8bda9c3a
 +	status = "okay";
 +};
 +
-+&vepu22 {
++&h265e {
 +	status = "okay";
 +};
 +
@@ -242,7 +242,7 @@ index 00000000..8bda9c3a
 +	status = "okay";
 +};
 +
-+&mpp_srv {
++&vpu_service {
 +	status = "okay";
 +};
 +
