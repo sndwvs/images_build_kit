@@ -1,2 +1,6 @@
-# Set "performance" GPU devfreq governor, "simple_ondemand" works bad in recent kernels
+# set "performance" GPU devfreq governor, "simple_ondemand" works bad in recent kernels
+# rk3399
 KERNEL=="ff9a0000.gpu", SUBSYSTEM=="devfreq", ATTR{governor}="performance"
+
+# rk3328
+KERNEL=="ff300000.gpu", SUBSYSTEM=="devfreq", ATTR{governor}="performance"
