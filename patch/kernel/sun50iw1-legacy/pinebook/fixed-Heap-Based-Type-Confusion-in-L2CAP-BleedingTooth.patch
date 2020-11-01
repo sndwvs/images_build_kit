@@ -1,3 +1,92 @@
+diff --git a/drivers/crypto/bcm/cipher.c b/drivers/crypto/bcm/cipher.c
+index f85356a48e7ea..ec4b5033013eb 100644
+--- a/drivers/crypto/bcm/cipher.c
++++ b/drivers/crypto/bcm/cipher.c
+@@ -2937,7 +2937,6 @@ static int aead_gcm_ccm_setkey(struct crypto_aead *cipher,
+ 
+ 	ctx->enckeylen = keylen;
+ 	ctx->authkeylen = 0;
+-	memcpy(ctx->enckey, key, ctx->enckeylen);
+ 
+ 	switch (ctx->enckeylen) {
+ 	case AES_KEYSIZE_128:
+@@ -2953,6 +2952,8 @@ static int aead_gcm_ccm_setkey(struct crypto_aead *cipher,
+ 		goto badkey;
+ 	}
+ 
++	memcpy(ctx->enckey, key, ctx->enckeylen);
++
+ 	flow_log("  enckeylen:%u authkeylen:%u\n", ctx->enckeylen,
+ 		 ctx->authkeylen);
+ 	flow_dump("  enc: ", ctx->enckey, ctx->enckeylen);
+@@ -3013,6 +3014,10 @@ static int aead_gcm_esp_setkey(struct crypto_aead *cipher,
+ 	struct iproc_ctx_s *ctx = crypto_aead_ctx(cipher);
+ 
+ 	flow_log("%s\n", __func__);
++
++	if (keylen < GCM_ESP_SALT_SIZE)
++		return -EINVAL;
++
+ 	ctx->salt_len = GCM_ESP_SALT_SIZE;
+ 	ctx->salt_offset = GCM_ESP_SALT_OFFSET;
+ 	memcpy(ctx->salt, key + keylen - GCM_ESP_SALT_SIZE, GCM_ESP_SALT_SIZE);
+@@ -3041,6 +3046,10 @@ static int rfc4543_gcm_esp_setkey(struct crypto_aead *cipher,
+ 	struct iproc_ctx_s *ctx = crypto_aead_ctx(cipher);
+ 
+ 	flow_log("%s\n", __func__);
++
++	if (keylen < GCM_ESP_SALT_SIZE)
++		return -EINVAL;
++
+ 	ctx->salt_len = GCM_ESP_SALT_SIZE;
+ 	ctx->salt_offset = GCM_ESP_SALT_OFFSET;
+ 	memcpy(ctx->salt, key + keylen - GCM_ESP_SALT_SIZE, GCM_ESP_SALT_SIZE);
+@@ -3070,6 +3079,10 @@ static int aead_ccm_esp_setkey(struct crypto_aead *cipher,
+ 	struct iproc_ctx_s *ctx = crypto_aead_ctx(cipher);
+ 
+ 	flow_log("%s\n", __func__);
++
++	if (keylen < CCM_ESP_SALT_SIZE)
++		return -EINVAL;
++
+ 	ctx->salt_len = CCM_ESP_SALT_SIZE;
+ 	ctx->salt_offset = CCM_ESP_SALT_OFFSET;
+ 	memcpy(ctx->salt, key + keylen - CCM_ESP_SALT_SIZE, CCM_ESP_SALT_SIZE);
+diff --git a/drivers/crypto/qat/qat_common/qat_algs.c b/drivers/crypto/qat/qat_common/qat_algs.c
+index b50eb55f8f57c..0d67cf5ede514 100644
+--- a/drivers/crypto/qat/qat_common/qat_algs.c
++++ b/drivers/crypto/qat/qat_common/qat_algs.c
+@@ -873,6 +873,11 @@ static int qat_alg_aead_dec(struct aead_request *areq)
+ 	struct icp_qat_fw_la_bulk_req *msg;
+ 	int digst_size = crypto_aead_authsize(aead_tfm);
+ 	int ret, ctr = 0;
++	u32 cipher_len;
++
++	cipher_len = areq->cryptlen - digst_size;
++	if (cipher_len % AES_BLOCK_SIZE != 0)
++		return -EINVAL;
+ 
+ 	ret = qat_alg_sgl_to_bufl(ctx->inst, areq->src, areq->dst, qat_req);
+ 	if (unlikely(ret))
+@@ -887,7 +892,7 @@ static int qat_alg_aead_dec(struct aead_request *areq)
+ 	qat_req->req.comn_mid.src_data_addr = qat_req->buf.blp;
+ 	qat_req->req.comn_mid.dest_data_addr = qat_req->buf.bloutp;
+ 	cipher_param = (void *)&qat_req->req.serv_specif_rqpars;
+-	cipher_param->cipher_length = areq->cryptlen - digst_size;
++	cipher_param->cipher_length = cipher_len;
+ 	cipher_param->cipher_offset = areq->assoclen;
+ 	memcpy(cipher_param->u.cipher_IV_array, areq->iv, AES_BLOCK_SIZE);
+ 	auth_param = (void *)((uint8_t *)cipher_param + sizeof(*cipher_param));
+@@ -916,6 +921,9 @@ static int qat_alg_aead_enc(struct aead_request *areq)
+ 	uint8_t *iv = areq->iv;
+ 	int ret, ctr = 0;
+ 
++	if (areq->cryptlen % AES_BLOCK_SIZE != 0)
++		return -EINVAL;
++
+ 	ret = qat_alg_sgl_to_bufl(ctx->inst, areq->src, areq->dst, qat_req);
+ 	if (unlikely(ret))
+ 		return ret;
 diff --git a/drivers/usb/serial/ftdi_sio.c b/drivers/usb/serial/ftdi_sio.c
 index ae98fe94fe91e..01a98d071c7c7 100644
 --- a/drivers/usb/serial/ftdi_sio.c
@@ -63,10 +152,10 @@ index f7a6ac05ac57a..eb5538a44ee9d 100644
  	{ USB_DEVICE(PETATEL_VENDOR_ID, PETATEL_PRODUCT_NP10T_600E) },
  	{ USB_DEVICE_AND_INTERFACE_INFO(TPLINK_VENDOR_ID, TPLINK_PRODUCT_LTE, 0xff, 0x00, 0x00) },	/* TP-Link LTE Module */
 diff --git a/drivers/usb/serial/pl2303.c b/drivers/usb/serial/pl2303.c
-index c5a2995dfa2e3..c0bf7a424d930 100644
+index e6d9b79d35217..e290b250f45cc 100644
 --- a/drivers/usb/serial/pl2303.c
 +++ b/drivers/usb/serial/pl2303.c
-@@ -100,6 +100,7 @@ static const struct usb_device_id id_table[] = {
+@@ -94,6 +94,7 @@ static const struct usb_device_id id_table[] = {
  	{ USB_DEVICE(HP_VENDOR_ID, HP_LD220_PRODUCT_ID) },
  	{ USB_DEVICE(HP_VENDOR_ID, HP_LD220TA_PRODUCT_ID) },
  	{ USB_DEVICE(HP_VENDOR_ID, HP_LD381_PRODUCT_ID) },
@@ -75,10 +164,10 @@ index c5a2995dfa2e3..c0bf7a424d930 100644
  	{ USB_DEVICE(HP_VENDOR_ID, HP_LD960TA_PRODUCT_ID) },
  	{ USB_DEVICE(HP_VENDOR_ID, HP_LCM220_PRODUCT_ID) },
 diff --git a/drivers/usb/serial/pl2303.h b/drivers/usb/serial/pl2303.h
-index 7d3090ee7e0cb..0f681ddbfd288 100644
+index c98db6b650a5c..a897680473a78 100644
 --- a/drivers/usb/serial/pl2303.h
 +++ b/drivers/usb/serial/pl2303.h
-@@ -127,6 +127,7 @@
+@@ -121,6 +121,7 @@
  
  /* Hewlett-Packard POS Pole Displays */
  #define HP_VENDOR_ID		0x03f0
@@ -87,21 +176,44 @@ index 7d3090ee7e0cb..0f681ddbfd288 100644
  #define HP_TD620_PRODUCT_ID	0x0956
  #define HP_LD960_PRODUCT_ID	0x0b39
 diff --git a/include/net/bluetooth/hci_core.h b/include/net/bluetooth/hci_core.h
-index da3728871e85d..78970afa96f97 100644
+index b689aceb636b1..3cd232cf29c66 100644
 --- a/include/net/bluetooth/hci_core.h
 +++ b/include/net/bluetooth/hci_core.h
-@@ -1402,11 +1402,13 @@ static inline void hci_encrypt_cfm(struct hci_conn *conn, __u8 status)
- 	else
- 		encrypt = 0x01;
+@@ -1308,16 +1308,34 @@ static inline void hci_auth_cfm(struct hci_conn *conn, __u8 status)
+ 		conn->security_cfm_cb(conn, status);
+ }
+ 
+-static inline void hci_encrypt_cfm(struct hci_conn *conn, __u8 status,
+-								__u8 encrypt)
++static inline void hci_encrypt_cfm(struct hci_conn *conn, __u8 status)
+ {
+ 	struct hci_cb *cb;
++	__u8 encrypt;
++
++	if (conn->state == BT_CONFIG) {
++		if (!status)
++			conn->state = BT_CONNECTED;
  
 -	if (conn->sec_level == BT_SECURITY_SDP)
 -		conn->sec_level = BT_SECURITY_LOW;
-+	if (!status) {
-+		if (conn->sec_level == BT_SECURITY_SDP)
-+			conn->sec_level = BT_SECURITY_LOW;
++		hci_connect_cfm(conn, status);
++		hci_conn_drop(conn);
++		return;
++	}
  
 -	if (conn->pending_sec_level > conn->sec_level)
 -		conn->sec_level = conn->pending_sec_level;
++	if (!test_bit(HCI_CONN_ENCRYPT, &conn->flags))
++		encrypt = 0x00;
++	else if (test_bit(HCI_CONN_AES_CCM, &conn->flags))
++		encrypt = 0x02;
++	else
++		encrypt = 0x01;
++
++	if (!status) {
++		if (conn->sec_level == BT_SECURITY_SDP)
++			conn->sec_level = BT_SECURITY_LOW;
++
 +		if (conn->pending_sec_level > conn->sec_level)
 +			conn->sec_level = conn->pending_sec_level;
 +	}
@@ -109,10 +221,10 @@ index da3728871e85d..78970afa96f97 100644
  	mutex_lock(&hci_cb_list_lock);
  	list_for_each_entry(cb, &hci_cb_list, list) {
 diff --git a/include/net/bluetooth/l2cap.h b/include/net/bluetooth/l2cap.h
-index 8f1e6a7a2df84..1d1232917de72 100644
+index 093aedebdf0ca..8efc2419a815f 100644
 --- a/include/net/bluetooth/l2cap.h
 +++ b/include/net/bluetooth/l2cap.h
-@@ -665,6 +665,8 @@ struct l2cap_ops {
+@@ -623,6 +623,8 @@ struct l2cap_ops {
  	struct sk_buff		*(*alloc_skb) (struct l2cap_chan *chan,
  					       unsigned long hdr_len,
  					       unsigned long len, int nb);
@@ -225,10 +337,10 @@ index 26526be579c75..da7fd7c8c2dc0 100644
  	req.ext_feat = 0;
  	a2mp_send(mgr, A2MP_DISCOVER_REQ, 1, sizeof(req), &req);
 diff --git a/net/bluetooth/hci_conn.c b/net/bluetooth/hci_conn.c
-index 307800fd18e6d..b99b5c6de55ab 100644
+index 87691404d0c6b..ee57fa20bac3e 100644
 --- a/net/bluetooth/hci_conn.c
 +++ b/net/bluetooth/hci_conn.c
-@@ -1323,6 +1323,23 @@ int hci_conn_check_link_mode(struct hci_conn *conn)
+@@ -1285,6 +1285,23 @@ int hci_conn_check_link_mode(struct hci_conn *conn)
  			return 0;
  	}
  
@@ -253,10 +365,43 @@ index 307800fd18e6d..b99b5c6de55ab 100644
  	    !test_bit(HCI_CONN_ENCRYPT, &conn->flags))
  		return 0;
 diff --git a/net/bluetooth/hci_event.c b/net/bluetooth/hci_event.c
-index 6c6c9a81bee2c..ff38f98988db8 100644
+index fd436e5d7b542..9917b399ddd0d 100644
 --- a/net/bluetooth/hci_event.c
 +++ b/net/bluetooth/hci_event.c
-@@ -3068,27 +3068,23 @@ static void hci_encrypt_change_evt(struct hci_dev *hdev, struct sk_buff *skb)
+@@ -2840,7 +2840,7 @@ static void hci_auth_complete_evt(struct hci_dev *hdev, struct sk_buff *skb)
+ 				     &cp);
+ 		} else {
+ 			clear_bit(HCI_CONN_ENCRYPT_PEND, &conn->flags);
+-			hci_encrypt_cfm(conn, ev->status, 0x00);
++			hci_encrypt_cfm(conn, ev->status);
+ 		}
+ 	}
+ 
+@@ -2925,22 +2925,7 @@ static void read_enc_key_size_complete(struct hci_dev *hdev, u8 status,
+ 		conn->enc_key_size = rp->key_size;
+ 	}
+ 
+-	if (conn->state == BT_CONFIG) {
+-		conn->state = BT_CONNECTED;
+-		hci_connect_cfm(conn, 0);
+-		hci_conn_drop(conn);
+-	} else {
+-		u8 encrypt;
+-
+-		if (!test_bit(HCI_CONN_ENCRYPT, &conn->flags))
+-			encrypt = 0x00;
+-		else if (test_bit(HCI_CONN_AES_CCM, &conn->flags))
+-			encrypt = 0x02;
+-		else
+-			encrypt = 0x01;
+-
+-		hci_encrypt_cfm(conn, 0, encrypt);
+-	}
++	hci_encrypt_cfm(conn, 0);
+ 
+ unlock:
+ 	hci_dev_unlock(hdev);
+@@ -2989,27 +2974,23 @@ static void hci_encrypt_change_evt(struct hci_dev *hdev, struct sk_buff *skb)
  
  	clear_bit(HCI_CONN_ENCRYPT_PEND, &conn->flags);
  
@@ -292,11 +437,27 @@ index 6c6c9a81bee2c..ff38f98988db8 100644
  	/* Try reading the encryption key size for encrypted ACL links */
  	if (!ev->status && ev->encrypt && conn->type == ACL_LINK) {
  		struct hci_cp_read_enc_key_size cp;
+@@ -3058,14 +3039,7 @@ static void hci_encrypt_change_evt(struct hci_dev *hdev, struct sk_buff *skb)
+ 	}
+ 
+ notify:
+-	if (conn->state == BT_CONFIG) {
+-		if (!ev->status)
+-			conn->state = BT_CONNECTED;
+-
+-		hci_connect_cfm(conn, ev->status);
+-		hci_conn_drop(conn);
+-	} else
+-		hci_encrypt_cfm(conn, ev->status, ev->encrypt);
++	hci_encrypt_cfm(conn, ev->status);
+ 
+ unlock:
+ 	hci_dev_unlock(hdev);
 diff --git a/net/bluetooth/l2cap_core.c b/net/bluetooth/l2cap_core.c
-index fe913a5c754a8..129cbef8e5605 100644
+index 12a50e5a9f452..3499bace25eca 100644
 --- a/net/bluetooth/l2cap_core.c
 +++ b/net/bluetooth/l2cap_core.c
-@@ -7302,9 +7302,10 @@ static int l2cap_data_rcv(struct l2cap_chan *chan, struct sk_buff *skb)
+@@ -6701,9 +6701,10 @@ static int l2cap_data_rcv(struct l2cap_chan *chan, struct sk_buff *skb)
  		goto drop;
  	}
  
@@ -311,10 +472,10 @@ index fe913a5c754a8..129cbef8e5605 100644
  	if (!control->sframe) {
  		int err;
 diff --git a/net/bluetooth/l2cap_sock.c b/net/bluetooth/l2cap_sock.c
-index a995d2c51fa7f..c7fc28a465fdb 100644
+index 390a9afab6473..40e96a610e2b4 100644
 --- a/net/bluetooth/l2cap_sock.c
 +++ b/net/bluetooth/l2cap_sock.c
-@@ -1663,6 +1663,19 @@ static void l2cap_sock_suspend_cb(struct l2cap_chan *chan)
+@@ -1479,6 +1479,19 @@ static void l2cap_sock_suspend_cb(struct l2cap_chan *chan)
  	sk->sk_state_change(sk);
  }
  
@@ -334,19 +495,19 @@ index a995d2c51fa7f..c7fc28a465fdb 100644
  static const struct l2cap_ops l2cap_chan_ops = {
  	.name			= "L2CAP Socket Interface",
  	.new_connection		= l2cap_sock_new_connection_cb,
-@@ -1678,6 +1691,7 @@ static const struct l2cap_ops l2cap_chan_ops = {
+@@ -1493,6 +1506,7 @@ static const struct l2cap_ops l2cap_chan_ops = {
+ 	.set_shutdown		= l2cap_sock_set_shutdown_cb,
  	.get_sndtimeo		= l2cap_sock_get_sndtimeo_cb,
- 	.get_peer_pid		= l2cap_sock_get_peer_pid_cb,
  	.alloc_skb		= l2cap_sock_alloc_skb_cb,
 +	.filter			= l2cap_sock_filter,
  };
  
  static void l2cap_sock_destruct(struct sock *sk)
 diff --git a/net/bluetooth/mgmt.c b/net/bluetooth/mgmt.c
-index 9e8a3cccc6ca3..9bcba7eff4bd3 100644
+index acb7c6d5643fe..5fce559a61bf5 100644
 --- a/net/bluetooth/mgmt.c
 +++ b/net/bluetooth/mgmt.c
-@@ -766,7 +766,8 @@ static u32 get_supported_settings(struct hci_dev *hdev)
+@@ -756,7 +756,8 @@ static u32 get_supported_settings(struct hci_dev *hdev)
  
  		if (lmp_ssp_capable(hdev)) {
  			settings |= MGMT_SETTING_SSP;
@@ -356,9 +517,9 @@ index 9e8a3cccc6ca3..9bcba7eff4bd3 100644
  		}
  
  		if (lmp_sc_capable(hdev))
-@@ -1794,6 +1795,10 @@ static int set_hs(struct sock *sk, struct hci_dev *hdev, void *data, u16 len)
+@@ -1771,6 +1772,10 @@ static int set_hs(struct sock *sk, struct hci_dev *hdev, void *data, u16 len)
  
- 	bt_dev_dbg(hdev, "sock %p", sk);
+ 	BT_DBG("request for %s", hdev->name);
  
 +	if (!IS_ENABLED(CONFIG_BT_HS))
 +		return mgmt_cmd_status(sk, hdev->id, MGMT_OP_SET_HS,
