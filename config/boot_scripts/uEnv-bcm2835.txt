@@ -1,3 +1,3 @@
 verbosity=4
 console=both
-extraargs=coherent_pool=1M 8250.nr_uarts=1 snd_bcm2835.enable_compat_alsa=1 snd_bcm2835.enable_hdmi=1 snd_bcm2835.enable_headphones=1
+extraargs=coherent_pool=1M 8250.nr_uarts=1 snd_bcm2835.enable_compat_alsa=1 snd_bcm2835.enable_hdmi=1 snd_bcm2835.enable_headphones=1 smsc95xx.macaddr=00:90:5e:df:8c:81
