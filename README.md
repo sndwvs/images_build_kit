@@ -49,3 +49,11 @@ password: **password**
 
 ## cross compilation arm on aarch64 architecture ##
 `ARCH=arm ./build.sh`
+
+
+# VARIABLES #
+
+## config/environment/00-environment.conf ##
+| variable             | possible values      | description          |
+| :------------------- | :------------------- | :------------------- |
+| NTP                  | yes/no (yes - default) | setting up the NTP server |
