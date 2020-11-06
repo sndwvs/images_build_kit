@@ -30,13 +30,13 @@ password: **password**
     * RK3328
         + [Rock64](http://wiki.pine64.org/index.php/ROCK64_Main_Page#SoC_and_Memory_Specification)
         + [Rock Pi E](https://wiki.radxa.com/RockpiE/getting_started#Features) board provided by [Radxa Team](https://forum.radxa.com/t/rock-pi-e-engineering-sample-is-available-now/3130)
-        + [Station M1](http://stationpc.com/portal.php?mod=topic&topicid=7#spec)
+        + [Station M1 (roc-rk3328-pc)](http://stationpc.com/portal.php?mod=topic&topicid=7#spec)
     * RK3399
         + [Firefly-RK3399](http://en.t-firefly.com/product/rk3399.html)
         + [ROCKPro64](http://wiki.pine64.org/index.php/ROCKPro64_Main_Page#SoC_and_Memory_Specification)
         + [Rock Pi 4](http://rockpi.org/#spec-section)
         + [Pinebook Pro](https://wiki.pine64.org/index.php/Pinebook_Pro#SoC_and_Memory_Specification)
-        + [Station P1](http://stationpc.com/portal.php?mod=topic&topicid=2#spec)
+        + [Station P1 (roc-rk3399-pc-plus)](http://stationpc.com/portal.php?mod=topic&topicid=2#spec)
 * Broadcom
     * BCM2837
         + [Raspberry Pi 3](https://www.raspberrypi.org/products/raspberry-pi-3-model-b/)
