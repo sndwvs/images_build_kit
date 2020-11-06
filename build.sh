@@ -208,7 +208,7 @@ for image_type in ${DISTR_IMAGES[@]}; do
         setting_system
         setting_settings
         setting_wifi
-        [[ $NTP == "yes" ]] setting_ntp
+        [[ $NTP == "yes" ]] && setting_ntp
         setting_bootloader_move_to_disk
         setting_governor
         download_pkg $DISTR_URL "$image_type"
