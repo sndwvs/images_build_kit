@@ -10,10 +10,12 @@ This commit fixes that issue.
 This is only a temporary work around while a permenant fix is found, as this commit seems to only cause issues
 with dwc2
 
+
 diff --git a/drivers/net/wireless/ath/ath9k/hif_usb.c b/drivers/net/wireless/ath/ath9k/hif_usb.c
---- b/drivers/net/wireless/ath/ath9k/hif_usb.c
-+++ a/drivers/net/wireless/ath/ath9k/hif_usb.c
-@@ -118,10 +118,10 @@
+index 3f563e02d..903851481 100644
+--- a/drivers/net/wireless/ath/ath9k/hif_usb.c
++++ b/drivers/net/wireless/ath/ath9k/hif_usb.c
+@@ -118,10 +118,10 @@ static int hif_usb_send_regout(struct hif_device_usb *hif_dev,
  	cmd->skb = skb;
  	cmd->hif_dev = hif_dev;
  
@@ -27,7 +29,7 @@ diff --git a/drivers/net/wireless/ath/ath9k/hif_usb.c b/drivers/net/wireless/ath
  
  	usb_anchor_urb(urb, &hif_dev->regout_submitted);
  	ret = usb_submit_urb(urb, GFP_KERNEL);
-@@ -735,11 +735,11 @@
+@@ -735,11 +735,11 @@ static void ath9k_hif_usb_reg_in_cb(struct urb *urb)
  
  		rx_buf->skb = nskb;
  
@@ -38,11 +40,11 @@ diff --git a/drivers/net/wireless/ath/ath9k/hif_usb.c b/drivers/net/wireless/ath
  						 USB_REG_IN_PIPE),
  				 nskb->data, MAX_REG_IN_BUF_SIZE,
 -				 ath9k_hif_usb_reg_in_cb, rx_buf, 1);
-+				 ath9k_hif_usb_reg_in_cb, nskb);
++				 ath9k_hif_usb_reg_in_cb, rx_buf);
  	}
  
  resubmit:
-@@ -944,11 +944,11 @@
+@@ -944,11 +944,11 @@ static int ath9k_hif_usb_alloc_reg_in_urbs(struct hif_device_usb *hif_dev)
  		rx_buf->hif_dev = hif_dev;
  		rx_buf->skb = skb;
  
@@ -57,7 +59,7 @@ diff --git a/drivers/net/wireless/ath/ath9k/hif_usb.c b/drivers/net/wireless/ath
  
  		/* Anchor URB */
  		usb_anchor_urb(urb, &hif_dev->reg_in_submitted);
-@@ -1069,7 +1069,9 @@
+@@ -1069,7 +1069,9 @@ static int ath9k_hif_usb_download_fw(struct hif_device_usb *hif_dev)
  
  static int ath9k_hif_usb_dev_init(struct hif_device_usb *hif_dev)
  {
@@ -68,7 +70,7 @@ diff --git a/drivers/net/wireless/ath/ath9k/hif_usb.c b/drivers/net/wireless/ath
  
  	ret = ath9k_hif_usb_download_fw(hif_dev);
  	if (ret) {
-@@ -1079,6 +1081,20 @@
+@@ -1079,6 +1081,20 @@ static int ath9k_hif_usb_dev_init(struct hif_device_usb *hif_dev)
  		return ret;
  	}
  
@@ -89,7 +91,7 @@ diff --git a/drivers/net/wireless/ath/ath9k/hif_usb.c b/drivers/net/wireless/ath
  	/* Alloc URBs */
  	ret = ath9k_hif_usb_alloc_urbs(hif_dev);
  	if (ret) {
-@@ -1353,7 +1369,7 @@
+@@ -1353,7 +1369,7 @@ static void ath9k_hif_usb_reboot(struct usb_device *udev)
  	if (!buf)
  		return;
  
