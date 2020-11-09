@@ -407,3 +407,25 @@ setting_governor() {
         sed "s:#SCALING_\(.*\)=\(.*\):SCALING_\1=$CPU_GOVERNOR:g" -i $SOURCE/$ROOTFS/etc/default/cpufreq
     fi
 }
+
+
+image_compression() {
+    local IMG="$1"
+    pushd $BUILD/$OUTPUT/$IMAGES >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    COMPRESSOR="zstd"
+    EXT="zst"
+    PARAMETERS="-qf12 --rm"
+    message "" "compression" "$COMPRESSOR $PARAMETERS ${IMG}.img"
+    pushd $BUILD/$OUTPUT/$IMAGES >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    $COMPRESSOR $PARAMETERS ${IMG}.img
+    # testing
+    message "" "testing" "$COMPRESSOR -qt ${IMG}.img.${EXT}"
+    $COMPRESSOR -qt ${IMG}.img.${EXT}
+    # create checksum
+    local CHECKSUM="sha1sum"
+    local CHECKSUM_EXT="sha"
+    message "" "create" "checksum ${CHECKSUM} ${IMG}.img.${EXT}.${CHECKSUM_EXT}"
+    ${CHECKSUM} ${IMG}.img.${EXT} > ${IMG}.img.${EXT}.${CHECKSUM_EXT}
+    popd >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+}
+

@@ -216,6 +216,7 @@ for image_type in ${DISTR_IMAGES[@]}; do
         install_kernel
         create_initrd
         create_img
+        [[ $IMAGE_COMPRESSION == "yes" ]] && image_compression "$ROOTFS"
     fi
 
     if [[ $image_type == xfce ]]; then
@@ -236,6 +237,7 @@ for image_type in ${DISTR_IMAGES[@]}; do
         setting_for_desktop
         setting_alsa "$ROOTFS_XFCE"
         create_img "$image_type"
+        [[ $IMAGE_COMPRESSION == "yes" ]] && image_compression "$ROOTFS_XFCE"
     fi
 done
 

@@ -59,3 +59,4 @@ password: **password**
 | variable             | possible values      | description          |
 | :------------------- | :------------------- | :------------------- |
 | NTP                  | yes/no (yes - default) | setting up the NTP server |
+| IMAGE_COMPRESSION    | yes/no (yes - default) | image compression |
