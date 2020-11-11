@@ -58,10 +58,15 @@ get_config() {
                     "$CWD/config/sources/$SOCFAMILY"
 #                    "$CWD/config/packages"
                 )
+
+    # applied first
+    message "" "added" "configuration file environment.conf"
+    source "$CWD/config/environment/environment.conf" || exit 1
+
     for dir in "${dirs[@]}"; do
         for file in ${dir}/*.conf; do
             _file=$(basename ${file})
-            if $(echo "${dir}" | grep -q "environment"); then
+            if [[ $(echo "${dir}" | grep -q "environment") || "${_file}" != "environment.conf" ]]; then
                 message "" "added" "configuration file $_file"
                 source "$file" || exit 1
             fi
@@ -185,7 +190,7 @@ gcc_version() {
 read_packages() {
     local TYPE="$1"
     local PKG
-    [[ -f $CWD/config/packages/packages-${TYPE}.conf ]] && PKG=( $(cat $CWD/config/packages/packages-${TYPE}.conf | grep -v "^#") )
+    [[ -f $CWD/config/packages/packages-${TYPE}.conf ]] && PKG=( $(grep -vP "^#|^$" $CWD/config/packages/packages-${TYPE}.conf) )
     eval "$2=\${PKG[*]}"
 }
 
