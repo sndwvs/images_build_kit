@@ -66,7 +66,7 @@ get_config() {
     for dir in "${dirs[@]}"; do
         for file in ${dir}/*.conf; do
             _file=$(basename ${file})
-            if [[ $(echo "${dir}" | grep -q "environment") || "${_file}" != "environment.conf" ]]; then
+            if [[ $(echo "${dir}" | grep "environment") && "${_file}" != "environment.conf" ]]; then
                 message "" "added" "configuration file $_file"
                 source "$file" || exit 1
             fi
