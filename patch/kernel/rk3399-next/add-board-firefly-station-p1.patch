@@ -10,7 +10,7 @@ diff --git a/arch/arm64/boot/dts/rockchip/Makefile b/arch/arm64/boot/dts/rockchi
 diff --git a/arch/arm64/boot/dts/rockchip/rk3399-station-p1.dts b/arch/arm64/boot/dts/rockchip/rk3399-station-p1.dts
 --- /dev/null	2013-01-18 10:51:04.168000019 +0200
 +++ b/arch/arm64/boot/dts/rockchip/rk3399-station-p1.dts	2020-11-12 21:52:14.380892248 +0200
-@@ -0,0 +1,119 @@
+@@ -0,0 +1,115 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 +/*
 + * Copyright (c) 2017 T-Chip Intelligent Technology Co., Ltd
@@ -100,10 +100,6 @@ diff --git a/arch/arm64/boot/dts/rockchip/rk3399-station-p1.dts b/arch/arm64/boo
 +	};
 +
 +	wifi {
-+		wifi_enable_h: wifi-enable-h {
-+			rockchip,pins = <0 RK_PB2 RK_FUNC_GPIO &pcfg_pull_none>;
-+		};
-+
 +		wifi_host_wake_l: wifi-host-wake-l {
 +			rockchip,pins = <0 RK_PA3 RK_FUNC_GPIO &pcfg_pull_none>;
 +		};
