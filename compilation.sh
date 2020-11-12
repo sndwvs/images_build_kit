@@ -27,7 +27,7 @@ compile_boot_loader() {
     cd $SOURCE/$BOOT_LOADER_DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     gcc_version "$CROSS" GCC_VERSION
-    message "" "version" "$GCC_VERSION"
+    message "" "compiler" "gcc $GCC_VERSION"
 
     local ARCH=arm
 
@@ -143,7 +143,7 @@ compile_kernel() {
     install -D $CWD/config/kernel/$LINUX_CONFIG $SOURCE/$KERNEL_DIR/.config || (message "err" "details" && exit 1) || exit 1
 
     gcc_version "$CROSS" GCC_VERSION
-    message "" "version" "$GCC_VERSION"
+    message "" "compiler" "gcc $GCC_VERSION"
 
     # added in name suffix
     change_name_version ""
