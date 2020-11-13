@@ -1,0 +1,33 @@
+--- a/arch/arm64/boot/dts/rockchip/Makefile	2020-10-31 02:37:07.601335180 +0200
++++ b/arch/arm64/boot/dts/rockchip/Makefile	2020-11-13 08:20:39.963996542 +0200
+@@ -108,6 +108,7 @@
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-rock-pi-4a.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-rock-pi-4b.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-rock-pi-4c.dtb
++dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-station-p1.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-tve1030g.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-tve1030g-avb.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-tve1205g.dtb
+--- /dev/null	2013-01-18 10:51:04.168000019 +0200
++++ b/arch/arm64/boot/dts/rockchip/rk3399-station-p1.dts	2020-11-13 08:14:06.637808030 +0200
+@@ -0,0 +1,20 @@
++/dts-v1/;
++#include "rk3399-roc-pc.dtsi"
++
++/ {
++	model = "Firefly Station P1";
++	compatible = "firefly,station-p1", "firefly,roc-rk3399-pc-plus", "rockchip,rk3399";
++};
++
++&wireless_wlan {
++	status = "okay";
++};
++
++&wireless_bluetooth {
++	status = "okay";
++};
++
++&usb_charge {
++	status = "okay";
++};
++
