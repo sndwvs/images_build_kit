@@ -414,7 +414,7 @@ image_compression() {
     pushd $BUILD/$OUTPUT/$IMAGES >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     COMPRESSOR="zstd"
     EXT="zst"
-    PARAMETERS="-qf12 --rm -T${CTHREADS}"
+    PARAMETERS="-qf12 --rm -T${CPUS}"
     message "" "compression" "$COMPRESSOR $PARAMETERS ${IMG}.img"
     pushd $BUILD/$OUTPUT/$IMAGES >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     $COMPRESSOR $PARAMETERS ${IMG}.img
