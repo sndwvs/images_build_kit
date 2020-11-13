@@ -422,8 +422,8 @@ image_compression() {
     message "" "testing" "$COMPRESSOR -qt ${IMG}.img.${EXT}"
     $COMPRESSOR -qt ${IMG}.img.${EXT}
     # create checksum
-    local CHECKSUM="sha1sum"
-    local CHECKSUM_EXT="sha"
+    local CHECKSUM_EXT="sha256"
+    local CHECKSUM="${CHECKSUM_EXT}sum"
     message "" "create" "checksum ${CHECKSUM} ${IMG}.img.${EXT}.${CHECKSUM_EXT}"
     ${CHECKSUM} ${IMG}.img.${EXT} > ${IMG}.img.${EXT}.${CHECKSUM_EXT}
     popd >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
