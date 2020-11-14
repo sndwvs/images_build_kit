@@ -21,7 +21,7 @@ build_kernel_pkg() {
     rsync -a --exclude .git $SOURCE/$KERNEL_FIRMWARE_DIR/ $BUILD/$PKG/kernel-modules/lib/firmware/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     # adding custom firmware
-    [[ ! -z $FIRMWARE ]] && ( rsync -va $CWD/blobs/$FIRMWARE/* -d $BUILD/$PKG/kernel-modules/lib/firmware/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+    [[ $FIRMWARE == "yes" ]] && ( rsync -va $CWD/blobs/firmware/* -d $BUILD/$PKG/kernel-modules/lib/firmware/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
 
     # install kernel
     install -Dm644 $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/$KERNEL "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/$KERNEL"
