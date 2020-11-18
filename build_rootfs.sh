@@ -313,6 +313,9 @@ setting_system() {
     if [[ -d $CWD/system/$SOCFAMILY ]]; then
         rsync -av --chown=root:root $CWD/system/$SOCFAMILY/ $SOURCE/$ROOTFS/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
+#    if [[ -d $CWD/system/$BOARD_NAME ]]; then
+#        rsync -av --chown=root:root $CWD/system/$BOARD_NAME/ $SOURCE/$ROOTFS/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+#    fi
 }
 
 
@@ -333,8 +336,10 @@ setting_hostname() {
 
 
 setting_networkmanager() {
+    [[ ! -z "$1" ]] && local ROOTFS="$1"
+
     message "" "setting" "networkmanager"
-    chmod 755 "$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.networkmanager" || exit 1
+    chmod 755 "$SOURCE/$ROOTFS/etc/rc.d/rc.networkmanager" || exit 1
 }
 
 
