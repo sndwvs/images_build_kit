@@ -233,6 +233,7 @@ for image_type in ${DISTR_IMAGES[@]}; do
         download_pkg $DISTR_EXTRA_URL $SOCFAMILY
         install_pkg $SOCFAMILY
 
+        [[ $NETWORKMANAGER == "yes" ]] && setting_networkmanager
         setting_default_start_x
         setting_for_desktop
         setting_alsa "$ROOTFS_XFCE"

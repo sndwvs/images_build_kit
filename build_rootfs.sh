@@ -332,6 +332,12 @@ setting_hostname() {
 }
 
 
+setting_networkmanager() {
+    message "" "setting" "networkmanager"
+    chmod 755 "$SOURCE/$ROOTFS/etc/rc.d/rc.networkmanager" || exit 1
+}
+
+
 setting_ntp() {
     message "" "setting" "ntp"
     chmod 755 "$SOURCE/$ROOTFS/etc/rc.d/rc.ntpd" || exit 1

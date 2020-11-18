@@ -59,4 +59,5 @@ password: **password**
 | variable             | possible values      | description          |
 | :------------------- | :------------------- | :------------------- |
 | NTP                  | yes/no (yes - default) | setting up the NTP server |
+| NETWORKMANAGER       | yes/no (yes - default) | setting up the NetworkManager service |
 | IMAGE_COMPRESSION    | yes/no (yes - default) | image compression |
