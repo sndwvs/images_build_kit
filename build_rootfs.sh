@@ -334,7 +334,7 @@ setting_hostname() {
 
 setting_networkmanager() {
     message "" "setting" "networkmanager"
-    chmod 755 "$SOURCE/$ROOTFS/etc/rc.d/rc.networkmanager" || exit 1
+    chmod 755 "$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.networkmanager" || exit 1
 }
 
 
