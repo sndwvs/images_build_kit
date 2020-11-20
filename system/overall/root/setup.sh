@@ -27,7 +27,7 @@ case ${COMPATIBLE} in
 #            LOADER="idbloader.img:uboot.img:trust.img"
 #            FIX_BOOT_DISK=true
 #    ;;
-    *rock*64*|*rock*pi*|pinebook*pro|*firefly*rk33*)
+    *rock*64*|*rock*pi*|*pinebook*pro*|*firefly*rk33*)
             OFFSET_LOADER="64:16384:"
             LOADER="idbloader.img:u-boot.itb:"
             FIX_BOOT_DISK=true
