@@ -23,36 +23,36 @@ done
 
 # Duplicate file descriptor 1 on descriptor 3
 exec 3>&1
-
 while true; do
     BOARD_NAME=$(dialog --title "build rootfs" \
                 --radiolist "selected your board" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
                 "${BOARDS[@]}" \
     2>&1 1>&3)
 
-    if [ ! -e $BOARD_NAME ]; then
-        break
-    fi
+    [ ! -e $BOARD_NAME ] && break
 done
-
-# kernel source
-result=$(dialog --title "build for $BOARD_NAME" \
-        --radiolist "select kernel source" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
-        "legacy" "legacy kernel-source" "off" \
-        "next" "mainline kernel-source" "on" \
-2>&1 1>&3)
-
-exit_status=$?
 # Close file descriptor 3
 exec 3>&-
 
-for arg in $result; do
-    if [ "$arg" == "legacy" ]; then
-            KERNEL_SOURCE=$arg
-    elif [ "$arg" == "next" ]; then
-            KERNEL_SOURCE=$arg
-    fi
+# Duplicate file descriptor 1 on descriptor 3
+exec 3>&1
+#---------------------------------------------
+# get kernel source type
+#---------------------------------------------
+KERNEL_SOURCES=$(grep -oP "(?<=_SOURCES=).*$" $CWD/config/boards/$BOARD_NAME/${BOARD_NAME}.conf | sed 's:\"::g')
+[ ! -z ${KERNEL_SOURCES%%:*} ] && kernel_sources_options+=("${KERNEL_SOURCES%%:*}" "legacy kernel source" "off")
+[ ! -z ${KERNEL_SOURCES##*:} ] && kernel_sources_options+=("${KERNEL_SOURCES##*:}" "mainline kernel source" "off")
+while true; do
+    # kernel source
+    KERNEL_SOURCE=$(dialog --title "build for $BOARD_NAME" \
+            --radiolist "select kernel source" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
+            "${kernel_sources_options[@]}" \
+    2>&1 1>&3)
+
+    [ ! -e $KERNEL_SOURCE ] && break
 done
+# Close file descriptor 3
+exec 3>&-
 
 options+=("clean" "clean sources, remove binaries and image" "off")
 options+=("download" "download source and use pre-built binaries" "on")
@@ -63,19 +63,16 @@ options+=("xfce-image" "create image with xfce" "off")
 
 # Duplicate file descriptor 1 on descriptor 3
 exec 3>&1
-
 while true; do
     result=$(dialog --title "build $KERNEL_SOURCE for $BOARD_NAME" \
            --checklist "select build options" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
            "${options[@]}" \
     2>&1 1>&3)
-    if [[ ! -z $result ]]; then break; fi
+    [ ! -z $result ] && break
 done
-
 exit_status=$?
 # Close file descriptor 3
 exec 3>&-
-
 
 for arg in ${result[*]}; do
     case "$arg" in
