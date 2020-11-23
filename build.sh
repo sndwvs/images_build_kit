@@ -68,7 +68,7 @@ while true; do
            --checklist "select build options" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
            "${options[@]}" \
     2>&1 1>&3)
-    [ ! -z $result ] && break
+    [ ! -z "$result" ] && break
 done
 exit_status=$?
 # Close file descriptor 3
