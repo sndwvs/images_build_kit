@@ -5,9 +5,9 @@ Without it rk808 used by all rk3399 boards fails to be probed.
 
 diff --git a/drivers/regulator/core.c b/drivers/regulator/core.c
 index 4859cf84c..b6dcbb779 100644
---- a/drivers/regulator/core.c
-+++ b/drivers/regulator/core.c
-@@ -5256,20 +5256,15 @@ regulator_register(const struct regulator_desc *regulator_desc,
+--- a/drivers/regulator/core.c	2020-11-30 13:37:25.615646522 +0200
++++ b/drivers/regulator/core.c	2020-11-30 13:40:29.834596092 +0200
+@@ -5264,20 +5264,15 @@
  	else if (regulator_desc->supply_name)
  		rdev->supply_name = regulator_desc->supply_name;
  
@@ -19,7 +19,7 @@ index 4859cf84c..b6dcbb779 100644
 +	if (regulator_resolve_supply(rdev))
 +		rdev_dbg(rdev, "unable to resolve supply\n");
 +
- 	ret = set_machine_constraints(rdev, constraints);
+ 	ret = set_machine_constraints(rdev);
 -	if (ret == -EPROBE_DEFER) {
 -		/* Regulator might be in bypass mode and so needs its supply
 -		 * to set the constraints */
@@ -28,7 +28,7 @@ index 4859cf84c..b6dcbb779 100644
 -		 * that is just being created */
 -		ret = regulator_resolve_supply(rdev);
 -		if (!ret)
--			ret = set_machine_constraints(rdev, constraints);
+-			ret = set_machine_constraints(rdev);
 -		else
 -			rdev_dbg(rdev, "unable to resolve supply early: %pe\n",
 -				 ERR_PTR(ret));
