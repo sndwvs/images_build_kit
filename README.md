@@ -59,6 +59,7 @@ password: **password**
 ## config/environment/00-environment.conf ##
 | variable             | possible values      | description          |
 | :------------------- | :------------------- | :------------------- |
+| USE_UBOOT_MIRROR     | yes/no (no  - default) | use u-boot mirror  |
 | NTP                  | yes/no (yes - default) | setting up the NTP server |
 | NETWORKMANAGER       | yes/no (yes - default) | setting up the NetworkManager service |
 | IMAGE_COMPRESSION    | yes/no (yes - default) | image compression |
