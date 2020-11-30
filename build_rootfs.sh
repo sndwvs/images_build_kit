@@ -219,7 +219,11 @@ download_pkg() {
         category=$(echo $pkg | cut -f1 -d "/")
         pkg=$(echo $pkg | cut -f2 -d "/")
         if [[ ! -z ${pkg} ]];then
-            PKG_NAME=($(wget --no-check-certificate -q -O - ${url}/${category}/ | cut -f7 -d '>' | cut -f1 -d '<' | egrep -o "(^$(echo $pkg | sed 's/+/\\\+/g'))-.*(t.z)" | sort -ur))
+            if [[ $USE_SLARM64_MIRROR == yes ]];then
+                PKG_NAME=($(wget --no-check-certificate -q -O - ${url}/${category}/ | grep -oP '(?<=\"\>&nbsp;).*(?=\<\/a\>)' | egrep -o "(^$(echo $pkg | sed 's/+/\\\+/g'))-.*(t.z)" | sort -ur))
+            else
+                PKG_NAME=($(wget --no-check-certificate -q -O - ${url}/${category}/ | cut -f7 -d '>' | cut -f1 -d '<' | egrep -o "(^$(echo $pkg | sed 's/+/\\\+/g'))-.*(t.z)" | sort -ur))
+            fi
             for raw in ${PKG_NAME[*]};do
                [[ $(echo $raw | rev | cut -d '-' -f4- | rev | grep -ox $pkg) ]] && _PKG_NAME=$raw
             done

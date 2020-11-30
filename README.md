@@ -61,6 +61,7 @@ password: **password**
 | :------------------- | :------------------- | :------------------- |
 | USE_NEXT_KERNEL_MIRROR | yes/no (yes - default) | use mainline kernel mirror |
 | USE_UBOOT_MIRROR     | yes/no (no  - default) | use u-boot mirror  |
+| USE_SLARM64_MIRROR   | yes/no (no  - default) | use slarm64 mirror |
 | NTP                  | yes/no (yes - default) | setting up the NTP server |
 | NETWORKMANAGER       | yes/no (yes - default) | setting up the NetworkManager service |
 | IMAGE_COMPRESSION    | yes/no (yes - default) | image compression |

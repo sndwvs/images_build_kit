@@ -96,12 +96,25 @@ fi
 
 
 #---------------------------------------------
+# configuration distribution source base url
+#---------------------------------------------
+if [[ ${DISTR} == slackwarearm ]];then
+    DISTR_SOURCE=${DISTR_SOURCE:-"https://ftp.arm.slackware.com/slackwarearm"}
+else
+    if [[ $USE_SLARM64_MIRROR == yes ]]; then
+        DISTR_SOURCE=${DISTR_SOURCE:-"https://osdn.net/projects/slarm64/storage"}
+    else
+        DISTR_SOURCE=${DISTR_SOURCE:-"http://dl.fail.pp.ua/slackware"}
+    fi
+fi
+
+#---------------------------------------------
 # rootfs configuration
 #---------------------------------------------
 if [[ ${DISTR} == slackwarearm ]];then
-    URL_ROOTFS="https://ftp.arm.slackware.com/slackwarearm/slackwarearm-devtools/minirootfs/roots/"
+    URL_ROOTFS=${URL_ROOTFS:-"${DISTR_SOURCE}/slackwarearm-devtools/minirootfs/roots/"}
 else
-    URL_ROOTFS="http://dl.fail.pp.ua/slackware/rootfs/"
+    URL_ROOTFS=${URL_ROOTFS:-"${DISTR_SOURCE}/rootfs/"}
 fi
 ROOTFS_NAME=$(wget --no-check-certificate -q -O - $URL_ROOTFS | grep -oP "(sla(ck|rm64)-current-[\.\-\+\d\w]+.tar.xz)" | sort -ur | head -n1 | cut -d '.' -f1)
 ROOTFS_VERSION=$(date +%Y%m%d)
@@ -138,8 +151,10 @@ if [[ ${DISTR} == slackwarearm ]];then
 else
     DISTR_DIR=${DISTR}
 fi
-DISTR_URL="http://dl.fail.pp.ua/slackware/${DISTR}-${DISTR_VERSION}/${DISTR_DIR}"
-DISTR_EXTRA_URL="http://dl.fail.pp.ua/slackware/packages/${ARCH}"
+DISTR_URL="${DISTR_SOURCE}/${DISTR}-${DISTR_VERSION}/${DISTR_DIR}"
+DISTR_EXTRA_URL="${DISTR_SOURCE}/packages/${ARCH}"
+#DISTR_URL="http://dl.fail.pp.ua/slackware/${DISTR}-${DISTR_VERSION}/${DISTR_DIR}"
+#DISTR_EXTRA_URL="http://dl.fail.pp.ua/slackware/packages/${ARCH}"
 
 #---------------------------------------------
 # clean enviroment
