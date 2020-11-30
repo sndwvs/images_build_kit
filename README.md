@@ -59,6 +59,7 @@ password: **password**
 ## config/environment/00-environment.conf ##
 | variable             | possible values      | description          |
 | :------------------- | :------------------- | :------------------- |
+| USE_NEXT_KERNEL_MIRROR | yes/no (yes - default) | use mainline kernel mirror |
 | USE_UBOOT_MIRROR     | yes/no (no  - default) | use u-boot mirror  |
 | NTP                  | yes/no (yes - default) | setting up the NTP server |
 | NETWORKMANAGER       | yes/no (yes - default) | setting up the NetworkManager service |

@@ -9,8 +9,11 @@ fi
 #---------------------------------------------
 # mainline kernel source configuration
 #---------------------------------------------
-LINUX_SOURCE=${LINUX_SOURCE:-"https://kernel.googlesource.com/pub/scm/linux/kernel/git/stable/linux-stable"}
-#LINUX_SOURCE='git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git'
+if [[ $USE_NEXT_KERNEL_MIRROR == yes ]]; then
+    LINUX_SOURCE=${LINUX_SOURCE:-"https://kernel.googlesource.com/pub/scm/linux/kernel/git/stable/linux-stable"}
+else
+    LINUX_SOURCE=${LINUX_SOURCE:-"git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git"}
+fi
 KERNEL_BRANCH=${KERNEL_BRANCH:-"linux-5.9.y::"}
 KERNEL_DIR=${KERNEL_DIR:-"linux-$KERNEL_SOURCE"}
 
