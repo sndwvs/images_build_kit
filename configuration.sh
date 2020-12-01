@@ -99,7 +99,7 @@ fi
 # configuration distribution source base url
 #---------------------------------------------
 if [[ ${DISTR} == slackwarearm ]];then
-    DISTR_SOURCE=${DISTR_SOURCE:-"https://ftp.arm.slackware.com/slackwarearm"}
+    DISTR_SOURCE=${DISTR_SOURCE:-"http://dl.fail.pp.ua/slackware"}
 else
     if [[ $USE_SLARM64_MIRROR == yes ]]; then
         DISTR_SOURCE=${DISTR_SOURCE:-"https://osdn.net/projects/slarm64/storage"}
@@ -112,7 +112,8 @@ fi
 # rootfs configuration
 #---------------------------------------------
 if [[ ${DISTR} == slackwarearm ]];then
-    URL_ROOTFS=${URL_ROOTFS:-"${DISTR_SOURCE}/slackwarearm-devtools/minirootfs/roots/"}
+#    URL_ROOTFS=${URL_ROOTFS:-"${DISTR_SOURCE}/slackwarearm-devtools/minirootfs/roots/"}
+    URL_ROOTFS=${URL_ROOTFS:-"https://ftp.arm.slackware.com/slackwarearm/slackwarearm-devtools/minirootfs/roots/"}
 else
     URL_ROOTFS=${URL_ROOTFS:-"${DISTR_SOURCE}/rootfs/"}
 fi
