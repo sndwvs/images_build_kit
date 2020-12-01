@@ -1,6 +1,6 @@
 --- a/arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s.dts	2020-12-01 17:53:08.008768652 +0200
 +++ b/arch/arm64/boot/dts/rockchip/rk3308-rock-pi-s.dts	2020-12-01 17:54:29.728826515 +0200
-@@ -335,3 +335,30 @@
+@@ -335,3 +335,20 @@
  	pinctrl-0 = <&uart4_xfer &uart4_rts &uart4_cts>;
  	status = "okay";
  };
@@ -12,22 +12,12 @@
 +		phy-supply = <&vcc5v0_otg>;
 +		status = "okay";
 +	};
-+
-+	u2phy_otg: otg-port {
-+		vbus-supply = <&vcc5v0_otg>;
-+		status = "okay";
-+	};
 +};
 +
-+&usb20_otg {
-+	dr_mode = "host";
++&usb_host_ehci {
 +	status = "okay";
 +};
 +
-+&usb_host0_ehci {
-+	status = "okay";
-+};
-+
-+&usb_host0_ohci{
++&usb_host_ohci{
 +	status = "okay";
 +};
