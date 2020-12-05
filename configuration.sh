@@ -33,7 +33,8 @@ DISTR_VERSION=${DISTR_VERSION:-"current"} # or 14.2
 #---------------------------------------------
 # configuration build images
 #---------------------------------------------
-#DISTR_IMAGES=${DISTR_IMAGES:-"mini"}
+DISTR_IMAGES+=("base")
+[[ $DESKTOP_SELECTED == yes ]] && DISTR_IMAGES+=("xfce")
 
 #---------------------------------------------
 # boot loader configuration

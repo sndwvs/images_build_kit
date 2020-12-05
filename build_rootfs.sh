@@ -11,7 +11,7 @@ get_name_rootfs() {
     image_type="$1"
     kernel_version KERNEL_VERSION
 
-    if [[ $image_type == mini ]]; then
+    if [[ $image_type == base ]]; then
         ROOTFS="${ROOTFS_NAME/rootfs/base-rootfs}-$KERNEL_VERSION-$BOARD_NAME-build-$ROOTFS_VERSION"
     else
         if [[ $ARCH == arm ]]; then
@@ -28,7 +28,7 @@ get_name_rootfs() {
 clean_rootfs() {
     image_type=$1
 
-    if [[ $image_type == mini ]] && [[ ! -z $ROOTFS ]] && [[ -d $SOURCE/$ROOTFS ]]; then
+    if [[ $image_type == base ]] && [[ ! -z $ROOTFS ]] && [[ -d $SOURCE/$ROOTFS ]]; then
         message "" "clean" "$ROOTFS"
         rm -rf $SOURCE/$ROOTFS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
@@ -239,7 +239,7 @@ download_pkg() {
 
 
 install_pkg(){
-    if [[ $1 == mini ]]; then
+    if [[ $1 == base ]]; then
         local ROOTFS="$ROOTFS"
     else
         local ROOTFS="$ROOTFS_XFCE"

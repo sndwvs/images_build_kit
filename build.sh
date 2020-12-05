@@ -54,12 +54,12 @@ done
 # Close file descriptor 3
 exec 3>&-
 
+DESKTOP=$(grep -oP "(?<=DESKTOP\=).*$" $CWD/config/boards/$BOARD_NAME/${BOARD_NAME}.conf || echo "no")
 options+=("clean" "clean sources, remove binaries and image" "off")
 options+=("download" "download source and use pre-built binaries" "on")
 options+=("compile" "build binaries locally" "on")
-options+=("mini-image" "create basic image" "on")
 options+=("tools" "create and pack tools" "on")
-options+=("xfce-image" "create image with xfce" "off")
+[[ $DESKTOP == yes ]] && options+=("desktop" "create image with xfce" "on")
 
 # Duplicate file descriptor 1 on descriptor 3
 exec 3>&1
@@ -73,7 +73,6 @@ done
 exit_status=$?
 # Close file descriptor 3
 exec 3>&-
-
 for arg in ${result[*]}; do
     case "$arg" in
         download)
@@ -85,14 +84,11 @@ for arg in ${result[*]}; do
          compile)
                     COMPILE_BINARIES="true"
                 ;;
-           mini*)
-                    DISTR_IMAGES+=($(echo $arg | cut -f1 -d '-'))
-                ;;
            tools)
                     TOOLS_PACK="true"
                 ;;
-           xfce*)
-                    DISTR_IMAGES+=($(echo $arg | cut -f1 -d '-'))
+           desktop)
+                    DESKTOP_SELECTED="yes"
                 ;;
     esac
 done
@@ -193,7 +189,7 @@ for image_type in ${DISTR_IMAGES[@]}; do
     get_name_rootfs $image_type
     clean_rootfs $image_type
 
-    if [[ $image_type == mini ]]; then
+    if [[ $image_type == base ]]; then
         download_rootfs
         prepare_rootfs
         create_bootloader_pack

@@ -18,3 +18,4 @@ boards
 | LINUX_CONFIG         | linux kernel config name in [kernel](../kernel) |
 | LINUX_DEFCONFIG      | default linux kernel config name |
 | DEVICE_TREE_BLOB     | hardware file name |
+| DESKTOP              | graphical user environment - yes/no |
