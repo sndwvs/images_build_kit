@@ -37,7 +37,7 @@ esac
 create_uboot()
 {
     pushd $SOURCE/$BOOT_LOADER_DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    if [[ $SOCFAMILY == sun?i ]]; then
+    if [[ $SOCFAMILY == sun?i || $BOARD_NAME == pinephone ]]; then
         install -Dm644 $BOOT_LOADER_BIN $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     else
         install -Dm644 spl/sunxi-spl.bin $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/sunxi-spl.bin >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
@@ -52,7 +52,7 @@ write_uboot()
     message "" "write" "$BOOT_LOADER_DIR"
     # clear u-boot
     dd if=/dev/zero of=$1 bs=1k count=1023 seek=1 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    if [[ $SOCFAMILY == sun?i ]]; then
+    if [[ $SOCFAMILY == sun?i || $BOARD_NAME == pinephone ]]; then
         dd if="$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN" of=$1 bs=1024 seek=8 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     else
         dd if="$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/sunxi-spl.bin" of=$1 bs=8k seek=1 conv=fsync >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
