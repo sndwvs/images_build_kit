@@ -26,7 +26,7 @@ cd $DIR_MAINLINE
 git clean -xdfq && git reset --hard
 export CROSS_COMPILE=aarch64-none-linux-gnu-
 make clean
-for pth in $(ls $CWD/../../../patch/u-boot/meson-sm1/* | LC_ALL=C sort -u);do
+for pth in $(ls $CWD/../../../patch/u-boot/meson-sm1/next/* | LC_ALL=C sort -u);do
     echo "patching " ${pth##*/}
     patch -p1 -i ${pth}
 done
@@ -50,7 +50,7 @@ sed 's:aarch64-none-elf:aarch64-elf:g' -i Makefile
 find -name Makefile -exec sed 's:arm-none-eabi:arm-eabi:g' -i {} \+
 
 make clean
-for pth in $(ls $CWD/../../../patch/u-boot-tools/meson-sm1/* | LC_ALL=C sort -u);do
+for pth in $(ls $CWD/../../../patch/u-boot-tools/meson-sm1/legacy/* | LC_ALL=C sort -u);do
     if [[ ! $pth =~ 'fixed-compiler-names' ]]; then
         echo "patching " ${pth##*/}
         patch -p1 -i ${pth}
