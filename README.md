@@ -38,6 +38,7 @@ password: **password**
         + [Pinebook Pro](https://wiki.pine64.org/index.php/Pinebook_Pro#SoC_and_Memory_Specification)
         + [Station P1](http://stationpc.com/portal.php?mod=topic&topicid=2#spec) [(roc-rk3399-pc-plus)](http://en.t-firefly.com/product/rocrk3399pc.html#spec)
         + [Helios64](https://wiki.kobol.io/helios64/intro/#overall-specifications)
+        + [Orange Pi 4](http://www.orangepi.org/Orange Pi 4/)
 * Broadcom
     * BCM2837
         + [Raspberry Pi 3](https://www.raspberrypi.org/products/raspberry-pi-3-model-b/)

@@ -52,7 +52,7 @@ compile_boot_loader() {
         # for rockpro64, rock pi 4, pinebook pro, rock64, firefly-rk3399, rock pi e, helios64
         if [[ $BOARD_NAME == rockpro64     || $BOARD_NAME == rock_pi_4*     || $BOARD_NAME == pinebook_pro || \
               $BOARD_NAME == rock64        || $BOARD_NAME == firefly_rk3399 || $BOARD_NAME == rock_pi_e || \
-              $BOARD_NAME == station_[mp]1 || $BOARD_NAME == helios64 ]]; then
+              $BOARD_NAME == station_[mp]1 || $BOARD_NAME == helios64 || $BOARD_NAME == orange_pi_4* ]]; then
             make $CTHREADS ARCH=$ARCH u-boot.itb CROSS_COMPILE=$CROSS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
     fi
