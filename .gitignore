@@ -1,2 +1,4 @@
 build/
 old/
+*~
+*.swp
