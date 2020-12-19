@@ -290,11 +290,6 @@ EOF
 
 
 setting_for_desktop() {
-    # correcting the sound output through the alsa
-    #if [ ! -x "$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.pulseaudio" ]; then
-    #    chmod 755 "$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.pulseaudio"
-    #fi
-
     if [[ $SOCFAMILY == sun* ]]; then
         # adjustment for vdpau
         sed -i 's#sunxi_ve_mem_reserve=0#sunxi_ve_mem_reserve=128#' "$SOURCE/$ROOTFS_XFCE/boot/boot.cmd"
@@ -317,9 +312,9 @@ setting_system() {
     if [[ -d $CWD/system/$SOCFAMILY ]]; then
         rsync -av --chown=root:root $CWD/system/$SOCFAMILY/ $SOURCE/$ROOTFS/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
-#    if [[ -d $CWD/system/$BOARD_NAME ]]; then
-#        rsync -av --chown=root:root $CWD/system/$BOARD_NAME/ $SOURCE/$ROOTFS/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-#    fi
+    if [[ -d $CWD/system/${BOARD_NAME}-${KERNEL_SOURCE} ]]; then
+        rsync -av --chown=root:root $CWD/system/${BOARD_NAME}-${KERNEL_SOURCE}/ $SOURCE/$ROOTFS/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
 }
 
 
