@@ -100,12 +100,12 @@ fi
 # configuration distribution source base url
 #---------------------------------------------
 if [[ ${DISTR} == slackwarearm ]];then
-    DISTR_SOURCE=${DISTR_SOURCE:-"http://dl.fail.pp.ua/slackware"}
+    DISTR_SOURCE=${DISTR_SOURCE:-"http://dl.slarm64.org/slackware"}
 else
     if [[ $USE_SLARM64_MIRROR == yes ]]; then
         DISTR_SOURCE=${DISTR_SOURCE:-"https://osdn.net/projects/slarm64/storage"}
     else
-        DISTR_SOURCE=${DISTR_SOURCE:-"http://dl.fail.pp.ua/slackware"}
+        DISTR_SOURCE=${DISTR_SOURCE:-"http://dl.slarm64.org/slackware"}
     fi
 fi
 
@@ -155,8 +155,8 @@ else
 fi
 DISTR_URL="${DISTR_SOURCE}/${DISTR}-${DISTR_VERSION}/${DISTR_DIR}"
 DISTR_EXTRA_URL="${DISTR_SOURCE}/packages/${ARCH}"
-#DISTR_URL="http://dl.fail.pp.ua/slackware/${DISTR}-${DISTR_VERSION}/${DISTR_DIR}"
-#DISTR_EXTRA_URL="http://dl.fail.pp.ua/slackware/packages/${ARCH}"
+#DISTR_URL="http://dl.slarm64.org/slackware/${DISTR}-${DISTR_VERSION}/${DISTR_DIR}"
+#DISTR_EXTRA_URL="http://dl.slarm64.org/slackware/packages/${ARCH}"
 
 #---------------------------------------------
 # clean enviroment

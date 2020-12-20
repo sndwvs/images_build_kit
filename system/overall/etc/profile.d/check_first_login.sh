@@ -2,7 +2,7 @@
 # only do this for interactive shells
 if [ "$-" != "${-#*i}" ]; then
     if [ -f "$HOME/.never_logged" ]; then
-        echo -e "\n\e[0;36mSupport: \e[1m\e[39mfail.pp.ua\x1B[0m\n"
+        echo -e "\n\e[0;36mSupport: \e[1m\e[39mslarm64.org\x1B[0m\n"
         echo -e "Creating new account. Please provide a username (eg. your forename): \c"
         read username
         RealUserName="$(echo "${username}" | tr '[:upper:]' '[:lower:]' | tr -d -c '[:alpha:]')"
