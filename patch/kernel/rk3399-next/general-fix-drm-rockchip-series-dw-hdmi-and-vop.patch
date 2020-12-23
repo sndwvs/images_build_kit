@@ -1,0 +1,959 @@
+From 20f7ecab40e96ce2b6f6a16788a9715f274aa9ca Mon Sep 17 00:00:00 2001
+From: Jonas Karlman <jonas@kwiboo.se>
+Date: Wed, 15 Jul 2020 15:24:47 +0000
+Subject: [PATCH 01/18] drm/rockchip: vop: fix crtc duplicate state
+
+struct rockchip_crtc_state owned members is always reset to zero in
+the atomic_duplicate_state callback.
+Fix this by using kmemdup on the subclass state structure.
+
+Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
+---
+ drivers/gpu/drm/rockchip/rockchip_drm_vop.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/gpu/drm/rockchip/rockchip_drm_vop.c b/drivers/gpu/drm/rockchip/rockchip_drm_vop.c
+index c80f7d9fd13f..4086a2df55f2 100644
+--- a/drivers/gpu/drm/rockchip/rockchip_drm_vop.c
++++ b/drivers/gpu/drm/rockchip/rockchip_drm_vop.c
+@@ -1529,7 +1529,11 @@ static struct drm_crtc_state *vop_crtc_duplicate_state(struct drm_crtc *crtc)
+ {
+ 	struct rockchip_crtc_state *rockchip_state;
+ 
+-	rockchip_state = kzalloc(sizeof(*rockchip_state), GFP_KERNEL);
++	if (WARN_ON(!crtc->state))
++		return NULL;
++
++	rockchip_state = kmemdup(to_rockchip_crtc_state(crtc->state),
++				 sizeof(*rockchip_state), GFP_KERNEL);
+ 	if (!rockchip_state)
+ 		return NULL;
+ 
+
+From 12b160acb25af1bc895d0e5258bec6843e266d03 Mon Sep 17 00:00:00 2001
+From: Jonas Karlman <jonas@kwiboo.se>
+Date: Sun, 3 May 2020 16:51:31 +0000
+Subject: [PATCH 02/18] drm/rockchip: vop: filter modes outside 0.5% pixel
+ clock tolerance
+
+Filter modes that require a pixel clock that differ more then 0.5%
+from the requested pixel clock.
+
+This filter is only applied to tmds only connector and/or encoders.
+
+Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
+---
+ drivers/gpu/drm/rockchip/rockchip_drm_vop.c | 54 +++++++++++++++++++++
+ 1 file changed, 54 insertions(+)
+
+diff --git a/drivers/gpu/drm/rockchip/rockchip_drm_vop.c b/drivers/gpu/drm/rockchip/rockchip_drm_vop.c
+index 4086a2df55f2..81ebe06328a3 100644
+--- a/drivers/gpu/drm/rockchip/rockchip_drm_vop.c
++++ b/drivers/gpu/drm/rockchip/rockchip_drm_vop.c
+@@ -1142,6 +1142,59 @@ static void vop_crtc_disable_vblank(struct drm_crtc *crtc)
+ 	spin_unlock_irqrestore(&vop->irq_lock, flags);
+ }
+ 
++static bool vop_crtc_is_tmds(struct drm_crtc *crtc)
++{
++	struct rockchip_crtc_state *s = to_rockchip_crtc_state(crtc->state);
++	struct drm_encoder *encoder;
++
++	switch (s->output_type) {
++	case DRM_MODE_CONNECTOR_LVDS:
++	case DRM_MODE_CONNECTOR_DSI:
++		return false;
++	case DRM_MODE_CONNECTOR_eDP:
++	case DRM_MODE_CONNECTOR_HDMIA:
++	case DRM_MODE_CONNECTOR_DisplayPort:
++		return true;
++	}
++
++	drm_for_each_encoder_mask(encoder, crtc->dev, crtc->state->encoder_mask)
++		if (encoder->encoder_type != DRM_MODE_ENCODER_TMDS)
++			return false;
++
++	return true;
++}
++
++/*
++ * The VESA DMT standard specifies a 0.5% pixel clock frequency tolerance.
++ * The CVT spec reuses that tolerance in its examples.
++ */
++#define	CLOCK_TOLERANCE_PER_MILLE	5
++
++static enum drm_mode_status vop_crtc_mode_valid(struct drm_crtc *crtc,
++					const struct drm_display_mode *mode)
++{
++	struct vop *vop = to_vop(crtc);
++	long rounded_rate;
++	long lowest, highest;
++
++	if (!vop_crtc_is_tmds(crtc))
++		return MODE_OK;
++
++	rounded_rate = clk_round_rate(vop->dclk, mode->clock * 1000 + 999);
++	if (rounded_rate < 0)
++		return MODE_NOCLOCK;
++
++	lowest = mode->clock * (1000 - CLOCK_TOLERANCE_PER_MILLE);
++	if (rounded_rate < lowest)
++		return MODE_CLOCK_LOW;
++
++	highest = mode->clock * (1000 + CLOCK_TOLERANCE_PER_MILLE);
++	if (rounded_rate > highest)
++		return MODE_CLOCK_HIGH;
++
++	return MODE_OK;
++}
++
+ static bool vop_crtc_mode_fixup(struct drm_crtc *crtc,
+ 				const struct drm_display_mode *mode,
+ 				struct drm_display_mode *adjusted_mode)
+@@ -1512,6 +1565,7 @@ static void vop_crtc_atomic_flush(struct drm_crtc *crtc,
+ }
+ 
+ static const struct drm_crtc_helper_funcs vop_crtc_helper_funcs = {
++	.mode_valid = vop_crtc_mode_valid,
+ 	.mode_fixup = vop_crtc_mode_fixup,
+ 	.atomic_check = vop_crtc_atomic_check,
+ 	.atomic_begin = vop_crtc_atomic_begin,
+
+From 847c1ca1406d21ffec73ba34d103a8c069ec0eaa Mon Sep 17 00:00:00 2001
+From: Jonas Karlman <jonas@kwiboo.se>
+Date: Mon, 20 Jul 2020 15:15:50 +0000
+Subject: [PATCH 03/18] drm/rockchip: vop: filter interlaced modes
+
+The current version of the driver does not support interlaced modes,
+lets filter any interlaced mode.
+
+Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
+---
+ drivers/gpu/drm/rockchip/rockchip_drm_vop.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/gpu/drm/rockchip/rockchip_drm_vop.c b/drivers/gpu/drm/rockchip/rockchip_drm_vop.c
+index 81ebe06328a3..93b3e1f48d31 100644
+--- a/drivers/gpu/drm/rockchip/rockchip_drm_vop.c
++++ b/drivers/gpu/drm/rockchip/rockchip_drm_vop.c
+@@ -1180,6 +1180,9 @@ static enum drm_mode_status vop_crtc_mode_valid(struct drm_crtc *crtc,
+ 	if (!vop_crtc_is_tmds(crtc))
+ 		return MODE_OK;
+ 
++	if (mode->flags & DRM_MODE_FLAG_INTERLACE)
++		return MODE_NO_INTERLACE;
++
+ 	rounded_rate = clk_round_rate(vop->dclk, mode->clock * 1000 + 999);
+ 	if (rounded_rate < 0)
+ 		return MODE_NOCLOCK;
+
+From e0d94baaa66ba9732f055b6b16b16a47791ebbcf Mon Sep 17 00:00:00 2001
+From: Jonas Karlman <jonas@kwiboo.se>
+Date: Sat, 10 Oct 2020 14:57:30 +0000
+Subject: [PATCH 04/18] drm/rockchip: vop: define max output resolution
+ supported
+
+Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
+---
+ drivers/gpu/drm/rockchip/rockchip_drm_vop.h | 6 ++++++
+ drivers/gpu/drm/rockchip/rockchip_vop_reg.c | 7 +++++++
+ 2 files changed, 13 insertions(+)
+
+diff --git a/drivers/gpu/drm/rockchip/rockchip_drm_vop.h b/drivers/gpu/drm/rockchip/rockchip_drm_vop.h
+index 4a2099cb582e..1516231bbf93 100644
+--- a/drivers/gpu/drm/rockchip/rockchip_drm_vop.h
++++ b/drivers/gpu/drm/rockchip/rockchip_drm_vop.h
+@@ -185,6 +185,11 @@ struct vop_win_data {
+ 	enum drm_plane_type type;
+ };
+ 
++struct vop_rect {
++	int width;
++	int height;
++};
++
+ struct vop_data {
+ 	uint32_t version;
+ 	const struct vop_intr *intr;
+@@ -197,6 +202,7 @@ struct vop_data {
+ 	const struct vop_win_data *win;
+ 	unsigned int win_size;
+ 	unsigned int lut_size;
++	struct vop_rect max_output;
+ 
+ #define VOP_FEATURE_OUTPUT_RGB10	BIT(0)
+ #define VOP_FEATURE_INTERNAL_RGB	BIT(1)
+diff --git a/drivers/gpu/drm/rockchip/rockchip_vop_reg.c b/drivers/gpu/drm/rockchip/rockchip_vop_reg.c
+index 80053d91a301..57c36e9207c1 100644
+--- a/drivers/gpu/drm/rockchip/rockchip_vop_reg.c
++++ b/drivers/gpu/drm/rockchip/rockchip_vop_reg.c
+@@ -682,6 +682,7 @@ static const struct vop_intr rk3288_vop_intr = {
+ static const struct vop_data rk3288_vop = {
+ 	.version = VOP_VERSION(3, 1),
+ 	.feature = VOP_FEATURE_OUTPUT_RGB10,
++	.max_output = { 3840, 2160 },
+ 	.intr = &rk3288_vop_intr,
+ 	.common = &rk3288_common,
+ 	.modeset = &rk3288_modeset,
+@@ -782,6 +783,7 @@ static const struct vop_misc rk3368_misc = {
+ 
+ static const struct vop_data rk3368_vop = {
+ 	.version = VOP_VERSION(3, 2),
++	.max_output = { 4096, 2160 },
+ 	.intr = &rk3368_vop_intr,
+ 	.common = &rk3288_common,
+ 	.modeset = &rk3288_modeset,
+@@ -803,6 +805,7 @@ static const struct vop_intr rk3366_vop_intr = {
+ 
+ static const struct vop_data rk3366_vop = {
+ 	.version = VOP_VERSION(3, 4),
++	.max_output = { 4096, 2160 },
+ 	.intr = &rk3366_vop_intr,
+ 	.common = &rk3288_common,
+ 	.modeset = &rk3288_modeset,
+@@ -909,6 +912,7 @@ static const struct vop_afbc rk3399_vop_afbc = {
+ static const struct vop_data rk3399_vop_big = {
+ 	.version = VOP_VERSION(3, 5),
+ 	.feature = VOP_FEATURE_OUTPUT_RGB10,
++	.max_output = { 4096, 2160 },
+ 	.intr = &rk3366_vop_intr,
+ 	.common = &rk3288_common,
+ 	.modeset = &rk3288_modeset,
+@@ -935,6 +939,7 @@ static const struct vop_win_yuv2yuv_data rk3399_vop_lit_win_yuv2yuv_data[] = {
+ 
+ static const struct vop_data rk3399_vop_lit = {
+ 	.version = VOP_VERSION(3, 6),
++	.max_output = { 2560, 1600 },
+ 	.intr = &rk3366_vop_intr,
+ 	.common = &rk3288_common,
+ 	.modeset = &rk3288_modeset,
+@@ -955,6 +960,7 @@ static const struct vop_win_data rk3228_vop_win_data[] = {
+ static const struct vop_data rk3228_vop = {
+ 	.version = VOP_VERSION(3, 7),
+ 	.feature = VOP_FEATURE_OUTPUT_RGB10,
++	.max_output = { 4096, 2160 },
+ 	.intr = &rk3366_vop_intr,
+ 	.common = &rk3288_common,
+ 	.modeset = &rk3288_modeset,
+@@ -1026,6 +1032,7 @@ static const struct vop_win_data rk3328_vop_win_data[] = {
+ static const struct vop_data rk3328_vop = {
+ 	.version = VOP_VERSION(3, 8),
+ 	.feature = VOP_FEATURE_OUTPUT_RGB10,
++	.max_output = { 4096, 2160 },
+ 	.intr = &rk3328_vop_intr,
+ 	.common = &rk3328_common,
+ 	.modeset = &rk3328_modeset,
+
+From d29942d431714f764b3c27df489c07f4643f2e8a Mon Sep 17 00:00:00 2001
+From: Jonas Karlman <jonas@kwiboo.se>
+Date: Mon, 20 Jul 2020 11:46:16 +0000
+Subject: [PATCH 05/18] drm/rockchip: vop: filter modes above max output
+ supported
+
+Filter any mode with a resolution not supported by the VOP.
+
+Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
+---
+ drivers/gpu/drm/rockchip/rockchip_drm_vop.c | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+
+diff --git a/drivers/gpu/drm/rockchip/rockchip_drm_vop.c b/drivers/gpu/drm/rockchip/rockchip_drm_vop.c
+index 93b3e1f48d31..cd788ea9492e 100644
+--- a/drivers/gpu/drm/rockchip/rockchip_drm_vop.c
++++ b/drivers/gpu/drm/rockchip/rockchip_drm_vop.c
+@@ -1174,6 +1174,7 @@ static enum drm_mode_status vop_crtc_mode_valid(struct drm_crtc *crtc,
+ 					const struct drm_display_mode *mode)
+ {
+ 	struct vop *vop = to_vop(crtc);
++	const struct vop_rect *max_output = &vop->data->max_output;
+ 	long rounded_rate;
+ 	long lowest, highest;
+ 
+@@ -1195,6 +1196,10 @@ static enum drm_mode_status vop_crtc_mode_valid(struct drm_crtc *crtc,
+ 	if (rounded_rate > highest)
+ 		return MODE_CLOCK_HIGH;
+ 
++	if (max_output->width && max_output->height)
++		return drm_mode_validate_size(mode, max_output->width,
++					      max_output->height);
++
+ 	return MODE_OK;
+ }
+ 
+@@ -1203,8 +1208,19 @@ static bool vop_crtc_mode_fixup(struct drm_crtc *crtc,
+ 				struct drm_display_mode *adjusted_mode)
+ {
+ 	struct vop *vop = to_vop(crtc);
++	const struct vop_rect *max_output = &vop->data->max_output;
+ 	unsigned long rate;
+ 
++	if (max_output->width && max_output->height) {
++		enum drm_mode_status status;
++
++		status = drm_mode_validate_size(adjusted_mode,
++						max_output->width,
++						max_output->height);
++		if (status != MODE_OK)
++			return false;
++	}
++
+ 	/*
+ 	 * Clock craziness.
+ 	 *
+
+From 68a8ea02c3faadf4be6821fcb977508bca25ede5 Mon Sep 17 00:00:00 2001
+From: Yakir Yang <ykk@rock-chips.com>
+Date: Mon, 11 Jul 2016 19:05:39 +0800
+Subject: [PATCH 06/18] drm/rockchip: dw_hdmi: adjust cklvl & txlvl for RF/EMI
+
+Dut to the high HDMI signal voltage driver, Mickey have meet
+a serious RF/EMI problem, so we decided to reduce HDMI signal
+voltage to a proper value.
+
+The default params for phy is cklvl = 20 & txlvl = 13 (RF/EMI failed)
+  ck: lvl = 13, term=100, vlo = 2.71, vhi=3.14, vswing = 0.43
+  tx: lvl = 20, term=100, vlo = 2.81, vhi=3.16, vswing = 0.35
+
+1. We decided to reduce voltage value to lower, but VSwing still
+keep high, RF/EMI have been improved but still failed.
+   ck: lvl =  6, term=100, vlo = 2.61, vhi=3.11, vswing = 0.50
+   tx: lvl =  6, term=100, vlo = 2.61, vhi=3.11, vswing = 0.50
+
+2. We try to keep voltage value and vswing both lower, then RF/EMI
+test all passed  ;)
+   ck: lvl = 11, term= 66, vlo = 2.68, vhi=3.09, vswing = 0.40
+   tx: lvl = 11, term= 66, vlo = 2.68, vhi=3.09, vswing = 0.40
+When we back to run HDMI different test and single-end test, we see
+different test passed, but signle-end test failed. The oscilloscope
+show that simgle-end clock's VL value is 1.78v (which remind LowLimit
+should not lower then 2.6v).
+
+3. That's to say there are some different between PHY document and
+measure value. And according to experiment 2 results, we need to
+higher clock voltage and lower data voltage, then we can keep RF/EMI
+satisfied and single-end & differen test passed.
+  ck: lvl =  9, term=100, vlo = 2.65, vhi=3.12, vswing = 0.47
+  tx: lvl = 16, term=100, vlo = 2.75, vhi=3.15, vswing = 0.39
+
+Signed-off-by: Yakir Yang <ykk@rock-chips.com>
+Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
+---
+ drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
+index 23de359a1dec..f78851e7ef16 100644
+--- a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
++++ b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
+@@ -181,7 +181,7 @@ static const struct dw_hdmi_curr_ctrl rockchip_cur_ctr[] = {
+ static const struct dw_hdmi_phy_config rockchip_phy_config[] = {
+ 	/*pixelclk   symbol   term   vlev*/
+ 	{ 74250000,  0x8009, 0x0004, 0x0272},
+-	{ 148500000, 0x802b, 0x0004, 0x028d},
++	{ 165000000, 0x802b, 0x0004, 0x0209},
+ 	{ 297000000, 0x8039, 0x0005, 0x028d},
+ 	{ ~0UL,	     0x0000, 0x0000, 0x0000}
+ };
+
+From 7c9fe4f078518f6a65ee2cb3090d5d3a4f5f9833 Mon Sep 17 00:00:00 2001
+From: Nickey Yang <nickey.yang@rock-chips.com>
+Date: Mon, 13 Feb 2017 15:40:29 +0800
+Subject: [PATCH 07/18] drm/rockchip: dw_hdmi: add phy_config for 594Mhz pixel
+ clock
+
+Add phy_config for 594Mhz pixel clock used for 4K@60hz
+
+Signed-off-by: Nickey Yang <nickey.yang@rock-chips.com>
+Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
+---
+ drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
+index f78851e7ef16..a308adb56d2f 100644
+--- a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
++++ b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
+@@ -183,6 +183,7 @@ static const struct dw_hdmi_phy_config rockchip_phy_config[] = {
+ 	{ 74250000,  0x8009, 0x0004, 0x0272},
+ 	{ 165000000, 0x802b, 0x0004, 0x0209},
+ 	{ 297000000, 0x8039, 0x0005, 0x028d},
++	{ 594000000, 0x8039, 0x0000, 0x019d},
+ 	{ ~0UL,	     0x0000, 0x0000, 0x0000}
+ };
+ 
+
+From 99c39a213c1ed8be4ea12f0595b64660019f9bda Mon Sep 17 00:00:00 2001
+From: Douglas Anderson <dianders@chromium.org>
+Date: Mon, 11 Jul 2016 19:05:36 +0800
+Subject: [PATCH 08/18] drm/rockchip: dw_hdmi: Set cur_ctr to 0 always
+
+Jitter was improved by lowering the MPLL bandwidth to account for high
+frequency noise in the rk3288 PLL.  In each case MPLL bandwidth was
+lowered only enough to get us a comfortable margin.  We believe that
+lowering the bandwidth like this is safe given sufficient testing.
+
+Signed-off-by: Douglas Anderson <dianders@chromium.org>
+Signed-off-by: Yakir Yang <ykk@rock-chips.com>
+Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
+---
+ drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c | 16 ++--------------
+ 1 file changed, 2 insertions(+), 14 deletions(-)
+
+diff --git a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
+index a308adb56d2f..5b273f26f177 100644
+--- a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
++++ b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
+@@ -160,20 +160,8 @@ static const struct dw_hdmi_mpll_config rockchip_mpll_cfg[] = {
+ static const struct dw_hdmi_curr_ctrl rockchip_cur_ctr[] = {
+ 	/*      pixelclk    bpp8    bpp10   bpp12 */
+ 	{
+-		40000000,  { 0x0018, 0x0018, 0x0018 },
+-	}, {
+-		65000000,  { 0x0028, 0x0028, 0x0028 },
+-	}, {
+-		66000000,  { 0x0038, 0x0038, 0x0038 },
+-	}, {
+-		74250000,  { 0x0028, 0x0038, 0x0038 },
+-	}, {
+-		83500000,  { 0x0028, 0x0038, 0x0038 },
+-	}, {
+-		146250000, { 0x0038, 0x0038, 0x0038 },
+-	}, {
+-		148500000, { 0x0000, 0x0038, 0x0038 },
+-	}, {
++		600000000, { 0x0000, 0x0000, 0x0000 },
++	},  {
+ 		~0UL,      { 0x0000, 0x0000, 0x0000},
+ 	}
+ };
+
+From 0bd389e1b4049045d75cbe2e34d748b325f706cf Mon Sep 17 00:00:00 2001
+From: Douglas Anderson <dianders@chromium.org>
+Date: Mon, 11 Jul 2016 19:05:42 +0800
+Subject: [PATCH 09/18] drm/rockchip: dw_hdmi: Use auto-generated tables
+
+The previous tables for mpll_cfg and curr_ctrl were created using the
+20-pages of example settings provided by the PHY vendor.  Those
+example settings weren't particularly dense, so there were places
+where we were guessing what the settings would be for 10-bit and
+12-bit (not that we use those anyway).  It was also always a lot of
+extra work every time we wanted to add a new clock rate since we had
+to cross-reference several tables.
+
+In <http://crosreview.com/285855> I've gone through the work to figure
+out how to generate this table automatically.  Let's now use the
+automatically generated table and then we'll never need to look at it
+again.
+
+We only support 8-bit mode right now and only support a small number
+of clock rates and and I've verified that the only 8-bit rate that was
+affected was 148.5.  That mode appears to have been wrong in the old
+table.
+
+Signed-off-by: Douglas Anderson <dianders@chromium.org>
+Signed-off-by: Yakir Yang <ykk@rock-chips.com>
+Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
+---
+ drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c | 130 +++++++++++---------
+ 1 file changed, 69 insertions(+), 61 deletions(-)
+
+diff --git a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
+index 5b273f26f177..b5d2cdaa24fa 100644
+--- a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
++++ b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
+@@ -79,80 +79,88 @@ struct rockchip_hdmi {
+ 
+ static const struct dw_hdmi_mpll_config rockchip_mpll_cfg[] = {
+ 	{
+-		27000000, {
+-			{ 0x00b3, 0x0000},
+-			{ 0x2153, 0x0000},
+-			{ 0x40f3, 0x0000}
++		30666000, {
++			{ 0x00b3, 0x0000 },
++			{ 0x2153, 0x0000 },
++			{ 0x40f3, 0x0000 },
+ 		},
+-	}, {
+-		36000000, {
+-			{ 0x00b3, 0x0000},
+-			{ 0x2153, 0x0000},
+-			{ 0x40f3, 0x0000}
++	},  {
++		36800000, {
++			{ 0x00b3, 0x0000 },
++			{ 0x2153, 0x0000 },
++			{ 0x40a2, 0x0001 },
+ 		},
+-	}, {
+-		40000000, {
+-			{ 0x00b3, 0x0000},
+-			{ 0x2153, 0x0000},
+-			{ 0x40f3, 0x0000}
++	},  {
++		46000000, {
++			{ 0x00b3, 0x0000 },
++			{ 0x2142, 0x0001 },
++			{ 0x40a2, 0x0001 },
+ 		},
+-	}, {
+-		54000000, {
+-			{ 0x0072, 0x0001},
+-			{ 0x2142, 0x0001},
+-			{ 0x40a2, 0x0001},
++	},  {
++		61333000, {
++			{ 0x0072, 0x0001 },
++			{ 0x2142, 0x0001 },
++			{ 0x40a2, 0x0001 },
+ 		},
+-	}, {
+-		65000000, {
+-			{ 0x0072, 0x0001},
+-			{ 0x2142, 0x0001},
+-			{ 0x40a2, 0x0001},
++	},  {
++		73600000, {
++			{ 0x0072, 0x0001 },
++			{ 0x2142, 0x0001 },
++			{ 0x4061, 0x0002 },
+ 		},
+-	}, {
+-		66000000, {
+-			{ 0x013e, 0x0003},
+-			{ 0x217e, 0x0002},
+-			{ 0x4061, 0x0002}
++	},  {
++		92000000, {
++			{ 0x0072, 0x0001 },
++			{ 0x2145, 0x0002 },
++			{ 0x4061, 0x0002 },
++		},
++	},  {
++		122666000, {
++			{ 0x0051, 0x0002 },
++			{ 0x2145, 0x0002 },
++			{ 0x4061, 0x0002 },
+ 		},
+-	}, {
+-		74250000, {
+-			{ 0x0072, 0x0001},
+-			{ 0x2145, 0x0002},
+-			{ 0x4061, 0x0002}
++	},  {
++		147200000, {
++			{ 0x0051, 0x0002 },
++			{ 0x2145, 0x0002 },
++			{ 0x4064, 0x0003 },
+ 		},
+-	}, {
+-		83500000, {
+-			{ 0x0072, 0x0001},
++	},  {
++		184000000, {
++			{ 0x0051, 0x0002 },
++			{ 0x214c, 0x0003 },
++			{ 0x4064, 0x0003 },
+ 		},
+-	}, {
+-		108000000, {
+-			{ 0x0051, 0x0002},
+-			{ 0x2145, 0x0002},
+-			{ 0x4061, 0x0002}
++	},  {
++		226666000, {
++			{ 0x0040, 0x0003 },
++			{ 0x214c, 0x0003 },
++			{ 0x4064, 0x0003 },
+ 		},
+-	}, {
+-		106500000, {
+-			{ 0x0051, 0x0002},
+-			{ 0x2145, 0x0002},
+-			{ 0x4061, 0x0002}
++	},  {
++		272000000, {
++			{ 0x0040, 0x0003 },
++			{ 0x214c, 0x0003 },
++			{ 0x5a64, 0x0003 },
+ 		},
+-	}, {
+-		146250000, {
+-			{ 0x0051, 0x0002},
+-			{ 0x2145, 0x0002},
+-			{ 0x4061, 0x0002}
++	},  {
++		340000000, {
++			{ 0x0040, 0x0003 },
++			{ 0x3b4c, 0x0003 },
++			{ 0x5a64, 0x0003 },
+ 		},
+-	}, {
+-		148500000, {
+-			{ 0x0051, 0x0003},
+-			{ 0x214c, 0x0003},
+-			{ 0x4064, 0x0003}
++	},  {
++		600000000, {
++			{ 0x1a40, 0x0003 },
++			{ 0x3b4c, 0x0003 },
++			{ 0x5a64, 0x0003 },
+ 		},
+-	}, {
++	},  {
+ 		~0UL, {
+-			{ 0x00a0, 0x000a },
+-			{ 0x2001, 0x000f },
+-			{ 0x4002, 0x000f },
++			{ 0x0000, 0x0000 },
++			{ 0x0000, 0x0000 },
++			{ 0x0000, 0x0000 },
+ 		},
+ 	}
+ };
+
+From f83d188f49bd11d085c3f4160b208cb8194daff4 Mon Sep 17 00:00:00 2001
+From: Jonas Karlman <jonas@kwiboo.se>
+Date: Wed, 8 Jan 2020 21:07:52 +0000
+Subject: [PATCH 10/18] drm/rockchip: dw-hdmi: limit tmds to 340mhz
+
+RK3228/RK3328 does not provide a stable hdmi signal at TMDS rates
+above 371.25MHz (340MHz pixel clock).
+
+Limit the pixel clock rate to 340MHz to provide a stable signal.
+Also limit the pixel clock to the display reported max tmds clock.
+
+This also enables use of pixel clocks up to 340MHz on RK3288/RK3399.
+
+Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
+---
+ drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c | 16 ++++------------
+ 1 file changed, 4 insertions(+), 12 deletions(-)
+
+diff --git a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
+index b5d2cdaa24fa..5f7ab8e6bb72 100644
+--- a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
++++ b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
+@@ -221,19 +221,11 @@ dw_hdmi_rockchip_mode_valid(struct dw_hdmi *hdmi, void *data,
+ 			    const struct drm_display_info *info,
+ 			    const struct drm_display_mode *mode)
+ {
+-	const struct dw_hdmi_mpll_config *mpll_cfg = rockchip_mpll_cfg;
+-	int pclk = mode->clock * 1000;
+-	bool valid = false;
+-	int i;
+-
+-	for (i = 0; mpll_cfg[i].mpixelclock != (~0UL); i++) {
+-		if (pclk == mpll_cfg[i].mpixelclock) {
+-			valid = true;
+-			break;
+-		}
+-	}
++	if (mode->clock > 340000 ||
++	    (info->max_tmds_clock && mode->clock > info->max_tmds_clock))
++		return MODE_CLOCK_HIGH;
+ 
+-	return (valid) ? MODE_OK : MODE_BAD;
++	return MODE_OK;
+ }
+ 
+ static void dw_hdmi_rockchip_encoder_disable(struct drm_encoder *encoder)
+
+From bc3d7ea92f03bd8183fb0c0f2da68f14cc2306b4 Mon Sep 17 00:00:00 2001
+From: Jonas Karlman <jonas@kwiboo.se>
+Date: Sun, 3 May 2020 22:36:23 +0000
+Subject: [PATCH 11/18] drm/rockchip: dw-hdmi: limit resolution to 3840x2160
+
+Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
+---
+ drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
+index 5f7ab8e6bb72..0e7ca368314d 100644
+--- a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
++++ b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
+@@ -225,7 +225,7 @@ dw_hdmi_rockchip_mode_valid(struct dw_hdmi *hdmi, void *data,
+ 	    (info->max_tmds_clock && mode->clock > info->max_tmds_clock))
+ 		return MODE_CLOCK_HIGH;
+ 
+-	return MODE_OK;
++	return drm_mode_validate_size(mode, 3840, 2160);
+ }
+ 
+ static void dw_hdmi_rockchip_encoder_disable(struct drm_encoder *encoder)
+
+From f0e84276e834b001945b3c41e4bca538f5348e36 Mon Sep 17 00:00:00 2001
+From: Jonas Karlman <jonas@kwiboo.se>
+Date: Wed, 8 Jan 2020 21:07:49 +0000
+Subject: [PATCH 12/18] drm/rockchip: dw-hdmi: allow high tmds bit rates
+
+Prepare support for High TMDS Bit Rates used by HDMI2.0 display modes.
+
+Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
+---
+ drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
+index 0e7ca368314d..6f7641fbe6cc 100644
+--- a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
++++ b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
+@@ -306,6 +306,8 @@ static int dw_hdmi_rockchip_genphy_init(struct dw_hdmi *dw_hdmi, void *data,
+ {
+ 	struct rockchip_hdmi *hdmi = (struct rockchip_hdmi *)data;
+ 
++	dw_hdmi_set_high_tmds_clock_ratio(dw_hdmi, display);
++
+ 	return phy_power_on(hdmi->phy);
+ }
+ 
+
+From 5ce972036abcf6c64db1d3cacebb1f67282327fd Mon Sep 17 00:00:00 2001
+From: Jonas Karlman <jonas@kwiboo.se>
+Date: Wed, 8 Jan 2020 21:07:52 +0000
+Subject: [PATCH 13/18] drm/rockchip: dw-hdmi: remove unused plat_data on
+ rk3228/rk3328
+
+mpll_cfg/cur_ctr/phy_config is not used when phy_force_vendor is true,
+lets remove them.
+
+Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
+---
+ drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c | 6 ------
+ 1 file changed, 6 deletions(-)
+
+diff --git a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
+index 6f7641fbe6cc..cc20a83fa9b8 100644
+--- a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
++++ b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
+@@ -396,9 +396,6 @@ static struct rockchip_hdmi_chip_data rk3228_chip_data = {
+ 
+ static const struct dw_hdmi_plat_data rk3228_hdmi_drv_data = {
+ 	.mode_valid = dw_hdmi_rockchip_mode_valid,
+-	.mpll_cfg = rockchip_mpll_cfg,
+-	.cur_ctr = rockchip_cur_ctr,
+-	.phy_config = rockchip_phy_config,
+ 	.phy_data = &rk3228_chip_data,
+ 	.phy_ops = &rk3228_hdmi_phy_ops,
+ 	.phy_name = "inno_dw_hdmi_phy2",
+@@ -433,9 +430,6 @@ static struct rockchip_hdmi_chip_data rk3328_chip_data = {
+ 
+ static const struct dw_hdmi_plat_data rk3328_hdmi_drv_data = {
+ 	.mode_valid = dw_hdmi_rockchip_mode_valid,
+-	.mpll_cfg = rockchip_mpll_cfg,
+-	.cur_ctr = rockchip_cur_ctr,
+-	.phy_config = rockchip_phy_config,
+ 	.phy_data = &rk3328_chip_data,
+ 	.phy_ops = &rk3328_hdmi_phy_ops,
+ 	.phy_name = "inno_dw_hdmi_phy2",
+
+From e49594bf91a8a4892068f2d5edf6f771fece8fbb Mon Sep 17 00:00:00 2001
+From: Jonas Karlman <jonas@kwiboo.se>
+Date: Sat, 10 Oct 2020 10:16:32 +0000
+Subject: [PATCH 14/18] drm/rockchip: dw-hdmi: encoder error handling
+
+Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
+---
+ drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c | 25 +++++++++++++++------
+ 1 file changed, 18 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
+index cc20a83fa9b8..fd614c8a3486 100644
+--- a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
++++ b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c
+@@ -516,8 +516,7 @@ static int dw_hdmi_rockchip_bind(struct device *dev, struct device *master,
+ 
+ 	ret = clk_prepare_enable(hdmi->vpll_clk);
+ 	if (ret) {
+-		DRM_DEV_ERROR(hdmi->dev, "Failed to enable HDMI vpll: %d\n",
+-			      ret);
++		DRM_DEV_ERROR(hdmi->dev, "Failed to enable vpll: %d\n", ret);
+ 		return ret;
+ 	}
+ 
+@@ -525,12 +524,16 @@ static int dw_hdmi_rockchip_bind(struct device *dev, struct device *master,
+ 	if (IS_ERR(hdmi->phy)) {
+ 		ret = PTR_ERR(hdmi->phy);
+ 		if (ret != -EPROBE_DEFER)
+-			DRM_DEV_ERROR(hdmi->dev, "failed to get phy\n");
+-		return ret;
++			DRM_DEV_ERROR(hdmi->dev, "Failed to get phy: %d\n", ret);
++		goto err_disable_clk;
+ 	}
+ 
+ 	drm_encoder_helper_add(encoder, &dw_hdmi_rockchip_encoder_helper_funcs);
+-	drm_simple_encoder_init(drm, encoder, DRM_MODE_ENCODER_TMDS);
++	ret = drm_simple_encoder_init(drm, encoder, DRM_MODE_ENCODER_TMDS);
++	if (ret) {
++		DRM_DEV_ERROR(hdmi->dev, "Failed to init encoder: %d\n", ret);
++		goto err_disable_clk;
++	}
+ 
+ 	platform_set_drvdata(pdev, hdmi);
+ 
+@@ -542,10 +545,18 @@ static int dw_hdmi_rockchip_bind(struct device *dev, struct device *master,
+ 	 */
+ 	if (IS_ERR(hdmi->hdmi)) {
+ 		ret = PTR_ERR(hdmi->hdmi);
+-		drm_encoder_cleanup(encoder);
+-		clk_disable_unprepare(hdmi->vpll_clk);
++		if (ret != -EPROBE_DEFER)
++			DRM_DEV_ERROR(hdmi->dev, "Failed to init dw-hdmi bridge: %d\n", ret);
++		goto err_encoder_cleanup;
+ 	}
+ 
++	return 0;
++
++err_encoder_cleanup:
++	drm_encoder_cleanup(encoder);
++err_disable_clk:
++	clk_disable_unprepare(hdmi->vpll_clk);
++
+ 	return ret;
+ }
+ 
+
+From 422c18b170d2d80f2dce80d66581fc479b867714 Mon Sep 17 00:00:00 2001
+From: Jonas Karlman <jonas@kwiboo.se>
+Date: Wed, 8 Jan 2020 21:07:50 +0000
+Subject: [PATCH 15/18] clk: rockchip: set parent rate for DCLK_VOP clock on
+ rk3228
+
+Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
+---
+ drivers/clk/rockchip/clk-rk3228.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/clk/rockchip/clk-rk3228.c b/drivers/clk/rockchip/clk-rk3228.c
+index 47d6482dda9d..a2b4d5487514 100644
+--- a/drivers/clk/rockchip/clk-rk3228.c
++++ b/drivers/clk/rockchip/clk-rk3228.c
+@@ -408,7 +408,7 @@ static struct rockchip_clk_branch rk3228_clk_branches[] __initdata = {
+ 			RK2928_CLKSEL_CON(29), 0, 3, DFLAGS),
+ 	DIV(0, "sclk_vop_pre", "sclk_vop_src", 0,
+ 			RK2928_CLKSEL_CON(27), 8, 8, DFLAGS),
+-	MUX(DCLK_VOP, "dclk_vop", mux_dclk_vop_p, 0,
++	MUX(DCLK_VOP, "dclk_vop", mux_dclk_vop_p, CLK_SET_RATE_PARENT | CLK_SET_RATE_NO_REPARENT,
+ 			RK2928_CLKSEL_CON(27), 1, 1, MFLAGS),
+ 
+ 	FACTOR(0, "xin12m", "xin24m", 0, 1, 2),
+
+From 7e39e48ff9e4b85defe52524b738273404a0d322 Mon Sep 17 00:00:00 2001
+From: Jonas Karlman <jonas@kwiboo.se>
+Date: Wed, 8 Jan 2020 21:07:51 +0000
+Subject: [PATCH 16/18] arm64: dts: rockchip: increase vop clock rate on rk3328
+
+The VOP on RK3328 needs to run at higher rate in order to
+produce a proper 3840x2160 signal.
+
+Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
+---
+ arch/arm64/boot/dts/rockchip/rk3328.dtsi | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/rockchip/rk3328.dtsi b/arch/arm64/boot/dts/rockchip/rk3328.dtsi
+index bbdb19a3e85d..6547e2b4b617 100644
+--- a/arch/arm64/boot/dts/rockchip/rk3328.dtsi
++++ b/arch/arm64/boot/dts/rockchip/rk3328.dtsi
+@@ -802,8 +802,8 @@
+ 			<0>, <24000000>,
+ 			<24000000>, <24000000>,
+ 			<15000000>, <15000000>,
+-			<100000000>, <100000000>,
+-			<100000000>, <100000000>,
++			<300000000>, <100000000>,
++			<400000000>, <100000000>,
+ 			<50000000>, <100000000>,
+ 			<100000000>, <100000000>,
+ 			<50000000>, <50000000>,
+
+From 5ebc12b31f24c5aae9985ea90f4533c7e9372448 Mon Sep 17 00:00:00 2001
+From: Jonas Karlman <jonas@kwiboo.se>
+Date: Sat, 10 Oct 2020 14:32:21 +0000
+Subject: [PATCH 17/18] drm/rockchip: vop: split rk3288 vop
+
+Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
+---
+ drivers/gpu/drm/rockchip/rockchip_vop_reg.c | 21 ++++++++++++++++++---
+ 1 file changed, 18 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/gpu/drm/rockchip/rockchip_vop_reg.c b/drivers/gpu/drm/rockchip/rockchip_vop_reg.c
+index 57c36e9207c1..5966c78d2f9d 100644
+--- a/drivers/gpu/drm/rockchip/rockchip_vop_reg.c
++++ b/drivers/gpu/drm/rockchip/rockchip_vop_reg.c
+@@ -679,7 +679,7 @@ static const struct vop_intr rk3288_vop_intr = {
+ 	.clear = VOP_REG(RK3288_INTR_CTRL0, 0xf, 8),
+ };
+ 
+-static const struct vop_data rk3288_vop = {
++static const struct vop_data rk3288_vop_big = {
+ 	.version = VOP_VERSION(3, 1),
+ 	.feature = VOP_FEATURE_OUTPUT_RGB10,
+ 	.max_output = { 3840, 2160 },
+@@ -692,6 +692,19 @@ static const struct vop_data rk3288_vop = {
+ 	.lut_size = 1024,
+ };
+ 
++static const struct vop_data rk3288_vop_lit = {
++	.version = VOP_VERSION(3, 1),
++	.feature = VOP_FEATURE_OUTPUT_RGB10,
++	.max_output = { 2560, 1600 },
++	.intr = &rk3288_vop_intr,
++	.common = &rk3288_common,
++	.modeset = &rk3288_modeset,
++	.output = &rk3288_output,
++	.win = rk3288_vop_win_data,
++	.win_size = ARRAY_SIZE(rk3288_vop_win_data),
++	.lut_size = 1024,
++};
++
+ static const int rk3368_vop_intrs[] = {
+ 	FS_INTR,
+ 	0, 0,
+@@ -1055,8 +1068,10 @@ static const struct of_device_id vop_driver_dt_match[] = {
+ 	  .data = &rk3066_vop },
+ 	{ .compatible = "rockchip,rk3188-vop",
+ 	  .data = &rk3188_vop },
+-	{ .compatible = "rockchip,rk3288-vop",
+-	  .data = &rk3288_vop },
++	{ .compatible = "rockchip,rk3288-vop-big",
++	  .data = &rk3288_vop_big },
++	{ .compatible = "rockchip,rk3288-vop-lit",
++	  .data = &rk3288_vop_lit },
+ 	{ .compatible = "rockchip,rk3368-vop",
+ 	  .data = &rk3368_vop },
+ 	{ .compatible = "rockchip,rk3366-vop",
+
+From b333fb9906fd3348ff7957256ab42098d2b672ea Mon Sep 17 00:00:00 2001
+From: Jonas Karlman <jonas@kwiboo.se>
+Date: Sat, 10 Oct 2020 14:33:30 +0000
+Subject: [PATCH 18/18] ARM: dts: rockchip: split rk3288 vop
+
+Signed-off-by: Jonas Karlman <jonas@kwiboo.se>
+---
+ arch/arm/boot/dts/rk3288.dtsi | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/boot/dts/rk3288.dtsi b/arch/arm/boot/dts/rk3288.dtsi
+index 68d5a58cfe88..7eab841b58b8 100644
+--- a/arch/arm/boot/dts/rk3288.dtsi
++++ b/arch/arm/boot/dts/rk3288.dtsi
+@@ -1037,7 +1037,7 @@
+ 	};
+ 
+ 	vopb: vop@ff930000 {
+-		compatible = "rockchip,rk3288-vop";
++		compatible = "rockchip,rk3288-vop-big";
+ 		reg = <0x0 0xff930000 0x0 0x19c>, <0x0 0xff931000 0x0 0x1000>;
+ 		interrupts = <GIC_SPI 15 IRQ_TYPE_LEVEL_HIGH>;
+ 		clocks = <&cru ACLK_VOP0>, <&cru DCLK_VOP0>, <&cru HCLK_VOP0>;
+@@ -1087,7 +1087,7 @@
+ 	};
+ 
+ 	vopl: vop@ff940000 {
+-		compatible = "rockchip,rk3288-vop";
++		compatible = "rockchip,rk3288-vop-lit";
+ 		reg = <0x0 0xff940000 0x0 0x19c>, <0x0 0xff941000 0x0 0x1000>;
+ 		interrupts = <GIC_SPI 16 IRQ_TYPE_LEVEL_HIGH>;
+ 		clocks = <&cru ACLK_VOP1>, <&cru DCLK_VOP1>, <&cru HCLK_VOP1>;
