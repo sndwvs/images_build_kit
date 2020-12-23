@@ -163,12 +163,12 @@ patching_source() {
                 LANGUAGE=english patch --batch --dry-run -p1 -N < "${dir}/${file}" | grep create \
                         | awk '{print $NF}' | sed -n 's/,$//p' | xargs -I % sh -c 'rm %'
 
-                if ! grep -qP '[Hh]unk.*(FAILED|ignored)' <(patch --batch -Np1 --dry-run < "${dir}/${file}"); then
+                if ! grep -qP '[Hh]unk.*(FAILED|ignored)' <(patch --batch -Np1 --dry-run < "${dir}/${file}" 2>&1 | tee -a $LOG); then
                     patch --batch --silent -Np1 < "${dir}/${file}" >> $LOG 2>&1
                     message "" "patching" "succeeded: $file"
                 else
                     message "" "patching" "not succeeded: $file"
-#                    mv "${dir}/${file}" "${dir}/${file}.disabled"
+#                    mv "${dir}/${file}" "${dir}/${file}.auto.disabled"
                 fi
             fi
         done
