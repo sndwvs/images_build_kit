@@ -13,6 +13,7 @@ fi
 message() {
     # parametr 1 - type message
     #     "err"  - error
+    #     "warn" - warning
     #     "info" - info (default is empty)
     # parametr 2 - action message
     # parametr 3 - text message
@@ -21,9 +22,12 @@ message() {
     if [[ ! -z "$3" ]]; then MESSAGE="$3"; else unset MESSAGE; fi
 
     if [[ "$1" == "err" ]]; then
-        printf '|\e[0;31m%s \x1B[0m| \e[0;32m%-12s\x1B[0m %s\n' "$1" "$ACTION" "$LOG"
+        printf '|\e[1;31m%s \x1B[0m| \e[0;32m%-12s\x1B[0m %s\n' "$1" "$ACTION" "$LOG"
+    elif [[ "$1" == "warn" ]]; then
+        printf '|\e[1;33mwarn\x1B[0m| \e[0;32m%-12s\x1B[0m %s\n' "$ACTION" "$MESSAGE"
+        [[ -f $LOG ]] && echo "|----------- delimiter ----------- \"$ACTION\" \"$MESSAGE\" -----------|" >> $LOG
     elif [[ "$1" == "info" || -z "$1" ]]; then
-        printf '|\e[0;36minfo\x1B[0m| \e[0;32m%-12s\x1B[0m %s\n' "$ACTION" "$MESSAGE"
+        printf '|\e[1;36minfo\x1B[0m| \e[0;32m%-12s\x1B[0m %s\n' "$ACTION" "$MESSAGE"
         [[ -f $LOG ]] && echo "|----------- delimiter ----------- \"$ACTION\" \"$MESSAGE\" -----------|" >> $LOG
     fi
     return 0
@@ -156,6 +160,8 @@ patching_source() {
 
     pushd $PATCH_SOURCE >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
+    set +e
+
     for file in "${names_s[@]}"; do
         for dir in "${dirs[@]}"; do
             if [[ -f "${dir}/${file}" ]]; then
@@ -163,16 +169,19 @@ patching_source() {
                 LANGUAGE=english patch --batch --dry-run -p1 -N < "${dir}/${file}" | grep create \
                         | awk '{print $NF}' | sed -n 's/,$//p' | xargs -I % sh -c 'rm %'
 
-                if ! grep -qP '[Hh]unk.*(FAILED|ignored)' <(patch --batch -Np1 --dry-run < "${dir}/${file}" 2>&1 | tee -a $LOG); then
-                    patch --batch --silent -Np1 < "${dir}/${file}" >> $LOG 2>&1
-                    message "" "patching" "succeeded: $file"
-                else
-                    message "" "patching" "not succeeded: $file"
+                patch --batch --silent -Np1 < "${dir}/${file}" >> $LOG 2>&1
+
+                if [[ $? -ne 0 ]]; then
+                    message "warn" "patching" "not succeeded: $file"
 #                    mv "${dir}/${file}" "${dir}/${file}.auto.disabled"
+                else
+                    message "" "patching" "succeeded: $file"
                 fi
             fi
         done
     done
+
+    set -e
 
     popd >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
