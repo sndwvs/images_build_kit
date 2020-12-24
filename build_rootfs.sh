@@ -14,7 +14,7 @@ get_name_rootfs() {
     if [[ $image_type == base ]]; then
         ROOTFS="$(echo ${ROOTFS_NAME} | rev | cut -d '-' -f4- | rev)-${ARCH}-${image_type}-$BOARD_NAME-$KERNEL_VERSION-build-${ROOTFS_VERSION}"
     else
-        ROOTFS_XFCE=$ROOTFS
+        ROOTFS_XFCE="$(echo ${ROOTFS_NAME} | rev | cut -d '-' -f4- | rev)-${ARCH}-${image_type}-$BOARD_NAME-$KERNEL_VERSION-build-${ROOTFS_VERSION}"
     fi
 }
 
