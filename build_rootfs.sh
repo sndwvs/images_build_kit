@@ -11,19 +11,11 @@ get_name_rootfs() {
     image_type="$1"
     kernel_version KERNEL_VERSION
 
-    ROOTFS="$(echo ${ROOTFS_NAME} | rev | cut -d '-' -f4- | rev)-${image_type}-$BOARD_NAME-$KERNEL_VERSION-build-${ROOTFS_VERSION}"
-
-#    if [[ $image_type == base ]]; then
-#        ROOTFS="${ROOTFS_NAME/rootfs/base-rootfs}-$KERNEL_VERSION-$BOARD_NAME-build-$ROOTFS_VERSION"
-#    else
-#        if [[ $ARCH == arm ]]; then
-#            # Slackware ARM
-#            ROOTFS_XFCE="${ROOTFS_NAME/miniroot/xfce}-$KERNEL_VERSION-$BOARD_NAME-build-$ROOTFS_VERSION"
-#        else
-#            # slarm64
-#            ROOTFS_XFCE="${ROOTFS_NAME/rootfs/xfce-rootfs}-$KERNEL_VERSION-$BOARD_NAME-build-$ROOTFS_VERSION"
-#        fi
-#    fi
+    if [[ $image_type == base ]]; then
+        ROOTFS="$(echo ${ROOTFS_NAME} | rev | cut -d '-' -f4- | rev)-${image_type}-$BOARD_NAME-$KERNEL_VERSION-build-${ROOTFS_VERSION}"
+    else
+        ROOTFS_XFCE=$ROOTFS
+    fi
 }
 
 
