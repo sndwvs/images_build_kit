@@ -667,9 +667,9 @@ index 000000000000..4a3038f22639
 +
 +	regulator_suspend_prepare(PM_SUSPEND_MEM);
 +
-+	error = disable_nonboot_cpus();
++	error = freeze_secondary_cpus(0);
 +	if (error) {
-+		pr_err("Disable nonboot cpus failed!\n");
++		pr_err("Freeze secondary cpus failed!\n");
 +		return;
 +	}
 +
