@@ -5,7 +5,8 @@
 
 setenv load_addr "0x9000000"
 # fixed for kernel 5.10.y
-setenv fdt_addr "0x10000000"
+setenv fdt_addr "0x15000000"
+setenv ramdisk_addr "0x4080000"
 # default values
 setenv rootdev "/dev/mmcblk0p1"
 setenv verbosity "1"
@@ -34,8 +35,8 @@ fdt resize 65536
 fdt get value dtb_bootargs /chosen bootargs
 if test "${dtb_bootargs}" != "" ; then setenv bootargs "${bootargs} ${dtb_bootargs}"; fi
 
-if load ${devtype} ${devnum} ${ramdisk_addr_r} ${prefix}uInitrd; then
-    booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr};
+if load ${devtype} ${devnum} ${ramdisk_addr} ${prefix}uInitrd; then
+    booti ${kernel_addr_r} ${ramdisk_addr} ${fdt_addr};
 else
     booti ${kernel_addr_r} - ${fdt_addr};
 fi
