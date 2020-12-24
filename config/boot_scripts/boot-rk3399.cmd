@@ -4,8 +4,6 @@
 #
 
 setenv load_addr "0x9000000"
-# fixed for kernel 5.10.y
-setenv fdt_addr "0x10000000"
 # default values
 setenv rootdev "/dev/mmcblk0p1"
 setenv verbosity "1"
@@ -25,9 +23,9 @@ if test "${earlycon}" = "on"; then setenv consoleargs "earlycon ${consoleargs}";
 
 setenv bootargs "root=${rootdev} ro rootwait rootfstype=${rootfstype} init=/sbin/init ${consoleargs} consoleblank=0 loglevel=${verbosity} usb-storage.quirks=${usbstoragequirks} ${extraargs}"
 
-load ${devtype} ${devnum} ${fdt_addr} ${prefix}dtb/${fdtfile}
+load ${devtype} ${devnum} ${fdt_addr_r} ${prefix}dtb/${fdtfile}
 load ${devtype} ${devnum} ${kernel_addr_r} ${prefix}Image
-fdt addr ${fdt_addr}
+fdt addr ${fdt_addr_r}
 fdt resize 65536
 
 # read "/chosen" node, property "bootargs", and store in var "dtb_bootargs"
@@ -35,9 +33,9 @@ fdt get value dtb_bootargs /chosen bootargs
 if test "${dtb_bootargs}" != "" ; then setenv bootargs "${bootargs} ${dtb_bootargs}"; fi
 
 if load ${devtype} ${devnum} ${ramdisk_addr_r} ${prefix}uInitrd; then
-    booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr};
+    booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r};
 else
-    booti ${kernel_addr_r} - ${fdt_addr};
+    booti ${kernel_addr_r} - ${fdt_addr_r};
 fi
 
 # Recompile with:
