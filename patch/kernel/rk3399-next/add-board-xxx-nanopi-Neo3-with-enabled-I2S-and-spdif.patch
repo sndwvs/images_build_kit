@@ -14,12 +14,12 @@ diff --git a/arch/arm64/boot/dts/rockchip/Makefile b/arch/arm64/boot/dts/rockchi
 index f769eb1d1..b8e6e86e0 100644
 --- a/arch/arm64/boot/dts/rockchip/Makefile
 +++ b/arch/arm64/boot/dts/rockchip/Makefile
-@@ -8,6 +8,7 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3328-a1.dtb
+@@ -6,6 +6,7 @@
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3326-odroid-go2.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3328-a1.dtb
  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3328-evb.dtb
- dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3328-nanopi-r2-rev00.dtb
- dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3328-nanopi-r2-rev20.dtb
 +dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3328-nanopi-neo3-rev02.dtb
- dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3328-rock-pi-e.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3328-nanopi-r2s.dtb
  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3328-rock64.dtb
  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3328-roc-cc.dtb
 diff --git a/arch/arm64/boot/dts/rockchip/rk3328-nanopi-neo3-rev02.dts b/arch/arm64/boot/dts/rockchip/rk3328-nanopi-neo3-rev02.dts

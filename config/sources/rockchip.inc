@@ -32,7 +32,7 @@ case $KERNEL_SOURCE in
             KERNEL_DIR="linux-$SOCFAMILY-$KERNEL_SOURCE"
     ;;
     next)
-            KERNEL_BRANCH="linux-5.9.y::"
+            KERNEL_BRANCH="linux-5.10.y::"
     ;;
 esac
 
