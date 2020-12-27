@@ -6,7 +6,7 @@
  
 +	cpuinfo {
 +		compatible = "rockchip,cpuinfo";
-+		nvmem-cells = <&otp_id>;
++		nvmem-cells = <&cpu_id>;
 +		nvmem-cell-names = "id";
 +	};
 +
@@ -28,10 +28,10 @@
 +			 <&cru PCLK_OTP_PHY>;
 +		clock-names = "otp", "apb_pclk", "phy";
 +		resets = <&cru SRST_OTP_PHY>;
-+		reset-names = "otp_phy";
++		reset-names = "phy";
 +
 +		/* Data cells */
-+		otp_id: id@7 {
++		cpu_id: id@7 {
 +			reg = <0x07 0x10>;
 +		};
 +		cpu_leakage: cpu-leakage@17 {
