@@ -11,10 +11,13 @@ get_name_rootfs() {
     image_type="$1"
     kernel_version KERNEL_VERSION
 
+    local ROOTFS_NAME_IMG=$(echo ${ROOTFS_NAME} | rev | cut -d '-' -f4- | rev)
+    [[ -z $ROOTFS_NAME_IMG ]] && local ROOTFS_NAME_IMG=$(echo ${ROOTFS_NAME} | rev | cut -d '-' -f2- | rev)
+
     if [[ $image_type == base ]]; then
-        ROOTFS="$(echo ${ROOTFS_NAME} | rev | cut -d '-' -f4- | rev)-${ARCH}-${image_type}-$BOARD_NAME-$KERNEL_VERSION-build-${ROOTFS_VERSION}"
+        ROOTFS="${ROOTFS_NAME_IMG}-${ARCH}-${image_type}-$BOARD_NAME-$KERNEL_VERSION-build-${ROOTFS_VERSION}"
     else
-        ROOTFS_XFCE="$(echo ${ROOTFS_NAME} | rev | cut -d '-' -f4- | rev)-${ARCH}-${image_type}-$BOARD_NAME-$KERNEL_VERSION-build-${ROOTFS_VERSION}"
+        ROOTFS_XFCE="${ROOTFS_NAME_IMG}-${ARCH}-${image_type}-$BOARD_NAME-$KERNEL_VERSION-build-${ROOTFS_VERSION}"
     fi
 }
 
