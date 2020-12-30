@@ -11,8 +11,7 @@ get_name_rootfs() {
     image_type="$1"
     kernel_version KERNEL_VERSION
 
-    local ROOTFS_NAME_IMG=$(echo ${ROOTFS_NAME} | rev | cut -d '-' -f4- | rev)
-    [[ -z $ROOTFS_NAME_IMG ]] && local ROOTFS_NAME_IMG=$(echo ${ROOTFS_NAME} | rev | cut -d '-' -f2- | rev)
+    local ROOTFS_NAME_IMG=$(echo ${ROOTFS_NAME} | cut -d '-' -f-2)
 
     if [[ $image_type == base ]]; then
         ROOTFS="${ROOTFS_NAME_IMG}-${ARCH}-${image_type}-$BOARD_NAME-$KERNEL_VERSION-build-${ROOTFS_VERSION}"
