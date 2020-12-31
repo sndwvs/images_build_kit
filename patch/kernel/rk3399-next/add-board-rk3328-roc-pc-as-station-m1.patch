@@ -10,7 +10,7 @@
  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3368-evb-act8846.dtb
 --- /dev/null	2020-12-23 11:47:50.044000030 +0200
 +++ b/arch/arm64/boot/dts/rockchip/rk3328-roc-pc.dts	2020-12-30 16:15:50.808198411 +0200
-@@ -0,0 +1,470 @@
+@@ -0,0 +1,499 @@
 +/*
 + * SPDX-License-Identifier: (GPL-2.0+ or MIT)
 + * Copyright (c) 2016 Fuzhou Rockchip Electronics Co., Ltd
@@ -23,6 +23,11 @@
 +/ {
 +	model = "Firefly roc-rk3328-pc";
 +	compatible = "firefly,roc-rk3328-pc", "rockchip,rk3328";
++
++	aliases {
++		mmc0 = &sdmmc;
++		mmc1 = &emmc; /* MMC boot device */
++	};
 +
 +	gmac_clkin: external-gmac-clock {
 +		compatible = "fixed-clock";
@@ -57,24 +62,35 @@
 +		};
 +	};
 +
-+	vcc_host_vbus: host-vbus-regulator {
++	vcc_host_5v: vcc-host-5v-regulator {
 +		compatible = "regulator-fixed";
-+		gpio = <&gpio3 RK_PA7 GPIO_ACTIVE_HIGH>;
++		enable-active-high;
++		gpio = <&gpio0 RK_PA0 GPIO_ACTIVE_HIGH>;
 +		pinctrl-names = "default";
-+		pinctrl-0 = <&host_vbus_drv>;
++		pinctrl-0 = <&usb30_host_drv>;
++		regulator-name = "vcc_host_5v";
 +		regulator-always-on;
 +		regulator-boot-on;
-+		regulator-name = "vcc_host_vbus";
-+		regulator-min-microvolt = <5000000>;
-+		regulator-max-microvolt = <5000000>;
-+		enable-active-high;
++		vin-supply = <&vcc_sys>;
 +	};
-+
-+	vcc_phy: vcc-phy-regulator {
++	
++	vcc_host1_5v: vcc_otg_5v: vcc-host1-5v-regulator {
 +		compatible = "regulator-fixed";
 +		regulator-name = "vcc_phy";
 +		regulator-always-on;
 +		regulator-boot-on;
++	};
++
++	vcc_phy: vcc-phy-regulator {
++		compatible = "regulator-fixed";
++		enable-active-high;
++		gpio = <&gpio0 RK_PA2 GPIO_ACTIVE_HIGH>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&usb20_host_drv>;
++		regulator-name = "vcc_host1_5v";
++		regulator-always-on;
++		regulator-boot-on;
++		vin-supply = <&vcc_sys>;
 +	};
 +
 +	vcc_sd: sdmmc-regulator {
@@ -277,7 +293,7 @@
 +		gpio-controller;
 +		#gpio-cells = <2>;
 +		#clock-cells = <1>;
-+		clock-output-names = "rk805-clkout1", "rk805-clkout2";
++		clock-output-names = "xin32k", "rk805-clkout2";
 +
 +		vcc1-supply = <&vcc_sys>;
 +		vcc2-supply = <&vcc_sys>;
@@ -291,7 +307,7 @@
 +		};
 +
 +		pwrkey {
-+			status = "disabled";
++			status = "okay";
 +		};
 +
 +		gpio {
@@ -392,14 +408,14 @@
 +
 +&pinctrl {
 +	pinctrl-names = "default";
-+	pinctrl-0 = <&wifi_enable>;
++    pinctrl-0 = <&clk_32k_out>;
 +
-+	wifi {
-+		wifi_enable: wifi-enable {
++    clk_32k {
++		clk_32k_out: clk-32k-out {
 +			rockchip,pins =
-+				<0 RK_PA0 RK_FUNC_GPIO &pcfg_pull_down>;
-+		};
-+	};
++				<1 RK_PD4 1 &pcfg_pull_none>;
++        };
++    };
 +
 +	pmic {
 +		pmic_int_l: pmic-int-l {
@@ -408,10 +424,24 @@
 +		};
 +	};
 +
-+	usb {
-+		host_vbus_drv: host-vbus-drv {
-+			rockchip,pins =
-+				<3 RK_PA7 RK_FUNC_GPIO &pcfg_pull_none>;
++	sdio-pwrseq {
++		wifi_enable_h: wifi-enable-h {
++			rockchip,pins = <3 RK_PB0 RK_FUNC_GPIO &pcfg_pull_none>,
++				<3 RK_PA1 RK_FUNC_GPIO &pcfg_pull_none_4ma>,
++				<1 RK_PD0 RK_FUNC_GPIO &pcfg_pull_none>,
++				<1 RK_PD2 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++	};
++
++	usb2 {
++		usb20_host_drv: usb20-host-drv {
++			rockchip,pins = <0 RK_PA2 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++	};
++
++	usb3 {
++		usb30_host_drv: usb30-host-drv {
++			rockchip,pins = <0 RK_PA0 RK_FUNC_GPIO &pcfg_pull_none>;
 +		};
 +	};
 +};
@@ -429,7 +459,6 @@
 +};
 +
 +&u3phy {
-+	vbus-supply = <&vcc_host_vbus>;
 +	status = "okay";
 +};
 +
