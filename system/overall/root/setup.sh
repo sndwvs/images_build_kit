@@ -184,7 +184,7 @@ prepare_disk() {
         dd if=/boot/$TRUST_LOADER of=/dev/$DISK seek=$TRUST_OFFSET_LOADER status=noxfer >/dev/null 2>&1
     fi
 
-    [[ ${COMPATIBLE} =~ raspberry*pi ]] && unset OFFSET && SIZE="+150M"
+    [[ ${COMPATIBLE} =~ raspberry*pi ]] && unset OFFSET && SIZE="+256M"
 
     echo -e "\nn\np\n${PART}\n${OFFSET}\n${SIZE}\nw" | fdisk "/dev/$DISK" >/dev/null 2>&1
 

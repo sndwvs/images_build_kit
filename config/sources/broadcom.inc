@@ -70,7 +70,7 @@ create_img() {
     losetup $LOOP $SOURCE/$IMAGE.img || exit 1
 
     message "" "create" "partition"
-    echo -e "\no\nn\np\n1\n$IMAGE_OFFSET\n+100M\n\nt\nc\nn\np\n2\n\n\nw" | fdisk $LOOP >> $LOG 2>&1 || true
+    echo -e "\no\nn\np\n1\n$IMAGE_OFFSET\n+256M\n\nt\nc\nn\np\n2\n\n\nw" | fdisk $LOOP >> $LOG 2>&1 || true
 
     partprobe $LOOP >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
