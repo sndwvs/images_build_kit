@@ -392,7 +392,13 @@ setting_bootloader() {
             -e "s:%SERIAL_CONSOLE_SPEED%:${SERIAL_CONSOLE_SPEED}:g" \
             -i "$SOURCE/$ROOTFS/boot/boot.cmd"
     fi
-    [[ -f $CWD/config/boot_scripts/boot-$SOCFAMILY.ini ]] && install -Dm644 $CWD/config/boot_scripts/boot-$SOCFAMILY.ini "$SOURCE/$ROOTFS/boot/boot.ini"
+    if [[ -f $CWD/config/boot_scripts/boot-$SOCFAMILY.ini ]];then
+        install -Dm644 $CWD/config/boot_scripts/boot-$SOCFAMILY.ini "$SOURCE/$ROOTFS/boot/boot.ini"
+        # u-boot serial inteface config
+        sed -e "s:%SERIAL_CONSOLE%:${SERIAL_CONSOLE}:g" \
+            -e "s:%SERIAL_CONSOLE_SPEED%:${SERIAL_CONSOLE_SPEED}:g" \
+            -i "$SOURCE/$ROOTFS/boot/boot.ini"
+    fi
     # compile boot script
     [[ -f $SOURCE/$ROOTFS/boot/boot.cmd ]] && ( $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A arm -T script -d $SOURCE/$ROOTFS/boot/boot.cmd \
                                                                         "$SOURCE/$ROOTFS/boot/boot.scr" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
