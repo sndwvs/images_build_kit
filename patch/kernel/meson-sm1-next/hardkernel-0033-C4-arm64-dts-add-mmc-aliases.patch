@@ -1,0 +1,11 @@
+--- a/arch/arm64/boot/dts/amlogic/meson-sm1-odroid-c4.dts	2021-01-07 21:57:02.866468943 +0000
++++ b/arch/arm64/boot/dts/amlogic/meson-sm1-odroid-c4.dts	2021-01-07 21:58:36.310149409 +0000
+@@ -32,6 +32,8 @@
+ 		serial0 = &uart_AO;
+ 		serial1 = &uart_A;
+ 		spi0 = &spicc0;
++		mmc0 = &sd_emmc_b; /* SD card */
++		mmc1 = &sd_emmc_c; /* eMMC */
+ 	};
+ 
+ 	chosen {
