@@ -121,7 +121,7 @@ compile_boot_tools() {
         make $CTHREADS tools >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
     if [[ $SOCFAMILY == meson* ]]; then
-        make ${BOARD_NAME}_defconfig >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        make ${BOARD_NAME/_/}_defconfig >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         make $CTHREADS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 }
