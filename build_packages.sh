@@ -26,35 +26,50 @@ build_kernel_pkg() {
         [[ -d $CWD/blobs/firmware-${BOARD_NAME} ]] && ( rsync -va $CWD/blobs/firmware-${BOARD_NAME}/ -d $BUILD/$PKG/kernel-modules/lib/firmware/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
     fi
 
+    message "" "copy" "kernel"
     # install kernel
-    install -Dm644 $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/$KERNEL "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/$KERNEL"
+    install -Dm644 $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/$KERNEL $BUILD/$PKG/kernel-${SOCFAMILY}/boot/vmlinuz-${KERNEL_VERSION}
+    install -Dm644 $SOURCE/$KERNEL_DIR/System.map $BUILD/$PKG/kernel-${SOCFAMILY}/boot/System.map-${KERNEL_VERSION}
+    install -Dm644 $SOURCE/$KERNEL_DIR/.config $BUILD/$PKG/kernel-${SOCFAMILY}/boot/config-${KERNEL_VERSION}
+    if [[ $SOCFAMILY != bcm2* ]];then
+        # Make symlinks:
+        ln -sf System.map-${KERNEL_VERSION} $BUILD/$PKG/kernel-${SOCFAMILY}/boot/System.map
+        ln -sf config-${KERNEL_VERSION} $BUILD/$PKG/kernel-${SOCFAMILY}/boot/config
+        ln -sf vmlinuz-${KERNEL_VERSION} $BUILD/$PKG/kernel-${SOCFAMILY}/boot/vmlinuz
+        ln -sf vmlinuz-${KERNEL_VERSION} $BUILD/$PKG/kernel-${SOCFAMILY}/boot/$KERNEL
+    else
+        install -Dm644 $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/$KERNEL $BUILD/$PKG/kernel-${SOCFAMILY}/boot/$KERNEL
+        install -Dm644 $SOURCE/$KERNEL_DIR/System.map $BUILD/$PKG/kernel-${SOCFAMILY}/boot/System.map
+        install -Dm644 $SOURCE/$KERNEL_DIR/.config $BUILD/$PKG/kernel-${SOCFAMILY}/boot/config
+    fi
 
     message "" "copy" "device tree blob"
     # add device tree
-    install -m755 -d "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/"
+    install -m755 -d "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb-${KERNEL_VERSION}"
     if [[ ${KARCH} == arm64 ]]; then
             [[ $SOCFAMILY == rk3* ]] && ( cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/rockchip/*.dtb \
-              $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+              $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb-${KERNEL_VERSION}/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
             [[ $SOCFAMILY == sun* ]] && ( cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/allwinner/*.dtb \
-              $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+              $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb-${KERNEL_VERSION}/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
             if [[ $SOCFAMILY == bcm2* ]]; then
                 install -dm755 "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/overlays/"
                 cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/broadcom/*.dtb \
-                        $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-                cp -a $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/*.dtb $BUILD/$PKG/kernel-${SOCFAMILY}/boot/
+                        $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb-${KERNEL_VERSION}/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+                cp -a $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb-${KERNEL_VERSION}/*.dtb $BUILD/$PKG/kernel-${SOCFAMILY}/boot/
                 cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/overlays/{*.dtbo,README} \
                         $BUILD/$PKG/kernel-${SOCFAMILY}/boot/overlays/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             fi
             [[ $SOCFAMILY == meson* ]] && ( cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/amlogic/*.dtb \
-              $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+              $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb-${KERNEL_VERSION}/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
     else
         cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/*${SOCFAMILY}*dtb \
-              $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+              $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb-${KERNEL_VERSION}/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
+    [[ $SOCFAMILY != bcm2* ]] && ( ln -sf dtb-${KERNEL_VERSION} $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
 
     cd "$CWD" # fix actual current directory
     # clean-up unnecessary files generated during install
-    find "$BUILD/$PKG/kernel-modules" "$BUILD/$PKG/kernel-headers" \( -name .install -o -name ..install.cmd \) -delete
+    find "$BUILD/$PKG/kernel-modules" "$BUILD/$PKG/kernel-headers" \( -name .install -o -name ..install.cmd \) -delete >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     message "" "create" "kernel packages"
     # split install_modules -> firmware
     install -dm755 "$BUILD/$PKG/kernel-firmware/lib"
