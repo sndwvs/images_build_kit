@@ -10,6 +10,8 @@ setenv verbosity "1"
 setenv console "both"
 setenv rootfstype "ext4"
 setenv earlycon "off"
+# for helios64
+setenv prefix "/boot/"
 
 echo "Boot script loaded from ${devtype} ${devnum}"
 
