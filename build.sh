@@ -43,7 +43,7 @@ fi
 #---------------------------------------------
 # get kernel source type
 #---------------------------------------------
-if [[ -z $KERNEL_SOURCE ]]; then
+if [[ $NO_MENU == yes ]]; then
     # Duplicate file descriptor 1 on descriptor 3
     exec 3>&1
     KERNEL_SOURCES=$(grep -oP "(?<=_SOURCES=).*$" $CWD/config/boards/$BOARD_NAME/${BOARD_NAME}.conf | sed 's:\"::g')
