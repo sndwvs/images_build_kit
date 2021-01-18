@@ -54,6 +54,9 @@ password: **password**
 ## cross compilation arm on aarch64 architecture ##
 `ARCH=arm ./build.sh`
 
+## creating an image from the command line ##
+`ARCH=arm BOARD_NAME=cubietruck KERNEL_SOURCE=legacy DOWNLOAD_SOURCE_BINARIES=yes ./build.sh`
+
 
 # VARIABLES #
 
@@ -66,3 +69,11 @@ password: **password**
 | NTP                  | yes/no (yes - default) | setting up the NTP server |
 | NETWORKMANAGER       | yes/no (yes - default) | setting up the NetworkManager service |
 | IMAGE_COMPRESSION    | yes/no (yes - default) | image compression |
+| ARCH                 | auto (current system - default) | system architecture |
+| BOARD_NAME           | empty (from the menu) | board [name](config/boards/) for assembly |
+| KERNEL_SOURCE        | empty (legacy/next - from the menu) | kernel source type |
+| DESKTOP_SELECTED     | empty (yes/no - from the menu) | create a GUI image |
+| DOWNLOAD_SOURCE_BINARIES | empty (yes/no - from the menu) | download required components |
+| CLEAN                | empty (yes/no - from the menu) | removing donwload/built components |
+| COMPILE_BINARIES     | empty (yes/no - from the menu) | compilation of all required components |
+| TOOLS_PACK           | empty (yes/no - from the menu) | compilation of packages needed for assembly |

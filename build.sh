@@ -21,38 +21,47 @@ for board in $CWD/config/boards/*/*.conf ;do
     BOARDS+=( $(echo $board | rev | cut -d '/' -f1 | cut -d '.' -f2 | rev) "$(sed -n '/^#/{3p}' $board | sed 's:#\s::')" "off")
 done
 
-# Duplicate file descriptor 1 on descriptor 3
-exec 3>&1
-while true; do
-    BOARD_NAME=$(dialog --title "build rootfs" \
-                --radiolist "selected your board" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
-                "${BOARDS[@]}" \
-    2>&1 1>&3)
+if [[ -z $BOARD_NAME ]]; then
+    # no menu
+    NO_MENU=yes
 
-    [ ! -e $BOARD_NAME ] && break
-done
-# Close file descriptor 3
-exec 3>&-
+    # Duplicate file descriptor 1 on descriptor 3
+    exec 3>&1
+    while true; do
+        BOARD_NAME=$(dialog --title "build rootfs" \
+                    --radiolist "selected your board" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
+                    "${BOARDS[@]}" \
+        2>&1 1>&3)
 
-# Duplicate file descriptor 1 on descriptor 3
-exec 3>&1
+        [ ! -e $BOARD_NAME ] && break
+    done
+    # Close file descriptor 3
+    exec 3>&-
+fi
+
+
 #---------------------------------------------
 # get kernel source type
 #---------------------------------------------
-KERNEL_SOURCES=$(grep -oP "(?<=_SOURCES=).*$" $CWD/config/boards/$BOARD_NAME/${BOARD_NAME}.conf | sed 's:\"::g')
-[ ! -z ${KERNEL_SOURCES%%:*} ] && kernel_sources_options+=("${KERNEL_SOURCES%%:*}" "legacy kernel source" "off")
-[ ! -z ${KERNEL_SOURCES##*:} ] && kernel_sources_options+=("${KERNEL_SOURCES##*:}" "mainline kernel source" "off")
-while true; do
-    # kernel source
-    KERNEL_SOURCE=$(dialog --title "build for $BOARD_NAME" \
-            --radiolist "select kernel source" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
-            "${kernel_sources_options[@]}" \
-    2>&1 1>&3)
+if [[ -z $KERNEL_SOURCE ]]; then
+    # Duplicate file descriptor 1 on descriptor 3
+    exec 3>&1
+    KERNEL_SOURCES=$(grep -oP "(?<=_SOURCES=).*$" $CWD/config/boards/$BOARD_NAME/${BOARD_NAME}.conf | sed 's:\"::g')
+    [ ! -z ${KERNEL_SOURCES%%:*} ] && kernel_sources_options+=("${KERNEL_SOURCES%%:*}" "legacy kernel source" "off")
+    [ ! -z ${KERNEL_SOURCES##*:} ] && kernel_sources_options+=("${KERNEL_SOURCES##*:}" "mainline kernel source" "off")
+    while true; do
+        # kernel source
+        KERNEL_SOURCE=$(dialog --title "build for $BOARD_NAME" \
+                --radiolist "select kernel source" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
+                "${kernel_sources_options[@]}" \
+        2>&1 1>&3)
 
-    [ ! -e $KERNEL_SOURCE ] && break
-done
-# Close file descriptor 3
-exec 3>&-
+        [ ! -e $KERNEL_SOURCE ] && break
+    done
+    # Close file descriptor 3
+    exec 3>&-
+fi
+
 
 DESKTOP=$(grep -oP "(?<=DESKTOP\=).*$" $CWD/config/boards/$BOARD_NAME/${BOARD_NAME}.conf || echo "no")
 options+=("clean" "clean sources, remove binaries and image" "off")
@@ -61,37 +70,40 @@ options+=("compile" "build binaries locally" "on")
 options+=("tools" "create and pack tools" "on")
 [[ $DESKTOP == yes ]] && options+=("desktop" "create image with xfce" "on")
 
-# Duplicate file descriptor 1 on descriptor 3
-exec 3>&1
-while true; do
-    result=$(dialog --title "build $KERNEL_SOURCE for $BOARD_NAME" \
-           --checklist "select build options" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
-           "${options[@]}" \
-    2>&1 1>&3)
-    [ ! -z "$result" ] && break
-done
-exit_status=$?
-# Close file descriptor 3
-exec 3>&-
-for arg in ${result[*]}; do
-    case "$arg" in
-        download)
-                    DOWNLOAD_SOURCE_BINARIES="true"
-                ;;
-           clean)
-                    CLEAN="true"
-                ;;
-         compile)
-                    COMPILE_BINARIES="true"
-                ;;
-           tools)
-                    TOOLS_PACK="true"
-                ;;
-           desktop)
-                    DESKTOP_SELECTED="yes"
-                ;;
-    esac
-done
+if [[ $NO_MENU == yes ]]; then
+    # Duplicate file descriptor 1 on descriptor 3
+    exec 3>&1
+    while true; do
+        result=$(dialog --title "build $KERNEL_SOURCE for $BOARD_NAME" \
+               --checklist "select build options" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
+               "${options[@]}" \
+        2>&1 1>&3)
+        [ ! -z "$result" ] && break
+    done
+    exit_status=$?
+    # Close file descriptor 3
+    exec 3>&-
+    for arg in ${result[*]}; do
+        case "$arg" in
+            download)
+                        DOWNLOAD_SOURCE_BINARIES=yes
+                    ;;
+               clean)
+                        CLEAN=yes
+                    ;;
+             compile)
+                        COMPILE_BINARIES=yes
+                    ;;
+               tools)
+                        TOOLS_PACK=yes
+                    ;;
+             desktop)
+                        DESKTOP_SELECTED=yes
+                    ;;
+        esac
+    done
+fi
+
 
 #---------------------------------------------
 # select build arch on x86_64
@@ -144,7 +156,7 @@ source $CWD/configuration.sh || exit 1
 #---------------------------------------------
 # main script
 #---------------------------------------------
-if [[ $CLEAN == true ]]; then
+if [[ $CLEAN == yes ]]; then
     clean_sources
 fi
 
@@ -152,31 +164,31 @@ if [[ ! -e $BOARD_NAME ]]; then
     prepare_dest
 fi
 
-if [[ $DOWNLOAD_SOURCE_BINARIES == true ]]; then
+if [[ $DOWNLOAD_SOURCE_BINARIES == yes ]]; then
     download
 fi
 #---------------------------------------------
 # start build
 #---------------------------------------------
 message "" "start" "build $DISTR ARCH $ARCH"
-if [[ $COMPILE_BINARIES == true ]]; then
+if [[ $COMPILE_BINARIES == yes ]]; then
     # aarch64 change interpreter path
     [[ $MARCH == aarch64 ]] && change_interpreter_path "${XTOOLS[@]}"
     clear_boot_tools
 #    if [[ ! -z $ATF && $SOCFAMILY == rk33* ]] || [[ $SOCFAMILY == meson* ]]; then
     if [[ ! -z $ATF && $SOCFAMILY == rk33* ]]; then
-        [[ $DOWNLOAD_SOURCE_BINARIES == true ]] && patching_source "u-boot-tools"
+        [[ $DOWNLOAD_SOURCE_BINARIES == yes ]] && patching_source "u-boot-tools"
         compile_boot_tools
     fi
-    [[ ! -z $ATF && $DOWNLOAD_SOURCE_BINARIES == true ]] && ( patching_source "atf" && compile_atf )
+    [[ ! -z $ATF && $DOWNLOAD_SOURCE_BINARIES == yes ]] && ( patching_source "atf" && compile_atf )
 
-    [[ $DOWNLOAD_SOURCE_BINARIES == true ]] && patching_source "u-boot"
+    [[ $DOWNLOAD_SOURCE_BINARIES == yes ]] && patching_source "u-boot"
     compile_boot_loader
 
-    [[ $DOWNLOAD_SOURCE_BINARIES == true ]] && patching_source "kernel"
+    [[ $DOWNLOAD_SOURCE_BINARIES == yes ]] && patching_source "kernel"
     compile_kernel
 
-    if [[ $SOCFAMILY == sun* && $TOOLS_PACK == true ]]; then
+    if [[ $SOCFAMILY == sun* && $TOOLS_PACK == yes ]]; then
         compile_sunxi_tools
         build_sunxi_tools
     fi
