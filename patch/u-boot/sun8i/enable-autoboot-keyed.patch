@@ -13,9 +13,9 @@ index 53eae8953e..1e931a0eb0 100644
  	imply CMD_DM
 diff --git a/cmd/Kconfig b/cmd/Kconfig
 index d6d130edfa..46ed3a9d76 100644
---- a/cmd/Kconfig
-+++ b/cmd/Kconfig
-@@ -51,7 +51,7 @@ config AUTOBOOT_KEYED
+--- a/common/Kconfig
++++ b/common/Kconfig
+@@ -753,7 +753,7 @@
  config AUTOBOOT_PROMPT
  	string "Autoboot stop prompt"
  	depends on AUTOBOOT_KEYED
@@ -24,7 +24,7 @@ index d6d130edfa..46ed3a9d76 100644
  	help
  	  This string is displayed before the boot delay selected by
  	  CONFIG_BOOTDELAY starts. If it is not defined	there is no
-@@ -84,6 +84,7 @@ config AUTOBOOT_DELAY_STR
+@@ -793,6 +793,7 @@
  config AUTOBOOT_STOP_STR
  	string "Stop autobooting via specific input key / string"
  	depends on AUTOBOOT_KEYED && !AUTOBOOT_ENCRYPTION
