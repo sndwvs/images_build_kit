@@ -187,6 +187,100 @@ patching_source() {
 }
 
 #---------------------------------------------
+# external patching process
+#---------------------------------------------
+external_patching_source() {
+
+    if [[ $EXTERNAL_WIFI == yes ]]; then
+        local PREFFIX="drivers/net/wireless"
+
+        # <url>|<name>|<branch>
+        # Wireless drivers for Realtek 8189ES chipsets
+        local SOURCES+=('https://github.com/jwrdegoede/rtl8189ES_linux|rtl8189es|master::')
+
+        # Wireless drivers for Realtek 8189FS chipsets
+        SOURCES+=('https://github.com/jwrdegoede/rtl8189ES_linux|rtl8189fs|rtl8189fs::')
+
+        # Wireless drivers for Realtek 8192EU chipsets
+        SOURCES+=('https://github.com/Mange/rtl8192eu-linux-driver|rtl8192eu|realtek-4.4.x::')
+
+        ## Wireless drivers for Realtek 8811, 8812, 8814 and 8821 chipsets
+        SOURCES+=('https://github.com/morrownr/8812au|rtl8812au|5.9.3.2::')
+
+        # Wireless drivers for Xradio XR819 chipsets
+        SOURCES+=('https://github.com/karabek/xradio|xradio|master::')
+
+        # Wireless drivers for Realtek RTL8811CU and RTL8821C chipsets
+        SOURCES+=('https://github.com/brektrou/rtl8821CU|rtl8811cu|master:commit:2bebdb9a35c1d9b6e6a928e371fa39d5fcec8a62')
+
+        # Wireless drivers for Realtek 8188EU 8188EUS and 8188ETV chipsets
+        SOURCES+=('https://github.com/aircrack-ng/rtl8188eus|rtl8188eu|v5.7.6.1::')
+
+        # Wireless drivers for Realtek 88x2bu chipsets
+        SOURCES+=('https://github.com/morrownr/88x2bu|rtl8188eu|5.8.7.4::')
+
+        # Wireless drivers for Realtek 8723DS chipsets
+        SOURCES+=('https://github.com/lwfinger/rtl8723ds|rtl8723ds|master::')
+
+        # Wireless drivers for Realtek 8723DU chipsets
+        SOURCES+=('https://github.com/lwfinger/rtl8723du|rtl8723du|master::')
+
+        # Wireless drivers for Realtek 8814AU chipsets
+        SOURCES+=('https://github.com/morrownr/8814au|rtl8814au|main::')
+
+
+
+        for src in "${SOURCES[@]}";do
+            IFS='|'
+            local source_array=($src)
+            local DRIVER_URL="${source_array[0]}"
+            local DRIVER_NAME="${source_array[1]}"
+            local DRIVER_BRANCH="${source_array[2]}"
+
+            [[ -d $SOURCE/$KERNEL_DIR/${PREFFIX}/$DRIVER_NAME ]] && ( rm -rf $SOURCE/$KERNEL_DIR/${PREFFIX}/$DRIVER_NAME || (message "err" "details" && exit 1) || exit 1 )
+            message "" "download" "external driver $DRIVER_NAME"
+            # git_fetch <dir> <url> <branch>
+            git_fetch $SOURCE/$KERNEL_DIR/${PREFFIX}/$DRIVER_NAME $DRIVER_URL $DRIVER_BRANCH
+            # clean .git
+            [[ -d $SOURCE/$KERNEL_DIR/${PREFFIX}/$DRIVER_NAME/.git ]] && ( rm -rf $SOURCE/$KERNEL_DIR/${PREFFIX}/$DRIVER_NAME/.git || (message "err" "details" && exit 1) || exit 1 )
+
+            if [[ $DRIVER_NAME == rtl8811cu ]]; then
+                # Address ARM related bug https://github.com/aircrack-ng/rtl8812au/issues/233
+                sed -i "s/^CONFIG_MP_VHT_HW_TX_MODE.*/CONFIG_MP_VHT_HW_TX_MODE = n/" \
+                "$SOURCE/$KERNEL_DIR/${PREFFIX}/$DRIVER_NAME/Makefile"
+            fi
+
+            if [[ $DRIVER_NAME == rtl8723du ]]; then
+                echo -e "config RTL8723DU" > $SOURCE/$KERNEL_DIR/${PREFFIX}/$DRIVER_NAME/Kconfig
+                echo -e "\ttristate \"Realtek 8723D USB WiFi\"" >> $SOURCE/$KERNEL_DIR/${PREFFIX}/$DRIVER_NAME/Kconfig
+                echo -e "\thelp" >> $SOURCE/$KERNEL_DIR/${PREFFIX}/$DRIVER_NAME/Kconfig
+                echo -e "\t  Help message of RTL8723DU" >> $SOURCE/$KERNEL_DIR/${PREFFIX}/$DRIVER_NAME/Kconfig
+                sed -i 's/export TopDIR ?= \$(shell pwd)/export TopDIR ?= \$(src)/g' "$SOURCE/$KERNEL_DIR/${PREFFIX}/$DRIVER_NAME/Makefile"
+            fi
+
+            # Kconfig
+            sed -i 's/---help---/help/g' "$SOURCE/$KERNEL_DIR/${PREFFIX}/$DRIVER_NAME/Kconfig"
+
+            # Disable debug
+            sed -i "s/^CONFIG_RTW_DEBUG.*/CONFIG_RTW_DEBUG = n/" \
+            "$SOURCE/$KERNEL_DIR/${PREFFIX}/$DRIVER_NAME/Makefile"
+
+            # Add to section Makefile
+            echo "obj-\$(CONFIG_${DRIVER_NAME^^}) += $DRIVER_NAME/" >> "$SOURCE/$KERNEL_DIR/${PREFFIX}/Makefile"
+            sed -i "/source \"drivers\/net\/wireless\/ti\/Kconfig\"/a source \"drivers\/net\/wireless\/$DRIVER_NAME\/Kconfig\"" \
+            "$SOURCE/$KERNEL_DIR/${PREFFIX}/Kconfig"
+
+            # fixed Makefile Xradio XR819
+            sed -i 's:CONFIG_XRADIO:CONFIG_WLAN_VENDOR_XRADIO:' "$SOURCE/$KERNEL_DIR/${PREFFIX}/Makefile"
+
+            message "" "patching" "succeeded: $DRIVER_NAME"
+        done
+        # clean
+        unset SOURCES
+    fi
+}
+
+#---------------------------------------------
 # get gcc version
 #---------------------------------------------
 gcc_version() {

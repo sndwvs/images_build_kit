@@ -54,6 +54,10 @@ ATF_SOURCE=${ATF_SOURCE:-"https://github.com/ARM-software/arm-trusted-firmware.g
 ATF_DIR=${ATF_DIR:-"arm-trusted-firmware"}
 ATF_BRANCH=${ATF_BRANCH:-"master::"}
 
+#---------------------------------------------
+# external wifi driver configuration
+#---------------------------------------------
+[[ -z $EXTERNAL_WIFI ]] && EXTERNAL_WIFI=yes
 
 
 

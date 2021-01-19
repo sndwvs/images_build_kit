@@ -185,7 +185,10 @@ if [[ $COMPILE_BINARIES == yes ]]; then
     [[ $DOWNLOAD_SOURCE_BINARIES == yes ]] && patching_source "u-boot"
     compile_boot_loader
 
-    [[ $DOWNLOAD_SOURCE_BINARIES == yes ]] && patching_source "kernel"
+    if [[ $DOWNLOAD_SOURCE_BINARIES == yes ]]; then
+        external_patching_source
+        patching_source "kernel"
+    fi
     compile_kernel
 
     if [[ $SOCFAMILY == sun* && $TOOLS_PACK == yes ]]; then

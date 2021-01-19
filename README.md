@@ -77,3 +77,4 @@ password: **password**
 | CLEAN                | empty (yes/no - from the menu) | removing donwload/built components |
 | COMPILE_BINARIES     | empty (yes/no - from the menu) | compilation of all required components |
 | TOOLS_PACK           | empty (yes/no - from the menu) | compilation of packages needed for assembly |
+| EXTERNAL_WIFI        | yes/no (yes - default) | apply wifi patch with git |
