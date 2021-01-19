@@ -193,10 +193,11 @@ external_patching_source() {
 
     if [[ $EXTERNAL_WIFI == yes ]]; then
         local PREFFIX="drivers/net/wireless"
+        local SOURCES=()
 
         # <url>|<name>|<branch>
         # Wireless drivers for Realtek 8189ES chipsets
-        local SOURCES+=('https://github.com/jwrdegoede/rtl8189ES_linux|rtl8189es|master::')
+        SOURCES+=('https://github.com/jwrdegoede/rtl8189ES_linux|rtl8189es|master::')
 
         # Wireless drivers for Realtek 8189FS chipsets
         SOURCES+=('https://github.com/jwrdegoede/rtl8189ES_linux|rtl8189fs|rtl8189fs::')
@@ -233,6 +234,7 @@ external_patching_source() {
         for src in "${SOURCES[@]}";do
             IFS='|'
             local source_array=($src)
+            unset IFS
             local DRIVER_URL="${source_array[0]}"
             local DRIVER_NAME="${source_array[1]}"
             local DRIVER_BRANCH="${source_array[2]}"
@@ -275,8 +277,6 @@ external_patching_source() {
 
             message "" "patching" "succeeded: $DRIVER_NAME"
         done
-        # clean
-        unset SOURCES
     fi
 }
 
