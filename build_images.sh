@@ -420,6 +420,21 @@ setting_datetime() {
 }
 
 
+setting_dhcp() {
+    message "" "setting" "eth0 enabled dhcp"
+    # set eth0 to be DHCP by default
+    sed -i 's/USE_DHCP\[0\]=.*/USE_DHCP\[0\]="yes"/g' $SOURCE/$ROOTFS/etc/rc.d/rc.inet1.conf
+}
+
+
+setting_ssh() {
+    message "" "setting" "ssh login under the root"
+    sed -e 's/^\(#\)\(PermitRootLogin\).*/\2 yes/g' \
+        -e 's/^\(#\)\(PasswordAuth.*\)/\2/g' \
+    -i "$SOURCE/$ROOTFS/etc/ssh/sshd_config"
+}
+
+
 image_compression() {
     local IMG="$1"
     pushd $BUILD/$OUTPUT/$IMAGES >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1

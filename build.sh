@@ -218,6 +218,8 @@ for image_type in ${DISTR_IMAGES[@]}; do
         setting_debug
         setting_motd
         setting_datetime
+        setting_dhcp
+        setting_ssh
         setting_settings
         setting_wifi
         [[ $NTP == "yes" ]] && setting_ntp
