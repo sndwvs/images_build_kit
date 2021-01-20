@@ -1,0 +1,14 @@
+#
+# /etc/fstab: static file system information
+#
+# <file system>        <mount point>   <type>   <options>                        <dump> <pass>
+shm                    /dev/shm        tmpfs    defaults                         0      0
+devpts                 /dev/pts        devpts   noexec,nosuid,gid=tty,mode=0620  0      0
+sysfs                  /sys            sysfs    defaults                         0      0
+proc                   /proc           proc     defaults                         0      0
+#
+#/dev/#EXT4FS_BOOT#    /boot           ext4     errors=remount-ro                0      1
+#/dev/#SWAP#           swap            swap     defaults                         0      0
+#/dev/#EXT4FS_ROOT#    /               ext4     errors=remount-ro                0      1
+#/dev/#EXT4FS_HOME#    /home           ext4     defaults                         0      2
+

@@ -11,12 +11,10 @@ get_name_rootfs() {
     image_type="$1"
     kernel_version KERNEL_VERSION
 
-    local ROOTFS_NAME_IMG=$(echo ${ROOTFS_NAME} | cut -d '-' -f-2)
-
     if [[ $image_type == base ]]; then
-        ROOTFS="${ROOTFS_NAME_IMG}-${ARCH}-${image_type}-$BOARD_NAME-$KERNEL_VERSION-build-${ROOTFS_VERSION}"
+        ROOTFS="${ROOTFS_NAME}-${ARCH}-${image_type}-$BOARD_NAME-$KERNEL_VERSION-build-${ROOTFS_VERSION}"
     else
-        ROOTFS_XFCE="${ROOTFS_NAME_IMG}-${ARCH}-${image_type}-$BOARD_NAME-$KERNEL_VERSION-build-${ROOTFS_VERSION}"
+        ROOTFS_XFCE="${ROOTFS_NAME}-${ARCH}-${image_type}-$BOARD_NAME-$KERNEL_VERSION-build-${ROOTFS_VERSION}"
     fi
 }
 
@@ -36,16 +34,9 @@ clean_rootfs() {
 }
 
 
-download_rootfs() {
-    message "" "download" "$ROOTFS_NAME"
-    wget -c --no-check-certificate $URL_ROOTFS/$ROOTFS_NAME.tar.xz -O $SOURCE/$ROOTFS_NAME.tar.xz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-}
-
-
 prepare_rootfs() {
     message "" "prepare" "$ROOTFS"
     mkdir -p $SOURCE/$ROOTFS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    tar xpf $SOURCE/$ROOTFS_NAME.tar.xz -C "$SOURCE/$ROOTFS" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     if [[ ! -z $TOOLS_PACK ]] && [[ $SOCFAMILY == sun* ]]; then
         message "" "install" "${SUNXI_TOOLS_DIR}"
@@ -73,7 +64,7 @@ setting_debug() {
              }' \
         -i "$SOURCE/$ROOTFS/etc/securetty"
 
-    sed -e 's/^\(s\(0\)\)\(.*\)\(115200\)\(.*\)\(ttyS0\)/\1\3'$SERIAL_CONSOLE' '$SERIAL_CONSOLE_SPEED'/' \
+    sed -e "s/^#\(\(s\(1\)\).*\)\(ttyS0\).*\(9600\)/\1$SERIAL_CONSOLE $SERIAL_CONSOLE_SPEED/" \
         -i "$SOURCE/$ROOTFS/etc/inittab"
 }
 
@@ -418,6 +409,14 @@ setting_governor() {
         message "" "setting" "governor"
         sed "s:#SCALING_\(.*\)=\(.*\):SCALING_\1=$CPU_GOVERNOR:g" -i $SOURCE/$ROOTFS/etc/default/cpufreq
     fi
+}
+
+
+setting_datetime() {
+    message "" "setting" "datetime"
+    rm -f $SOURCE/$ROOTFS/etc/localtime* >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    ln -vfs /usr/share/zoneinfo/UTC $SOURCE/$ROOTFS/etc/localtime-copied-from  >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    cp -favv $SOURCE/$ROOTFS/usr/share/zoneinfo/UTC $SOURCE/$ROOTFS/etc/localtime >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 

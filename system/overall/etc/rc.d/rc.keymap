@@ -1,0 +1,6 @@
+#!/bin/sh
+# load the keyboard map.
+# more maps are in /usr/share/kbd/keymaps.
+if [ -x /usr/bin/loadkeys ]; then
+ /usr/bin/loadkeys us.map
+fi

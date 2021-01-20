@@ -147,7 +147,7 @@ reset
 source $CWD/downloads.sh || exit 1
 source $CWD/compilation.sh || exit 1
 source $CWD/build_packages.sh || exit 1
-source $CWD/build_rootfs.sh || exit 1
+source $CWD/build_images.sh || exit 1
 source $CWD/configuration.sh || exit 1
 
 
@@ -205,24 +205,24 @@ for image_type in ${DISTR_IMAGES[@]}; do
     clean_rootfs $image_type
 
     if [[ $image_type == base ]]; then
-        download_rootfs
         prepare_rootfs
         create_bootloader_pack
+        download_pkg $DISTR_URL "$image_type"
+        install_pkg "$image_type"
+        install_kernel
+        create_initrd
+        setting_system
         setting_bootloader
         setting_hostname
         setting_fstab
         setting_debug
         setting_motd
-        setting_system
+        setting_datetime
         setting_settings
         setting_wifi
         [[ $NTP == "yes" ]] && setting_ntp
         setting_bootloader_move_to_disk
         setting_governor
-        download_pkg $DISTR_URL "$image_type"
-        install_pkg "$image_type"
-        install_kernel
-        create_initrd
         create_img
         [[ $IMAGE_COMPRESSION == "yes" ]] && image_compression "$ROOTFS"
     fi

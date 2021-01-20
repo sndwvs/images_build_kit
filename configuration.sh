@@ -116,13 +116,7 @@ fi
 #---------------------------------------------
 # rootfs configuration
 #---------------------------------------------
-if [[ ${DISTR} == slackwarearm ]];then
-#    URL_ROOTFS=${URL_ROOTFS:-"${DISTR_SOURCE}/slackwarearm-devtools/minirootfs/roots/"}
-    URL_ROOTFS=${URL_ROOTFS:-"https://ftp.arm.slackware.com/slackwarearm/slackwarearm-devtools/minirootfs/roots/"}
-else
-    URL_ROOTFS=${URL_ROOTFS:-"${DISTR_SOURCE}/rootfs/"}
-fi
-ROOTFS_NAME=$(wget --no-check-certificate -q -O - $URL_ROOTFS | grep -oP "(sla(ck|rm64)-current-[\.\-\+\d\w]+.tar.xz)" | sort -ur | head -n1 | cut -d '.' -f1)
+ROOTFS_NAME=${DISTR/earm/e}-${DISTR_VERSION}
 ROOTFS_VERSION=$(date +%Y%m%d)
 
 #---------------------------------------------
