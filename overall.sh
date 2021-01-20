@@ -105,6 +105,16 @@ get_config() {
 }
 
 #---------------------------------------------
+# convert version to number
+#---------------------------------------------
+version() {
+    # Description: use for comparisons of version strings.
+    # $1  : a version string of form 1.2.3.4
+    # use: [[ $(version 1.2.3.4) >= $(version 1.2.3.3) ]] && echo "yes" || echo "no"
+    printf "%d" ${1//./ }
+}
+
+#---------------------------------------------
 # patching process
 #---------------------------------------------
 patching_source() {
@@ -192,6 +202,7 @@ patching_source() {
 external_patching_source() {
 
     if [[ $EXTERNAL_WIFI == yes ]]; then
+        kernel_version KERNEL_VERSION
         local PREFFIX="drivers/net/wireless"
         local SOURCES=()
 
@@ -272,8 +283,12 @@ external_patching_source() {
             sed -i "/source \"drivers\/net\/wireless\/ti\/Kconfig\"/a source \"drivers\/net\/wireless\/$DRIVER_NAME\/Kconfig\"" \
             "$SOURCE/$KERNEL_DIR/${PREFFIX}/Kconfig"
 
-            # fixed Makefile Xradio XR819
-            sed -i 's:CONFIG_XRADIO:CONFIG_WLAN_VENDOR_XRADIO:' "$SOURCE/$KERNEL_DIR/${PREFFIX}/Makefile"
+            if [[ $DRIVER_NAME == xradio ]]; then
+                # fixed Makefile Xradio XR819
+                sed -i 's:CONFIG_XRADIO:CONFIG_WLAN_VENDOR_XRADIO:' "$SOURCE/$KERNEL_DIR/${PREFFIX}/Makefile"
+
+                [[ $(version $KERNEL_VERSION) -ge $(version 5.4) ]] && sed -i 's/^#include <asm\/mach-types.h>/\/\/#include <asm\/mach-types.h>/' "$SOURCE/$KERNEL_DIR/${PREFFIX}/$DRIVER_NAME/sdio.c"
+            fi
 
             message "" "patching" "succeeded: $DRIVER_NAME"
         done
