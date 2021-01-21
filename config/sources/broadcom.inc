@@ -53,7 +53,7 @@ write_uboot()
 create_img() {
 
     if [[ $1 == xfce ]]; then
-        IMAGE="$ROOTFS_XFCE"
+        IMAGE="$ROOTFS_DESKTOP"
     else
         IMAGE="$ROOTFS"
     fi

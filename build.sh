@@ -230,8 +230,8 @@ for image_type in ${DISTR_IMAGES[@]}; do
     fi
 
     if [[ $image_type == xfce ]]; then
-        message "" "create" "$ROOTFS_XFCE"
-        rsync -ar --del $SOURCE/$ROOTFS/ $SOURCE/$ROOTFS_XFCE >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        message "" "create" "$ROOTFS_DESKTOP"
+        rsync -ar --del $SOURCE/$ROOTFS/ $SOURCE/$ROOTFS_DESKTOP >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         download_pkg $DISTR_URL "$image_type"
         install_pkg "$image_type"
 
@@ -243,12 +243,12 @@ for image_type in ${DISTR_IMAGES[@]}; do
         download_pkg $DISTR_EXTRA_URL $SOCFAMILY
         install_pkg $SOCFAMILY
 
-        [[ $NETWORKMANAGER == "yes" ]] && setting_networkmanager "$ROOTFS_XFCE"
+        [[ $NETWORKMANAGER == "yes" ]] && setting_networkmanager "$ROOTFS_DESKTOP"
         setting_default_start_x
         setting_for_desktop
-        setting_alsa "$ROOTFS_XFCE"
+        setting_alsa "$ROOTFS_DESKTOP"
         create_img "$image_type"
-        [[ $IMAGE_COMPRESSION == "yes" ]] && image_compression "$ROOTFS_XFCE"
+        [[ $IMAGE_COMPRESSION == "yes" ]] && image_compression "$ROOTFS_DESKTOP"
     fi
 done
 

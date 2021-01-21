@@ -14,7 +14,7 @@ get_name_rootfs() {
     if [[ $image_type == base ]]; then
         ROOTFS="${ROOTFS_NAME}-${ARCH}-${image_type}-$BOARD_NAME-$KERNEL_VERSION-build-${ROOTFS_VERSION}"
     else
-        ROOTFS_XFCE="${ROOTFS_NAME}-${ARCH}-${image_type}-$BOARD_NAME-$KERNEL_VERSION-build-${ROOTFS_VERSION}"
+        ROOTFS_DESKTOP="${ROOTFS_NAME}-${ARCH}-${image_type}-$BOARD_NAME-$KERNEL_VERSION-build-${ROOTFS_VERSION}"
     fi
 }
 
@@ -27,9 +27,9 @@ clean_rootfs() {
         rm -rf $SOURCE/$ROOTFS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
-    if [[ $image_type == xfce ]] && [[ ! -z $ROOTFS_XFCE ]] && [[ -d $SOURCE/$ROOTFS_XFCE ]] ;then
-        message "" "clean" "$ROOTFS_XFCE"
-        rm -rf $SOURCE/$ROOTFS_XFCE >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    if [[ $image_type == xfce ]] && [[ ! -z $ROOTFS_DESKTOP ]] && [[ -d $SOURCE/$ROOTFS_DESKTOP ]] ;then
+        message "" "clean" "$ROOTFS_DESKTOP"
+        rm -rf $SOURCE/$ROOTFS_DESKTOP >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 }
 
@@ -88,7 +88,7 @@ setting_wifi() {
 create_img() {
 
     if [[ $1 == xfce ]]; then
-        IMAGE="$ROOTFS_XFCE"
+        IMAGE="$ROOTFS_DESKTOP"
     else
         IMAGE="$ROOTFS"
     fi
@@ -229,7 +229,7 @@ install_pkg(){
     if [[ $1 == base ]]; then
         local ROOTFS="$ROOTFS"
     else
-        local ROOTFS="$ROOTFS_XFCE"
+        local ROOTFS="$ROOTFS_DESKTOP"
     fi
 
     local type=$1
@@ -256,16 +256,16 @@ install_kernel() {
 
 
 setting_default_start_x() {
-    sed "s#id:3#id:4#" -i $SOURCE/$ROOTFS_XFCE/etc/inittab
+    sed "s#id:3#id:4#" -i $SOURCE/$ROOTFS_DESKTOP/etc/inittab
 
     # fix default xfce
-    ln -sf $SOURCE/$ROOTFS_XFCE/etc/X11/xinit/xinitrc.xfce \
-       -r $SOURCE/$ROOTFS_XFCE/etc/X11/xinit/xinitrc
+    ln -sf $SOURCE/$ROOTFS_DESKTOP/etc/X11/xinit/xinitrc.xfce \
+       -r $SOURCE/$ROOTFS_DESKTOP/etc/X11/xinit/xinitrc
 
     if [[ $SOCFAMILY == rk3288 ]]; then
-        if [[ ! $(cat $SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.local | grep fbset) ]];then
+        if [[ ! $(cat $SOURCE/$ROOTFS_DESKTOP/etc/rc.d/rc.local | grep fbset) ]];then
             # add start fbset for DefaultDepth 24
-            cat <<EOF >>"$SOURCE/$ROOTFS_XFCE/etc/rc.d/rc.local"
+            cat <<EOF >>"$SOURCE/$ROOTFS_DESKTOP/etc/rc.d/rc.local"
 
 if [ -x /etc/rc.d/rc.fbset ] ; then
     /etc/rc.d/rc.fbset
@@ -279,9 +279,9 @@ EOF
 setting_for_desktop() {
     if [[ $SOCFAMILY == sun* ]]; then
         # adjustment for vdpau
-        sed -i 's#sunxi_ve_mem_reserve=0#sunxi_ve_mem_reserve=128#' "$SOURCE/$ROOTFS_XFCE/boot/boot.cmd"
-        $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A arm -T script -d $SOURCE/$ROOTFS_XFCE/boot/boot.cmd \
-        "$SOURCE/$ROOTFS_XFCE/boot/boot.scr" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        sed -i 's#sunxi_ve_mem_reserve=0#sunxi_ve_mem_reserve=128#' "$SOURCE/$ROOTFS_DESKTOP/boot/boot.cmd"
+        $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A arm -T script -d $SOURCE/$ROOTFS_DESKTOP/boot/boot.cmd \
+        "$SOURCE/$ROOTFS_DESKTOP/boot/boot.scr" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 }
 
