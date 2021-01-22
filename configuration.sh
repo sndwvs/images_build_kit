@@ -31,10 +31,16 @@ DISTR=${DISTR:-"slackwarearm"}
 DISTR_VERSION=${DISTR_VERSION:-"current"} # or 14.2
 
 #---------------------------------------------
-# configuration build images
+# configuration build images and desktop environment
 #---------------------------------------------
 DISTR_IMAGES+=("base")
-[[ $DESKTOP_SELECTED == yes ]] && DISTR_IMAGES+=("xfce")
+if [[ $DESKTOP_SELECTED == yes ]]; then
+ if [[ -z $DE ]]; then
+     DISTR_IMAGES+=("xfce")
+ else
+     DISTR_IMAGES+=($DE)
+ fi
+fi
 
 #---------------------------------------------
 # boot loader configuration

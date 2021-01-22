@@ -79,3 +79,4 @@ password: **password**
 | TOOLS_PACK           | empty (yes/no - from the menu) | compilation of packages needed for assembly |
 | EXTERNAL_WIFI        | yes/no (yes - default) | apply wifi patch with git |
 | DISTR_VERSION        | current - default) | distribution release |
+| DE                   | xfce - default | select desktop environment |
