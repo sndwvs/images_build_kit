@@ -84,13 +84,13 @@ get_config() {
             fi
             #---- packages
 #            for image_type in ${CREATE_IMAGE[@]}; do
-#                if [[ $image_type = xfce ]]; then
+#                if [[ $image_type == xfce ]]; then
 #                    if [[ -n ${BOARD_NAME} && ! ${_file%%*-${BOARD_NAME}*} ]]; then
 #                         message "" "added" "configuration file $_file"
 #                         source "$file" || exit 1
 #                    fi
 
-#                    [[ $file = *extra* ]] && source "$file" && \
+#                    [[ $file == *extra* ]] && source "$file" && \
 #                                            message "" "added" "configuration file $(basename $file)"
 
 #                fi

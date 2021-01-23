@@ -51,12 +51,9 @@ write_uboot()
 }
 
 create_img() {
+    local IMAGE="$1"
 
-    if [[ $1 == xfce ]]; then
-        IMAGE="$ROOTFS_DESKTOP"
-    else
-        IMAGE="$ROOTFS"
-    fi
+    [[ -z "$IMAGE" ]] && exit 1
 
     # +800M for create swap firstrun
     ROOTFS_SIZE=$(rsync -an --stats $SOURCE/$IMAGE test | grep "Total file size" | sed 's/[^0-9]//g' | xargs -I{} expr {} / $((1024*1024)) + 1000)"M"

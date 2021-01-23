@@ -20,14 +20,14 @@ get_name_rootfs() {
 
 
 clean_rootfs() {
-    image_type=$1
+    image_type="$1"
 
     if [[ $image_type == base ]] && [[ ! -z $ROOTFS ]] && [[ -d $SOURCE/$ROOTFS ]]; then
         message "" "clean" "$ROOTFS"
         rm -rf $SOURCE/$ROOTFS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
-    if [[ $image_type == xfce ]] && [[ ! -z $ROOTFS_DESKTOP ]] && [[ -d $SOURCE/$ROOTFS_DESKTOP ]] ;then
+    if [[ $image_type != base ]] && [[ ! -z $ROOTFS_DESKTOP ]] && [[ -d $SOURCE/$ROOTFS_DESKTOP ]] ;then
         message "" "clean" "$ROOTFS_DESKTOP"
         rm -rf $SOURCE/$ROOTFS_DESKTOP >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
@@ -86,12 +86,9 @@ setting_wifi() {
 
 
 create_img() {
+    local IMAGE="$1"
 
-    if [[ $1 == xfce ]]; then
-        IMAGE="$ROOTFS_DESKTOP"
-    else
-        IMAGE="$ROOTFS"
-    fi
+    [[ -z "$IMAGE" ]] && exit 1
 
     # +800M for create swap firstrun
     ROOTFS_SIZE=$(rsync -an --stats $SOURCE/$IMAGE test | grep "Total file size" | sed 's/[^0-9]//g' | xargs -I{} expr {} / $((1024*1024)) + 1000)"M"
@@ -142,54 +139,6 @@ create_img() {
     fi
 
     message "" "done" "image $IMAGE"
-}
-
-
-setting_settings() {
-    if [[ ! -f "$SOURCE/$ROOTFS/etc/rc.d/rc.settings" ]];then
-        message "" "setting" "rc.settings"
-
-        if [[ "$KERNEL_SOURCE" == "next" && "$BOARD_NAME" == "cubietruck" ]];then
-            cat <<EOF >>"$SOURCE/$ROOTFS/etc/rc.d/rc.settings"
-#!/bin/sh
-
-LED="/sys/class/leds"
-
-#echo "heartbeat" > \$LED/cubietruck:blue:usr/trigger
-echo "mmc0" > \$LED/cubietruck:green:usr/trigger
-echo "cpu1" > \$LED/cubietruck:orange:usr/trigger
-echo "cpu0" > \$LED/cubietruck:white:usr/trigger
-
-
-# cpufreq
-CORES=\$(cat /proc/cpuinfo | grep processor | wc -l)
-core=0
-
-#while [ \$core -lt \$CORES ]; do
-#    echo performance > /sys/devices/system/cpu/cpu\$core/cpufreq/scaling_governor
-#    echo 1008000 > /sys/devices/system/cpu/cpu\$core/cpufreq/scaling_max_freq
-#    echo 912000 > /sys/devices/system/cpu/cpu\$core/cpufreq/scaling_min_freq
-#    core=\$((\$core+1))
-#done
-
-# ondemand
-while [ \$core -lt \$CORES ]; do
-    echo ondemand > /sys/devices/system/cpu/cpu\$core/cpufreq/scaling_governor
-    echo 1008000 > /sys/devices/system/cpu/cpu\$core/cpufreq/scaling_max_freq
-    echo 336000 > /sys/devices/system/cpu/cpu\$core/cpufreq/scaling_min_freq
-    core=\$((\$core+1))
-done
-
-echo 40 > /sys/devices/system/cpu/cpufreq/ondemand/up_threshold
-echo 200000 > /sys/devices/system/cpu/cpufreq/ondemand/sampling_rate
-
-EOF
-        fi
-
-        if [[ -f "$SOURCE/$ROOTFS/etc/rc.d/rc.settings" ]];then
-            chmod 755 "$SOURCE/$ROOTFS/etc/rc.d/rc.settings"
-        fi
-    fi
 }
 
 
@@ -256,23 +205,12 @@ install_kernel() {
 
 
 setting_default_start_x() {
+    local de="$1"
     sed "s#id:3#id:4#" -i $SOURCE/$ROOTFS_DESKTOP/etc/inittab
 
-    # fix default xfce
-    ln -sf $SOURCE/$ROOTFS_DESKTOP/etc/X11/xinit/xinitrc.xfce \
+    # starting the desktop environment
+    ln -sf $SOURCE/$ROOTFS_DESKTOP/etc/X11/xinit/xinitrc.${de} \
        -r $SOURCE/$ROOTFS_DESKTOP/etc/X11/xinit/xinitrc
-
-    if [[ $SOCFAMILY == rk3288 ]]; then
-        if [[ ! $(cat $SOURCE/$ROOTFS_DESKTOP/etc/rc.d/rc.local | grep fbset) ]];then
-            # add start fbset for DefaultDepth 24
-            cat <<EOF >>"$SOURCE/$ROOTFS_DESKTOP/etc/rc.d/rc.local"
-
-if [ -x /etc/rc.d/rc.fbset ] ; then
-    /etc/rc.d/rc.fbset
-fi
-EOF
-        fi
-    fi
 }
 
 

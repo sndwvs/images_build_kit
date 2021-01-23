@@ -201,14 +201,14 @@ fi
 
 for image_type in ${DISTR_IMAGES[@]}; do
 
-    get_name_rootfs $image_type
-    clean_rootfs $image_type
+    get_name_rootfs ${image_type}
+    clean_rootfs ${image_type}
 
-    if [[ $image_type == base ]]; then
+    if [[ ${image_type} == base ]]; then
         prepare_rootfs
         create_bootloader_pack
-        download_pkg $DISTR_URL "$image_type"
-        install_pkg "$image_type"
+        download_pkg $DISTR_URL "${image_type}"
+        install_pkg "${image_type}"
         install_kernel
         create_initrd
         setting_system
@@ -220,35 +220,36 @@ for image_type in ${DISTR_IMAGES[@]}; do
         setting_datetime
         setting_dhcp
         setting_ssh
-        setting_settings
         setting_wifi
-        [[ $NTP == "yes" ]] && setting_ntp
+        [[ $NTP == yes ]] && setting_ntp
         setting_bootloader_move_to_disk
         setting_governor
-        create_img
-        [[ $IMAGE_COMPRESSION == "yes" ]] && image_compression "$ROOTFS"
+        create_img "$ROOTFS"
+        [[ $IMAGE_COMPRESSION == yes ]] && image_compression "$ROOTFS"
     fi
 
-    if [[ $image_type == xfce ]]; then
+    if [[ ${image_type} != base ]]; then
         message "" "create" "$ROOTFS_DESKTOP"
         rsync -ar --del $SOURCE/$ROOTFS/ $SOURCE/$ROOTFS_DESKTOP >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        download_pkg $DISTR_URL "$image_type"
-        install_pkg "$image_type"
 
-        # install extra packages
-        download_pkg $DISTR_EXTRA_URL 'extra'
-        install_pkg 'extra'
+        # installing distribution desktop packages
+        download_pkg $DISTR_URL "desktop-${image_type}"
+        install_pkg "desktop-${image_type}"
 
-        # install extra board packages
+        # installing extra desktop packages
+        download_pkg $DISTR_EXTRA_URL "desktop-${image_type}-extra"
+        install_pkg "desktop-${image_type}-extra"
+
+        # installing extra board packages
         download_pkg $DISTR_EXTRA_URL $SOCFAMILY
         install_pkg $SOCFAMILY
 
-        [[ $NETWORKMANAGER == "yes" ]] && setting_networkmanager "$ROOTFS_DESKTOP"
-        setting_default_start_x
+        [[ $NETWORKMANAGER == yes ]] && setting_networkmanager "$ROOTFS_DESKTOP"
+        setting_default_start_x ${image_type}
         setting_for_desktop
         setting_alsa "$ROOTFS_DESKTOP"
-        create_img "$image_type"
-        [[ $IMAGE_COMPRESSION == "yes" ]] && image_compression "$ROOTFS_DESKTOP"
+        create_img "$ROOTFS_DESKTOP"
+        [[ $IMAGE_COMPRESSION == yes ]] && image_compression "$ROOTFS_DESKTOP"
     fi
 done
 

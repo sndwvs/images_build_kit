@@ -61,22 +61,22 @@ password: **password**
 # VARIABLES #
 
 ## config/environment/00-environment.conf ##
-| variable             | possible values      | description          |
-| :------------------- | :------------------- | :------------------- |
-| USE_NEXT_KERNEL_MIRROR | yes/no (yes - default) | use mainline kernel mirror |
-| USE_UBOOT_MIRROR     | yes/no (no  - default) | use u-boot mirror  |
-| USE_SLARM64_MIRROR   | yes/no (no  - default) | use slarm64 mirror |
-| NTP                  | yes/no (yes - default) | setting up the NTP server |
-| NETWORKMANAGER       | yes/no (yes - default) | setting up the NetworkManager service |
-| IMAGE_COMPRESSION    | yes/no (yes - default) | image compression |
-| ARCH                 | auto (current system - default) | system architecture |
-| BOARD_NAME           | empty (from the menu) | board [name](config/boards/) for assembly |
-| KERNEL_SOURCE        | empty (legacy/next - from the menu) | kernel source type |
-| DESKTOP_SELECTED     | empty (yes/no - from the menu) | create a GUI image |
+| variable                 | possible values      | description          |
+| :----------------------- | :------------------- | :------------------- |
+| USE_NEXT_KERNEL_MIRROR   | yes/no (yes - default) | use mainline kernel mirror |
+| USE_UBOOT_MIRROR         | yes/no (no  - default) | use u-boot mirror  |
+| USE_SLARM64_MIRROR       | yes/no (no  - default) | use slarm64 mirror |
+| NTP                      | yes/no (yes - default) | setting up the NTP server |
+| NETWORKMANAGER           | yes/no (yes - default) | setting up the NetworkManager service |
+| IMAGE_COMPRESSION        | yes/no (yes - default) | image compression |
+| ARCH                     | auto (current system - default) | system architecture |
+| BOARD_NAME               | empty (from the menu) | board [name](config/boards/) for assembly |
+| KERNEL_SOURCE            | empty (legacy/next - from the menu) | kernel source type |
+| DESKTOP_SELECTED         | empty (yes/no - from the menu) | create a GUI image |
 | DOWNLOAD_SOURCE_BINARIES | empty (yes/no - from the menu) | download required components |
-| CLEAN                | empty (yes/no - from the menu) | removing donwload/built components |
-| COMPILE_BINARIES     | empty (yes/no - from the menu) | compilation of all required components |
-| TOOLS_PACK           | empty (yes/no - from the menu) | compilation of packages needed for assembly |
-| EXTERNAL_WIFI        | yes/no (yes - default) | apply wifi patch with git |
-| DISTR_VERSION        | current - default) | distribution release |
-| DE                   | xfce - default | select desktop environment |
+| CLEAN                    | empty (yes/no - from the menu) | removing donwload/built components |
+| COMPILE_BINARIES         | empty (yes/no - from the menu) | compilation of all required components |
+| TOOLS_PACK               | empty (yes/no - from the menu) | compilation of packages needed for assembly |
+| EXTERNAL_WIFI            | yes/no (yes - default) | apply wifi patch with git |
+| DISTR_VERSION            | current - default) | distribution release |
+| DE                       | xfce - default | select desktop environment: xfce, enlightenment |
