@@ -226,7 +226,7 @@ external_patching_source() {
         SOURCES+=('https://github.com/brektrou/rtl8821CU|rtl8811cu|master:commit:2bebdb9a35c1d9b6e6a928e371fa39d5fcec8a62')
 
         # Wireless drivers for Realtek 8188EU 8188EUS and 8188ETV chipsets
-        SOURCES+=('https://github.com/aircrack-ng/rtl8188eus|rtl8188eu|v5.7.6.1::')
+        SOURCES+=('https://github.com/aircrack-ng/rtl8188eus|rtl8188eu|v5.3.9::')
 
         # Wireless drivers for Realtek 88x2bu chipsets
         SOURCES+=('https://github.com/cilynx/rtl88x2bu|rtl8822bu|5.6.1_30362.20181109_COEX20180928-6a6a::')
