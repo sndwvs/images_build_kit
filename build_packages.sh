@@ -62,7 +62,7 @@ build_kernel_pkg() {
             [[ $SOCFAMILY == meson* ]] && ( cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/amlogic/*.dtb \
               $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb-${KERNEL_VERSION}/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
     else
-        cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/*${SOCFAMILY}*dtb \
+        cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/*.dtb \
               $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb-${KERNEL_VERSION}/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
     [[ $SOCFAMILY != bcm2* ]] && ( ln -sf dtb-${KERNEL_VERSION} $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
