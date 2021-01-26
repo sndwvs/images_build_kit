@@ -240,6 +240,9 @@ setting_system() {
     if [[ -d $CWD/system/${BOARD_NAME}-${KERNEL_SOURCE} ]]; then
         rsync -av --chown=root:root $CWD/system/${BOARD_NAME}-${KERNEL_SOURCE}/ $SOURCE/$ROOTFS/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
+
+    # setting for root
+    rsync -av --chown=root:root $SOURCE/$ROOTFS/etc/skel/ $SOURCE/$ROOTFS/root/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 
