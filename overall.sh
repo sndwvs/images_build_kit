@@ -108,10 +108,11 @@ get_config() {
 # convert version to number
 #---------------------------------------------
 version() {
-    # Description: use for comparisons of version strings.
-    # $1  : a version string of form 1.2.3.4
+    local ver="$1"
+    # for comparison, we take the numbers before the point and after
+    # $1  : a version string of form 12.34.56.78 converts to 1234
     # use: [[ $(version 1.2.3.4) >= $(version 1.2.3.3) ]] && echo "yes" || echo "no"
-    printf "%d" ${1//./ }
+    echo $ver | sed 's:^\([0-9]*\)\.\([0-9]*\).*:\1\2:g'
 }
 
 #---------------------------------------------
@@ -232,6 +233,7 @@ external_patching_source() {
         SOURCES+=('https://github.com/cilynx/rtl88x2bu|rtl8822bu|5.6.1_30362.20181109_COEX20180928-6a6a::')
 
         # Wireless drivers for Realtek 8723DS chipsets
+        [[ $(version $KERNEL_VERSION) -ge $(version 5.4) ]] && \
         SOURCES+=('https://github.com/lwfinger/rtl8723ds|rtl8723ds|master::')
 
         # Wireless drivers for Realtek 8723DU chipsets
