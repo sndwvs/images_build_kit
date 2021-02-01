@@ -61,7 +61,7 @@ create_uboot()
 #            dd if=u-boot.itb of=rkspi_loader.img seek=1024 conv=notrunc
         if [[ $BOARD_NAME == rockpro64     || $BOARD_NAME == rock_pi_4*     || $BOARD_NAME == pinebook_pro || \
               $BOARD_NAME == rock64        || $BOARD_NAME == firefly_rk3399 || $BOARD_NAME == rock_pi_e || \
-              $BOARD_NAME == helios64      || $BOARD_NAME == orange_pi_4* ]]; then
+              $BOARD_NAME == helios64      || $BOARD_NAME == orange_pi_4*   || $BOARD_NAME == station_m1 ]]; then
             local TPL="tpl/u-boot-tpl.bin"
             # Using proprietary TPL bootloader
             # TPL (memory initialization) have appeared only in u-boot 2019.10, and some users report stability issues.
