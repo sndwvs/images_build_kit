@@ -10,7 +10,7 @@ diff --git a/arch/arm64/boot/dts/rockchip/Makefile b/arch/arm64/boot/dts/rockchi
 diff --git a/arch/arm64/boot/dts/rockchip/rk3399-station-p1.dts b/arch/arm64/boot/dts/rockchip/rk3399-station-p1.dts
 --- /dev/null	2013-01-18 10:51:04.168000019 +0200
 +++ b/arch/arm64/boot/dts/rockchip/rk3399-station-p1.dts	2021-01-01 20:35:28.161927261 +0200
-@@ -0,0 +1,43 @@
+@@ -0,0 +1,44 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 +/*
 + * Copyright (c) 2017 T-Chip Intelligent Technology Co., Ltd
@@ -33,6 +33,7 @@ diff --git a/arch/arm64/boot/dts/rockchip/rk3399-station-p1.dts b/arch/arm64/boo
 +	chosen {
 +		bootargs = "swiotlb=1 spectre_v2=0 kpti=0 ssbd=force-off";
 +	};
++};
 +
 +&rk808{
 +	rtc {
