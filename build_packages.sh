@@ -22,8 +22,8 @@ build_kernel_pkg() {
 
     # adding custom firmware
     if [[ $FIRMWARE == "yes" ]];then
-        rsync -va $CWD/blobs/firmware/ -d $BUILD/$PKG/kernel-modules/lib/firmware/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        [[ -d $CWD/blobs/firmware-${BOARD_NAME} ]] && ( rsync -va $CWD/blobs/firmware-${BOARD_NAME}/ -d $BUILD/$PKG/kernel-modules/lib/firmware/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+        cp -vaf $CWD/blobs/firmware/* $BUILD/$PKG/kernel-modules/lib/firmware/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        [[ -d $CWD/blobs/firmware-${BOARD_NAME} ]] && ( cp -vaf $CWD/blobs/firmware-${BOARD_NAME}/* $BUILD/$PKG/kernel-modules/lib/firmware/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
     fi
 
     message "" "copy" "kernel"
