@@ -108,11 +108,12 @@ get_config() {
 # convert version to number
 #---------------------------------------------
 version() {
-    local ver="$1"
+    local ver="$@"
     # for comparison, we take the numbers before the point and after
-    # $1  : a version string of form 12.34.56.78 converts to 1234
-    # use: [[ $(version 1.2.3.4) >= $(version 1.2.3.3) ]] && echo "yes" || echo "no"
-    echo $ver | sed 's:^\([0-9]*\)\.\([0-9]*\).*:\1\2:g'
+    # $1  : a version string of form 12.34.56 converts to 12034056
+    # use: [[ $(version 1.2.3) >= $(version 1.2.3) ]] && echo "yes" || echo "no"
+    #echo $ver | sed 's:^\([0-9]*\)\.\([0-9]*\).*:\1\2:g'
+    echo "${ver[@]}" | gawk -F. '{ printf("%03d%03d%03d\n", $1,$2,$3); }' | sed 's:^[0]*::g'
 }
 
 #---------------------------------------------
