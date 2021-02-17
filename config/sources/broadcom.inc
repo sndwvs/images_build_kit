@@ -12,12 +12,12 @@ BOOT_LOADER_BIN="u-boot.bin"
 case $KERNEL_SOURCE in
     legacy)
             LINUX_SOURCE="https://github.com/raspberrypi/linux.git"
-            KERNEL_BRANCH="rpi-5.8.y::"
+            KERNEL_BRANCH="rpi-5.10.y::"
             KERNEL_DIR="linux-$SOCFAMILY-$KERNEL_SOURCE"
     ;;
     next)
             LINUX_SOURCE="https://github.com/raspberrypi/linux.git"
-            KERNEL_BRANCH="rpi-5.10.y::"
+            KERNEL_BRANCH="rpi-5.11.y::"
             KERNEL_DIR="linux-$SOCFAMILY-$KERNEL_SOURCE"
     ;;
 esac
