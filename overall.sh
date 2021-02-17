@@ -202,9 +202,40 @@ patching_source() {
 # external patching process
 #---------------------------------------------
 external_patching_source() {
+    kernel_version KERNEL_VERSION
+
+    if [[ $EXTERNAL_WIREGUARD == yes && $(version $KERNEL_VERSION) -ge $(version 3.10) && $(version $KERNEL_VERSION) -le $(version 5.5) ]]; then
+        local PREFFIX="net"
+        SOURCES='https://git.zx2c4.com/wireguard-linux-compat|wireguard|master::'
+        IFS='|'
+        local source_array=($SOURCES)
+        unset IFS
+        local DRIVER_URL="${source_array[0]}"
+        local DRIVER_NAME="${source_array[1]}"
+        local DRIVER_BRANCH="${source_array[2]}"
+
+        [[ -d $SOURCE/$KERNEL_DIR/${PREFFIX}/$DRIVER_NAME ]] && ( rm -rf $SOURCE/$KERNEL_DIR/${PREFFIX}/$DRIVER_NAME || (message "err" "details" && exit 1) || exit 1 )
+        message "" "download" "external driver $DRIVER_NAME"
+        # git_fetch <dir> <url> <branch>
+        git_fetch $SOURCE/$KERNEL_DIR/${PREFFIX}/$DRIVER_NAME $DRIVER_URL $DRIVER_BRANCH
+        mv $SOURCE/$KERNEL_DIR/${PREFFIX}/$DRIVER_NAME/src/* $SOURCE/$KERNEL_DIR/${PREFFIX}/$DRIVER_NAME/
+        # clean .git, src
+        [[ -d $SOURCE/$KERNEL_DIR/${PREFFIX}/$DRIVER_NAME/.git ]] && ( rm -rf $SOURCE/$KERNEL_DIR/${PREFFIX}/$DRIVER_NAME/{.git*,src} || (message "err" "details" && exit 1) || exit 1 )
+        sed -i "/^obj-\\\$(CONFIG_NETFILTER).*+=/a obj-\$(CONFIG_WIREGUARD) += $DRIVER_NAME/" \
+            $SOURCE/$KERNEL_DIR/${PREFFIX}/Makefile
+        sed -i "/^if INET\$/a source \"net/wireguard/Kconfig\"" \
+            $SOURCE/$KERNEL_DIR/${PREFFIX}/Kconfig
+        # remove duplicates
+        [[ $(grep -c $DRIVER_NAME $SOURCE/$KERNEL_DIR/${PREFFIX}/Makefile) -gt 1 ]] && \
+        sed -i '0,/wireguard/{/wireguard/d;}' $SOURCE/$KERNEL_DIR/${PREFFIX}/Makefile
+        [[ $(grep -c $DRIVER_NAME $SOURCE/$KERNEL_DIR/${PREFFIX}/Kconfig) -gt 1 ]] && \
+        sed -i '0,/wireguard/{/wireguard/d;}' $SOURCE/$KERNEL_DIR/${PREFFIX}/Kconfig
+
+        message "" "patching" "succeeded: $DRIVER_NAME"
+        unset SOURCES
+    fi
 
     if [[ $EXTERNAL_WIFI == yes ]]; then
-        kernel_version KERNEL_VERSION
         local PREFFIX="drivers/net/wireless"
         local SOURCES=()
 

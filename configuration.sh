@@ -65,6 +65,10 @@ ATF_BRANCH=${ATF_BRANCH:-"master::"}
 #---------------------------------------------
 [[ -z $EXTERNAL_WIFI ]] && EXTERNAL_WIFI=yes
 
+#---------------------------------------------
+# external wireguard driver configuration
+#---------------------------------------------
+[[ -z $EXTERNAL_WIREGUARD ]] && EXTERNAL_WIREGUARD=yes
 
 
 #---------------------------------------------
