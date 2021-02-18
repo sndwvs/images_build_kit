@@ -253,7 +253,7 @@ external_patching_source() {
         SOURCES+=('https://github.com/morrownr/8812au|rtl8812au|5.9.3.2::')
 
         # Wireless drivers for Xradio XR819 chipsets
-        [[ $(version $KERNEL_VERSION) -ge $(version 5.4) ]] && \
+        [[ $(version $KERNEL_VERSION) -ge $(version 5.4) && $(version $KERNEL_VERSION) -le $(version 5.10) ]] && \
         SOURCES+=('https://github.com/karabek/xradio|xradio|master::')
 
         # Wireless drivers for Realtek RTL8811CU and RTL8821C chipsets
@@ -266,11 +266,11 @@ external_patching_source() {
         SOURCES+=('https://github.com/cilynx/rtl88x2bu|rtl8822bu|5.6.1_30362.20181109_COEX20180928-6a6a::')
 
         # Wireless drivers for Realtek 8723DS chipsets
-        [[ $(version $KERNEL_VERSION) -ge $(version 5.4) ]] && \
+        [[ $(version $KERNEL_VERSION) -ge $(version 5.4) && $(version $KERNEL_VERSION) -le $(version 5.10) ]] && \
         SOURCES+=('https://github.com/lwfinger/rtl8723ds|rtl8723ds|master::')
 
         # Wireless drivers for Realtek 8723DU chipsets
-        [[ $(version $KERNEL_VERSION) -ge $(version 5.4) ]] && \
+        [[ $(version $KERNEL_VERSION) -ge $(version 5.4) && $(version $KERNEL_VERSION) -le $(version 5.10) ]] && \
         SOURCES+=('https://github.com/lwfinger/rtl8723du|rtl8723du|master::')
 
         # Wireless drivers for Realtek 8814AU chipsets
