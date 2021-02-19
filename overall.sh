@@ -266,7 +266,7 @@ external_patching_source() {
         SOURCES+=('https://github.com/cilynx/rtl88x2bu|rtl8822bu|5.6.1_30362.20181109_COEX20180928-6a6a::')
 
         # Wireless drivers for Realtek 8723DS chipsets
-        [[ $(version $KERNEL_VERSION) -ge $(version 5.4) && $(version $KERNEL_VERSION) -le $(version 5.10) ]] && \
+        [[ $(version $KERNEL_VERSION) -ge $(version 5.4) ]] && \
         SOURCES+=('https://github.com/lwfinger/rtl8723ds|rtl8723ds|master::')
 
         # Wireless drivers for Realtek 8723DU chipsets
