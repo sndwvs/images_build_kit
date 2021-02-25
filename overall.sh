@@ -270,7 +270,7 @@ external_patching_source() {
         SOURCES+=('https://github.com/lwfinger/rtl8723ds|rtl8723ds|master::')
 
         # Wireless drivers for Realtek 8723DU chipsets
-        [[ $(version $KERNEL_VERSION) -ge $(version 5.4) && $(version $KERNEL_VERSION) -le $(version 5.10) ]] && \
+        [[ $(version $KERNEL_VERSION) -ge $(version 5.4) ]] && \
         SOURCES+=('https://github.com/lwfinger/rtl8723du|rtl8723du|master::')
 
         # Wireless drivers for Realtek 8814AU chipsets
