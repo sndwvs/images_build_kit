@@ -253,7 +253,7 @@ external_patching_source() {
         SOURCES+=('https://github.com/morrownr/8812au|rtl8812au|5.9.3.2::')
 
         # Wireless drivers for Xradio XR819 chipsets
-        [[ $(version $KERNEL_VERSION) -ge $(version 5.4) && $(version $KERNEL_VERSION) -le $(version 5.10) ]] && \
+        [[ $(version $KERNEL_VERSION) -ge $(version 5.4) && $(version $KERNEL_VERSION) -le $(version 5.11) ]] && \
         SOURCES+=('https://github.com/karabek/xradio|xradio|master::')
 
         # Wireless drivers for Realtek RTL8811CU and RTL8821C chipsets
