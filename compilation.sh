@@ -11,6 +11,8 @@ compile_sunxi_tools() {
     message "" "compiling" "$SUNXI_TOOLS_DIR"
     cd $SOURCE/$SUNXI_TOOLS_DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
+    export CFLAGS="-I$SOURCE/$KERNEL_DIR/scripts/dtc/libfdt/"
+
     # for host
     make -s clean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     make -s tools >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
@@ -20,6 +22,7 @@ compile_sunxi_tools() {
     # for destination
     make -s clean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     make $CTHREADS tools CROSS_COMPILE=${CROSS} >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    unset CFLAGS
 }
 
 compile_boot_loader() {
