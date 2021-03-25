@@ -403,7 +403,7 @@ index 5c20a32c95392..8d3c268fb1b8d 100644
 -		 * task into the wait for ever nirwana as well.
 -		 */
 -		tsk->flags |= PF_EXITPIDONE;
-+		futext_exit_recursive(tsk);
++		futex_exit_recursive(tsk);
  		set_current_state(TASK_UNINTERRUPTIBLE);
  		schedule();
  	}
