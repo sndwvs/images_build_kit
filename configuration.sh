@@ -14,7 +14,7 @@ if [[ $USE_NEXT_KERNEL_MIRROR == yes ]]; then
 else
     LINUX_SOURCE=${LINUX_SOURCE:-"git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git"}
 fi
-KERNEL_BRANCH=${KERNEL_BRANCH:-"linux-5.10.y::"}
+KERNEL_BRANCH=${KERNEL_BRANCH:-"linux-5.11.y::"}
 KERNEL_DIR=${KERNEL_DIR:-"linux-$KERNEL_SOURCE"}
 
 #---------------------------------------------
@@ -28,7 +28,7 @@ KERNEL_FIRMWARE_DIR=${KERNEL_FIRMWARE_DIR:-"linux-firmware"}
 # configuration linux distribution
 #---------------------------------------------
 DISTR=${DISTR:-"slackwarearm"}
-DISTR_VERSION=${DISTR_VERSION:-"current"} # or 14.2
+DISTR_VERSION=${DISTR_VERSION:-"current"} # or 15.0
 
 #---------------------------------------------
 # configuration build images and desktop environment

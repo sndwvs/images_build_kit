@@ -1,7 +1,8 @@
-From baed19f58ae55fa2081dc6c72d83080c1b6da01b Mon Sep 17 00:00:00 2001
+From f11388785b09c4685a14303f0961f2bed875ab88 Mon Sep 17 00:00:00 2001
 From: Artem Lapkin <art@khadas.com>
 Date: Wed, 24 Feb 2021 12:12:53 +0000
-Subject: [PATCH] FROMLIST(v1): drm/meson: add shutdown function to meson_drv
+Subject: [PATCH 21/58] FROMLIST(v1): drm/meson: add shutdown function to
+ meson_drv
 
 Problem: random stucks on reboot stage about 1/20 stuck/reboots
 // debug kernel log
@@ -34,7 +35,7 @@ Signed-off-by: Artem Lapkin <art@khadas.com>
  1 file changed, 12 insertions(+)
 
 diff --git a/drivers/gpu/drm/meson/meson_drv.c b/drivers/gpu/drm/meson/meson_drv.c
-index 42c5d3246cfcb..ac3808e846ff8 100644
+index 42c5d3246cfc..ac3808e846ff 100644
 --- a/drivers/gpu/drm/meson/meson_drv.c
 +++ b/drivers/gpu/drm/meson/meson_drv.c
 @@ -482,6 +482,17 @@ static int meson_probe_remote(struct platform_device *pdev,
@@ -63,3 +64,6 @@ index 42c5d3246cfcb..ac3808e846ff8 100644
  	.driver     = {
  		.name	= "meson-drm",
  		.of_match_table = dt_match,
+-- 
+2.25.1
+
