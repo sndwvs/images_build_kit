@@ -80,4 +80,4 @@ password: **password**
 | EXTERNAL_WIFI            | yes/no (yes - default) | apply wifi patch with git |
 | EXTERNAL_WIREGUARD       | yes/no (yes - default) | apply wireguard driver patch with git |
 | DISTR_VERSION            | current - default) | distribution release |
-| DE                       | xfce - default | select desktop environment: xfce, enlightenment |
+| DE                       | xfce - default | select desktop environment: xfce, enlightenment, openbox |
