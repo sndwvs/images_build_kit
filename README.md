@@ -79,5 +79,5 @@ password: **password**
 | TOOLS_PACK               | empty (yes/no - from the menu) | compilation of packages needed for assembly |
 | EXTERNAL_WIFI            | yes/no (yes - default) | apply wifi patch with git |
 | EXTERNAL_WIREGUARD       | yes/no (yes - default) | apply wireguard driver patch with git |
-| DISTR_VERSION            | current - default) | distribution release |
+| DISTR_VERSION            | current - default | distribution release |
 | DE                       | xfce - default | select desktop environment: xfce, enlightenment, openbox |
