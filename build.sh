@@ -232,6 +232,10 @@ for image_type in ${DISTR_IMAGES[@]}; do
         message "" "create" "$ROOTFS_DESKTOP"
         rsync -ar --del $SOURCE/$ROOTFS/ $SOURCE/$ROOTFS_DESKTOP >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
+        # installing overall distribution desktop packages
+        download_pkg $DISTR_URL "desktop"
+        install_pkg "desktop"
+
         # installing distribution desktop packages
         download_pkg $DISTR_URL "desktop-${image_type}"
         install_pkg "desktop-${image_type}"
