@@ -8335,10 +8335,10 @@ index 179d55af5852..a66fc0acad1e 100644
 -
 -extra-$(CONFIG_HEADER_TEST) += $(addsuffix .s, $(header-test-y) $(header-test-m))
 -
- # Overlay targets
- extra-y				+= $(dtbo-y) $(scr-y) $(dtbotxt-y)
-
-@@ -312,13 +298,13 @@ DT_TMP_SCHEMA := $(objtree)/$(DT_BINDING_DIR)/processed-schema.yaml
+ # Add subdir path
+ 
+ extra-y		:= $(addprefix $(obj)/,$(extra-y))
+@@ -305,13 +291,13 @@ DT_TMP_SCHEMA := $(objtree)/$(DT_BINDING_DIR)/processed-schema.yaml
  quiet_cmd_dtb_check =	CHECK   $@
        cmd_dtb_check =	$(DT_CHECKER) -u $(srctree)/$(DT_BINDING_DIR) -p $(DT_TMP_SCHEMA) $@ ;
  
