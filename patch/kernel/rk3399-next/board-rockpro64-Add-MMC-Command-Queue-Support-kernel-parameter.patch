@@ -56,7 +56,7 @@ index 55997cf84b39f..2c69a7cbe8077 100644
  /*
   * Given the decoded CSD structure, decode the raw CID to our CID structure.
   */
-@@ -1824,15 +1828,20 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+@@ -1847,14 +1851,20 @@
  	 */
  	card->ext_csd.cmdq_en = false;
  	if (card->ext_csd.cmdq_support && host->caps2 & MMC_CAP2_CQE) {
@@ -68,7 +68,6 @@ index 55997cf84b39f..2c69a7cbe8077 100644
 -				mmc_hostname(card->host));
 -			card->ext_csd.cmdq_support = false;
 -			card->ext_csd.cmdq_depth = 0;
--			err = 0;
 +		if (mmc_cmdqueue_support) {
 +			err = mmc_cmdq_enable(card);
 +			if (err && err != -EBADMSG)

@@ -14,7 +14,7 @@ if [[ $USE_NEXT_KERNEL_MIRROR == yes ]]; then
 else
     LINUX_SOURCE=${LINUX_SOURCE:-"git://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git"}
 fi
-KERNEL_BRANCH=${KERNEL_BRANCH:-"linux-5.11.y::"}
+KERNEL_BRANCH=${KERNEL_BRANCH:-"linux-5.12.y::"}
 KERNEL_DIR=${KERNEL_DIR:-"linux-$KERNEL_SOURCE"}
 
 #---------------------------------------------
