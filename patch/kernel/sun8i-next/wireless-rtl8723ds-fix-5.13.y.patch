@@ -1,0 +1,27 @@
+From 6ef5d8fcdb0b94b7490a9a38353877708fca2cd4 Mon Sep 17 00:00:00 2001
+From: gordboy <35108003+gordboy@users.noreply.github.com>
+Date: Tue, 27 Apr 2021 12:31:30 +0100
+Subject: [PATCH] Update to kernel 5.12
+
+---
+ os_dep/linux/recv_linux.c | 5 +++++
+ 2 files changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/net/wireless/rtl8723ds/os_dep/linux/recv_linux.c b/drivers/net/wireless/rtl8723ds/os_dep/linux/recv_linux.c
+index e9ca7d4..23ea6c7 100644
+--- a/drivers/net/wireless/rtl8723ds/os_dep/linux/recv_linux.c
++++ b/drivers/net/wireless/rtl8723ds/os_dep/linux/recv_linux.c
+@@ -355,8 +355,13 @@ static int napi_recv(_adapter *padapter, int budget)
+ 
+ #ifdef CONFIG_RTW_GRO
+ 		if (pregistrypriv->en_gro) {
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 12, 0))
++			rtw_napi_gro_receive(&padapter->napi, pskb);
++			rx_ok = _TRUE;
++#else
+ 			if (rtw_napi_gro_receive(&padapter->napi, pskb) != GRO_DROP)
+ 				rx_ok = _TRUE;
++#endif
+ 			goto next;
+ 		}
+ #endif /* CONFIG_RTW_GRO */
