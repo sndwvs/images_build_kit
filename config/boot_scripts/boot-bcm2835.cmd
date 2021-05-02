@@ -16,7 +16,7 @@ fi
 if test "${console}" = "display" || test "${console}" = "both"; then setenv consoleargs "console=%SERIAL_CONSOLE%,%SERIAL_CONSOLE_SPEED%n8"; fi
 if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "${consoleargs} earlyprintk console=tty1"; fi
 
-setenv bootargs "root=${rootdev} ro rootwait rootfstype=${rootfstype} init=/sbin/init ${consoleargs} loglevel=${verbosity} ${extraargs}"
+setenv bootargs "root=${rootdev} ro rootwait rootfstype=${rootfstype} init=/sbin/init ${consoleargs} loglevel=${verbosity} usb-storage.quirks=${usbstoragequirks} ${extraargs}"
 
 load ${devtype} ${devnum}:1 ${kernel_addr_r} Image
 load ${devtype} ${devnum}:1 ${fdt_addr_r} ${fdtfile}

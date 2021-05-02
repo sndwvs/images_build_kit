@@ -19,7 +19,7 @@ if test "${console}" = "serial" || test "${console}" = "both"; then setenv conso
 fdt addr ${fdt_addr}
 fdt get value bootargs /chosen bootargs
 
-setenv bootargs "root=${rootdev} ro rootwait rootfstype=${rootfstype} init=/sbin/init ${consoleargs} loglevel=${verbosity} ${extraargs}"
+setenv bootargs "root=${rootdev} ro rootwait rootfstype=${rootfstype} init=/sbin/init ${consoleargs} loglevel=${verbosity} usb-storage.quirks=${usbstoragequirks} ${extraargs}"
 
 fdt rm /chosen bootargs
 
