@@ -19,3 +19,5 @@ boards
 | LINUX_DEFCONFIG      | default linux kernel config name |
 | DEVICE_TREE_BLOB     | hardware file name |
 | DESKTOP              | graphical user environment - yes/no |
+| MODULES              | forced loading of kernel modules |
+| MODULES_BLACKLIST    | prohibiting loading kernel modules |

@@ -376,6 +376,18 @@ setting_ssh() {
 }
 
 
+setting_modules() {
+    if [[ ! -z ${MODULES} ]]; then
+        message "" "setting" "install modules: ${MODULES}"
+        tr ' ' '\n' <<< "${MODULES}" | sed -e 's/^/\/sbin\/modprobe /' >> "$SOURCE/$ROOTFS/etc/rc.d/rc.modules.local"
+    fi
+    if [[ ! -z ${MODULES_BLACKLIST} ]]; then
+        message "" "setting" "blacklist modules: ${MODULES_BLACKLIST}"
+        tr ' ' '\n' <<< "${MODULES_BLACKLIST}" | sed -e 's/^/blacklist /' > "$SOURCE/$ROOTFS/etc/modprobe.d/blacklist-${BOARD_NAME}.conf"
+    fi
+}
+
+
 image_compression() {
     local IMG="$1"
     pushd $BUILD/$OUTPUT/$IMAGES >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1

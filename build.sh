@@ -220,6 +220,7 @@ for image_type in ${DISTR_IMAGES[@]}; do
         setting_datetime
         setting_dhcp
         setting_ssh
+        setting_modules
         setting_wifi
         [[ $NTP == yes ]] && setting_ntp
         setting_bootloader_move_to_disk
