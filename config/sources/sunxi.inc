@@ -26,7 +26,7 @@ case $KERNEL_SOURCE in
     ;;
     next)
             LINUX_SOURCE="https://github.com/megous/linux"
-            KERNEL_BRANCH="orange-pi-5.11::"
+            KERNEL_BRANCH="orange-pi-5.12::"
             KERNEL_DIR="linux-$SOCFAMILY-$KERNEL_SOURCE"
     ;;
 esac

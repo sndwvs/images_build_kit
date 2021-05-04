@@ -2,10 +2,10 @@ diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
 index 965a7c0..71a672e 100644
 --- a/arch/arm/boot/dts/Makefile
 +++ b/arch/arm/boot/dts/Makefile
-@@ -1213,3 +1213,5 @@ dtb-$(CONFIG_ARCH_ASPEED) += \
- 	aspeed-bmc-opp-zaius.dtb \
+@@ -1442,3 +1442,5 @@
  	aspeed-bmc-portwell-neptune.dtb \
- 	aspeed-bmc-quanta-q71l.dtb
+ 	aspeed-bmc-quanta-q71l.dtb \
+ 	aspeed-bmc-supermicro-x11spi.dtb
 +
 +subdir-y	:= overlay
 diff --git a/arch/arm/boot/dts/overlay/Makefile b/arch/arm/boot/dts/overlay/Makefile
@@ -7135,4 +7135,3 @@ index 26e6af4..65b9435 100644
  # Add subdir path
  
  extra-y		:= $(addprefix $(obj)/,$(extra-y))
-

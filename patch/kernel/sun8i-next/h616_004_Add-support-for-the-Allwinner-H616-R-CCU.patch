@@ -70,27 +70,16 @@ index 50f8d1bc7046..119d1797f501 100644
  static void __init sunxi_r_ccu_init(struct device_node *node,
  				    const struct sunxi_ccu_desc *desc)
  {
-@@ -195,3 +233,10 @@  static void __init sun50i_h6_r_ccu_setup(struct device_node *node)
- }
- CLK_OF_DECLARE(sun50i_h6_r_ccu, "allwinner,sun50i-h6-r-ccu",
- 	       sun50i_h6_r_ccu_setup);
-+
-+static void __init sun50i_h616_r_ccu_setup(struct device_node *node)
-+{
-+	sunxi_r_ccu_init(node, &sun50i_h616_r_ccu_desc);
-+}
-+CLK_OF_DECLARE(sun50i_h616_r_ccu, "allwinner,sun50i-h616-r-ccu",
-+	       sun50i_h616_r_ccu_setup);
 diff --git a/drivers/clk/sunxi-ng/ccu-sun50i-h6-r.h b/drivers/clk/sunxi-ng/ccu-sun50i-h6-r.h
 index 782117dc0b28..128302696ca1 100644
 --- a/drivers/clk/sunxi-ng/ccu-sun50i-h6-r.h
 +++ b/drivers/clk/sunxi-ng/ccu-sun50i-h6-r.h
-@@ -14,6 +14,7 @@ 
+@@ -14,6 +14,7 @@
  
  #define CLK_R_APB2	3
  
--#define CLK_NUMBER	(CLK_W1 + 1)
-+#define CLK_NUMBER_H6	(CLK_W1 + 1)
+-#define CLK_NUMBER	(CLK_R_APB2_RSB + 1)
++#define CLK_NUMBER_H6	(CLK_R_APB2_RSB + 1)
 +#define CLK_NUMBER_H616	(CLK_IR + 1)
  
  #endif /* _CCU_SUN50I_H6_R_H */
