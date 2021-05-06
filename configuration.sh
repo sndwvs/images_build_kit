@@ -33,7 +33,7 @@ DISTR_VERSION=${DISTR_VERSION:-"current"} # or 15.0
 #---------------------------------------------
 # configuration build images and desktop environment
 #---------------------------------------------
-DISTR_IMAGES+=("base")
+DISTR_IMAGES+=("server")
 if [[ $DESKTOP_SELECTED == yes ]]; then
  if [[ -z $DE ]]; then
      DISTR_IMAGES+=("xfce")

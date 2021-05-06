@@ -11,7 +11,7 @@ get_name_rootfs() {
     image_type="$1"
     kernel_version KERNEL_VERSION
 
-    if [[ $image_type == base ]]; then
+    if [[ $image_type == server ]]; then
         ROOTFS="${ROOTFS_NAME}-${ARCH}-${image_type}-$BOARD_NAME-$KERNEL_VERSION-build-${ROOTFS_VERSION}"
     else
         ROOTFS_DESKTOP="${ROOTFS_NAME}-${ARCH}-${image_type}-$BOARD_NAME-$KERNEL_VERSION-build-${ROOTFS_VERSION}"
@@ -22,12 +22,12 @@ get_name_rootfs() {
 clean_rootfs() {
     image_type="$1"
 
-    if [[ $image_type == base ]] && [[ ! -z $ROOTFS ]] && [[ -d $SOURCE/$ROOTFS ]]; then
+    if [[ $image_type == server ]] && [[ ! -z $ROOTFS ]] && [[ -d $SOURCE/$ROOTFS ]]; then
         message "" "clean" "$ROOTFS"
         rm -rf $SOURCE/$ROOTFS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
-    if [[ $image_type != base ]] && [[ ! -z $ROOTFS_DESKTOP ]] && [[ -d $SOURCE/$ROOTFS_DESKTOP ]] ;then
+    if [[ $image_type != server ]] && [[ ! -z $ROOTFS_DESKTOP ]] && [[ -d $SOURCE/$ROOTFS_DESKTOP ]] ;then
         message "" "clean" "$ROOTFS_DESKTOP"
         rm -rf $SOURCE/$ROOTFS_DESKTOP >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
@@ -175,7 +175,7 @@ download_pkg() {
 
 
 install_pkg(){
-    if [[ $1 == base ]]; then
+    if [[ $1 == server ]]; then
         local ROOTFS="$ROOTFS"
     else
         local ROOTFS="$ROOTFS_DESKTOP"

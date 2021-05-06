@@ -204,7 +204,7 @@ for image_type in ${DISTR_IMAGES[@]}; do
     get_name_rootfs ${image_type}
     clean_rootfs ${image_type}
 
-    if [[ ${image_type} == base ]]; then
+    if [[ ${image_type} == server ]]; then
         prepare_rootfs
         create_bootloader_pack
         download_pkg $DISTR_URL "${image_type}"
@@ -229,7 +229,7 @@ for image_type in ${DISTR_IMAGES[@]}; do
         [[ $IMAGE_COMPRESSION == yes ]] && image_compression "$ROOTFS"
     fi
 
-    if [[ ${image_type} != base ]]; then
+    if [[ ${image_type} != server ]]; then
         message "" "create" "$ROOTFS_DESKTOP"
         rsync -ar --del $SOURCE/$ROOTFS/ $SOURCE/$ROOTFS_DESKTOP >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
