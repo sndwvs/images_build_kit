@@ -186,7 +186,7 @@ prepare_disk() {
 
     [[ ${COMPATIBLE} =~ raspberry*pi ]] && unset OFFSET && SIZE="+256M"
 
-    echo -e "\nn\np\n${PART}\n${OFFSET}\n${SIZE}\nw" | fdisk "/dev/$DISK" >/dev/null 2>&1
+    echo -e "\no\nn\np\n${PART}\n${OFFSET}\n${SIZE}\nw" | fdisk "/dev/$DISK" >/dev/null 2>&1
 
     if [[ ${COMPATIBLE} =~ raspberry*pi ]] ;then
         echo -e "\nn\np\n\n\n\nt\n${PART}\nc\nw" | fdisk "/dev/$DISK" >/dev/null 2>&1
