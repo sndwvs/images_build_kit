@@ -31,9 +31,9 @@ index aebd49c88719..da11ef28a47b 100644
  dtb-$(CONFIG_ARCH_MESON) += meson-gxm-vega-s96.dtb
  dtb-$(CONFIG_ARCH_MESON) += meson-gxm-wetek-core2.dtb
 +dtb-$(CONFIG_ARCH_MESON) += meson-sm1-bananapi-m5.dtb
- dtb-$(CONFIG_ARCH_MESON) += meson-sm1-sei610.dtb
  dtb-$(CONFIG_ARCH_MESON) += meson-sm1-khadas-vim3l.dtb
  dtb-$(CONFIG_ARCH_MESON) += meson-sm1-odroid-c4.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-sm1-odroid-hc4.dtb
 diff --git a/arch/arm64/boot/dts/amlogic/meson-sm1-bananapi-m5.dts b/arch/arm64/boot/dts/amlogic/meson-sm1-bananapi-m5.dts
 new file mode 100644
 index 000000000000..a98301777622
