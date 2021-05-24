@@ -191,60 +191,34 @@ if [[ ! -e $BOARD_NAME ]]; then
     prepare_dest
 fi
 
-if [[ $DOWNLOAD_SOURCE_BINARIES == yes ]]; then
-    download
-fi
+#if [[ $DOWNLOAD_SOURCE_BINARIES == yes ]]; then
+#    download
+#fi
 #---------------------------------------------
 # start build
 #---------------------------------------------
 message "" "start" "build $DISTR ARCH $ARCH"
-if [[ $COMPILE_BINARIES == yes ]]; then
-    # aarch64 change interpreter path
-    [[ $MARCH == aarch64 ]] && change_interpreter_path "${XTOOLS[@]}"
-    clear_boot_tools
-#    if [[ ! -z $ATF && $SOCFAMILY == rk33* ]] || [[ $SOCFAMILY == meson* ]]; then
-    if [[ ! -z $ATF && $SOCFAMILY == rk33* ]]; then
-        [[ $DOWNLOAD_SOURCE_BINARIES == yes ]] && patching_source "u-boot-tools"
-        compile_boot_tools
-    fi
-    [[ ! -z $ATF && $DOWNLOAD_SOURCE_BINARIES == yes ]] && ( patching_source "atf" && compile_atf )
-
-    [[ $DOWNLOAD_SOURCE_BINARIES == yes ]] && patching_source "u-boot"
-    compile_boot_loader
-
-    if [[ $DOWNLOAD_SOURCE_BINARIES == yes ]]; then
-        external_patching_source
-        patching_source "kernel"
-    fi
-    compile_kernel
-
-    if [[ $SOCFAMILY == sun* && $TOOLS_PACK == yes ]]; then
-        compile_sunxi_tools
-        build_sunxi_tools
-    fi
-
-    build_kernel_pkg
-fi
 
 for image_type in ${DISTR_IMAGES[@]}; do
 
     get_name_rootfs ${image_type}
-    clean_rootfs ${image_type}
+#    clean_rootfs ${image_type}
 
     if [[ ${image_type} == server || ${image_type} == core ]]; then
-        prepare_rootfs
-        create_bootloader_pack
-        download_pkg $DISTR_URL "${image_type}"
-        install_pkg "${image_type}"
-        install_kernel
-        create_initrd
-        setting_system
+#        prepare_rootfs
+#        create_bootloader_pack
+#        download_pkg $DISTR_URL "${image_type}"
+#        install_pkg "${image_type}"
+##        install_kernel
+##        create_initrd
+##        setting_system
         setting_bootloader
         setting_hostname
-        setting_fstab
-        setting_debug
-        setting_motd
-        setting_datetime
+#        setting_fstab
+#        setting_debug
+#        setting_motd
+#        setting_datetime
+exit
         setting_dhcp
         setting_ssh
         setting_modules
