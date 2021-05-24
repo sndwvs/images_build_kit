@@ -11,7 +11,7 @@ get_name_rootfs() {
     image_type="$1"
     kernel_version KERNEL_VERSION
 
-    if [[ $image_type == server ]]; then
+    if [[ $image_type == server || $image_type == core ]]; then
         ROOTFS="${ROOTFS_NAME}-${ARCH}-${image_type}-$BOARD_NAME-$KERNEL_VERSION-build-${ROOTFS_VERSION}"
     else
         ROOTFS_DESKTOP="${ROOTFS_NAME}-${ARCH}-${image_type}-$BOARD_NAME-$KERNEL_VERSION-build-${ROOTFS_VERSION}"
@@ -22,7 +22,7 @@ get_name_rootfs() {
 clean_rootfs() {
     image_type="$1"
 
-    if [[ $image_type == server ]] && [[ ! -z $ROOTFS ]] && [[ -d $SOURCE/$ROOTFS ]]; then
+    if [[ $image_type == server || $image_type == core ]] && [[ ! -z $ROOTFS ]] && [[ -d $SOURCE/$ROOTFS ]]; then
         message "" "clean" "$ROOTFS"
         rm -rf $SOURCE/$ROOTFS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
@@ -57,22 +57,31 @@ setting_fstab() {
 
 setting_debug() {
     message "" "setting" "uart debugging"
-    sed -e 's/#\(ttyS[0-2]\)/\1/' \
-        -e '/#ttyS3/{n;/^#/i ttyFIQ0
-             }' \
-        -e '/#ttyp7/{n;/^#/i ttyAMA0
-             }' \
-        -i "$SOURCE/$ROOTFS/etc/securetty"
+    if [[ $DISTR == sla* ]]; then
+        sed -e 's/#\(ttyS[0-2]\)/\1/' \
+            -e '/#ttyS3/{n;/^#/i ttyFIQ0
+                 }' \
+            -e '/#ttyp7/{n;/^#/i ttyAMA0
+                 }' \
+            -i "$SOURCE/$ROOTFS/etc/securetty"
 
-    sed -e "s/^#\(\(s\(1\)\).*\)\(ttyS0\).*\(9600\)/\1$SERIAL_CONSOLE $SERIAL_CONSOLE_SPEED/" \
-        -i "$SOURCE/$ROOTFS/etc/inittab"
+        sed -e "s/^#\(\(s\(1\)\).*\)\(ttyS0\).*\(9600\)/\1$SERIAL_CONSOLE $SERIAL_CONSOLE_SPEED/" \
+            -i "$SOURCE/$ROOTFS/etc/inittab"
+    elif [[ $DISTR == crux* ]]; then
+        sed -e '/ttyS0/{n;/^/i ttyS1\nttyS2\nttyS3\nttyFIQ0\nttyAMA0
+                 }' \
+            -i "$SOURCE/$ROOTFS/etc/securetty"
+
+        sed -e "s/^#\(\(s\(1\)\).*\).*\(38400\).*\(ttyS0\)\(.*$\)/\1$SERIAL_CONSOLE_SPEED $SERIAL_CONSOLE\6/" \
+            -i "$SOURCE/$ROOTFS/etc/inittab"
+    fi
 }
 
 
 setting_motd() {
     message "" "setting" "motd message"
     # http://patorjk.com/ font: rectangles
-    [[ -f "$CWD/config/boards/$BOARD_NAME/motd" ]] && install -m644 -D "$CWD/config/boards/$BOARD_NAME/motd" "$SOURCE/$ROOTFS/etc/motd"
+    [[ -f "$CWD/config/boards/$BOARD_NAME/motd.${DISTR}" ]] && install -m644 -D "$CWD/config/boards/$BOARD_NAME/motd.${DISTR}" "$SOURCE/$ROOTFS/etc/motd"
 }
 
 
@@ -154,19 +163,27 @@ download_pkg() {
     for pkg in ${packages}; do
         category=$(echo $pkg | cut -f1 -d "/")
         pkg=$(echo $pkg | cut -f2 -d "/")
+        [[ $ARCH == crux* ]] && pkg=$category
         if [[ ! -z ${pkg} ]];then
             if [[ $USE_SLARM64_MIRROR == yes ]];then
                 PKG_NAME=($(wget --no-check-certificate -q -O - ${url}/${category}/ | grep -oP '(?<=\"\>&nbsp;).*(?=\<\/a\>)' | egrep -o "(^$(echo $pkg | sed 's/+/\\\+/g'))-.*(t.z)" | sort -ur))
             else
                 PKG_NAME=($(wget --no-check-certificate -q -O - ${url}/${category}/ | cut -f7 -d '>' | cut -f1 -d '<' | egrep -o "(^$(echo $pkg | sed 's/+/\\\+/g'))-.*(t.z)" | sort -ur))
             fi
+
+            [[ $DISTR == crux* ]] && PKG_NAME=($(wget --no-check-certificate -q -O - ${url}/${category}/ | cut -f7 -d '>' | cut -f1 -d '<' | egrep -o "(^$(echo $pkg | sed 's/+/\\\+/g'))#.*(t.*z)" | sort -ur))
+
             for raw in ${PKG_NAME[*]};do
-               [[ $(echo $raw | rev | cut -d '-' -f4- | rev | grep -ox $pkg) ]] && _PKG_NAME=$raw
+                if [[ $DISTR == sla* ]]; then
+                   [[ $(echo $raw | rev | cut -d '-' -f4- | rev | grep -ox $pkg) ]] && _PKG_NAME=$raw
+                elif [[ $DISTR == crux* ]]; then
+                   [[ $(echo $raw | cut -d "#" -f1 | grep -ox $pkg) ]] && _PKG_NAME=${raw/\#/%23}
+                fi
             done
 
             [[ -z ${_PKG_NAME} ]] && ( echo "empty download package ${category}/$pkg" >> $LOG 2>&1 && message "err" "details" && exit 1 )
 
-            message "" "download" "package $category/${_PKG_NAME}"
+            message "" "download" "package $category/${_PKG_NAME/\%23/#}"
             wget --no-check-certificate -c -nc -nd -np ${url}/${category}/${_PKG_NAME} -P $BUILD/$PKG/${type}/${ARCH}/${category}/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             unset _PKG_NAME
         fi
@@ -175,7 +192,7 @@ download_pkg() {
 
 
 install_pkg(){
-    if [[ $1 == server ]]; then
+    if [[ $1 == server || $1 == core ]]; then
         local ROOTFS="$ROOTFS"
     else
         local ROOTFS="$ROOTFS_DESKTOP"
@@ -192,7 +209,13 @@ install_pkg(){
         pkg=$(echo $pkg | cut -f2 -d "/")
         if [[ ! -z ${pkg} ]];then
             message "" "install" "package $category/${pkg}"
-            ROOT=$SOURCE/$ROOTFS upgradepkg --install-new $BUILD/$PKG/${type}/${ARCH}/$category/${pkg}-* >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            if [[ $DISTR == sla* ]]; then
+                ROOT=$SOURCE/$ROOTFS upgradepkg --install-new $BUILD/$PKG/${type}/${ARCH}/$category/${pkg}-* >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            elif [[ $DISTR == crux* ]]; then
+                # fixed install packages
+                [[ ! -e $SOURCE/$ROOTFS/var/lib/pkg/db ]] && ( install -Dm644 /dev/null $SOURCE/$ROOTFS/var/lib/pkg/db >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+                pkgadd --root $SOURCE/$ROOTFS $BUILD/$PKG/${type}/${ARCH}/$category/${pkg}#* >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            fi
         fi
     done
 }
@@ -200,7 +223,14 @@ install_pkg(){
 
 install_kernel() {
     message "" "install" "kernel ${KERNEL_VERSION}"
-    ROOT=$SOURCE/$ROOTFS upgradepkg --install-new $BUILD/$PKG/*${SOCFAMILY}*${KERNEL_VERSION}*.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    if [[ $DISTR == sla* ]]; then
+        ROOT=$SOURCE/$ROOTFS upgradepkg --install-new $BUILD/$PKG/*${SOCFAMILY}*${KERNEL_VERSION}*.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    elif [[ $DISTR == crux* ]]; then
+        rsync -av --chown=root:root $BUILD/$PKG/kernel-${SOCFAMILY}/ $SOURCE/$ROOTFS/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        rsync -av --chown=root:root $BUILD/$PKG/kernel-modules/ $SOURCE/$ROOTFS/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        #rsync -av --chown=root:root $BUILD/$PKG/kernel-firmware/ $SOURCE/$ROOTFS/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        #rsync -av --chown=root:root $BUILD/$PKG/kernel-source/ $SOURCE/$ROOTFS/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
 }
 
 
@@ -232,17 +262,17 @@ setting_bootloader_move_to_disk() {
 
 setting_system() {
     message "" "setting" "system"
-    rsync -av --chown=root:root $CWD/system/overall/ $SOURCE/$ROOTFS/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
+    rsync -av --chown=root:root $CWD/system/overall/$DISTR/ $SOURCE/$ROOTFS/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     if [[ -d $CWD/system/$SOCFAMILY ]]; then
         rsync -av --chown=root:root $CWD/system/$SOCFAMILY/ $SOURCE/$ROOTFS/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
     if [[ -d $CWD/system/${BOARD_NAME}-${KERNEL_SOURCE} ]]; then
         rsync -av --chown=root:root $CWD/system/${BOARD_NAME}-${KERNEL_SOURCE}/ $SOURCE/$ROOTFS/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
-
     # setting for root
-    rsync -av --chown=root:root $SOURCE/$ROOTFS/etc/skel/ $SOURCE/$ROOTFS/root/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    if [[ -d $SOURCE/$ROOTFS/etc/skel ]]; then
+        rsync -av --chown=root:root $SOURCE/$ROOTFS/etc/skel/ $SOURCE/$ROOTFS/root/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
 }
 
 
@@ -258,7 +288,11 @@ setting_alsa() {
 
 setting_hostname() {
     message "" "setting" "hostname"
-    echo $BOARD_NAME | sed 's/_/-/g' > "$SOURCE/$ROOTFS/etc/HOSTNAME"
+    if [[ $DISTR == sla* ]]; then
+        echo $BOARD_NAME | sed 's/_/-/g' > "$SOURCE/$ROOTFS/etc/HOSTNAME"
+    elif [[ $DISTR == crux* ]]; then
+        echo $BOARD_NAME | sed 's/_/-/g' | xargs -I {} sed -i 's:\(^HOSTNAME=\).*:\1{}:g' "$SOURCE/$ROOTFS/etc/rc.conf"
+    fi
 }
 
 

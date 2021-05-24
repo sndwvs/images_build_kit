@@ -111,49 +111,50 @@ build_kernel_pkg() {
     cd ..
     ln -sf linux-${KERNEL_VERSION} linux
 
+    if [[ $DISTR == sla* ]]; then
+        # create kernel package
+        cd $BUILD/$PKG/kernel-${SOCFAMILY}/ && mkdir "install"
+        cat "$CWD/packages/kernel/slack-desc.kernel-template" | sed "s:%SOCFAMILY%:${SOCFAMILY}:g" > "$BUILD/$PKG/kernel-${SOCFAMILY}/install/slack-desc"
+        makepkg -l n -c n $BUILD/$PKG/kernel-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    # create kernel package
-    cd $BUILD/$PKG/kernel-${SOCFAMILY}/ && mkdir "install"
-    cat "$CWD/packages/kernel/slack-desc.kernel-template" | sed "s:%SOCFAMILY%:${SOCFAMILY}:g" > "$BUILD/$PKG/kernel-${SOCFAMILY}/install/slack-desc"
-    makepkg -l n -c n $BUILD/$PKG/kernel-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        # create kernel-modules package
+        cd $BUILD/$PKG/kernel-modules/ && mkdir "install"
+        cat "$CWD/packages/kernel/slack-desc.kernel-modules" | sed "s:%SOCFAMILY%:${SOCFAMILY}:g" > "$BUILD/$PKG/kernel-modules/install/slack-desc"
+        makepkg -l n -c n $BUILD/$PKG/kernel-modules-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    # create kernel-modules package
-    cd $BUILD/$PKG/kernel-modules/ && mkdir "install"
-    cat "$CWD/packages/kernel/slack-desc.kernel-modules" | sed "s:%SOCFAMILY%:${SOCFAMILY}:g" > "$BUILD/$PKG/kernel-modules/install/slack-desc"
-    makepkg -l n -c n $BUILD/$PKG/kernel-modules-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        # create kernel-headers package
+        cd $BUILD/$PKG/kernel-headers/ && mkdir "install"
+        cat "$CWD/packages/kernel/slack-desc.kernel-headers" | sed "s:%SOCFAMILY%:${SOCFAMILY}:g" > "$BUILD/$PKG/kernel-headers/install/slack-desc"
+        makepkg -l n -c n $BUILD/$PKG/kernel-headers-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    # create kernel-headers package
-    cd $BUILD/$PKG/kernel-headers/ && mkdir "install"
-    cat "$CWD/packages/kernel/slack-desc.kernel-headers" | sed "s:%SOCFAMILY%:${SOCFAMILY}:g" > "$BUILD/$PKG/kernel-headers/install/slack-desc"
-    makepkg -l n -c n $BUILD/$PKG/kernel-headers-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        # create kernel-firmware package
+        cd $BUILD/$PKG/kernel-firmware/ && mkdir "install"
+        cat "$CWD/packages/kernel/slack-desc.kernel-firmware" | sed "s:%SOCFAMILY%:${SOCFAMILY}:g" > "$BUILD/$PKG/kernel-firmware/install/slack-desc"
+        makepkg -l n -c n $BUILD/$PKG/kernel-firmware-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    # create kernel-firmware package
-    cd $BUILD/$PKG/kernel-firmware/ && mkdir "install"
-    cat "$CWD/packages/kernel/slack-desc.kernel-firmware" | sed "s:%SOCFAMILY%:${SOCFAMILY}:g" > "$BUILD/$PKG/kernel-firmware/install/slack-desc"
-    makepkg -l n -c n $BUILD/$PKG/kernel-firmware-${SOCFAMILY}-${KERNEL_VERSION}-${ARCH}-${PKG_BUILD}${PACKAGER}.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        # create kernel-source package
+        cd $BUILD/$PKG/kernel-source/ && mkdir "install"
+        cat "$CWD/packages/kernel/slack-desc.kernel-source" | sed "s:%SOCFAMILY%:${SOCFAMILY}:g" > "$BUILD/$PKG/kernel-source/install/slack-desc"
+        makepkg -l n -c n $BUILD/$PKG/kernel-source-${SOCFAMILY}-${KERNEL_VERSION}-noarch-${PKG_BUILD}${PACKAGER}.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    # create kernel-source package
-    cd $BUILD/$PKG/kernel-source/ && mkdir "install"
-    cat "$CWD/packages/kernel/slack-desc.kernel-source" | sed "s:%SOCFAMILY%:${SOCFAMILY}:g" > "$BUILD/$PKG/kernel-source/install/slack-desc"
-    makepkg -l n -c n $BUILD/$PKG/kernel-source-${SOCFAMILY}-${KERNEL_VERSION}-noarch-${PKG_BUILD}${PACKAGER}.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        cd $BUILD/$PKG
 
-    cd $BUILD/$PKG
+        # clear kernel packages directories
+        [[ -d "$BUILD/$PKG/kernel-${SOCFAMILY}" ]] && \
+            rm -rf "$BUILD/$PKG/kernel-${SOCFAMILY}" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    # clear kernel packages directories
-    [[ -d "$BUILD/$PKG/kernel-${SOCFAMILY}" ]] && \
-        rm -rf "$BUILD/$PKG/kernel-${SOCFAMILY}" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        [[ -d "$BUILD/$PKG/kernel-modules" ]] && \
+            rm -rf "$BUILD/$PKG/kernel-modules" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    [[ -d "$BUILD/$PKG/kernel-modules" ]] && \
-        rm -rf "$BUILD/$PKG/kernel-modules" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        [[ -d "$BUILD/$PKG/kernel-headers" ]] && \
+            rm -rf "$BUILD/$PKG/kernel-headers" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    [[ -d "$BUILD/$PKG/kernel-headers" ]] && \
-        rm -rf "$BUILD/$PKG/kernel-headers" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        [[ -d "$BUILD/$PKG/kernel-firmware" ]] && \
+            rm -rf "$BUILD/$PKG/kernel-firmware" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    [[ -d "$BUILD/$PKG/kernel-firmware" ]] && \
-        rm -rf "$BUILD/$PKG/kernel-firmware" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
-    [[ -d "$BUILD/$PKG/kernel-source" ]] && \
-        rm -rf "$BUILD/$PKG/kernel-source" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        [[ -d "$BUILD/$PKG/kernel-source" ]] && \
+            rm -rf "$BUILD/$PKG/kernel-source" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
 }
 
 

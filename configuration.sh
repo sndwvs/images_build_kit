@@ -27,8 +27,12 @@ KERNEL_FIRMWARE_DIR=${KERNEL_FIRMWARE_DIR:-"linux-firmware"}
 #---------------------------------------------
 # configuration linux distribution
 #---------------------------------------------
-DISTR=${DISTR:-"slackwarearm"}
-DISTR_VERSION=${DISTR_VERSION:-"current"} # or 15.0
+#DISTR=${DISTR:-"slackwarearm"}
+if [[ $DISTR == sla* ]]; then
+    DISTR_VERSION=${DISTR_VERSION:-"current"} # or 15.0
+elif [[ $DISTR == crux* ]]; then
+    DISTR_VERSION=${DISTR_VERSION:-"3.6"}
+fi
 
 #---------------------------------------------
 # configuration build images and desktop environment
@@ -115,12 +119,15 @@ fi
 #---------------------------------------------
 if [[ ${DISTR} == slackwarearm ]];then
     DISTR_SOURCE=${DISTR_SOURCE:-"http://dl.slarm64.org/slackware"}
-else
+elif [[ ${DISTR} == slarm64 ]];then
     if [[ $USE_SLARM64_MIRROR == yes ]]; then
         DISTR_SOURCE=${DISTR_SOURCE:-"https://osdn.net/projects/slarm64/storage"}
     else
         DISTR_SOURCE=${DISTR_SOURCE:-"http://dl.slarm64.org/slackware"}
     fi
+elif [[ ${DISTR} == crux* ]];then
+    DISTR_VERSION="3.6"
+    DISTR_SOURCE=${DISTR_SOURCE:-"http://dl.slarm64.org/crux"}
 fi
 
 #---------------------------------------------
@@ -156,15 +163,21 @@ export PATH=/bin:/sbin:/usr/bin:/usr/sbin:$BUILD/$OUTPUT/$TOOLS/
 #---------------------------------------------
 # packages
 #---------------------------------------------
-if [[ ${DISTR} == slackwarearm ]];then
+if [[ ${DISTR} == slackwarearm ]]; then
     DISTR_DIR=${DISTR/arm/}
-else
+elif [[ ${DISTR} == slarm64 ]]; then
     DISTR_DIR=${DISTR}
+elif [[ ${DISTR} == crux* ]]; then
+    unset DISTR_DIR
+    DISTR_IMAGES[0]="core"
 fi
 DISTR_URL="${DISTR_SOURCE}/${DISTR}-${DISTR_VERSION}/${DISTR_DIR}"
 DISTR_EXTRA_URL="${DISTR_SOURCE}/packages/${ARCH}"
 #DISTR_URL="http://dl.slarm64.org/slackware/${DISTR}-${DISTR_VERSION}/${DISTR_DIR}"
 #DISTR_EXTRA_URL="http://dl.slarm64.org/slackware/packages/${ARCH}"
+if [[ ${DISTR} == crux* ]]; then
+    DISTR_URL="${DISTR_SOURCE}/pkg/${DISTR_VERSION}-${ARCH}"
+fi
 
 #---------------------------------------------
 # clean enviroment

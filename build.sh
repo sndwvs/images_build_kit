@@ -41,6 +41,33 @@ fi
 
 
 #---------------------------------------------
+# get linux distributions
+#---------------------------------------------
+for _distr in $(grep -oP "(?<=DISTRS=[\"\']).*(?=[\'\"]$)" $CWD/config/environment/environment.conf); do
+    _selected="off"
+    [[ ${_distr} == slarm64 ]] && _selected="on"
+    DISTRS+=(${_distr} "linux" ${_selected})
+done
+if [[ -z $DISTR ]]; then
+    # no menu
+    NO_MENU=yes
+
+    # Duplicate file descriptor 1 on descriptor 3
+    exec 3>&1
+    while true; do
+        DISTR=$(dialog --title "distributions" \
+                    --radiolist "select distribution" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
+                    "${DISTRS[@]}" \
+        2>&1 1>&3)
+
+        [ ! -e $DISTR ] && break
+    done
+    # Close file descriptor 3
+    exec 3>&-
+fi
+
+
+#---------------------------------------------
 # get kernel source type
 #---------------------------------------------
 if [[ $NO_MENU == yes ]]; then
@@ -204,13 +231,12 @@ for image_type in ${DISTR_IMAGES[@]}; do
     get_name_rootfs ${image_type}
     clean_rootfs ${image_type}
 
-    if [[ ${image_type} == server ]]; then
+    if [[ ${image_type} == server || ${image_type} == core ]]; then
         prepare_rootfs
         create_bootloader_pack
         download_pkg $DISTR_URL "${image_type}"
         install_pkg "${image_type}"
         install_kernel
-        create_initrd
         setting_system
         setting_bootloader
         setting_hostname
@@ -218,18 +244,21 @@ for image_type in ${DISTR_IMAGES[@]}; do
         setting_debug
         setting_motd
         setting_datetime
-        setting_dhcp
-        setting_ssh
+        if [[ ${DISTR} != crux* ]]; then
+            create_initrd
+            setting_dhcp
+            setting_ssh
+            setting_wifi
+            [[ $NTP == yes ]] && setting_ntp
+            setting_governor
+        fi
         setting_modules
-        setting_wifi
-        [[ $NTP == yes ]] && setting_ntp
         setting_bootloader_move_to_disk
-        setting_governor
         create_img "$ROOTFS"
         [[ $IMAGE_COMPRESSION == yes ]] && image_compression "$ROOTFS"
     fi
 
-    if [[ ${image_type} != server ]]; then
+    if [[ ${image_type} != server && ${image_type} != core ]]; then
         message "" "create" "$ROOTFS_DESKTOP"
         rsync -ar --del $SOURCE/$ROOTFS/ $SOURCE/$ROOTFS_DESKTOP >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
