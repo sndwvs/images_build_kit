@@ -30,7 +30,7 @@ KERNEL_FIRMWARE_DIR=${KERNEL_FIRMWARE_DIR:-"linux-firmware"}
 #DISTR=${DISTR:-"slackwarearm"}
 if [[ $DISTR == sla* ]]; then
     DISTR_VERSION=${DISTR_VERSION:-"current"} # or 15.0
-elif [[ $DISTR == crux ]]; then
+elif [[ $DISTR == crux* ]]; then
     DISTR_VERSION=${DISTR_VERSION:-"3.6"}
 fi
 
@@ -125,7 +125,7 @@ elif [[ ${DISTR} == slarm64 ]];then
     else
         DISTR_SOURCE=${DISTR_SOURCE:-"http://dl.slarm64.org/slackware"}
     fi
-elif [[ ${DISTR} == crux ]];then
+elif [[ ${DISTR} == crux* ]];then
     DISTR_VERSION="3.6"
     DISTR_SOURCE=${DISTR_SOURCE:-"http://dl.slarm64.org/crux"}
 fi
@@ -167,7 +167,7 @@ if [[ ${DISTR} == slackwarearm ]]; then
     DISTR_DIR=${DISTR/arm/}
 elif [[ ${DISTR} == slarm64 ]]; then
     DISTR_DIR=${DISTR}
-elif [[ ${DISTR} == crux ]]; then
+elif [[ ${DISTR} == crux* ]]; then
     unset DISTR_DIR
     DISTR_IMAGES[0]="core"
 fi
@@ -175,7 +175,7 @@ DISTR_URL="${DISTR_SOURCE}/${DISTR}-${DISTR_VERSION}/${DISTR_DIR}"
 DISTR_EXTRA_URL="${DISTR_SOURCE}/packages/${ARCH}"
 #DISTR_URL="http://dl.slarm64.org/slackware/${DISTR}-${DISTR_VERSION}/${DISTR_DIR}"
 #DISTR_EXTRA_URL="http://dl.slarm64.org/slackware/packages/${ARCH}"
-if [[ ${DISTR} == crux ]]; then
+if [[ ${DISTR} == crux* ]]; then
     DISTR_URL="${DISTR_SOURCE}/pkg/${DISTR_VERSION}-${ARCH}"
 fi
 

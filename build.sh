@@ -256,7 +256,7 @@ for image_type in ${DISTR_IMAGES[@]}; do
         [[ $IMAGE_COMPRESSION == yes ]] && image_compression "$ROOTFS"
     fi
 
-    if [[ ${image_type} != server ]]; then
+    if [[ ${image_type} != server && ${image_type} != core ]]; then
         message "" "create" "$ROOTFS_DESKTOP"
         rsync -ar --del $SOURCE/$ROOTFS/ $SOURCE/$ROOTFS_DESKTOP >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
