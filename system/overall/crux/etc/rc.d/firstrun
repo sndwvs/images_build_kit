@@ -1,0 +1,18 @@
+#!/bin/bash
+#
+# /etc/rc.d/firstrun: start/stop firstrun
+#
+
+case $1 in
+	start)
+		/root/firstboot start
+		;;
+	stop)
+		/root/firstboot stop
+		;;
+	*)
+		echo "Usage: $0 [start|stop]"
+		;;
+esac
+
+# End of file

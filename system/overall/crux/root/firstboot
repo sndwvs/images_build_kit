@@ -1,0 +1,56 @@
+#!/bin/bash
+
+case "$1" in
+  'start')
+            if [[ -e /root/firstboot ]]; then
+
+                # check root disk
+                device=$(lsblk -in | grep "/$" | cut -d '-' -f2 | cut -d ' ' -f1 | sed 's/^\([a-z]*\)\([0-9]*\)\(\w*\)/\1\2/')
+                partition=$(lsblk -in | grep "/$" | cut -d '-' -f2 | cut -d ' ' -f1 | grep -oP '(?<=\d)p(\d*)')
+
+                if [ -f /root/part ]; then
+                    echo -e "\e[0;37mResizing SD card file-system\x1B[0m"
+                    /sbin/resize2fs -p /dev/${device}${partition} >/dev/null
+
+                    echo -e "\e[0;37mCreating 128Mb emergency swap area\x1B[0m"
+                    dd if=/dev/zero of=/swap bs=1024 count=131072 status=noxfer >/dev/null 2>&1
+                    chown root:root /swap
+                    chmod 0600 /swap
+                    mkswap /swap >/dev/null 2>&1
+                    swapon /swap >/dev/null 2>&1
+                    sed -i "/\# End of file/ i \\/swap    none          swap    defaults,pri=5       0       0\n" /etc/fstab
+                    sed -i "/\# End of file/ i \vm.swappiness = 10\n" /etc/sysctl.conf
+                    # apply parameter
+                    sysctl -qw vm.swappiness=10
+
+                    rm -f /root/{firstboot,part} /etc/rc.d/firstrun 2>&1>/dev/null
+                    sed -i 's:\( firstrun\)::g' /etc/rc.conf 2>&1>/dev/null
+                    exit 0
+                fi
+
+                if [[ ! -f /root/part ]]; then
+                    # change root password
+                    echo -e "\e[0;37mSetting password for root\x1B[0m"
+                    echo -e "password\npassword" | passwd root
+
+                    [[ ${partition/[!0-9]/} -gt 1 ]] && _partition=${partition/[!0-9]/}
+                    echo -e "\e[0;37mResizing partition SD card\x1B[0m"
+                    offset=$(fdisk -l /dev/${device} | grep -P "${device}.*${partition}" | tac | head -n 1 | awk '{print $2}')
+                    (echo -e "\nd\n${_partition}\np\nn\np\n${_partition}\n${offset}\n\nw" | fdisk /dev/$device)>/dev/null 2>&1
+
+                    # add part one
+                    touch /root/part
+
+                    sleep 2
+                    shutdown -r now
+                fi
+            fi
+        ;;
+   'stop')
+            echo -e "\e[0;37mResizing in next start\x1B[0m"
+        ;;
+        *)
+            echo "Usage: $0 {start|stop}" >&2
+            exit 1
+        ;;
+esac
