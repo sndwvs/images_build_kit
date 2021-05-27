@@ -245,9 +245,9 @@ for image_type in ${DISTR_IMAGES[@]}; do
         setting_motd
         setting_datetime
         setting_ssh
+        setting_dhcp
         if [[ ${DISTR} != crux* ]]; then
             create_initrd
-            setting_dhcp
             setting_wifi
             [[ $NTP == yes ]] && setting_ntp
             setting_governor

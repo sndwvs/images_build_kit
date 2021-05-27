@@ -403,7 +403,12 @@ setting_datetime() {
 setting_dhcp() {
     message "" "setting" "eth0 enabled dhcp"
     # set eth0 to be DHCP by default
-    sed -i 's/USE_DHCP\[0\]=.*/USE_DHCP\[0\]="yes"/g' $SOURCE/$ROOTFS/etc/rc.d/rc.inet1.conf
+    if [[ $DISTR == sla* ]]; then
+        sed -i 's/USE_DHCP\[0\]=.*/USE_DHCP\[0\]="yes"/g' $SOURCE/$ROOTFS/etc/rc.d/rc.inet1.conf
+    elif [[ $DISTR == crux* ]]; then
+        echo $BOARD_NAME | sed 's/_/-/g' | xargs -I {} sed -i 's:\(^HOSTNAME=\).*:\1{}:g' "$SOURCE/$ROOTFS/etc/rc.conf"
+        sed -e 's:^\(DEV=\).*:\1eth0:' -e 's:^\(DHCPOPTS=.*\)":\1 \$\{DEV\}":' "$SOURCE/$ROOTFS/etc/rc.d/net"
+    fi
 }
 
 
