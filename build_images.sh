@@ -282,6 +282,8 @@ setting_system() {
     if [[ $DISTR == crux* ]]; then
         # crux-arm added firstrun as service
         sed -i 's:\(SERVICES=.*\)):\1 firstrun):g' "$SOURCE/$ROOTFS/etc/rc.conf"
+        # prohibit firmware update
+        sed -i '/\# End of file/ i \\nUPGRADE            \^lib\/firmware\$          NO\n' "$SOURCE/$ROOTFS/etc/pkgadd.conf"
     fi
 }
 
@@ -426,6 +428,10 @@ setting_ssh() {
     sed -e 's/^\(#\)\(PermitRootLogin\).*/\2 yes/g' \
         -e 's/^\(#\)\(PasswordAuth.*\)/\2/g' \
     -i "$SOURCE/$ROOTFS/etc/ssh/sshd_config"
+    # crux-arm added sshd in service
+    if [[ $DISTR == crux* ]]; then
+        sed -i 's:\(SERVICES=.*\)\(net\)\(.*\):\1\2 sshd\3:g' "$SOURCE/$ROOTFS/etc/rc.conf"
+    fi
 }
 
 
