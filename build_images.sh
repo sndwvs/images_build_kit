@@ -278,6 +278,11 @@ setting_system() {
     if [[ -d $SOURCE/$ROOTFS/etc/skel ]]; then
         rsync -av --chown=root:root $SOURCE/$ROOTFS/etc/skel/ $SOURCE/$ROOTFS/root/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
+
+    if [[ $DISTR == crux* ]]; then
+        # crux-arm added firstrun as service
+        sed -i 's:\(SERVICES=.*\)):\1 firstrun):g' "$SOURCE/$ROOTFS/etc/rc.conf"
+    fi
 }
 
 
