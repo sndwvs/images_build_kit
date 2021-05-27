@@ -95,7 +95,7 @@ options+=("clean" "clean sources, remove binaries and image" "off")
 options+=("download" "download source and use pre-built binaries" "on")
 options+=("compile" "build binaries locally" "on")
 options+=("tools" "create and pack tools" "on")
-[[ $DESKTOP == yes ]] && options+=("desktop" "create image with xfce" "on")
+[[ $DESKTOP == yes && $DISTR != crux* ]] && options+=("desktop" "create image with xfce" "on")
 
 if [[ $NO_MENU == yes ]]; then
     # Duplicate file descriptor 1 on descriptor 3
