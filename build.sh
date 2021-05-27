@@ -236,6 +236,10 @@ for image_type in ${DISTR_IMAGES[@]}; do
         create_bootloader_pack
         download_pkg $DISTR_URL "${image_type}"
         install_pkg "${image_type}"
+        if [[ ${DISTR} == crux* ]]; then
+            download_pkg "${DISTR_URL}-update" "${image_type}-update"
+            install_pkg "${image_type}-update"
+        fi
         install_kernel
         setting_system
         setting_bootloader

@@ -168,7 +168,6 @@ download_pkg() {
     for pkg in ${packages}; do
         category=$(echo $pkg | cut -f1 -d "/")
         pkg=$(echo $pkg | cut -f2 -d "/")
-        [[ $ARCH == crux* ]] && pkg=$category
         if [[ ! -z ${pkg} ]];then
             if [[ $USE_SLARM64_MIRROR == yes ]];then
                 PKG_NAME=($(wget --no-check-certificate -q -O - ${url}/${category}/ | grep -oP '(?<=\"\>&nbsp;).*(?=\<\/a\>)' | egrep -o "(^$(echo $pkg | sed 's/+/\\\+/g'))-.*(t.z)" | sort -ur))
@@ -197,7 +196,7 @@ download_pkg() {
 
 
 install_pkg(){
-    if [[ $1 == server || $1 == core ]]; then
+    if [[ $1 == server || $1 == core* ]]; then
         local ROOTFS="$ROOTFS"
     else
         local ROOTFS="$ROOTFS_DESKTOP"
@@ -217,9 +216,10 @@ install_pkg(){
             if [[ $DISTR == sla* ]]; then
                 ROOT=$SOURCE/$ROOTFS upgradepkg --install-new $BUILD/$PKG/${type}/${ARCH}/$category/${pkg}-* >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             elif [[ $DISTR == crux* ]]; then
+                [[ $type == *-update ]] && up="-u"
                 # fixed install packages
                 [[ ! -e $SOURCE/$ROOTFS/var/lib/pkg/db ]] && ( install -Dm644 /dev/null $SOURCE/$ROOTFS/var/lib/pkg/db >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
-                pkgadd --root $SOURCE/$ROOTFS $BUILD/$PKG/${type}/${ARCH}/$category/${pkg}#* >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+                pkgadd ${up} --root $SOURCE/$ROOTFS $BUILD/$PKG/${type}/${ARCH}/$category/${pkg}#* >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             fi
         fi
     done
