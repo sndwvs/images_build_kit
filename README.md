@@ -55,7 +55,7 @@ password: **password**
 `ARCH=arm ./build.sh`
 
 ## creating an image from the command line ##
-`ARCH=arm BOARD_NAME=cubietruck KERNEL_SOURCE=legacy DOWNLOAD_SOURCE_BINARIES=yes COMPILE_BINARIES=yes ./build.sh`
+`ARCH=arm DISTR=slackwarearm BOARD_NAME=cubietruck KERNEL_SOURCE=legacy DOWNLOAD_SOURCE_BINARIES=yes COMPILE_BINARIES=yes ./build.sh`
 
 
 # VARIABLES #
