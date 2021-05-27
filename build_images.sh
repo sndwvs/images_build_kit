@@ -216,7 +216,7 @@ install_pkg(){
             if [[ $DISTR == sla* ]]; then
                 ROOT=$SOURCE/$ROOTFS upgradepkg --install-new $BUILD/$PKG/${type}/${ARCH}/$category/${pkg}-* >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             elif [[ $DISTR == crux* ]]; then
-                [[ $type == *-update ]] && up="-u"
+                [[ $type == *-update ]] && up="-u -f"
                 # fixed install packages
                 [[ ! -e $SOURCE/$ROOTFS/var/lib/pkg/db ]] && ( install -Dm644 /dev/null $SOURCE/$ROOTFS/var/lib/pkg/db >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
                 pkgadd ${up} --root $SOURCE/$ROOTFS $BUILD/$PKG/${type}/${ARCH}/$category/${pkg}#* >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
