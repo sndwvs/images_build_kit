@@ -249,9 +249,9 @@ for image_type in ${DISTR_IMAGES[@]}; do
         if [[ ${DISTR} != crux* ]]; then
             create_initrd
             setting_wifi
-            [[ $NTP == yes ]] && setting_ntp
             setting_governor
         fi
+        [[ $NTP == yes ]] && setting_ntp
         setting_modules
         setting_bootloader_move_to_disk
         create_img "$ROOTFS"

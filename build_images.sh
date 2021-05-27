@@ -316,8 +316,12 @@ setting_networkmanager() {
 
 setting_ntp() {
     message "" "setting" "ntp"
-    chmod 755 "$SOURCE/$ROOTFS/etc/rc.d/rc.ntpd" || exit 1
-    sed 's:^#server:server:g' -i "$SOURCE/$ROOTFS/etc/ntp.conf" || exit 1
+    if [[ $DISTR == sla* ]]; then
+        chmod 755 "$SOURCE/$ROOTFS/etc/rc.d/rc.ntpd" || exit 1
+        sed 's:^#server:server:g' -i "$SOURCE/$ROOTFS/etc/ntp.conf" || exit 1
+    elif [[ $DISTR == crux* ]]; then
+        sed 's:^#\(.*rdate.*ntp.org$\):\1:g' $SOURCE/$ROOTFS/etc/cron/daily/rdate >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
 }
 
 
