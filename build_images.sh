@@ -412,7 +412,7 @@ setting_dhcp() {
         sed -i 's/USE_DHCP\[0\]=.*/USE_DHCP\[0\]="yes"/g' $SOURCE/$ROOTFS/etc/rc.d/rc.inet1.conf
     elif [[ $DISTR == crux* ]]; then
         echo $BOARD_NAME | sed 's/_/-/g' | xargs -I {} sed -i 's:\(^HOSTNAME=\).*:\1{}:g' "$SOURCE/$ROOTFS/etc/rc.conf"
-        sed -e 's:^\(DEV=\).*:\1eth0:' -e 's:^\(DHCPOPTS=.*\)":\1 \$\{DEV\}":' "$SOURCE/$ROOTFS/etc/rc.d/net"
+        sed -e 's:^\(DEV=\).*:\1eth0:' -e 's:^\(DHCPOPTS=.*\)":\1 \$\{DEV\}":' -i "$SOURCE/$ROOTFS/etc/rc.d/net"
     fi
 }
 
