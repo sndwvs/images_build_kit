@@ -136,6 +136,7 @@ build_kernel_pkg() {
         cd $BUILD/$PKG/kernel-source/ && mkdir "install"
         cat "$CWD/packages/kernel/slack-desc.kernel-source" | sed "s:%SOCFAMILY%:${SOCFAMILY}:g" > "$BUILD/$PKG/kernel-source/install/slack-desc"
         makepkg -l n -c n $BUILD/$PKG/kernel-source-${SOCFAMILY}-${KERNEL_VERSION}-noarch-${PKG_BUILD}${PACKAGER}.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
 
         cd $BUILD/$PKG
 
@@ -154,7 +155,6 @@ build_kernel_pkg() {
 
         [[ -d "$BUILD/$PKG/kernel-source" ]] && \
             rm -rf "$BUILD/$PKG/kernel-source" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    fi
 }
 
 
