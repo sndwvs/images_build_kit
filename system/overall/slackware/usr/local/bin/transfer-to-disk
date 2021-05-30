@@ -248,7 +248,7 @@ fix_config() {
         DISK=${DISK%[0-9]*}
         [[ ! $(grep "^/dev/${DISK}" $OUTPUT/etc/fstab) ]] && sed -i "s#^/dev/\([a-z0-9]\)*#/dev/${DISK}\1    #g" $OUTPUT/etc/fstab
     fi
-    sed -i '/^if*/,/^$/d' $OUTPUT/etc/issue
+    sed -i '/\(=.*\)/,/^$/d;/\(if.*\)/,/^$/d' $OUTPUT/etc/issue
 }
 
 
