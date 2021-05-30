@@ -239,6 +239,8 @@ for image_type in ${DISTR_IMAGES[@]}; do
         if [[ ${DISTR} == crux* ]]; then
             download_pkg "${DISTR_URL}-update" "${image_type}-update"
             install_pkg "${image_type}-update"
+            download_pkg "${DISTR_URL}" "opt"
+            install_pkg "opt"
         fi
         install_kernel
         setting_system
