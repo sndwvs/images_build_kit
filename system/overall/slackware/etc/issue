@@ -4,9 +4,6 @@
 if you want to transfer the system to SDcard to internal memory (eMMC or NAND),
 follow [1;36mtransfer-to-disk[0;39m
 
-login: root
-password: password
-
 [0;36m=======================================================================[0;39m
 
 slarm64 GNU/\s (\l)
