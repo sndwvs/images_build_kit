@@ -138,23 +138,23 @@ build_kernel_pkg() {
         makepkg -l n -c n $BUILD/$PKG/kernel-source-${SOCFAMILY}-${KERNEL_VERSION}-noarch-${PKG_BUILD}${PACKAGER}.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
-        cd $BUILD/$PKG
+    cd $BUILD/$PKG
 
-        # clear kernel packages directories
-        [[ -d "$BUILD/$PKG/kernel-${SOCFAMILY}" ]] && \
-            rm -rf "$BUILD/$PKG/kernel-${SOCFAMILY}" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    # clear kernel packages directories
+    [[ -d "$BUILD/$PKG/kernel-${SOCFAMILY}" ]] && \
+        rm -rf "$BUILD/$PKG/kernel-${SOCFAMILY}" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-        [[ -d "$BUILD/$PKG/kernel-modules" ]] && \
-            rm -rf "$BUILD/$PKG/kernel-modules" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    [[ -d "$BUILD/$PKG/kernel-modules" ]] && \
+        rm -rf "$BUILD/$PKG/kernel-modules" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-        [[ -d "$BUILD/$PKG/kernel-headers" ]] && \
-            rm -rf "$BUILD/$PKG/kernel-headers" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    [[ -d "$BUILD/$PKG/kernel-headers" ]] && \
+        rm -rf "$BUILD/$PKG/kernel-headers" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-        [[ -d "$BUILD/$PKG/kernel-firmware" ]] && \
-            rm -rf "$BUILD/$PKG/kernel-firmware" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    [[ -d "$BUILD/$PKG/kernel-firmware" ]] && \
+        rm -rf "$BUILD/$PKG/kernel-firmware" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-        [[ -d "$BUILD/$PKG/kernel-source" ]] && \
-            rm -rf "$BUILD/$PKG/kernel-source" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    [[ -d "$BUILD/$PKG/kernel-source" ]] && \
+        rm -rf "$BUILD/$PKG/kernel-source" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 
