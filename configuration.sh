@@ -126,7 +126,6 @@ elif [[ ${DISTR} == slarm64 ]];then
         DISTR_SOURCE=${DISTR_SOURCE:-"http://dl.slarm64.org/slackware"}
     fi
 elif [[ ${DISTR} == crux* ]];then
-    DISTR_VERSION="3.6"
     DISTR_SOURCE=${DISTR_SOURCE:-"http://dl.slarm64.org/crux"}
 fi
 
