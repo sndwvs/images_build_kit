@@ -175,7 +175,11 @@ DISTR_EXTRA_URL="${DISTR_SOURCE}/packages/${ARCH}"
 #DISTR_URL="http://dl.slarm64.org/slackware/${DISTR}-${DISTR_VERSION}/${DISTR_DIR}"
 #DISTR_EXTRA_URL="http://dl.slarm64.org/slackware/packages/${ARCH}"
 if [[ ${DISTR} == crux* ]]; then
-    DISTR_URL="${DISTR_SOURCE}/pkg/${DISTR_VERSION}-${ARCH}"
+    if [[ ${ARCH} == aarch64 ]]; then
+        DISTR_URL="${DISTR_SOURCE}/pkg/${DISTR_VERSION}-${ARCH}"
+    else
+        DISTR_URL="${DISTR_SOURCE}/pkg/${DISTR_VERSION}"
+    fi
 fi
 
 #---------------------------------------------
