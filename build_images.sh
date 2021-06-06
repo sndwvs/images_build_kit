@@ -37,11 +37,6 @@ clean_rootfs() {
 prepare_rootfs() {
     message "" "prepare" "$ROOTFS"
     mkdir -p $SOURCE/$ROOTFS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
-    if [[ ! -z $TOOLS_PACK && $SOCFAMILY == sun* && $DISTR == sla* ]]; then
-        message "" "install" "${SUNXI_TOOLS_DIR}"
-        ROOT=$SOURCE/$ROOTFS upgradepkg --install-new $BUILD/$PKG/*${SUNXI_TOOLS_DIR}*.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    fi
 }
 
 
