@@ -405,6 +405,9 @@ setting_governor() {
 
 setting_datetime() {
     message "" "setting" "datetime"
+    # setting build time
+    [[ -e $SOURCE/$ROOTFS/usr/local/bin/fakehwclock.sh ]] && touch $SOURCE/$ROOTFS/usr/local/bin/fakehwclock.sh || (message "err" "details" && exit 1) || exit 1
+
     rm -f $SOURCE/$ROOTFS/etc/localtime* >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     ln -vfs /usr/share/zoneinfo/UTC $SOURCE/$ROOTFS/etc/localtime-copied-from  >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     cp -favv $SOURCE/$ROOTFS/usr/share/zoneinfo/UTC $SOURCE/$ROOTFS/etc/localtime >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
