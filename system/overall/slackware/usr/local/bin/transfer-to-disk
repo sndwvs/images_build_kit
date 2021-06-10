@@ -11,9 +11,8 @@ fi
 # configuration
 #---------------------------------------------
 ROOT_DISK=$(lsblk -in |  grep "/$" | cut -d '-' -f2 | cut -d ' ' -f1 | sed 's/^\([a-z]*\)\([0-9]*\)\(\w*\)/\1\2/')
-DIRS=("/bin" "/boot" "/dev" "/etc" "/home" "/lib" "/opt" "/root" "/sbin" "/srv" "/swap" "/tmp" "/usr" "/var")
-[[ $(uname -m) == aarch64 ]] && DIRS+=("/lib64")
 OUTPUT="/prepare"
+DIRS=( $(find / -maxdepth 1 | grep -vP "^\/$|dev|mnt|proc|run|sys|lost\+found|${OUTPUT}") )
 OFFSET=$(fdisk -l /dev/$ROOT_DISK | tac | head -n 1 | awk '{print $2}')
 PART=1
 RUNLEVEL=$(runlevel)
@@ -41,6 +40,7 @@ case ${COMPATIBLE} in
             OFFSET_LOADER="8::"
             LOADER="u-boot-sunxi-with-spl.bin::"
             BS=1024
+            FIX_BOOT_DISK=true
     ;;
     *pinebookallwinner*)
             OFFSET_LOADER="1:5:"
@@ -220,7 +220,7 @@ prepare_disk() {
 transfer() {
     local size=$( du -s ${DIRS[@]} | awk 'BEGIN{sum=0}{sum+=$1}END{print sum}' )
 
-    mkdir -p $OUTPUT/{media,mnt,proc,run,sys}
+    mkdir -p $OUTPUT/{dev,mnt,proc,run,sys}
 
     (
         for dir in ${DIRS[@]}; do
@@ -268,6 +268,8 @@ case "$OUT" in
 esac
 
 msginfo " ATTENTION " "\ndisk preparation in progress..."
+
+[[ $(mount | grep $OUTPUT) ]] && umount $OUTPUT
 
 prepare_disk "$DISK" OUT
 
