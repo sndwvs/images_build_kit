@@ -347,7 +347,13 @@ gcc_version() {
 read_packages() {
     local TYPE="$1"
     local PKG
-    [[ -f $CWD/config/packages/packages-${TYPE}.conf ]] && PKG=( $(grep -vP "^#|^$" $CWD/config/packages/packages-${TYPE}.conf) )
+    local PKG_PATH
+    if [[ -e $CWD/config/packages/${DISTR}/packages-${TYPE}.conf ]]; then
+        PKG_PATH=$CWD/config/packages/${DISTR}/packages-${TYPE}.conf
+    elif [[ -e $CWD/config/packages/${DISTR}/${ARCH}/packages-${TYPE}.conf ]]; then
+        PKG_PATH=$CWD/config/packages/${DISTR}/${ARCH}/packages-${TYPE}.conf
+    fi
+    [[ ! -z ${PKG_PATH} ]] && PKG=( $(grep -vP "^#|^$" ${PKG_PATH}) )
     eval "$2=\${PKG[*]}"
 }
 
