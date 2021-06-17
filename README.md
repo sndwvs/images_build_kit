@@ -35,6 +35,8 @@ project site: **[slarm64.org](http://slarm64.org)**
         + [Station P1](http://stationpc.com/portal.php?mod=topic&topicid=2#spec) [(roc-rk3399-pc-plus)](http://en.t-firefly.com/product/rocrk3399pc.html#spec) board provided by [Firefly Team](http://en.t-firefly.com)
         + [Helios64](https://wiki.kobol.io/helios64/intro/#overall-specifications)
         + [Orange Pi 4](http://www.orangepi.org/Orange%20Pi%204/)
+    * RK3566
+        + [Quartz64](https://wiki.pine64.org/wiki/Quartz64#SoC_and_Memory_Specifications)
 * Broadcom
     * BCM2837
         + [Raspberry Pi 3](https://www.raspberrypi.org/products/raspberry-pi-3-model-b/)
