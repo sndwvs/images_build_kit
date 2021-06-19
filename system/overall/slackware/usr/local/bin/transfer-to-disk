@@ -247,6 +247,7 @@ fix_config() {
         sed -e "\$a rootdev=\/dev\/${DISK}" -e '/rootdev.*/d' -i $OUTPUT/boot/uEnv.txt
         DISK=${DISK%[0-9]*}
         [[ ! $(grep "^/dev/${DISK}" $OUTPUT/etc/fstab) ]] && sed -i "s#^/dev/\([a-z0-9]\)*#/dev/${DISK}\1    #g" $OUTPUT/etc/fstab
+        [[ ${COMPATIBLE} =~ raspberry*pi && ! $(grep "${DISK}" $OUTPUT/boot/cmdline.txt 2>/dev/null) ]] && sed -i "s/\(root=\/dev\/\).*/\1${DISK}/g" $OUTPUT/boot/cmdline.txt
     fi
     sed -i '/\(=.*\)/,/^$/d;/\(if.*\)/,/^$/d' $OUTPUT/etc/issue
 }
