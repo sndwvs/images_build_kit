@@ -278,7 +278,7 @@ setting_system() {
         # crux-arm added firstrun as service
         sed -i 's:\(SERVICES=.*\)):\1 firstrun):g' "$SOURCE/$ROOTFS/etc/rc.conf"
         # prohibit firmware update
-        sed -i '/\# End of file/ i \\nUPGRADE            \^lib\/firmware\$          NO\n' "$SOURCE/$ROOTFS/etc/pkgadd.conf"
+        sed -i '/\# End of file/ i \\nUPGRADE            \^lib\/firmware\/\.\*$          NO\n' "$SOURCE/$ROOTFS/etc/pkgadd.conf"
     fi
 }
 
