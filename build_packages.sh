@@ -10,7 +10,7 @@ fi
 build_kernel_pkg() {
     cd $SOURCE
     # get kernel version
-    kernel_version KERNEL_VERSION
+    KERNEL_VERSION=$(get_version $SOURCE/$KERNEL_DIR)
 
     KERNEL=zImage
     [[ $KARCH == arm64 ]] && KERNEL=Image

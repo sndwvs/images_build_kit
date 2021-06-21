@@ -34,23 +34,21 @@ message() {
 }
 
 #---------------------------------------------
-# get linux kernel version from Makefile
+# get version from Makefile
 #---------------------------------------------
-kernel_version() {
-    local VER
+get_version() {
+    local VER=()
 
-    if [[ ! -f $SOURCE/$KERNEL_DIR/Makefile ]]; then
-        echo "no get kernel version" >> $LOG
+    if [[ ! -f "$1"/Makefile ]]; then
+        echo "no get version" >> $LOG
         (message "err" "details" && exit 1) || exit 1
     fi
 
-    VER=$(cat $SOURCE/$KERNEL_DIR/Makefile | grep VERSION | head -1 | awk '{print $(NF)}')
-    VER=$VER.$(cat $SOURCE/$KERNEL_DIR/Makefile | grep PATCHLEVEL | head -1 | awk '{print $(NF)}')
-    VER=$VER.$(cat $SOURCE/$KERNEL_DIR/Makefile | grep SUBLEVEL | head -1 | awk '{print $(NF)}')
-    EXTRAVERSION=$(cat $SOURCE/$KERNEL_DIR/Makefile | grep EXTRAVERSION | head -1 | awk '{print $(NF)}')
-    if [ "$EXTRAVERSION" != "=" ]; then VER=$VER$EXTRAVERSION; fi
-#    message "" "get" "kernel version $VER"
-    eval "$1=\$VER"
+    VER[0]=$(cat "$1"/Makefile | grep VERSION | head -1 | cut -d ' ' -f3-)
+    VER[1]=$(cat "$1"/Makefile | grep PATCHLEVEL | head -1 | cut -d ' ' -f3-)
+    VER[2]=$(cat "$1"/Makefile | grep SUBLEVEL | head -1 | cut -d ' ' -f3-)
+    VER[3]=$(cat "$1"/Makefile | grep EXTRAVERSION | head -1 | cut -d ' ' -f3-)
+    echo ${VER[0]}${VER[1]+.${VER[1]}}${VER[2]:+.${VER[2]}}${VER[3]}
 }
 
 #---------------------------------------------
@@ -202,7 +200,7 @@ patching_source() {
 # external patching process
 #---------------------------------------------
 external_patching_source() {
-    kernel_version KERNEL_VERSION
+    KERNEL_VERSION=$(get_version $SOURCE/$KERNEL_DIR)
 
     if [[ $EXTERNAL_WIREGUARD == yes && $(version $KERNEL_VERSION) -ge $(version 3.10) && $(version $KERNEL_VERSION) -le $(version 5.5) ]]; then
         local PREFFIX="net"

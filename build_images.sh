@@ -9,7 +9,7 @@ fi
 get_name_rootfs() {
     # name for rootfs image
     image_type="$1"
-    kernel_version KERNEL_VERSION
+    KERNEL_VERSION=$(get_version $SOURCE/$KERNEL_DIR)
 
     if [[ $image_type == server || $image_type == core ]]; then
         ROOTFS="${ROOTFS_NAME}-${ARCH}-${image_type}-$BOARD_NAME-$KERNEL_VERSION-build-${ROOTFS_VERSION}"
@@ -330,7 +330,7 @@ create_initrd() {
 
     message "" "create" "initrd"
 
-    kernel_version KERNEL_VERSION
+    KERNEL_VERSION=$(get_version $SOURCE/$KERNEL_DIR)
 
     mount --bind /dev "$SOURCE/$ROOTFS/dev"
     mount --bind /proc "$SOURCE/$ROOTFS/proc"

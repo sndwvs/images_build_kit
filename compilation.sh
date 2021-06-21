@@ -26,7 +26,8 @@ compile_sunxi_tools() {
 }
 
 compile_boot_loader() {
-    message "" "compiling" "$BOOT_LOADER_DIR $BOOT_LOADER_BRANCH"
+    BOOT_LOADER_VERSION=$(get_version $SOURCE/$BOOT_LOADER_DIR)
+    message "" "compiling" "$BOOT_LOADER_DIR $BOOT_LOADER_VERSION"
     cd $SOURCE/$BOOT_LOADER_DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     gcc_version "$CROSS" GCC_VERSION
@@ -109,7 +110,8 @@ compile_atf() {
 }
 
 compile_boot_tools() {
-    message "" "compiling" "$BOOT_LOADER_TOOLS_DIR $BOOT_LOADER_TOOLS_BRANCH"
+    BOOT_LOADER_TOOLS_VERSION=$(get_version $SOURCE/$BOOT_LOADER_TOOLS_DIR)
+    message "" "compiling" "$BOOT_LOADER_TOOLS_DIR $BOOT_LOADER_TOOLS_VERSION"
     cd $SOURCE/$BOOT_LOADER_TOOLS_DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     if [[ $MARCH == "x86_64" && $SOCFAMILY == rk33* ]]; then
@@ -131,7 +133,8 @@ compile_boot_tools() {
 
 
 compile_kernel() {
-    message "" "compiling" "$KERNEL_DIR $KERNEL_BRANCH"
+    KERNEL_VERSION=$(get_version $SOURCE/$KERNEL_DIR)
+    message "" "compiling" "$KERNEL_DIR $KERNEL_VERSION"
     cd "$SOURCE/$KERNEL_DIR" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     local KERNEL=zImage
