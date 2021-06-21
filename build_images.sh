@@ -228,7 +228,7 @@ install_kernel() {
     elif [[ $DISTR == crux* ]]; then
         rsync -av --chown=root:root $BUILD/$PKG/kernel-${SOCFAMILY}/ $SOURCE/$ROOTFS/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         rsync -av --chown=root:root $BUILD/$PKG/kernel-modules/ $SOURCE/$ROOTFS/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        #rsync -av --chown=root:root $BUILD/$PKG/kernel-firmware/ $SOURCE/$ROOTFS/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        rsync -av --chown=root:root $BUILD/$PKG/kernel-firmware/ $SOURCE/$ROOTFS/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         #rsync -av --chown=root:root $BUILD/$PKG/kernel-source/ $SOURCE/$ROOTFS/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 }
