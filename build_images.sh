@@ -82,6 +82,7 @@ setting_motd() {
     message "" "setting" "motd message"
     # http://patorjk.com/ font: rectangles
     [[ -f "$CWD/config/boards/$BOARD_NAME/motd.${DISTR}" ]] && install -m644 -D "$CWD/config/boards/$BOARD_NAME/motd.${DISTR}" "$SOURCE/$ROOTFS/etc/motd"
+    return 0
 }
 
 
