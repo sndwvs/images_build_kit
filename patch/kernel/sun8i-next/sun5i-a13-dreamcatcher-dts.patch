@@ -1,0 +1,412 @@
+--- /dev/null	2021-06-21 02:44:57.020000018 +0300
++++ b/arch/arm/boot/dts/sun5i-a13-dreamcatcher.dts	2021-06-26 10:12:16.681085550 +0300
+@@ -0,0 +1,409 @@
++/* created by zefie <zefie@zefie.com> */
++
++/dts-v1/;
++
++/* base */
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/input/input.h>
++#include <dt-bindings/interrupt-controller/irq.h>
++#include "sun5i-a13.dtsi"
++#include "sunxi-common-regulators.dtsi"
++
++/* custom additions */
++
++/ {
++
++	model = "Othernet A13-Dreamcatcher";
++	compatible = "othernet,a13-dreamcatcher", "allwinner,sun5i-a13";
++
++
++        aliases {
++                serial0 = &uart1;
++        };
++
++	backlight: backlight {
++		compatible = "gpio-backlight";
++		gpios = <&pio 3 23 GPIO_ACTIVE_HIGH>;
++	};
++
++	chosen {
++		stdout-path = "serial0:115200n8";
++		framebuffer@0 {
++			status = "okay";
++		};
++	};
++
++	leds {
++		compatible = "gpio-leds";
++		pinctrl-0 = <&led_pins_a>;
++		pinctrl-names = "default";
++
++		heartbeat {
++			gpios = <&pio 3 12 GPIO_ACTIVE_HIGH>;
++			linux,default-trigger = "heartbeat";
++		};
++
++		storage {
++			gpios = <&pio 3 13 GPIO_ACTIVE_HIGH>;
++			linux,default-trigger = "mmc0";
++		};
++
++                ext_storage {
++                        gpios = <&pio 3 2 GPIO_ACTIVE_HIGH>;
++                        linux,default-trigger = "mmc1";
++                };
++
++                audio {
++                        gpios = <&pio 3 3 GPIO_ACTIVE_HIGH>;
++                        linux,default-trigger = "transient";
++                };
++	};
++
++	soc {
++		mali: gpu@1c40000 {
++			compatible = "allwinner,sun4i-a10-mali", "arm,mali-400";
++			reg = <0x01c40000 0x10000>;
++			interrupts =	<69>,
++					<70>,
++					<71>,
++					<72>,
++					<73>;
++			interrupt-names =	"gp",
++						"gpmmu",
++						"pp0",
++						"ppmmu0",
++						"pmu";
++			clocks = <&ccu CLK_AHB_GPU>, <&ccu CLK_GPU>;
++			clock-names = "bus", "core";
++			resets = <&ccu RST_GPU>;
++			assigned-clocks = <&ccu CLK_GPU>;
++			assigned-clock-rates = <384000000>;
++		};
++	};
++
++};
++
++/* custom removals */
++
++&{/soc} {
++	/delete-node/ ethernet@1c0b000;
++	/delete-node/ ir@1c21800;
++	/delete-node/ lradc@1c22800;
++	/delete-node/ mdio@1c0b080;
++	/delete-node/ nand@1c03000;
++	/delete-node/ serial@1c28000;
++	/delete-node/ serial@1c28800;
++	/delete-node/ tv-encoder@1c0a000;
++};
++
++&{/soc/lcd-controller@1c0c000/ports/port@1} {
++	/delete-node/ endpoint@1;
++};
++
++&{/chosen} {
++	/delete-node/ framebuffer@1;
++};
++
++&pio {
++	/delete-node/ emac0@0;
++	/delete-node/ ir0@0;
++	/delete-node/ nand-base0@0;
++	/delete-node/ nand-cs@0;
++	/delete-node/ nand-rb@0;
++	/delete-node/ uart2@0;
++	/delete-node/ uart2-cts-rts@0;
++	/delete-node/ uart3@0;
++	/delete-node/ uart3-cts-rts@0;	
++};
++
++/* custom modifications */
++
++&be0 {
++        status = "okay";
++};
++
++&cpu0 {
++	// remove first row of numbers to disable overclock
++	cooling-max-level = <0x5>;
++	cooling-min-level = <0x0>;
++	operating-points = <
++		/* kHz    uV */
++		1104000 1400000
++		1008000 1400000
++		9120000 1350000
++		 864000 1300000
++		 624000 1200000
++		 576000 1200000
++		 432000 1200000
++	>;
++};
++
++&codec {
++        status = "okay";
++};
++
++&ehci0 {
++        status = "okay";
++};
++
++&fe0 {
++        status = "okay";
++};
++
++&i2c0 {
++        pinctrl-names = "default";
++        status = "okay";
++        axp209: pmic@34 {
++		compatible = "x-powers,axp209";
++		#interrupt-cells = <1>;
++		interrupt-controller;
++                interrupts = <0>;
++                reg = <0x34>;
++        };
++};
++
++&i2c1 {
++        pinctrl-names = "default";
++        status = "okay";
++};
++
++&i2c2 {
++        pinctrl-names = "default";
++        status = "okay";
++};
++
++&mmc0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&mmc0_pins>;
++	vmmc-supply = <&reg_vcc3v0>;
++	bus-width = <4>;
++	cd-gpios = <&pio 6 0 GPIO_ACTIVE_LOW>; /* PG0 */
++        status = "okay";
++};
++
++&mmc1 {
++	status = "disabled";
++};
++
++&mmc2 {
++        pinctrl-names = "default";
++	pinctrl-0 = <&mmc2_4bit_pc_pins>;
++	vmmc-supply = <&reg_vcc3v0>;
++	bus-width = <4>;
++	cd-gpios = <&pio 2 12 GPIO_ACTIVE_LOW>;
++        status = "okay";
++	mmccard@0 {
++		broken-hpi;
++		compatible = "mmc-card";
++		reg = <0>;
++	};
++
++};
++
++&ohci0 {
++	status = "okay";
++};
++
++&otg_sram {
++        status = "okay";
++};
++
++&pio {
++	ahci_power_button: ahci_pwr_pin@0 {
++		pins = "PB8";
++		function = "gpio_out";
++	};
++
++	led_pins_a: led_pins@0 {
++		drive-strengh =  <1>;
++		pins = "PD2", "PD3", "PD4", "PD5", "PD6", "PD7", "PD10", "PD11", "PD12", "PD13", "PD14", "PD21", "PD22";
++		function = "gpio_out";
++	};
++
++        mmc0_cd_pin_a: mmc0_cd_pin@0 {
++                pins = "PG0";
++                function = "gpio_in";
++                bias-pull-up;
++        };
++
++	mmc2_cd_pin_a: mmc2_cd_pin@0 {
++		pins = "PC12";
++		function = "gpio_in";
++                bias-pull-down;
++	};
++
++	spi0_cs0_pin_a: spi0-cs0@0 {
++		pins = "PC3";
++		function = "spi0";
++	};
++
++	spi0_pins_a: spi0@0 {
++		pins = "PC2", "PC0", "PC1";
++		function = "spi0";
++	};
++
++	spi1_cs0_pin_a: spi1-cs0@0 {
++		pins = "PG9";
++		function = "spi1";
++	};
++
++	spi1_pins_a: spi1@0 {
++		pins = "PG10", "PG11", "PG12";
++		function = "spi1";
++	};
++
++	spi2_cs0_pin_a: spi2-cs0@0 {
++		pins = "PE0";
++		function = "spi2";
++	};
++
++	spi2_pins_a: spi2@0 {
++		pins = "PE1", "PE2", "PE3";
++		function = "spi2";
++	};
++
++        usb0_vbus_detect_pin: usb0_vbus_detect_pin@0 {
++                pins = "PG1";
++                function = "gpio_in";
++                bias-pull-down;
++        };
++
++        usb0_id_detect_pin: usb0_id_detect_pin@0 {
++                pins = "PG2";
++                function = "gpio_in";
++                bias-pull-up;
++        };
++
++	usb0_vbus_pin_a: usb0_vbus_pin@0 {
++		pins = "PG15";
++		function = "gpio_out";
++	};
++
++        usb1_vbus_pin_a: usb1_vbus_pin@0 {
++                pins = "PG26";
++                function = "gpio_out";
++        };
++
++	usb2_vbus_pin_a: usb2_vbus_pin@0 {
++		pins = "PH3";
++		function = "gpio_out";
++	};
++};
++
++&pwm {
++        pinctrl-names = "default";
++        pinctrl-0 = <&pwm0_pin>;
++        status = "disabled";
++};
++
++&reg_ahci_5v {
++        gpio = <&pio 1 8 GPIO_ACTIVE_HIGH>;
++        pinctrl-0 = &ahci_power_button;
++        pinctrl-names = "default";
++};
++
++&reg_usb0_vbus {
++        gpio = <&pio 3 15 GPIO_ACTIVE_HIGH>;
++        status = "okay";
++};
++
++&reg_usb1_vbus {
++        gpio = <&pio 3 26 GPIO_ACTIVE_HIGH>;
++        status = "okay";
++};
++
++&spi0 {
++        pinctrl-names = "default";
++	pinctrl-0 = <&spi0_pins_a>,
++		    <&spi0_cs0_pin_a>;
++        status = "okay";
++
++	ads7846@0 {
++		compatible = "ti,ads7846";
++		reg = <0>;
++		spi-max-frequency = <2000000>;
++		interrupt-parent = <&pio>;
++		interrupts = <1 10 2>; /* IRQ_TYPE_EDGE_FALLING */
++		pendown-gpio = <&pio 1 10 GPIO_ACTIVE_HIGH>;
++		ti,x-plate-ohms = /bits/ 16 <100>;
++		ti,pressure-max = /bits/ 16 <255>;
++	};
++};
++
++&spi1 {
++        pinctrl-names = "default";
++	pinctrl-0 = <&spi1_pins_a>,
++		    <&spi1_cs0_pin_a>;
++	status = "okay";
++	panel: display@0{
++	/*
++		// tinydrm mode
++		compatible = "mi,mi0283qt";
++		rotation = <180>;
++		reset-gpios = <&pio 3 21 GPIO_ACTIVE_HIGH>;
++		dc-gpios = <&pio 3 7 GPIO_ACTIVE_HIGH>;
++	*/
++
++		// fbtft mode
++		compatible = "ilitek,ili9341";
++		rotate = <270>;
++		reset-gpios = <&pio 3 21 GPIO_ACTIVE_LOW>;
++		dc-gpios = <&pio 3 7 GPIO_ACTIVE_LOW>;
++
++		// common
++		reg = <0>;
++		spi-max-frequency = <48000000>;
++		bgr;
++		buswidth = <8>;
++		backlight = <&backlight>;
++		debug = <3>;
++		width-mm = <49>;
++                height-mm = <38>;
++
++		port {
++			panel_input: endpoint {
++				remote-endpoint = <&tcon0_out_lcd>;
++			};
++		};
++
++	};
++};
++
++&spi2 {
++        pinctrl-names = "default";
++	pinctrl-0 = <&spi2_pins_a>,
++		    <&spi2_cs0_pin_a>;
++	status = "okay";
++};
++
++&tcon0 {
++	status = "okay";
++};
++
++&tcon0_out {
++        tcon0_out_lcd: endpoint@0 {
++                reg = <0>;
++                remote-endpoint = <&panel_input>;
++        };
++};
++
++&uart1 {
++        pinctrl-names = "default";
++        pinctrl-0 = <&uart1_pg_pins>;
++        status = "okay";
++};
++
++&usb_otg {
++        dr_mode = "otg";
++        status = "okay";
++};
++
++&usbphy {
++        pinctrl-names = "default";
++        pinctrl-0 = <&usb0_id_detect_pin>, <&usb0_vbus_detect_pin>;
++        usb0_id_det-gpio = <&pio 6 2 GPIO_ACTIVE_HIGH>; /* PG2 */
++        usb0_vbus_det-gpio = <&pio 6 1 GPIO_ACTIVE_HIGH>; /* PG1 */
++        usb0_vbus-supply = <&reg_usb0_vbus>;
++        usb1_vbus-supply = <&reg_usb1_vbus>;
++        status = "okay";
++};

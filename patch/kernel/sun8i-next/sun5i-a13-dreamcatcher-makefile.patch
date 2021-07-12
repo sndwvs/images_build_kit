@@ -1,0 +1,12 @@
+--- a/arch/arm/boot/dts/Makefile	2021-06-04 20:47:01.207671063 +0300
++++ b/arch/arm/boot/dts/Makefile	2021-06-26 09:36:07.300784608 +0300
+@@ -1126,7 +1127,8 @@
+ 	sun5i-a13-utoo-p66.dtb \
+ 	sun5i-gr8-chip-pro.dtb \
+ 	sun5i-gr8-evb.dtb \
+-	sun5i-r8-chip.dtb
++	sun5i-r8-chip.dtb \
++	sun5i-a13-dreamcatcher.dtb
+ dtb-$(CONFIG_MACH_SUN6I) += \
+ 	sun6i-a31-app4-evb1.dtb \
+ 	sun6i-a31-colombus.dtb \
