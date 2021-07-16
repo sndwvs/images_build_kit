@@ -365,7 +365,7 @@ change_name_version() {
     [[ -f .config ]] && sed -i "s/CONFIG_LOCALVERSION_AUTO=.*/# CONFIG_LOCALVERSION_AUTO is not set/g" .config
 
     # prevent adding + to kernel release
-    touch .scmversion
+    echo -n > .scmversion
 }
 
 
