@@ -45,6 +45,8 @@ project site: **[slarm64.org](http://slarm64.org)**
 * Amlogic
     * S905X3
         + [Odroid-C4](https://wiki.odroid.com/odroid-c4/hardware/hardware#specifications)
+    * S905Y2
+        + [Radxa Zero](https://wiki.radxa.com/Zero/getting_started#Features)
 
 
 # BUILD #
