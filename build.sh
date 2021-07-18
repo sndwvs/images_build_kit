@@ -261,6 +261,7 @@ for image_type in ${DISTR_IMAGES[@]}; do
         setting_modules
         setting_bootloader_move_to_disk
         create_img "$ROOTFS"
+        build_img "$ROOTFS"
         [[ $IMAGE_COMPRESSION == yes ]] && image_compression "$ROOTFS"
     fi
 
@@ -289,6 +290,7 @@ for image_type in ${DISTR_IMAGES[@]}; do
         setting_for_desktop
         setting_alsa "$ROOTFS_DESKTOP"
         create_img "$ROOTFS_DESKTOP"
+        build_img "$ROOTFS_DESKTOP"
         [[ $IMAGE_COMPRESSION == yes ]] && image_compression "$ROOTFS_DESKTOP"
     fi
 done

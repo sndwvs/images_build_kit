@@ -394,4 +394,21 @@ clear_boot_tools() {
 }
 
 
+#---------------------------------------------
+# create image
+#---------------------------------------------
+create_img() {
+    local IMAGE="$1"
+
+    [[ -z "$IMAGE" ]] && exit 1
+
+    # +1000M for create swap firstrun
+    ROOTFS_SIZE=$(rsync -an --stats $SOURCE/$IMAGE test | grep "Total file size" | sed 's/[^0-9]//g' | xargs -I{} expr {} / $((1024*1024)) + 1000)"M"
+
+    message "" "create" "image size $ROOTFS_SIZE"
+
+    dd if=/dev/zero of=$SOURCE/$IMAGE.img bs=1 count=0 seek=$ROOTFS_SIZE >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+}
+
+
 

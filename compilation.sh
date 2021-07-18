@@ -67,7 +67,7 @@ compile_boot_loader() {
     fi
 
     # create bootloader
-    create_uboot
+    [[ $(type -t create_uboot) == function ]] && create_uboot
 }
 
 compile_atf() {
