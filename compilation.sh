@@ -45,7 +45,7 @@ compile_boot_loader() {
     [[ ! -z $ATF && -z $BL31 ]] && export BL31=$SOURCE/$ATF_DIR/bl31.bin
 
     # rockchip
-    if [[ $SOCFAMILY == rk3* ]]; then
+    if [[ $SOCFAMILY == rk3[23]* ]]; then
         # u-boot-firefly-rk3288 2016.03 package contains backports
         # of EFI support patches and fails to boot the kernel on the Firefly.
         [[ $SOCFAMILY == rk3288 ]] && ( sed 's/^\(CONFIG_EFI_LOADER=y\)/# CONFIG_EFI_LOADER is not set/' \
