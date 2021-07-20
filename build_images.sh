@@ -220,7 +220,7 @@ install_pkg(){
 install_kernel() {
     message "" "install" "kernel ${KERNEL_VERSION}"
     if [[ $DISTR == sla* ]]; then
-        ROOT=$SOURCE/$ROOTFS upgradepkg --install-new $BUILD/$PKG/*${SOCFAMILY}*${KERNEL_VERSION}*.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        ROOT=$SOURCE/$ROOTFS upgradepkg --install-new $BUILD/$PKG/*${SOCFAMILY}*${KERNEL_VERSION/-/_}*.txz >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     elif [[ $DISTR == crux* ]]; then
         rsync -av --chown=root:root $BUILD/$PKG/kernel-${SOCFAMILY}/ $SOURCE/$ROOTFS/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         rsync -av --chown=root:root $BUILD/$PKG/kernel-modules/ $SOURCE/$ROOTFS/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
