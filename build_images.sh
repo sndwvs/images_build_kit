@@ -359,13 +359,13 @@ setting_bootloader() {
     message "" "setting" "bootloader"
     # u-boot config
     if [[ -f $CWD/config/boot_scripts/extlinux-$SOCFAMILY.conf ]]; then
-        install -Dm644 $CWD/config/boot_scripts/extlinux-$SOCFAMILY.conf "$SOURCE/$ROOTFS/boot/extlinux.conf"
+        install -Dm644 $CWD/config/boot_scripts/extlinux-$SOCFAMILY.conf "$SOURCE/$ROOTFS/boot/extlinux/extlinux.conf"
         # u-boot serial inteface config
         sed -e "s:%ROOT_DISK%:${ROOT_DISK}:g" \
             -e "s:%DEVICE_TREE_BLOB%:${DEVICE_TREE_BLOB}:g" \
             -e "s:%SERIAL_CONSOLE%:${SERIAL_CONSOLE}:g" \
             -e "s:%SERIAL_CONSOLE_SPEED%:${SERIAL_CONSOLE_SPEED}:g" \
-            -i "$SOURCE/$ROOTFS/boot/extlinux.conf"
+            -i "$SOURCE/$ROOTFS/boot/extlinux/extlinux.conf"
         return 0
     fi
     if [[ -f $CWD/config/boot_scripts/boot-$SOCFAMILY.cmd ]]; then
