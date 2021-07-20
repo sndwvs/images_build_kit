@@ -31,7 +31,7 @@ build_kernel_pkg() {
     install -Dm644 $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/$KERNEL $BUILD/$PKG/kernel-${SOCFAMILY}/boot/vmlinuz-${KERNEL_VERSION}
     install -Dm644 $SOURCE/$KERNEL_DIR/System.map $BUILD/$PKG/kernel-${SOCFAMILY}/boot/System.map-${KERNEL_VERSION}
     install -Dm644 $SOURCE/$KERNEL_DIR/.config $BUILD/$PKG/kernel-${SOCFAMILY}/boot/config-${KERNEL_VERSION}
-    if [[ $SOCFAMILY != bcm2* || $SOCFAMILY != rk356* ]];then
+    if [[ $SOCFAMILY != bcm2* ]];then
         # Make symlinks:
         ln -sf System.map-${KERNEL_VERSION} $BUILD/$PKG/kernel-${SOCFAMILY}/boot/System.map
         ln -sf config-${KERNEL_VERSION} $BUILD/$PKG/kernel-${SOCFAMILY}/boot/config
