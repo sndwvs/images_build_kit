@@ -6,42 +6,6 @@ Subject: [PATCH 04/23] ethernet: stmmac: dwmac-rk: Add MAC driver support for
 
 Probably in the wrong place, as it's only 10/100 but :meh:
 
-From 67e46ea01439010eadbc220c7600fa6dae01e8e8 Mon Sep 17 00:00:00 2001
-From: David Wu <david.wu@rock-chips.com>
-Date: Thu, 8 Mar 2018 20:07:12 +0800
-Subject: [PATCH] ethernet: stmmac: dwmac-rk: Add MAC driver support for rk3308
-
-Add constants and callback functions for the dwmac on rk3308 soc.
-The base structure is the same, but registers and the bits in
-them moved slightly, and add the clk_mac_speed for the select
-of mac speed.
-
-Change-Id: Ieaea3ade9e51d5118f0eb855d8e02febfb2275d1
-Signed-off-by: David Wu <david.wu@rock-chips.com>
----
- .../bindings/net/rockchip-dwmac.txt           |  3 +-
- .../net/ethernet/stmicro/stmmac/dwmac-rk.c    | 59 +++++++++++++++++++
- 2 files changed, 61 insertions(+), 1 deletion(-)
-
-:100644 100644 3b71da7e874 553d5e17eca M        Documentation/devicetree/bindings/net/rockchip-dwmac.txt
-:100644 100644 dc50ba13a74 3b9b4731118 M        drivers/net/ethernet/stmicro/stmmac/dwmac-rk.c
----
- .../bindings/net/rockchip-dwmac.txt           |  1 +
- .../net/ethernet/stmicro/stmmac/dwmac-rk.c    | 59 +++++++++++++++++++
- 2 files changed, 60 insertions(+)
-
-diff --git a/Documentation/devicetree/bindings/net/rockchip-dwmac.txt b/Documentation/devicetree/bindings/net/rockchip-dwmac.txt
-index 3b71da7e8742..553d5e17eca8 100644
---- a/Documentation/devicetree/bindings/net/rockchip-dwmac.txt
-+++ b/Documentation/devicetree/bindings/net/rockchip-dwmac.txt
-@@ -8,6 +8,7 @@ Required properties:
-    "rockchip,rk3128-gmac": found on RK312x SoCs
-    "rockchip,rk3228-gmac": found on RK322x SoCs
-    "rockchip,rk3288-gmac": found on RK3288 SoCs
-+   "rockchip,rk3308-gmac": found on RK3308 SoCs
-    "rockchip,rk3328-gmac": found on RK3328 SoCs
-    "rockchip,rk3366-gmac": found on RK3366 SoCs
-    "rockchip,rk3368-gmac": found on RK3368 SoCs
 diff --git a/drivers/net/ethernet/stmicro/stmmac/dwmac-rk.c b/drivers/net/ethernet/stmicro/stmmac/dwmac-rk.c
 index dc50ba13a746..cfeca75ed284 100644
 --- a/drivers/net/ethernet/stmicro/stmmac/dwmac-rk.c

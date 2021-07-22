@@ -667,9 +667,9 @@ index 000000000000..4a3038f22639
 +
 +	regulator_suspend_prepare(PM_SUSPEND_MEM);
 +
-+	error = freeze_secondary_cpus(0);
++	error = disable_nonboot_cpus();
 +	if (error) {
-+		pr_err("Freeze secondary cpus failed!\n");
++		pr_err("Disable nonboot cpus failed!\n");
 +		return;
 +	}
 +
@@ -852,7 +852,7 @@ index 29d920516e0b..549b68c58e68 100644
 @@ -482,6 +482,9 @@ struct regulator_dev {
  
  	/* time when this regulator was disabled last time */
- 	unsigned long last_off_jiffy;
+ 	ktime_t last_off;
 +
 +	/* state when resuming */
 +	int resume_state;
