@@ -52,7 +52,7 @@ setting_fstab() {
             sed -i 's:#\(shm\):\1:' $SOURCE/$ROOTFS/etc/fstab || exit 1
             sed -i "/\# End of file/ i \\/dev\/$ROOT_DISK    \/          ext4    noatime,nodiratime,data=writeback,errors=remount-ro       0       1\n" $SOURCE/$ROOTFS/etc/fstab || exit 1
             [[ $SOCFAMILY == bcm2* ]] && sed -i "/\# End of file/ i \\/dev\/mmcblk0p1    \/boot      vfat    defaults       0       1\n" $SOURCE/$ROOTFS/etc/fstab
-            [[ $SOCFAMILY == rk356* ]] && sed -i "/\# End of file/ i \\/dev\/mmcblk0p2    \/boot      ext4    noatime,nodiratime       0       1\n" >> $SOURCE/$ROOTFS/etc/fstab
+            [[ $SOCFAMILY == rk356* ]] && sed -i "/\# End of file/ i \\/dev\/mmcblk0p2    \/boot      ext4    noatime,nodiratime       0       1\n" $SOURCE/$ROOTFS/etc/fstab
         fi
     fi
 }
