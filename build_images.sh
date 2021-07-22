@@ -364,7 +364,8 @@ setting_bootloader() {
     if [[ -f $CWD/config/boot_scripts/extlinux-$SOCFAMILY.conf ]]; then
         install -Dm644 $CWD/config/boot_scripts/extlinux-$SOCFAMILY.conf "$SOURCE/$ROOTFS/boot/extlinux/extlinux.conf"
         # u-boot serial inteface config
-        sed -e "s:%ROOT_DISK%:${ROOT_DISK}:g" \
+        sed -e "s:%DISTR%:${DISTR}:g" \
+            -e "s:%ROOT_DISK%:${ROOT_DISK}:g" \
             -e "s:%DEVICE_TREE_BLOB%:${DEVICE_TREE_BLOB}:g" \
             -e "s:%SERIAL_CONSOLE%:${SERIAL_CONSOLE}:g" \
             -e "s:%SERIAL_CONSOLE_SPEED%:${SERIAL_CONSOLE_SPEED}:g" \
