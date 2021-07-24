@@ -95,6 +95,13 @@ create_uboot()
             install -Dm644 uboot.img $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/uboot.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
     fi
+
+    if [[ $SOCFAMILY == rk35* ]]; then
+        [[ $USE_DDR_BLOB == yes ]] && TPL=$SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$DDR
+        tools/mkimage -n rk356x -T rksd -d ${TPL}:spl/u-boot-spl.bin $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        install -Dm644 u-boot.itb $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/u-boot.itb >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
+
     install -Dm644 $BOOT_LOADER_BIN $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     popd >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
