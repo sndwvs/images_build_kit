@@ -9,13 +9,12 @@ Signed-off-by: Miouyouyou (Myy) <myy@miouyouyou.fr>
 ---
 
 diff --git a/drivers/spi/spidev.c b/drivers/spi/spidev.c
-index 255786f2e..3a3f2e6fd 100644
---- a/drivers/spi/spidev.c
-+++ b/drivers/spi/spidev.c
-@@ -665,6 +665,7 @@ static const struct of_device_id spidev_dt_ids[] = {
- 	{ .compatible = "dh,dhcom-board" },
+--- a/drivers/spi/spidev.c	2021-07-24 05:08:14.664774984 +0000
++++ b/drivers/spi/spidev.c	2021-07-24 05:27:20.518440681 +0000
+@@ -684,6 +684,7 @@
  	{ .compatible = "menlo,m53cpld" },
  	{ .compatible = "cisco,spi-petra" },
+ 	{ .compatible = "micron,spi-authenta" },
 +	{ .compatible = "rockchip,spi_tinker" },
  	{},
  };
