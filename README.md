@@ -18,6 +18,7 @@ project site: **[slarm64.org](http://slarm64.org)**
         + [Orange Pi PC](https://linux-sunxi.org/Xunlong_Orange_Pi_PC)
     * A64
         + [1080P Pinebook](https://wiki.pine64.org/index.php/1080P_Pinebook#SoC_and_Memory_Specification)
+        + [SOPine and Baseboard](https://wiki.pine64.org/wiki/PINE_A64-LTS/SOPine#SoC_and_Memory_Specification)
 * Rockchip
     * RK3288
         + [Firefly-RK3288](http://en.t-firefly.com/product/rk3288.html)
@@ -81,6 +82,6 @@ to build crux-arm on slarm64/slackware distributions you need to install the pac
 | TOOLS_PACK               | empty (yes/no - from the menu) | compilation of packages needed for assembly |
 | EXTERNAL_WIFI            | yes/no (yes - default) | apply wifi patch with git |
 | EXTERNAL_WIREGUARD       | yes/no (yes - default) | apply wireguard driver patch with git |
-| DISTR                    | slackwarearm - default | distribution name: [slackwarearm](http://arm.slackware.com/), [slarm64](http://slarm64.org/), [crux-arm](https://crux-arm.nu/) |
+| DISTR                    | slarm64 - default | distribution name: [slackwarearm](http://arm.slackware.com/), [slarm64](http://slarm64.org/), [crux-arm](https://crux-arm.nu/) |
 | DISTR_VERSION            | current - default | distribution release |
 | DE                       | xfce - default | select desktop environment: xfce, enlightenment, openbox |
