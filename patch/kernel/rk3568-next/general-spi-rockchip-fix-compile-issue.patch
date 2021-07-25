@@ -1,0 +1,26 @@
+From 3c4faeac90657b9bf58cef4eb798f9695ada39f0 Mon Sep 17 00:00:00 2001
+From: Peter Geis <pgwipeout@gmail.com>
+Date: Thu, 3 Jun 2021 13:19:12 -0400
+Subject: [PATCH] spi: rockchip: fix compile issue
+
+Signed-off-by: Peter Geis <pgwipeout@gmail.com>
+---
+ drivers/spi/spi-rockchip.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/spi/spi-rockchip.c b/drivers/spi/spi-rockchip.c
+index 9d60c1b275e8..4b08be25c33d 100644
+--- a/drivers/spi/spi-rockchip.c
++++ b/drivers/spi/spi-rockchip.c
+@@ -210,7 +210,7 @@ static inline void wait_for_tx_idle(struct rockchip_spi *rs, bool slave_mode)
+ 	do {
+ 		if (slave_mode) {
+ 			if (!(readl_relaxed(rs->regs + ROCKCHIP_SPI_SR) & SR_SLAVE_TX_BUSY) &&
+-			    !((readl_relaxed(rs->regs + ROCKCHIP_SPI_SR) & SR_BUSY))
++			    !((readl_relaxed(rs->regs + ROCKCHIP_SPI_SR) & SR_BUSY)))
+ 				return;
+ 		} else {
+ 			if (!(readl_relaxed(rs->regs + ROCKCHIP_SPI_SR) & SR_BUSY))
+-- 
+GitLab
+

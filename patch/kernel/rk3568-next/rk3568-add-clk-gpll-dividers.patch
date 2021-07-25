@@ -1,0 +1,68 @@
+From b33e54eace9fa5345a9a9984936a782be6ada6f8 Mon Sep 17 00:00:00 2001
+From: Peter Geis <pgwipeout@gmail.com>
+Date: Thu, 3 Jun 2021 13:20:26 -0400
+Subject: [PATCH] clk: rockchip: add rk3568 gpll dividers
+
+---
+ drivers/clk/rockchip/clk-rk3568.c      | 14 +++++++-------
+ include/dt-bindings/clock/rk3568-cru.h |  7 +++++++
+ 2 files changed, 14 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/clk/rockchip/clk-rk3568.c b/drivers/clk/rockchip/clk-rk3568.c
+index 75ca855e720d..c6ff54c489bd 100644
+--- a/drivers/clk/rockchip/clk-rk3568.c
++++ b/drivers/clk/rockchip/clk-rk3568.c
+@@ -421,25 +421,25 @@ static struct rockchip_clk_branch rk3568_clk_branches[] __initdata = {
+ 	 * Clock-Architecture Diagram 1
+ 	 */
+ 	 /* SRC_CLK */
+-	COMPOSITE_NOMUX(0, "gpll_400m", "gpll", CLK_IGNORE_UNUSED,
++	COMPOSITE_NOMUX(GPLL_400M, "gpll_400m", "gpll", CLK_IGNORE_UNUSED,
+ 			RK3568_CLKSEL_CON(75), 0, 5, DFLAGS,
+ 			RK3568_CLKGATE_CON(35), 0, GFLAGS),
+-	COMPOSITE_NOMUX(0, "gpll_300m", "gpll", CLK_IGNORE_UNUSED,
++	COMPOSITE_NOMUX(GPLL_300M, "gpll_300m", "gpll", CLK_IGNORE_UNUSED,
+ 			RK3568_CLKSEL_CON(75), 8, 5, DFLAGS,
+ 			RK3568_CLKGATE_CON(35), 1, GFLAGS),
+-	COMPOSITE_NOMUX(0, "gpll_200m", "gpll", CLK_IGNORE_UNUSED,
++	COMPOSITE_NOMUX(GPLL_200M, "gpll_200m", "gpll", CLK_IGNORE_UNUSED,
+ 			RK3568_CLKSEL_CON(76), 0, 5, DFLAGS,
+ 			RK3568_CLKGATE_CON(35), 2, GFLAGS),
+-	COMPOSITE_NOMUX(0, "gpll_150m", "gpll", CLK_IGNORE_UNUSED,
++	COMPOSITE_NOMUX(GPLL_150M, "gpll_150m", "gpll", CLK_IGNORE_UNUSED,
+ 			RK3568_CLKSEL_CON(76), 8, 5, DFLAGS,
+ 			RK3568_CLKGATE_CON(35), 3, GFLAGS),
+-	COMPOSITE_NOMUX(0, "gpll_100m", "gpll", CLK_IGNORE_UNUSED,
++	COMPOSITE_NOMUX(GPLL_100M, "gpll_100m", "gpll", CLK_IGNORE_UNUSED,
+ 			RK3568_CLKSEL_CON(77), 0, 5, DFLAGS,
+ 			RK3568_CLKGATE_CON(35), 4, GFLAGS),
+-	COMPOSITE_NOMUX(0, "gpll_75m", "gpll", CLK_IGNORE_UNUSED,
++	COMPOSITE_NOMUX(GPLL_75M, "gpll_75m", "gpll", CLK_IGNORE_UNUSED,
+ 			RK3568_CLKSEL_CON(77), 8, 5, DFLAGS,
+ 			RK3568_CLKGATE_CON(35), 5, GFLAGS),
+-	COMPOSITE_NOMUX(0, "gpll_20m", "gpll", CLK_IGNORE_UNUSED,
++	COMPOSITE_NOMUX(GPLL_20M, "gpll_20m", "gpll", CLK_IGNORE_UNUSED,
+ 			RK3568_CLKSEL_CON(78), 0, 6, DFLAGS,
+ 			RK3568_CLKGATE_CON(35), 6, GFLAGS),
+ 	COMPOSITE_NOMUX(CPLL_500M, "cpll_500m", "cpll", CLK_IGNORE_UNUSED,
+diff --git a/include/dt-bindings/clock/rk3568-cru.h b/include/dt-bindings/clock/rk3568-cru.h
+index d29890865150..4b517ebd0ebe 100644
+--- a/include/dt-bindings/clock/rk3568-cru.h
++++ b/include/dt-bindings/clock/rk3568-cru.h
+@@ -479,6 +479,13 @@
+ #define CPLL_25M		416
+ #define CPLL_100M		417
+ #define SCLK_DDRCLK		418
++#define GPLL_400M		419
++#define GPLL_300M		420
++#define GPLL_200M		421
++#define GPLL_150M		422
++#define GPLL_100M		423
++#define GPLL_75M		424
++#define GPLL_20M		425
+ 
+ #define PCLK_CORE_PVTM		450
+ 
+-- 
+GitLab
+
