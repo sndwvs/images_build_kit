@@ -40,15 +40,3 @@ index c21f2331add6..8161895dde52 100644
  &mmc2 {
  	pinctrl-names = "default";
  	pinctrl-0 = <&mmc2_pins>;
-@@ -138,6 +152,10 @@
- 	vcc-hdmi-supply = <&reg_dldo1>;
- };
- 
-+&hdmi_sound {
-+	status = "okay";
-+};
-+
- &uart0 {
- 	pinctrl-names = "default";
- 	pinctrl-0 = <&uart0_pins_a>;
-

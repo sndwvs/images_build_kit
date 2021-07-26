@@ -67,7 +67,7 @@ index f3f8e177a..3e7aea743 100644
  &ohci0 {
  	status = "okay";
  };
-@@ -328,6 +365,32 @@ &simplefb_hdmi {
+@@ -328,6 +365,28 @@ &simplefb_hdmi {
  	vcc-hdmi-supply = <&reg_dldo1>;
  };
  
@@ -91,10 +91,6 @@ index f3f8e177a..3e7aea743 100644
 +			"MIC1", "Internal Microphone Left",
 +			"Internal Microphone Right", "HBIAS",
 +			"MIC2", "Internal Microphone Right";
-+};
-+
-+&hdmi_sound {
-+	status = "okay";
 +};
 +
  &uart0 {
