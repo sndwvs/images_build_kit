@@ -1,0 +1,12 @@
+--- a/drivers/net/wireless/rockchip_wlan/rkwifi/rk_wifi_config.c	2020-10-27 21:23:00.051060797 +0200
++++ b/drivers/net/wireless/rockchip_wlan/rkwifi/rk_wifi_config.c	2020-10-27 21:36:48.731118697 +0200
+@@ -17,7 +17,7 @@
+  * Set Firmware Path
+  */
+  
+-#define VENDOR_ETC_FIRMWARE "/vendor/etc/firmware/"
++#define VENDOR_ETC_FIRMWARE "/lib/firmware/"
+ 
+ int rkwifi_set_firmware(char *fw, char *nvram)
+ {
+
