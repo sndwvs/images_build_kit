@@ -10,7 +10,7 @@
  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3368-evb-act8846.dtb
 --- /dev/null	2020-12-23 11:47:50.044000030 +0200
 +++ b/arch/arm64/boot/dts/rockchip/rk3328-roc-pc.dts	2020-12-30 16:15:50.808198411 +0200
-@@ -0,0 +1,499 @@
+@@ -0,0 +1,495 @@
 +/*
 + * SPDX-License-Identifier: (GPL-2.0+ or MIT)
 + * Copyright (c) 2016 Fuzhou Rockchip Electronics Co., Ltd
@@ -488,10 +488,6 @@
 +};
 +
 +&usbdrd3 {
-+	status = "okay";
-+};
-+
-+&usbdrd_dwc3 {
 +	dr_mode = "host";
 +	status = "okay";
 +};

@@ -3,7 +3,7 @@ new file mode 100644
 index 000000000..52732643f
 --- /dev/null
 +++ b/arch/arm64/boot/dts/rockchip/rk3328-rock-pi-e.dts
-@@ -0,0 +1,470 @@
+@@ -0,0 +1,466 @@
 +/*
 + * SPDX-License-Identifier: (GPL-2.0+ or MIT)
 + * Copyright (c) 2016 Fuzhou Rockchip Electronics Co., Ltd
@@ -452,10 +452,6 @@ index 000000000..52732643f
 +};
 +
 +&usbdrd3 {
-+	status = "okay";
-+};
-+
-+&usbdrd_dwc3 {
 +	dr_mode = "host";
 +	status = "okay";
 +};

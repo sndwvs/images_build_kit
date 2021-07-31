@@ -2,7 +2,7 @@ new file mode 100644
 index 000000000000..b85508c12742
 --- /dev/null
 +++ b/arch/arm64/boot/dts/rockchip/rk3328-roc-pc.dts
-@@ -0,0 +1,447 @@
+@@ -0,0 +1,443 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 +/*
 + * Copyright (c) 2017 T-Chip Intelligent Technology Co., Ltd
@@ -435,10 +435,6 @@ index 000000000000..b85508c12742
 +};
 +
 +&usbdrd3 {
-+	status = "okay";
-+};
-+
-+&usbdrd_dwc3 {
 +	dr_mode = "host";
 +	status = "okay";
 +};
