@@ -1,0 +1,33 @@
+--- a/drivers/net/wireless/rtl8189es/core/rtw_iol.c	2021-08-01 16:10:01.232402330 +0000
++++ b/drivers/net/wireless/rtl8189es/core/rtw_iol.c	2021-08-01 16:11:41.276143625 +0000
+@@ -249,19 +249,21 @@
+ 	return is_cmd_bndy;
+ }
+ 
+-void rtw_IOL_cmd_buf_dump(ADAPTER *Adapter,int buf_len,u8 *pbuf)
++void rtw_IOL_cmd_buf_dump(ADAPTER *Adapter, int buf_len, u8 *pbuf)
+ {
+ 	int i;
+-	int j=1;
+-	
+-	printk("###### %s ######\n",__FUNCTION__);
+-	for(i=0;i< buf_len;i++){
+-		printk("%02x-",*(pbuf+i));
+-			
+-		if(j%32 ==0) printk("\n");j++;				
++	int j = 1;
++
++	printk("###### %s ######\n", __FUNCTION__);
++	for (i = 0; i < buf_len; i++) {
++		printk("%02x-", *(pbuf + i));
++
++		if (j % 32 == 0)
++			printk("\n");
++		j++;
+ 	}
+ 	printk("\n");
+-	printk("============= ioreg_cmd len = %d =============== \n",buf_len);	
++	printk("============= ioreg_cmd len = %d ===============\n", buf_len);
+ }
+ 
+ 
