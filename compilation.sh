@@ -135,6 +135,13 @@ compile_boot_tools() {
     fi
 }
 
+compile_boot_packer_loader() {
+    message "" "compiling" "$BOOT_PACKER_LOADER_DIR"
+    cd $SOURCE/$BOOT_PACKER_LOADER_DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
+    make clean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make $CTHREADS all >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+}
 
 compile_kernel() {
     KERNEL_VERSION=$(get_version $SOURCE/$KERNEL_DIR)

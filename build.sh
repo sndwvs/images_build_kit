@@ -207,6 +207,7 @@ if [[ $COMPILE_BINARIES == yes ]]; then
         [[ $DOWNLOAD_SOURCE_BINARIES == yes ]] && patching_source "u-boot-tools"
         compile_boot_tools
     fi
+    [[ ! -z $BOOT_PACKER_LOADER_DIR && $DOWNLOAD_SOURCE_BINARIES == yes ]] && compile_boot_packer_loader
     [[ ! -z $ATF && $DOWNLOAD_SOURCE_BINARIES == yes ]] && ( patching_source "atf" && compile_atf )
 
     [[ $DOWNLOAD_SOURCE_BINARIES == yes ]] && patching_source "u-boot"

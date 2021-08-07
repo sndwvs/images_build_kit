@@ -9,6 +9,10 @@ BOOT_FIP_SOURCE="https://github.com/radxa/amlogic-boot-fip.git"
 BOOT_FIP_DIR="u-boot-amlogic-fip"
 BOOT_FIP_BRANCH="master::"
 
+BOOT_PACKER_LOADER_SOURCE="https://github.com/angerman/meson64-tools.git"
+BOOT_PACKER_LOADER_DIR="u-boot-amlogic-packer"
+BOOT_PACKER_LOADER_BRANCH="master::"
+
 SERIAL_CONSOLE_SPEED=115200
 SERIAL_CONSOLE=ttyAML0
 

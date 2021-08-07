@@ -96,6 +96,12 @@ download() {
         git_fetch $SOURCE/$BOOT_FIP_DIR $BOOT_FIP_SOURCE ${BOOT_FIP_BRANCH}
     fi
 
+    if [[ ! -z $BOOT_PACKER_LOADER_SOURCE ]]; then
+        message "" "download" "$BOOT_PACKER_LOADER_DIR"
+        # git_fetch <dir> <url> <branch>
+        git_fetch $SOURCE/$BOOT_PACKER_LOADER_DIR $BOOT_PACKER_LOADER_SOURCE ${BOOT_PACKER_LOADER_BRANCH}
+    fi
+
     if [[ $SOCFAMILY == rk3* ]]; then
         message "" "download" "$RKBIN_DIR"
         # git_fetch <dir> <url> <branch>
