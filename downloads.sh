@@ -90,6 +90,12 @@ download() {
         git_fetch $SOURCE/$ATF_DIR $ATF_SOURCE ${ATF_BRANCH}
     fi
 
+    if [[ ! -z $BOOT_FIP_SOURCE ]]; then
+        message "" "download" "$BOOT_FIP_DIR"
+        # git_fetch <dir> <url> <branch>
+        git_fetch $SOURCE/$BOOT_FIP_DIR $BOOT_FIP_SOURCE ${BOOT_FIP_BRANCH}
+    fi
+
     if [[ $SOCFAMILY == rk3* ]]; then
         message "" "download" "$RKBIN_DIR"
         # git_fetch <dir> <url> <branch>

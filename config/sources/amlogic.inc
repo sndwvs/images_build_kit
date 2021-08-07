@@ -5,6 +5,10 @@ BOOT_LOADER_TOOLS_SOURCE="https://github.com/hardkernel/u-boot.git"
 BOOT_LOADER_TOOLS_DIR="u-boot-tools-amlogic"
 BOOT_LOADER_TOOLS_BRANCH="odroidg12-v2015.01::"
 
+BOOT_FIP_SOURCE="https://github.com/radxa/amlogic-boot-fip.git"
+BOOT_FIP_DIR="u-boot-amlogic-fip"
+BOOT_FIP_BRANCH="master::"
+
 SERIAL_CONSOLE_SPEED=115200
 SERIAL_CONSOLE=ttyAML0
 
