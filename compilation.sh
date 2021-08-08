@@ -73,6 +73,9 @@ compile_boot_loader() {
         make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
+    # uboot customization
+    [[ $(type -t uboot_customization) == function ]] && uboot_customization
+
     # create bootloader
     [[ $(type -t create_uboot) == function ]] && create_uboot
 }
