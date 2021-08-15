@@ -461,6 +461,16 @@ setting_modules() {
 }
 
 
+removed_default_xorg_conf() {
+    [[ ! -z "$1" ]] && local ROOTFS="$1"
+
+    if [[ -e $SOURCE/$ROOTFS/etc/X11/xorg.conf.d/xorg.conf ]]; then
+        message "" "setting" "removed default xorg.conf"
+        rm -rf "$SOURCE/$ROOTFS/etc/X11/xorg.conf.d/xorg.conf" || exit 1
+    fi
+}
+
+
 image_compression() {
     local IMG="$1"
     pushd $BUILD/$OUTPUT/$IMAGES >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1

@@ -290,6 +290,7 @@ for image_type in ${DISTR_IMAGES[@]}; do
         setting_default_start_x ${image_type}
         setting_for_desktop
         setting_alsa "$ROOTFS_DESKTOP"
+        removed_default_xorg_conf "$ROOTFS_DESKTOP"
         create_img "$ROOTFS_DESKTOP"
         build_img "$ROOTFS_DESKTOP"
         [[ $IMAGE_COMPRESSION == yes ]] && image_compression "$ROOTFS_DESKTOP"
