@@ -30,7 +30,7 @@ case "$1" in
                 if [[ ! -f /tmp/part ]]; then
                     echo -e "\e[0;37mSetting up a password change request for a root\x1B[0m"
                     # password change request at login
-                    passwd -e -i -1 -n -1 -w -1 -x -1 root
+                    passwd -e -i -1 -n -1 -w -1 -x -1 -d root
 
                     [[ ${partition/[!0-9]/} -gt 1 ]] && _partition=${partition/[!0-9]/}
                     echo -e "\e[0;37mResizing partition SD card\x1B[0m"
