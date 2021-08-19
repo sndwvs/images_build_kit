@@ -766,37 +766,6 @@ index c67cae9d52293..151e69a93e341 100644
  #define c3_DACR		(DACR32_EL2 * 2)/* Domain Access Control Register */
  #define c5_DFSR		(ESR_EL1 * 2)	/* Data Fault Status Register */
  #define c5_IFSR		(IFSR32_EL2 * 2)/* Instruction Fault Status Register */
-diff --git a/arch/arm64/include/asm/lse.h b/arch/arm64/include/asm/lse.h
-index 8262325e2fc66..13536c4da2c26 100644
---- a/arch/arm64/include/asm/lse.h
-+++ b/arch/arm64/include/asm/lse.h
-@@ -4,6 +4,8 @@
- 
- #if defined(CONFIG_AS_LSE) && defined(CONFIG_ARM64_LSE_ATOMICS)
- 
-+#define __LSE_PREAMBLE	".arch_extension lse\n"
-+
- #include <linux/compiler_types.h>
- #include <linux/export.h>
- #include <linux/stringify.h>
-@@ -20,8 +22,6 @@
- 
- #else	/* __ASSEMBLER__ */
- 
--__asm__(".arch_extension	lse");
--
- /* Move the ll/sc atomics out-of-line */
- #define __LL_SC_INLINE		notrace
- #define __LL_SC_PREFIX(x)	__ll_sc_##x
-@@ -33,7 +33,7 @@ __asm__(".arch_extension	lse");
- 
- /* In-line patching at runtime */
- #define ARM64_LSE_ATOMIC_INSN(llsc, lse)				\
--	ALTERNATIVE(llsc, lse, ARM64_HAS_LSE_ATOMICS)
-+	ALTERNATIVE(llsc, __LSE_PREAMBLE lse, ARM64_HAS_LSE_ATOMICS)
- 
- #endif	/* __ASSEMBLER__ */
- #else	/* CONFIG_AS_LSE && CONFIG_ARM64_LSE_ATOMICS */
 diff --git a/arch/arm64/kernel/syscall.c b/arch/arm64/kernel/syscall.c
 index 1457a0ba83dbc..f2d2dbbbfca20 100644
 --- a/arch/arm64/kernel/syscall.c
@@ -3452,16 +3421,16 @@ index d5cc32e80f5e2..cd58c123f547e 100644
  		ret = its_force_quiescent(base);
  		if (ret) {
  			pr_err("ITS@%pa: failed to quiesce on resume: %d\n",
-@@ -3558,9 +3551,6 @@ static int __init its_probe_one(struct resource *res,
+@@ -3595,9 +3588,6 @@
  		ctlr |= GITS_CTLR_ImDe;
  	writel_relaxed(ctlr, its->base + GITS_CTLR);
  
 -	if (GITS_TYPER_HCC(typer))
 -		its->flags |= ITS_FLAGS_SAVE_SUSPEND_STATE;
 -
- 	err = its_init_domain(handle, its);
- 	if (err)
- 		goto out_free_tables;
+ 	if (of_machine_is_compatible("rockchip,rk3568") || of_machine_is_compatible("rockchip,rk3566"))
+ 		its->flags |= ITS_FLAGS_SAVE_SUSPEND_STATE;
+ 
 diff --git a/drivers/md/dm-ioctl.c b/drivers/md/dm-ioctl.c
 index f666778ad2372..439277f48ff8b 100644
 --- a/drivers/md/dm-ioctl.c
