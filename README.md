@@ -38,6 +38,8 @@ project site: **[slarm64.org](http://slarm64.org)**
         + [Orange Pi 4](http://www.orangepi.org/Orange%20Pi%204/)
     * RK3566
         + [Quartz64](https://wiki.pine64.org/wiki/Quartz64#SoC_and_Memory_Specifications)
+    * RK3568
+        + [Rock 3](https://wiki.radxa.com/Rock3/getting_started#Features)
 * Broadcom
     * BCM2837
         + [Raspberry Pi 3](https://www.raspberrypi.org/products/raspberry-pi-3-model-b/)
