@@ -1,0 +1,78 @@
+From 25c4091a3206a5a35e99e2dfefe4c7a4007f1e49 Mon Sep 17 00:00:00 2001
+From: Stephen <stephen@vamrs.com>
+Date: Fri, 20 Aug 2021 19:14:24 +0800
+Subject: [PATCH 5/5] rockchip: disable optee requirement
+
+This patch also enables passing of BL31 location via variable.
+
+This is a copy of the patch from https://github.com/piter75/armbian-build/blob/rock-3a-bring-up/patch/u-boot/u-boot-rk356x/general-configurable-bl31-path.patch
+
+Signed-off-by: Stephen <stephen@vamrs.com>
+---
+ arch/arm/mach-rockchip/decode_bl31.py   | 12 +++++++++++-
+ arch/arm/mach-rockchip/make_fit_args.sh |  2 +-
+ arch/arm/mach-rockchip/make_fit_atf.py  | 13 ++++++++++++-
+ 3 files changed, 24 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/mach-rockchip/decode_bl31.py b/arch/arm/mach-rockchip/decode_bl31.py
+index 301bd153753..42fa32d23d2 100755
+--- a/arch/arm/mach-rockchip/decode_bl31.py
++++ b/arch/arm/mach-rockchip/decode_bl31.py
+@@ -41,7 +41,17 @@ def generate_atf_binary(bl31_file_name):
+             atf.write(data)
+ 
+ def main():
+-    bl31_elf="./bl31.elf"
++    if "BL31" in os.environ:
++        bl31_elf=os.getenv("BL31");
++    elif os.path.isfile("./bl31.elf"):
++        bl31_elf = "./bl31.elf"
++    else:
++        os.system("echo 'int main(){}' > bl31.c")
++        os.system("${CROSS_COMPILE}gcc -c bl31.c -o bl31.elf")
++        bl31_elf = "./bl31.elf"
++        logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
++        logging.warning(' BL31 file bl31.elf NOT found, resulting binary is non-functional')
++        logging.warning(' Please read Building section in doc/README.rockchip')
+     generate_atf_binary(bl31_elf);
+ 
+ if __name__ == "__main__":
+diff --git a/arch/arm/mach-rockchip/make_fit_args.sh b/arch/arm/mach-rockchip/make_fit_args.sh
+index 2e35cd63f90..9fb6849add0 100755
+--- a/arch/arm/mach-rockchip/make_fit_args.sh
++++ b/arch/arm/mach-rockchip/make_fit_args.sh
+@@ -30,7 +30,7 @@ function help()
+ 
+ if [ $# -eq 1 ]; then
+ 	# default
+-	TEE_OFFSET=0x08400000
++	TEE_OFFSET=
+ else
+ 	# args
+ 	while [ $# -gt 0 ]; do
+diff --git a/arch/arm/mach-rockchip/make_fit_atf.py b/arch/arm/mach-rockchip/make_fit_atf.py
+index 27b6ef75970..fac8d6f1219 100755
+--- a/arch/arm/mach-rockchip/make_fit_atf.py
++++ b/arch/arm/mach-rockchip/make_fit_atf.py
+@@ -212,9 +212,20 @@ def get_bl31_segments_info(bl31_file_name):
+ 
+ def main():
+     uboot_elf="./u-boot"
+-    bl31_elf="./bl31.elf"
+     FIT_ITS=sys.stdout
+ 
++    if "BL31" in os.environ:
++        bl31_elf=os.getenv("BL31");
++    elif os.path.isfile("./bl31.elf"):
++        bl31_elf = "./bl31.elf"
++    else:
++        os.system("echo 'int main(){}' > bl31.c")
++        os.system("${CROSS_COMPILE}gcc -c bl31.c -o bl31.elf")
++        bl31_elf = "./bl31.elf"
++        logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
++        logging.warning(' BL31 file bl31.elf NOT found, resulting binary is non-functional')
++        logging.warning(' Please read Building section in doc/README.rockchip')
++
+     opts, args = getopt.getopt(sys.argv[1:], "o:u:b:h")
+     for opt, val in opts:
+         if opt == "-o":

@@ -1,0 +1,26 @@
+From ee7576321bc6870792960daca34a9461500bae30 Mon Sep 17 00:00:00 2001
+From: Stephen <stephen@vamrs.com>
+Date: Thu, 12 Aug 2021 09:17:22 +0800
+Subject: [PATCH 3/5] bootcmd: set distro boot first for rk3568
+
+Signed-off-by: Stephen <stephen@vamrs.com>
+---
+ include/configs/rk3568_common.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/include/configs/rk3568_common.h b/include/configs/rk3568_common.h
+index f98ae421b77..4996ec41f0b 100644
+--- a/include/configs/rk3568_common.h
++++ b/include/configs/rk3568_common.h
+@@ -91,9 +91,9 @@
+ 
+ #undef RKIMG_BOOTCOMMAND
+ #define RKIMG_BOOTCOMMAND		\
++	"run distro_bootcmd;"		\
+ 	"boot_fit;"			\
+-	"boot_android ${devtype} ${devnum};" \
+-	"run distro_bootcmd;"
++	"boot_android ${devtype} ${devnum};"
+ #endif
+ 
+ /* rockchip ohci host driver */
