@@ -272,7 +272,7 @@ for image_type in ${DISTR_IMAGES[@]}; do
 
     if [[ ${image_type} != server && ${image_type} != core ]]; then
         message "" "create" "$ROOTFS_DESKTOP"
-        rsync -ar --del $SOURCE/$ROOTFS/ $SOURCE/$ROOTFS_DESKTOP >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        mv $SOURCE/$ROOTFS $SOURCE/$ROOTFS_DESKTOP >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
         # installing overall distribution desktop packages
         download_pkg $DISTR_URL "desktop"
