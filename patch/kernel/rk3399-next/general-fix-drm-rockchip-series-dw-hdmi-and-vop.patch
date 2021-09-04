@@ -993,16 +993,16 @@ diff --git a/include/drm/bridge/dw_hdmi.h b/include/drm/bridge/dw_hdmi.h
 index ea34ca146b82..4f61ede6486d 100644
 --- a/include/drm/bridge/dw_hdmi.h
 +++ b/include/drm/bridge/dw_hdmi.h
-@@ -152,7 +152,8 @@ struct dw_hdmi_plat_data {
+@@ -152,7 +152,8 @@
  	const struct dw_hdmi_curr_ctrl *cur_ctr;
  	const struct dw_hdmi_phy_config *phy_config;
  	int (*configure_phy)(struct dw_hdmi *hdmi, void *data,
 -			     unsigned long mpixelclock);
 +			     unsigned long mpixelclock,
 +			     unsigned long mtmdsclock);
- };
  
- struct dw_hdmi *dw_hdmi_probe(struct platform_device *pdev,
+ 	unsigned int disable_cec : 1;
+ };
 
 From b5aeea09fdb8a11a325efe17107176510cc784eb Mon Sep 17 00:00:00 2001
 From: Jonas Karlman <jonas@kwiboo.se>
