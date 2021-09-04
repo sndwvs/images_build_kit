@@ -1,13 +1,6 @@
 --- a/arch/arm64/boot/dts/rockchip/rk3328.dtsi
 +++ b/arch/arm64/boot/dts/rockchip/rk3328.dtsi
-@@ -346,12 +346,16 @@
- 			power-domain@RK3328_PD_HEVC {
- 				reg = <RK3328_PD_GPU>;
- 				clocks = <&cru ACLK_GPU>;
--			};		
-+			};
- 			power-domain@RK3328_PD_HEVC {
- 				reg = <RK3328_PD_HEVC>;
+@@ -335,6 +335,10 @@
  			};
  			power-domain@RK3328_PD_VIDEO {
  				reg = <RK3328_PD_VIDEO>;
@@ -15,9 +8,9 @@
 +					 <&cru HCLK_RKVDEC>,
 +					 <&cru SCLK_VDEC_CABAC>,
 +					 <&cru SCLK_VDEC_CORE>;
+ 				#power-domain-cells = <0>;
  			};
  			power-domain@RK3328_PD_VPU {
- 				reg = <RK3328_PD_VPU>;
 @@ -705,6 +709,7 @@
  		clocks = <&cru ACLK_RKVDEC>, <&cru HCLK_RKVDEC>;
  		clock-names = "aclk", "iface";
