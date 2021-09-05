@@ -1,0 +1,16 @@
+diff --git a/arch/arm/boot/dts/sun8i-r40.dtsi b/arch/arm/boot/dts/sun8i-r40.dtsi
+index 421dfbb..ae64248 100644
+--- a/arch/arm/boot/dts/sun8i-r40.dtsi
++++ b/arch/arm/boot/dts/sun8i-r40.dtsi
+@@ -720,6 +703,11 @@
+ 				function = "uart3";
+ 			};
+ 
++			uart4_ph_pins: uart4-ph-pins {
++				pins = "PH4", "PH5";
++				function = "uart4";
++			};
++
+ 			/omit-if-no-ref/
+ 			uart4_pg_pins: uart4-pg-pins {
+ 				pins = "PG10", "PG11";
