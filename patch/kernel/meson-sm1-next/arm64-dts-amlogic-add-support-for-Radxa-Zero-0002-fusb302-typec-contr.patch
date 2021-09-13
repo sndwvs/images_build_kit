@@ -20,8 +20,8 @@ diff --git a/arch/arm64/boot/dts/amlogic/meson-g12a-radxa-zero.dts b/arch/arm64/
 index c7bf2ee4113464..6d0cca4494a1e0 100644
 --- a/arch/arm64/boot/dts/amlogic/meson-g12a-radxa-zero.dts
 +++ b/arch/arm64/boot/dts/amlogic/meson-g12a-radxa-zero.dts
-@@ -65,6 +65,17 @@
- 		regulator-always-on;
+@@ -60,6 +60,17 @@
+ 		clock-names = "ext_clock";
  	};
  
 +	typec2_vbus: regulator-typec2_vbus {
@@ -29,16 +29,16 @@ index c7bf2ee4113464..6d0cca4494a1e0 100644
 +		regulator-name = "TYPEC2_VBUS";
 +		regulator-min-microvolt = <5000000>;
 +		regulator-max-microvolt = <5000000>;
-+		vin-supply = <&dc_in>;
++		vin-supply = <&ao_5v>;
 +
 +		gpio = <&gpio_ao GPIOAO_7 GPIO_ACTIVE_HIGH>;
 +		enable-active-high;
 +	};
 +
- 	dc_in: regulator-dc_in {
+ 	ao_5v: regulator-ao_5v {
  		compatible = "regulator-fixed";
- 		regulator-name = "DC_IN";
-@@ -225,6 +236,18 @@
+ 		regulator-name = "AO_5V";
+@@ -191,6 +202,18 @@
  	};
  };
  
@@ -57,8 +57,8 @@ index c7bf2ee4113464..6d0cca4494a1e0 100644
  &arb {
  	status = "okay";
  };
-@@ -307,6 +330,22 @@
- 	linux,rc-map-name = "rc-x96max";
+@@ -278,6 +301,22 @@
+ 	pinctrl-names = "default";
  };
  
 +&i2c_AO {
@@ -80,9 +80,9 @@ index c7bf2ee4113464..6d0cca4494a1e0 100644
  &pwm_AO_cd {
  	pinctrl-0 = <&pwm_ao_d_e_pins>;
  	pinctrl-names = "default";
-@@ -436,3 +475,11 @@
- &tohdmitx {
+@@ -405,3 +444,11 @@
  	status = "okay";
+ 	dr_mode = "host";
  };
 +
 +&usb2_phy0 {
