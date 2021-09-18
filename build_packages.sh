@@ -158,25 +158,6 @@ build_kernel_pkg() {
 }
 
 
-build_sunxi_tools() {
-    message "" "build" "package ${SUNXI_TOOLS_DIR}"
-    mkdir -p $BUILD/$PKG/${SUNXI_TOOLS_DIR}/{sbin,install}
-
-    install -m644 -D "$CWD/packages/${SUNXI_TOOLS_DIR}/slack-desc" "$BUILD/$PKG/${SUNXI_TOOLS_DIR}/install/slack-desc"
-
-    cp -P $SOURCE/${SUNXI_TOOLS_DIR}/{bin2fex,fex2bin,sunxi-fexc,sunxi-nand-part} \
-          $BUILD/$PKG/${SUNXI_TOOLS_DIR}/sbin/
-
-    local VERSION=$(printf "%s_%s\n" "$(git log -1 --pretty='format:%cd' --date=format:'%Y%m%d' HEAD)" \
-                                     "$(git rev-parse --short=7 HEAD)")
-    cd $BUILD/$PKG/${SUNXI_TOOLS_DIR}/
-    makepkg -l n -c n $BUILD/$PKG/${SUNXI_TOOLS_DIR}-$VERSION-${ARCH}-${PKG_BUILD}${PACKAGER}.txz \
-    >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
-    [[ -d $BUILD/$PKG/${SUNXI_TOOLS_DIR} ]] && rm -rf $BUILD/$PKG/${SUNXI_TOOLS_DIR}
-}
-
-
 create_bootloader_pack(){
     message "" "create" "bootloader pack"
     cd $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/ || exit 1

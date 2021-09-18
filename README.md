@@ -81,7 +81,6 @@ to build crux-arm on slarm64/slackware distributions you need to install the pac
 | DOWNLOAD_SOURCE_BINARIES | empty (yes/no - from the menu) | download required components |
 | CLEAN                    | empty (yes/no - from the menu) | removing donwload/built components |
 | COMPILE_BINARIES         | empty (yes/no - from the menu) | compilation of all required components |
-| TOOLS_PACK               | empty (yes/no - from the menu) | compilation of packages needed for assembly |
 | EXTERNAL_WIFI            | yes/no (yes - default) | apply wifi patch with git |
 | EXTERNAL_WIREGUARD       | yes/no (yes - default) | apply wireguard driver patch with git |
 | DISTR                    | slarm64 - default | distribution name: [slackwarearm](http://arm.slackware.com/), [slarm64](http://slarm64.org/), [crux-arm](https://crux-arm.nu/) |

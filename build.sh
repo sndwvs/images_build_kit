@@ -98,7 +98,6 @@ DESKTOP=$(grep -oP "(?<=DESKTOP\=).*$" $CWD/config/boards/$BOARD_NAME/${BOARD_NA
 options+=("clean" "clean sources, remove binaries and image" "off")
 options+=("download" "download source and use pre-built binaries" "on")
 options+=("compile" "build binaries locally" "on")
-options+=("tools" "create and pack tools" "on")
 [[ $DESKTOP == yes && $DISTR != crux* ]] && options+=("desktop" "create image with xfce" "on")
 
 if [[ $NO_MENU == yes ]]; then
@@ -124,9 +123,6 @@ if [[ $NO_MENU == yes ]]; then
                     ;;
              compile)
                         COMPILE_BINARIES=yes
-                    ;;
-               tools)
-                        TOOLS_PACK=yes
                     ;;
              desktop)
                         DESKTOP_SELECTED=yes
@@ -222,11 +218,6 @@ if [[ $COMPILE_BINARIES == yes ]]; then
         patching_source "kernel"
     fi
     compile_kernel
-
-    if [[ $SOCFAMILY == sun* && $TOOLS_PACK == yes ]]; then
-        compile_sunxi_tools
-        build_sunxi_tools
-    fi
 
     build_kernel_pkg
 fi
