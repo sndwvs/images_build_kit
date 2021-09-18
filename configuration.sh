@@ -37,7 +37,7 @@ fi
 #---------------------------------------------
 # configuration build images and desktop environment
 #---------------------------------------------
-DISTR_IMAGES+=("server")
+#DISTR_IMAGES+=("server")
 if [[ $DESKTOP_SELECTED == yes ]]; then
  if [[ -z $DE ]]; then
      DISTR_IMAGES+=("xfce")

@@ -95,10 +95,12 @@ fi
 
 
 DESKTOP=$(grep -oP "(?<=DESKTOP\=).*$" $CWD/config/boards/$BOARD_NAME/${BOARD_NAME}.conf || echo "no")
+DISTR_IMAGES=$(grep -oP "(?<=DISTR_IMAGES=).*(?=$)" $CWD/config/environment/environment.conf)
 options+=("clean" "clean sources, remove binaries and image" "off")
 options+=("download" "download source and use pre-built binaries" "on")
 options+=("compile" "build binaries locally" "on")
-[[ $DESKTOP == yes && $DISTR != crux* ]] && options+=("desktop" "create image with xfce" "on")
+options+=($DISTR_IMAGES "create default image" "on")
+[[ $DESKTOP == yes && $DISTR != crux* ]] && options+=("desktop" "create an image with a desktop (optional)" "on")
 
 if [[ $NO_MENU == yes ]]; then
     # Duplicate file descriptor 1 on descriptor 3
@@ -197,7 +199,7 @@ fi
 #---------------------------------------------
 # start build
 #---------------------------------------------
-message "" "start" "build $DISTR ARCH $ARCH"
+message "" "start" "build $DISTR ARCH $ARCH images: ${DISTR_IMAGES[*]}"
 if [[ $COMPILE_BINARIES == yes ]]; then
     # aarch64 change interpreter path
     [[ $MARCH == aarch64 ]] && change_interpreter_path "${XTOOLS[@]}"

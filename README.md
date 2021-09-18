@@ -85,4 +85,5 @@ to build crux-arm on slarm64/slackware distributions you need to install the pac
 | EXTERNAL_WIREGUARD       | yes/no (yes - default) | apply wireguard driver patch with git |
 | DISTR                    | slarm64 - default | distribution name: [slackwarearm](http://arm.slackware.com/), [slarm64](http://slarm64.org/), [crux-arm](https://crux-arm.nu/) |
 | DISTR_VERSION            | current - default | distribution release |
+| DISTR_IMAGES             | server - default | type of assembly of images: server and a choice from the list of DE |
 | DE                       | xfce - default | select desktop environment: xfce, enlightenment, openbox |
