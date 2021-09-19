@@ -10,10 +10,6 @@ IMAGE_OFFSET=2048
 
 ROOT_DISK="mmcblk0p1"
 
-SUNXI_TOOLS_SOURCE="https://github.com/linux-sunxi/sunxi-tools.git"
-SUNXI_TOOLS_DIR="sunxi-tools"
-SUNXI_TOOLS_BRANCH="master::" #"v1.2"
-
 BOOT_LOADER_BRANCH="master:tag:v2021.07"
 BOOT_LOADER_BIN="u-boot-sunxi-with-spl.bin"
 
