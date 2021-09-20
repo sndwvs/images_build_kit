@@ -115,10 +115,4 @@ download() {
     message "" "download" "$KERNEL_FIRMWARE_DIR"
     # git_fetch <dir> <url> <branch>
     git_fetch $SOURCE/$KERNEL_FIRMWARE_DIR $KERNEL_FIRMWARE_SOURCE ${KERNEL_FIRMWARE_BRANCH}
-
-    if [[ $SOCFAMILY == sun* ]]; then
-        message "" "download" "$SUNXI_TOOLS_DIR"
-        # git_fetch <dir> <url> <branch>
-        git_fetch $SOURCE/$SUNXI_TOOLS_DIR $SUNXI_TOOLS_SOURCE ${SUNXI_TOOLS_BRANCH}
-    fi
 }
