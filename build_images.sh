@@ -47,17 +47,17 @@ setting_fstab() {
         if [[ $DISTR == sla* ]]; then
             echo "/dev/$ROOT_DISK    /          ext4    noatime,nodiratime,data=writeback,errors=remount-ro       0       1" >> $SOURCE/$ROOTFS/etc/fstab || exit 1
             if [[ $SOCFAMILY == bcm2* ]]; then
-                echo "/dev/mmcblk0p1    /boot      vfat    defaults       0       1" >> $SOURCE/$ROOTFS/etc/fstab
+                echo "/dev/${ROOT_DISK/p?/p1}    /boot      vfat    defaults       0       1" >> $SOURCE/$ROOTFS/etc/fstab
             elif [[ $SOCFAMILY == rk356* ]]; then
-                echo "/dev/mmcblk0p2    /boot      ext4    noatime,nodiratime       0       1" >> $SOURCE/$ROOTFS/etc/fstab
+                echo "/dev/${ROOT_DISK/p?/p2}    /boot      ext4    noatime,nodiratime       0       1" >> $SOURCE/$ROOTFS/etc/fstab
             fi
         elif [[ $DISTR == crux* ]]; then
             sed -i 's:#\(shm\):\1:' $SOURCE/$ROOTFS/etc/fstab || exit 1
             sed -i "/\# End of file/ i \\/dev\/$ROOT_DISK    \/          ext4    noatime,nodiratime,data=writeback,errors=remount-ro       0       1\n" $SOURCE/$ROOTFS/etc/fstab || exit 1
             if [[ $SOCFAMILY == bcm2* ]]; then
-                sed -i "/\# End of file/ i \\/dev\/mmcblk0p1    \/boot      vfat    defaults       0       1\n" $SOURCE/$ROOTFS/etc/fstab
+                sed -i "/\# End of file/ i \\/dev\/${ROOT_DISK/p?/p1}    \/boot      vfat    defaults       0       1\n" $SOURCE/$ROOTFS/etc/fstab
             elif [[ $SOCFAMILY == rk356* ]]; then
-                sed -i "/\# End of file/ i \\/dev\/mmcblk0p2    \/boot      ext4    noatime,nodiratime       0       1\n" $SOURCE/$ROOTFS/etc/fstab
+                sed -i "/\# End of file/ i \\/dev\/${ROOT_DISK/p?/p2}    \/boot      ext4    noatime,nodiratime       0       1\n" $SOURCE/$ROOTFS/etc/fstab
             fi
         fi
     fi
