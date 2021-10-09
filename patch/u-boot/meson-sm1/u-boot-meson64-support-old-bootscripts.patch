@@ -1,5 +1,17 @@
---- a/include/configs/meson64.h	2021-03-26 22:10:15.905197648 +0000
-+++ b/include/configs/meson64.h	2021-03-26 22:15:18.916474388 +0000
+From 6fa451b69255ff5175272505a5f9b037b0113067 Mon Sep 17 00:00:00 2001
+From: Igor Pecovnik <igor.pecovnik@gmail.com>
+Date: Mon, 5 Apr 2021 20:24:38 +0200
+Subject: [PATCH] Patching something
+
+Signed-off-by: Igor Pecovnik <igor.pecovnik@gmail.com>
+---
+ include/configs/meson64.h | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/include/configs/meson64.h b/include/configs/meson64.h
+index 7e97f890..e45abb29 100644
+--- a/include/configs/meson64.h
++++ b/include/configs/meson64.h
 @@ -77,11 +77,15 @@
  	"stdout=" STDOUT_CFG "\0" \
  	"stderr=" STDOUT_CFG "\0" \
@@ -16,3 +28,6 @@
  	"fdtfile=amlogic/" CONFIG_DEFAULT_DEVICE_TREE ".dtb\0" \
  	BOOTENV
  #endif
+-- 
+Created with Armbian build tools https://github.com/armbian/build
+
