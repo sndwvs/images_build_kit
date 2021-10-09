@@ -1,0 +1,35 @@
+From 9d963cd69faf94bdcb80624132fd10392f57875b Mon Sep 17 00:00:00 2001
+From: Khem Raj <raj.khem@gmail.com>
+Date: Tue, 11 May 2021 12:11:51 -0700
+Subject: [PATCH] pmu: Do not mark already defined functions as weak
+
+These functions are already defined as static functions in same header
+Fixes
+
+| plat/rockchip/common/drivers/pmu/pmu_com.h:35:14: error: weak identifier 'pmu_power_domain_ctr' never declared [-Werror]                                                                                      | #pragma weak pmu_power_domain_ctr                                                                                                                                                                             |              ^
+| plat/rockchip/common/drivers/pmu/pmu_com.h:36:14: error: weak identifier 'check_cpu_wfie' never declared [-Werror]
+| #pragma weak check_cpu_wfie
+|              ^
+
+Upstream-Status: Pending
+Signed-off-by: Khem Raj <raj.khem@gmail.com>
+---
+ plat/rockchip/common/drivers/pmu/pmu_com.h | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/plat/rockchip/common/drivers/pmu/pmu_com.h b/plat/rockchip/common/drivers/pmu/pmu_com.h
+index 5359f73b4..3f9ce7df9 100644
+--- a/plat/rockchip/common/drivers/pmu/pmu_com.h
++++ b/plat/rockchip/common/drivers/pmu/pmu_com.h
+@@ -32,8 +32,6 @@ enum pmu_pd_state {
+ };
+ 
+ #pragma weak plat_ic_get_pending_interrupt_id
+-#pragma weak pmu_power_domain_ctr
+-#pragma weak check_cpu_wfie
+ 
+ static inline uint32_t pmu_power_domain_st(uint32_t pd)
+ {
+-- 
+2.31.1
+

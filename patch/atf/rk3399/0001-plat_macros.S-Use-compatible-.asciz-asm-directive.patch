@@ -1,0 +1,31 @@
+From 5f78ce7eb9ab6bf5af682a715a9264d2a5ee7666 Mon Sep 17 00:00:00 2001
+From: Khem Raj <raj.khem@gmail.com>
+Date: Tue, 11 May 2021 12:06:34 -0700
+Subject: [PATCH] plat_macros.S: Use compatible .asciz asm directive
+
+clang asm does not like two strings to .asciz therefore make it single
+string which works on clang too.
+
+Upstream-Status: Pending
+Signed-off-by: Khem Raj <raj.khem@gmail.com>
+---
+ plat/rockchip/common/include/plat_macros.S | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/plat/rockchip/common/include/plat_macros.S b/plat/rockchip/common/include/plat_macros.S
+index 691beeb44..c07be9ca9 100644
+--- a/plat/rockchip/common/include/plat_macros.S
++++ b/plat/rockchip/common/include/plat_macros.S
+@@ -23,8 +23,7 @@ icc_regs:
+ 
+ /* Registers common to both GICv2 and GICv3 */
+ gicd_pend_reg:
+-	.asciz "gicd_ispendr regs (Offsets 0x200 - 0x278)\n"	\
+-		" Offset:\t\t\tvalue\n"
++	.asciz "gicd_ispendr regs (Offsets 0x200 - 0x278)\n Offset:\t\t\tvalue\n"
+ newline:
+ 	.asciz "\n"
+ spacer:
+-- 
+2.31.1
+

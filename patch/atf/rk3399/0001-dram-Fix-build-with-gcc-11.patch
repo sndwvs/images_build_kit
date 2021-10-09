@@ -1,0 +1,34 @@
+From a09a1de53aba422249a8376b0d95024200021317 Mon Sep 17 00:00:00 2001
+From: Khem Raj <raj.khem@gmail.com>
+Date: Tue, 11 May 2021 11:55:31 -0700
+Subject: [PATCH] dram: Fix build with gcc 11
+
+This is a redundant assignment which GCC warns about.
+
+Fixes
+
+plat/rockchip/rk3399/drivers/dram/dram_spec_timing.c:781:11: error: explicitly assigning value of variable of type 'uint32_t' (aka 'unsigned int') to itself [-Werror,-Wself-assign]
+                twr_tmp = twr_tmp;
+                ~~~~~~~ ^ ~~~~~~~
+
+Signed-off-by: Khem Raj <raj.khem@gmail.com>
+---
+ plat/rockchip/rk3399/drivers/dram/dram_spec_timing.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/plat/rockchip/rk3399/drivers/dram/dram_spec_timing.c b/plat/rockchip/rk3399/drivers/dram/dram_spec_timing.c
+index 3cdb7a296..76bc5ee96 100644
+--- a/plat/rockchip/rk3399/drivers/dram/dram_spec_timing.c
++++ b/plat/rockchip/rk3399/drivers/dram/dram_spec_timing.c
+@@ -778,7 +778,7 @@ static void lpddr3_get_parameter(struct timing_related_config *timing_config,
+ 	else if (twr_tmp <= 8)
+ 		twr_tmp = 8;
+ 	else if (twr_tmp <= 12)
+-		twr_tmp = twr_tmp;
++		; /* do nothing */
+ 	else if (twr_tmp <= 14)
+ 		twr_tmp = 14;
+ 	else
+-- 
+2.31.1
+

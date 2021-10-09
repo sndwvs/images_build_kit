@@ -1,0 +1,46 @@
+From d4c60a312271e000e8339f0b47a302c325313758 Mon Sep 17 00:00:00 2001
+From: Khem Raj <raj.khem@gmail.com>
+Date: Tue, 11 May 2021 11:46:30 -0700
+Subject: [PATCH] Fix build with gcc 11
+
+Fixes
+plat/rockchip/rk3399/drivers/dram/dram.c:13:22: error: ignoring attribute 'section (".pmusram.data")' because it conflicts with previous 'section (".sram.data")' [-Werror=attributes]
+
+See [1]
+
+[1] https://developer.trustedfirmware.org/T925
+
+Upstream-Status: Pending
+Signed-off-by: Khem Raj <raj.khem@gmail.com>
+---
+ plat/rockchip/rk3399/drivers/dram/dram.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/plat/rockchip/rk3399/drivers/dram/dram.h b/plat/rockchip/rk3399/drivers/dram/dram.h
+index 0eb12cf29..5572b1612 100644
+--- a/plat/rockchip/rk3399/drivers/dram/dram.h
++++ b/plat/rockchip/rk3399/drivers/dram/dram.h
+@@ -149,7 +149,7 @@ struct rk3399_sdram_params {
+ 	uint32_t rx_cal_dqs[2][4];
+ };
+ 
+-extern __sramdata struct rk3399_sdram_params sdram_config;
++extern struct rk3399_sdram_params sdram_config;
+ 
+ void dram_init(void);
+ 
+diff --git a/plat/rockchip/rk3399/drivers/dram/dram.c b/plat/rockchip/rk3399/drivers/dram/dram.c
+index 42b62945a..c5757b38f 100644
+--- a/plat/rockchip/rk3399/drivers/dram/dram.c
++++ b/plat/rockchip/rk3399/drivers/dram/dram.c
+@@ -10,7 +10,7 @@
+ #include <secure.h>
+ #include <soc.h>
+ 
+-__pmusramdata struct rk3399_sdram_params sdram_config;
++__sramdata struct rk3399_sdram_params sdram_config;
+ 
+ void dram_init(void)
+ {
+-- 
+2.31.1
