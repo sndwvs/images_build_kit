@@ -1,0 +1,20 @@
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-a64-pinebook.dts b/arch/arm64/boot/dts/allwinner/sun50i-a64-pinebook.dts
+index 34e67f5f8..de71e62cf 100644
+--- a/arch/arm64/boot/dts/allwinner/sun50i-a64-pinebook.dts
++++ b/arch/arm64/boot/dts/allwinner/sun50i-a64-pinebook.dts
+@@ -368,7 +368,6 @@ &sound {
+ 	simple-audio-card,aux-devs = <&codec_analog>, <&speaker_amp>;
+ 	simple-audio-card,widgets = "Microphone", "Internal Microphone Left",
+ 				    "Microphone", "Internal Microphone Right",
+-				    "Headphone", "Headphone Jack",
+ 				    "Speaker", "Internal Speaker";
+ 	simple-audio-card,routing =
+ 			"Left DAC", "DACL",
+@@ -377,7 +376,6 @@ &sound {
+ 			"Speaker Amp INR", "LINEOUT",
+ 			"Internal Speaker", "Speaker Amp OUTL",
+ 			"Internal Speaker", "Speaker Amp OUTR",
+-			"Headphone Jack", "HP",
+ 			"ADCL", "Left ADC",
+ 			"ADCR", "Right ADC",
+ 			"Internal Microphone Left", "MBIAS",
