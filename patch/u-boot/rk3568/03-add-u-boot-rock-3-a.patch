@@ -333,3 +333,63 @@ index 2447cce468d..cd2c2ae8ed5 100644
  CONFIG_PINCTRL=y
  CONFIG_SPL_PINCTRL=y
  CONFIG_DM_FUEL_GAUGE=y
+
+From 61e873725e36057390c96a7cfce1cfeeda7ad23d Mon Sep 17 00:00:00 2001
+From: Stephen <stephen@vamrs.com>
+Date: Fri, 3 Sep 2021 16:08:27 +0800
+Subject: [PATCH 7/9] rockchip: rename rk3568-rock3a to rk3568-rock-3-a
+
+Signed-off-by: Stephen <stephen@vamrs.com>
+---
+ arch/arm/dts/Makefile                                          | 2 +-
+ arch/arm/dts/{rk3568-rock3a.dts => rk3568-rock-3-a.dts}        | 2 +-
+ configs/{rock3a-rk3568_defconfig => rock-3-a-rk3568_defconfig} | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+ rename arch/arm/dts/{rk3568-rock3a.dts => rk3568-rock-3-a.dts} (92%)
+ rename configs/{rock3a-rk3568_defconfig => rock-3-a-rk3568_defconfig} (99%)
+
+diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
+index 96d2c8a75a4..021750ee631 100644
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -58,7 +58,7 @@
+ 	rk3399-puma-ddr1866.dtb \
+ 	rk3566-quartz64.dtb \
+ 	rk3568-firefly.dtb \
+-	rk3568-rock3a.dtb \
++	rk3568-rock-3-a.dtb \
+ 	rv1108-evb.dtb
+ dtb-$(CONFIG_ARCH_MESON) += \
+ 	meson-gxbb-odroidc2.dtb
+diff --git a/arch/arm/dts/rk3568-rock3a.dts b/arch/arm/dts/rk3568-rock-3-a.dts
+similarity index 92%
+rename from arch/arm/dts/rk3568-rock3a.dts
+rename to arch/arm/dts/rk3568-rock-3-a.dts
+index d7540fd19b2..12367c1faf6 100644
+--- a/arch/arm/dts/rk3568-rock3a.dts
++++ b/arch/arm/dts/rk3568-rock-3-a.dts
+@@ -11,7 +11,7 @@
+ 
+ / {
+ 	model = "Radxa ROCK 3 Model A";
+-	compatible = "radxa,rock3a", "rockchip,rk3568";
++	compatible = "radxa,rock-3-a", "rockchip,rk3568";
+ 
+ 	adc-keys {
+ 		compatible = "adc-keys";
+diff --git a/configs/rock3a-rk3568_defconfig b/configs/rock-3-a-rk3568_defconfig
+similarity index 99%
+rename from configs/rock3a-rk3568_defconfig
+rename to configs/rock-3-a-rk3568_defconfig
+index cd2c2ae8ed5..35e6eb7ee10 100644
+--- a/configs/rock3a-rk3568_defconfig
++++ b/configs/rock-3-a-rk3568_defconfig
+@@ -15,7 +15,7 @@ CONFIG_SPL_LIBDISK_SUPPORT=y
+ CONFIG_SPL_NAND_SUPPORT=y
+ CONFIG_SPL_SPI_FLASH_SUPPORT=y
+ CONFIG_SPL_SPI_SUPPORT=y
+-CONFIG_DEFAULT_DEVICE_TREE="rk3568-rock3a"
++CONFIG_DEFAULT_DEVICE_TREE="rk3568-rock-3-a"
+ CONFIG_SMBIOS_PRODUCT_NAME=""
+ CONFIG_DEBUG_UART=y
+ CONFIG_FIT=y

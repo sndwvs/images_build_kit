@@ -1,0 +1,44 @@
+From bd2fa07970eafb2a8f5108e752c91b4a4921a919 Mon Sep 17 00:00:00 2001
+From: Stephen <stephen@vamrs.com>
+Date: Sat, 21 Aug 2021 15:03:32 +0800
+Subject: [PATCH 6/9] define fdtfile environment variable
+
+Define fdtfile for each device, to make it possible to use
+devicetreedir.
+
+Signed-off-by: Stephen <stephen@vamrs.com>
+---
+ include/configs/rk3568_common.h   | 1 +
+ include/configs/rockchip-common.h | 7 +++++++
+ 2 files changed, 8 insertions(+)
+
+diff --git a/include/configs/rk3568_common.h b/include/configs/rk3568_common.h
+index 4996ec41f0b..bf2f6020c4d 100644
+--- a/include/configs/rk3568_common.h
++++ b/include/configs/rk3568_common.h
+@@ -84,6 +84,7 @@
+ 
+ #define CONFIG_EXTRA_ENV_SETTINGS \
+ 	ENV_MEM_LAYOUT_SETTINGS \
++	"fdtfile=" FDTFILE \
+ 	"partitions=" PARTS_RKIMG \
+ 	ROCKCHIP_DEVICE_SETTINGS \
+ 	RKIMG_DET_BOOTDEV \
+diff --git a/include/configs/rockchip-common.h b/include/configs/rockchip-common.h
+index 4103342d426..70fefcf75a7 100644
+--- a/include/configs/rockchip-common.h
++++ b/include/configs/rockchip-common.h
+@@ -81,6 +81,13 @@
+ 	BOOT_TARGET_PXE(func) \
+ 	BOOT_TARGET_DHCP(func)
+ 
++
++#ifdef CONFIG_ARM64
++#define FDTFILE "rockchip/" CONFIG_DEFAULT_DEVICE_TREE ".dtb" "\0"
++#else
++#define FDTFILE CONFIG_DEFAULT_DEVICE_TREE ".dtb" "\0"
++#endif
++
+ #ifdef CONFIG_ARM64
+ #define ROOT_UUID "B921B045-1DF0-41C3-AF44-4C6F280D3FAE;\0"
+ #else
