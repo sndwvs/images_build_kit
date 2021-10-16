@@ -1,0 +1,18 @@
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-a64-sopine-baseboard.dts b/arch/arm64/boot/dts/allwinner/sun50i-a64-sopine-baseboard.dts
+index 970d52837..28a35c91d 100644
+--- a/arch/arm64/boot/dts/allwinner/sun50i-a64-sopine-baseboard.dts
++++ b/arch/arm64/boot/dts/allwinner/sun50i-a64-sopine-baseboard.dts
+@@ -161,12 +161,10 @@ &simplefb_hdmi {
+ 
+ &sound {
+ 	simple-audio-card,aux-devs = <&codec_analog>;
+-	simple-audio-card,widgets = "Microphone", "Microphone Jack",
+-				    "Headphone", "Headphone Jack";
++	simple-audio-card,widgets = "Microphone", "Microphone Jack";
+ 	simple-audio-card,routing =
+ 			"Left DAC", "DACL",
+ 			"Right DAC", "DACR",
+-			"Headphone Jack", "HP",
+ 			"ADCL", "Left ADC",
+ 			"ADCR", "Right ADC",
+ 			"MIC2", "Microphone Jack";
