@@ -1,0 +1,52 @@
+diff --git a/arch/arm/cpu/armv8/generic_timer.c b/arch/arm/cpu/armv8/generic_timer.c
+index f27a74b9d0..3f1cd8eec1 100644
+--- a/arch/arm/cpu/armv8/generic_timer.c
++++ b/arch/arm/cpu/armv8/generic_timer.c
+@@ -70,7 +70,7 @@ unsigned long timer_read_counter(void)
+ 	isb();
+ 	do {
+ 		asm volatile("mrs %0, cntpct_el0" : "=r" (cntpct));
+-	} while (((cntpct + 1) & GENMASK(10, 0)) <= 1);
++	} while (((cntpct + 1) & GENMASK(9, 0)) <= 1); // <-- Changed from 10 to 9 (10 bits)
+ 
+ 	return cntpct;
+ }
+diff --git a/arch/arm/dts/sun50i-a64-sopine-baseboard.dts b/arch/arm/dts/sun50i-a64-sopine-baseboard.dts
+index e22b94c836..8910516fc5 100644
+--- a/arch/arm/dts/sun50i-a64-sopine-baseboard.dts
++++ b/arch/arm/dts/sun50i-a64-sopine-baseboard.dts
+@@ -82,6 +82,8 @@
+ 	phy-mode = "rgmii-id";
+ 	phy-handle = <&ext_rgmii_phy>;
+ 	phy-supply = <&reg_dc1sw>;
++	allwinner,rx-delay-ps = <0>;   // Added
++	allwinner,tx-delay-ps = <500>; // Added
+ 	status = "okay";
+ };
+ 
+@@ -129,7 +131,7 @@
+ 	 * to initialize. 100ms should be plenty of time to finish
+ 	 * whole process.
+ 	 */
+-	regulator-enable-ramp-delay = <100000>;
++	regulator-enable-ramp-delay = <300000>; // <-- Increased to 300000 from 100000
+ 	regulator-name = "vcc-phy";
+ };
+ 
+diff --git a/configs/sopine_baseboard_defconfig b/configs/sopine_baseboard_defconfig
+index 0093076dc5..e4fc694ecd 100644
+--- a/configs/sopine_baseboard_defconfig
++++ b/configs/sopine_baseboard_defconfig
+@@ -15,3 +15,12 @@ CONFIG_SPI_FLASH_WINBOND=y
+ CONFIG_SUN8I_EMAC=y
+ CONFIG_USB_EHCI_HCD=y
+ CONFIG_USB_OHCI_HCD=y
++# Added the lines below for Clusterboard networking support
++# REF: https://forum.pine64.org/showthread.php?tid=5581&page=2
++# REF: https://github.com/janwillies/u-boot/commit/73ce03a08b3989b874b88f4f17286308c6cd5eea
++# REF: https://ericdraken.com/cluster-computer-gotchas/
++CONFIG_PHY_REALTEK=y
++CONFIG_RTL8211E_PINE64_GIGABIT_FIX=y
++CONFIG_GMAC_TX_DELAY=0
++# Fix a spurious timer timout issue
++CONFIG_SUNXI_A64_TIMER_ERRATUM=y
