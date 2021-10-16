@@ -39,6 +39,7 @@ project site: **[slarm64.org](http://slarm64.org)**
         + [Orange Pi 4](http://www.orangepi.org/Orange%20Pi%204/)
     * RK3566
         + [Quartz64](https://wiki.pine64.org/wiki/Quartz64#SoC_and_Memory_Specifications)
+        + [Station M2](https://www.stationpc.com/product/stationm2#spec) [(roc-rk3566-pc)](https://en.t-firefly.com/product/industry/rocrk3566pc.html#spec)
     * RK3568
         + [Rock 3](https://wiki.radxa.com/Rock3/getting_started#Features)
         + [Station P2](https://www.stationpc.com/product/stationp2#spec) [(roc-rk3568-pc)](https://en.t-firefly.com/product/industry/rocrk3568pc.html#spec)
