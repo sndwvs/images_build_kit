@@ -58,10 +58,14 @@ project site: **[slarm64.org](http://slarm64.org)**
 # BUILD #
 
 ## cross compilation arm on aarch64 architecture ##
-`ARCH=arm ./build.sh`
+```bash
+ARCH=arm ./build.sh
+```
 
 ## creating an image from the command line ##
-`ARCH=arm DISTR=slackwarearm BOARD_NAME=cubietruck KERNEL_SOURCE=legacy DOWNLOAD_SOURCE_BINARIES=yes COMPILE_BINARIES=yes ./build.sh`
+```bash
+ARCH=arm DISTR=slackwarearm BOARD_NAME=cubietruck KERNEL_SOURCE=legacy DOWNLOAD_SOURCE_BINARIES=yes COMPILE_BINARIES=yes ./build.sh
+```
 
 ## creating crux-arm
 to build crux-arm on slarm64/slackware distributions you need to install the package [pkgutils](http://dl.slarm64.org/slackware/packages/aarch64/a/pkgutils-5.40.7-aarch64-1mara.txz)
