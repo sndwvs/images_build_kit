@@ -1,0 +1,21 @@
+--- a/arch/arm/boot/dts/rk3288-firefly.dtsi	2021-11-14 12:53:35.781534886 +0000
++++ b/arch/arm/boot/dts/rk3288-firefly.dtsi	2021-11-14 12:55:46.565242431 +0000
+@@ -65,7 +65,8 @@
+ 		work_led: led-0 {
+ 			gpios = <&gpio8 RK_PA1 GPIO_ACTIVE_LOW>;
+ 			label = "firefly:blue:user";
+-			linux,default-trigger = "rc-feedback";
++			linux,default-trigger = "heartbeat";
++			default-state = "on";
+ 			pinctrl-names = "default";
+ 			pinctrl-0 = <&work_led_pin>;
+ 		};
+@@ -74,6 +75,7 @@
+ 			gpios = <&gpio8 RK_PA2 GPIO_ACTIVE_LOW>;
+ 			label = "firefly:green:power";
+ 			linux,default-trigger = "default-on";
++			default-state = "off";
+ 			pinctrl-names = "default";
+ 			pinctrl-0 = <&power_led_pin>;
+ 		};
+
