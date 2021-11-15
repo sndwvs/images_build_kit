@@ -1,7 +1,7 @@
-From 1167e0322f28f603ca30fba62e6cfbee56e512ce Mon Sep 17 00:00:00 2001
+From 6b8539046586e0d420e7f310df2da69b4a13d19f Mon Sep 17 00:00:00 2001
 From: Kevin Kim <ckkim@hardkernel.com>
 Date: Wed, 16 Jan 2019 14:45:10 +0900
-Subject: [PATCH 29/74] ODROID-COMMON: pwm: gpio: Add a generic gpio based PWM
+Subject: [PATCH 46/75] ODROID-COMMON: pwm: gpio: Add a generic gpio based PWM
  driver
 
 From: Olliver Schinagl <oliver@schinagl.nl>
@@ -20,8 +20,8 @@ Signed-off-by: Olliver Schinagl <oliver@schinagl.nl>
  MAINTAINERS                                   |   5 +
  drivers/pwm/Kconfig                           |  15 ++
  drivers/pwm/Makefile                          |   1 +
- drivers/pwm/pwm-gpio.c                        | 253 ++++++++++++++++++
- 5 files changed, 292 insertions(+)
+ drivers/pwm/pwm-gpio.c                        | 255 ++++++++++++++++++
+ 5 files changed, 294 insertions(+)
  create mode 100644 Documentation/devicetree/bindings/pwm/pwm-gpio.txt
  create mode 100644 drivers/pwm/pwm-gpio.c
 
@@ -50,10 +50,10 @@ index 000000000000..336f61faa446
 +		pwm-gpios = <&pio 7 2 GPIO_ACTIVE_LOW>;
 +	};
 diff --git a/MAINTAINERS b/MAINTAINERS
-index 4e2698cc7e23..63e59da28c58 100644
+index 3b79fd441dde..99f6ccfe48ad 100644
 --- a/MAINTAINERS
 +++ b/MAINTAINERS
-@@ -7186,6 +7186,11 @@ F:	Documentation/i2c/muxes/i2c-mux-gpio.rst
+@@ -7825,6 +7825,11 @@ F:	Documentation/i2c/muxes/i2c-mux-gpio.rst
  F:	drivers/i2c/muxes/i2c-mux-gpio.c
  F:	include/linux/platform_data/i2c-mux-gpio.h
  
@@ -66,10 +66,10 @@ index 4e2698cc7e23..63e59da28c58 100644
  M:	Krzysztof Halasa <khc@pm.waw.pl>
  S:	Maintained
 diff --git a/drivers/pwm/Kconfig b/drivers/pwm/Kconfig
-index cb8d739067d2..609011be5aaf 100644
+index aa29841bbb79..9100da8ef27a 100644
 --- a/drivers/pwm/Kconfig
 +++ b/drivers/pwm/Kconfig
-@@ -181,6 +181,21 @@ config PWM_FSL_FTM
+@@ -195,6 +195,21 @@ config PWM_FSL_FTM
  	  To compile this driver as a module, choose M here: the module
  	  will be called pwm-fsl-ftm.
  
@@ -92,11 +92,11 @@ index cb8d739067d2..609011be5aaf 100644
  	tristate "HiSilicon BVT PWM support"
  	depends on ARCH_HISI || COMPILE_TEST
 diff --git a/drivers/pwm/Makefile b/drivers/pwm/Makefile
-index a59c710e98c7..0d0bcce797fb 100644
+index 708840b7fba8..f190bbc3af8d 100644
 --- a/drivers/pwm/Makefile
 +++ b/drivers/pwm/Makefile
-@@ -15,6 +15,7 @@ obj-$(CONFIG_PWM_CRC)		+= pwm-crc.o
- obj-$(CONFIG_PWM_CROS_EC)	+= pwm-cros-ec.o
+@@ -16,6 +16,7 @@ obj-$(CONFIG_PWM_CROS_EC)	+= pwm-cros-ec.o
+ obj-$(CONFIG_PWM_DWC)		+= pwm-dwc.o
  obj-$(CONFIG_PWM_EP93XX)	+= pwm-ep93xx.o
  obj-$(CONFIG_PWM_FSL_FTM)	+= pwm-fsl-ftm.o
 +obj-$(CONFIG_PWM_GPIO)		+= pwm-gpio.o
@@ -105,10 +105,10 @@ index a59c710e98c7..0d0bcce797fb 100644
  obj-$(CONFIG_PWM_IMX1)		+= pwm-imx1.o
 diff --git a/drivers/pwm/pwm-gpio.c b/drivers/pwm/pwm-gpio.c
 new file mode 100644
-index 000000000000..ab421fb4b8ba
+index 000000000000..6707a5dbe5fb
 --- /dev/null
 +++ b/drivers/pwm/pwm-gpio.c
-@@ -0,0 +1,253 @@
+@@ -0,0 +1,255 @@
 +/*
 + * Copyright (c) 2015 Olliver Schinagl <oliver@schinagl.nl>
 + *
@@ -340,7 +340,9 @@ index 000000000000..ab421fb4b8ba
 +		hrtimer_cancel(&gpio_data->timer);
 +	}
 +
-+	return pwmchip_remove(&gpio_chip->chip);
++	pwmchip_remove(&gpio_chip->chip);
++
++	return 0;
 +}
 +
 +static const struct of_device_id gpio_pwm_of_match[] = {
