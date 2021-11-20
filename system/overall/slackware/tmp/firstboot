@@ -11,7 +11,7 @@ case "$1" in
 
                 # size swap
                 swap_size=131072
-                [[ $(free | grep Mem | awk '{print $2}') < $((1024*512)) ]] && swap_size=$((1024*512))
+                [[ $(free | grep Mem | awk '{print $2}') -lt $((1024*512)) ]] && swap_size=$((1024*512))
 
                 if [ -f /tmp/part ]; then
                     echo -e "\e[0;37mResizing SD card file-system\x1B[0m"
