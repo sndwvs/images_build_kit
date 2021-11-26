@@ -248,7 +248,7 @@ external_patching_source() {
         SOURCES+=('https://github.com/Mange/rtl8192eu-linux-driver|rtl8192eu|realtek-4.4.x::')
 
         ## Wireless drivers for Realtek 8811, 8812, 8814 and 8821 chipsets
-        SOURCES+=('https://github.com/morrownr/8812au|rtl8812au|5.9.3.2::')
+        SOURCES+=('https://github.com/morrownr/8812au-20210629|rtl8812au|main::')
 
         # Wireless drivers for Xradio XR819 chipsets
         [[ $(version $KERNEL_VERSION) -ge $(version 5.4) && $(version $KERNEL_VERSION) -le $(version 5.11) ]] && \
