@@ -61,26 +61,6 @@ diff -Naur a/drivers/net/wireless/rtl8812au/core/efuse/rtw_efuse.c b/drivers/net
  			_RTW_PRINT_SEL(RTW_DBGDUMP, "%02X%s"
  				, pEfuseHal->fakeEfuseInitMap[i]
  				, ((i + 1) % 16 == 0) ? "\n" : (((i + 1) % 8 == 0) ? "	  " : " ")
-diff -Naur a/drivers/net/wireless/rtl8812au/core/rtw_mlme.c b/drivers/net/wireless/rtl8812au/core/rtw_mlme.c
---- a/drivers/net/wireless/rtl8812au/core/rtw_mlme.c	2021-10-08 18:41:11.676166115 +0000
-+++ b/drivers/net/wireless/rtl8812au/core/rtw_mlme.c	2021-10-08 20:46:49.806974892 +0000
-@@ -3152,12 +3152,14 @@
- 	ssc_chk = rtw_sitesurvey_condition_check(padapter, _FALSE);
- 	if( ssc_chk == SS_DENY_BUSY_TRAFFIC) {
- 		#ifdef CONFIG_LAYER2_ROAMING
--		if (rtw_chk_roam_flags(padapter, RTW_ROAM_ACTIVE) && pmlmepriv->need_to_roam == _TRUE)
-+		if (rtw_chk_roam_flags(padapter, RTW_ROAM_ACTIVE) && pmlmepriv->need_to_roam == _TRUE) {
- 			RTW_INFO(FUNC_ADPT_FMT" need to roam, don't care BusyTraffic\n", FUNC_ADPT_ARG(padapter));
--		else
-+		} else
- 		#endif
-+		{
- 			RTW_INFO(FUNC_ADPT_FMT" exit BusyTraffic\n", FUNC_ADPT_ARG(padapter));
- 			goto exit;
-+		}
- 	}
- 	else if (ssc_chk != SS_ALLOW)
- 		goto exit;
 diff -Naur a/drivers/net/wireless/rtl8812au/core/rtw_recv.c b/drivers/net/wireless/rtl8812au/core/rtw_recv.c
 --- a/drivers/net/wireless/rtl8812au/core/rtw_recv.c	2021-10-08 18:41:11.708166044 +0000
 +++ b/drivers/net/wireless/rtl8812au/core/rtw_recv.c	2021-10-08 21:11:42.340150682 +0000
