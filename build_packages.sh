@@ -13,7 +13,7 @@ build_kernel_pkg() {
     KERNEL_VERSION=$(get_version $SOURCE/$KERNEL_DIR)
 
     KERNEL=zImage
-    [[ $KARCH == arm64 ]] && KERNEL=Image
+    [[ $KARCH == arm64 || $KARCH == riscv ]] && KERNEL=Image
 
     message "" "copy" "linux-firmware"
     # create linux firmware
