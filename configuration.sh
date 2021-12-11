@@ -111,6 +111,17 @@ elif [[ $MARCH == "aarch64" ]]; then
     VERSION_XTOOLS=$BASE_VERSION_XTOOLS
     XTOOLS+=("$XTOOLS_PREFIX-$VERSION_XTOOLS-${MARCH}-$XTOOLS_ARM_SUFFIX")
     URL_XTOOLS+=("$BASE_URL_XTOOLS/$BASE_VERSION_XTOOLS/binrel")
+
+    if [[ $ARCH == "riscv64" ]]; then
+        # http://dl.slarm64.org/slackware/tools/gcc-riscv64-11.2-2021.11-aarch64-riscv64-unknown-linux-gnu.tar.xz
+        BASE_URL_XTOOLS="http://dl.slarm64.org/slackware/tools"
+        XTOOLS_RISCV64_SUFFIX="riscv64-unknown-linux-gnu"
+        XTOOLS_PREFIX="gcc-riscv64"
+        BASE_VERSION_XTOOLS="11.2-2021.11"
+        VERSION_XTOOLS=$BASE_VERSION_XTOOLS
+        XTOOLS+=("$XTOOLS_PREFIX-$VERSION_XTOOLS-${MARCH}-$XTOOLS_RISCV64_SUFFIX")
+        URL_XTOOLS+=("$BASE_URL_XTOOLS")
+    fi
 fi
 
 
@@ -148,10 +159,14 @@ if [[ $MARCH == "x86_64" || $MARCH == "aarch64" ]]; then
             [[ $XTOOLS_ARM_SUFFIX =~ "gnueabihf" ]] && _XTOOLS_ARM_SUFFIX=$XTOOLS_ARM_SUFFIX
             export CROSS32="${SOURCE}/$XTOOL/bin/${_XTOOLS_ARM_SUFFIX}-"
         fi
+        if [[ $XTOOL =~ "riscv64" ]]; then
+            [[ $XTOOLS_RISCV64_SUFFIX =~ "riscv64" ]] && _XTOOLS_RISCV64_SUFFIX=$XTOOLS_RISCV64_SUFFIX
+            export CROSS="${SOURCE}/$XTOOL/bin/${_XTOOLS_RISCV64_SUFFIX}-"
+        fi
     done
 fi
 
-[[ $MARCH != "x86_64" ]] && export CROSS=""
+[[ $MARCH != "x86_64" && $ARCH != "riscv64" ]] && export CROSS=""
 [[ $MARCH == "aarch64" && $KARCH == "arm" ]] && export CROSS=$CROSS32
 
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin:$BUILD/$OUTPUT/$TOOLS/
@@ -170,7 +185,8 @@ elif [[ ${DISTR} == crux* ]]; then
     unset DISTR_DIR
     DISTR_IMAGES[0]="core"
 fi
-DISTR_URL="${DISTR_SOURCE}/${DISTR}-${DISTR_VERSION}/${DISTR_DIR}"
+[[ $ARCH == riscv64 ]] && DISTR_SUFFIX="-$ARCH"
+DISTR_URL="${DISTR_SOURCE}/${DISTR}${DISTR_SUFFIX}-${DISTR_VERSION}/${DISTR_DIR}"
 DISTR_EXTRA_URL="${DISTR_SOURCE}/packages/${ARCH}"
 #DISTR_URL="http://dl.slarm64.org/slackware/${DISTR}-${DISTR_VERSION}/${DISTR_DIR}"
 #DISTR_EXTRA_URL="http://dl.slarm64.org/slackware/packages/${ARCH}"
