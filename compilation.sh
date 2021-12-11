@@ -15,7 +15,11 @@ compile_boot_loader() {
     gcc_version "$CROSS" GCC_VERSION
     message "" "compiler" "gcc $GCC_VERSION"
 
-    local ARCH=arm
+    if [[ $ARCH == arm* || $ARCH == aarch* ]]; then
+        local ARCH=arm
+    elif [[ $ARCH == riscv* ]]; then
+        local ARCH=riscv
+    fi
 
     make ARCH=$ARCH CROSS_COMPILE=$CROSS clean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     make ARCH=$ARCH CROSS_COMPILE=$CROSS $BOOT_LOADER_CONFIG >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
@@ -29,6 +33,10 @@ compile_boot_loader() {
     if [[ $SOCFAMILY == rk35* ]]; then
         [[ ! -z $ATF && ! -z $BL31 ]] && ln -fs $SOURCE/$ATF_DIR/bl31.${BL31##*.} bl31.${BL31##*.}
         [[ ! -z $ATF && ! -z $OPTEE ]] && ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$OPTEE tee.bin
+    fi
+
+    if [[ $SOCFAMILY == sun20* ]]; then
+        [[ ! -z $OPENSBI && ! -z $OPENSBI_BLOB ]] && ln -fs $SOURCE/$OPENSBI_DIR/$OPENSBI_BLOB $OPENSBI_BLOB
     fi
 
     # rockchip
@@ -98,6 +106,26 @@ compile_atf() {
     fi
 }
 
+compile_opensbi() {
+    message "" "compiling" "$OPENSBI_DIR $OPENSBI_BRANCH"
+    cd $SOURCE/$OPENSBI_DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
+    if [[ $SOCFAMILY == sun20* ]]; then
+        make clean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        make $CTHREADS CROSS_COMPILE=$CROSS PLATFORM=$OPENSBI_PLATFORM FW_PIC=y BUILD_INFO=y >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        ln -fs $SOURCE/$OPENSBI_DIR/build/platform/$OPENSBI_PLATFORM/firmware/$OPENSBI_BLOB $OPENSBI_BLOB
+    fi
+}
+
+compile_spl_boot0() {
+    message "" "compiling" "$SPL_BOOT0_DIR $SPL_BOOT0_BRANCH"
+    cd $SOURCE/$SPL_BOOT0_DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
+    #make clean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make $CTHREADS CROSS_COMPILE=$CROSS p=$SOCFAMILY mmc >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    install -Dm644 nboot/boot0_sdcard_${SOCFAMILY}.bin $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/boot0_sdcard_${SOCFAMILY}.bin >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+}
+
 compile_boot_tools() {
     BOOT_LOADER_TOOLS_VERSION=$(get_version $SOURCE/$BOOT_LOADER_TOOLS_DIR)
     message "" "compiling" "$BOOT_LOADER_TOOLS_DIR $BOOT_LOADER_TOOLS_VERSION"
@@ -135,7 +163,7 @@ compile_kernel() {
 
     local KERNEL=zImage
 
-    [[ $KARCH == arm64 ]] && local KERNEL=Image
+    [[ $KARCH == arm64 || $KARCH == riscv ]] && local KERNEL=Image
 
     # delete previous creations
     if [[ $SOCFAMILY != rk3288 || $KERNEL_SOURCE != next ]]; then
@@ -144,7 +172,7 @@ compile_kernel() {
     fi
 
     # use proven config
-    install -D $CWD/config/kernel/$LINUX_CONFIG $SOURCE/$KERNEL_DIR/.config || (message "err" "details" && exit 1) || exit 1
+    install -Dm644 $CWD/config/kernel/$LINUX_CONFIG $SOURCE/$KERNEL_DIR/.config || (message "err" "details" && exit 1) || exit 1
 
     gcc_version "$CROSS" GCC_VERSION
     message "" "compiler" "gcc $GCC_VERSION"

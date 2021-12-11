@@ -59,7 +59,7 @@ if [[ -z $DISTR ]]; then
     # Duplicate file descriptor 1 on descriptor 3
     exec 3>&1
     while true; do
-        DISTR=$(dialog --title "distributions" \
+        DISTR=$(dialog --title "board $BOARD_NAME" \
                     --radiolist "select distribution" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
                     "${DISTRS[@]}" \
         2>&1 1>&3)
@@ -209,8 +209,20 @@ if [[ $COMPILE_BINARIES == yes ]]; then
         [[ $DOWNLOAD_SOURCE_BINARIES == yes ]] && patching_source "u-boot-tools"
         compile_boot_tools
     fi
-    [[ ! -z $BOOT_PACKER_LOADER_DIR && $DOWNLOAD_SOURCE_BINARIES == yes ]] && compile_boot_packer_loader
-    [[ ! -z $ATF && $DOWNLOAD_SOURCE_BINARIES == yes ]] && ( patching_source "atf" && compile_atf )
+
+    [[ ! -z $BOOT_PACKER_LOADER_DIR ]] && compile_boot_packer_loader
+
+    if [[ ! -z $ATF ]]; then
+        [[ $DOWNLOAD_SOURCE_BINARIES == yes ]] && patching_source "atf"
+        compile_atf
+    fi
+
+    [[ ! -z $SPL_BOOT0_DIR ]] && compile_spl_boot0
+
+    if [[ ! -z $OPENSBI ]]; then
+        [[ $DOWNLOAD_SOURCE_BINARIES == yes ]] && patching_source "opensbi"
+        compile_opensbi
+    fi
 
     [[ $DOWNLOAD_SOURCE_BINARIES == yes ]] && patching_source "u-boot"
     compile_boot_loader
