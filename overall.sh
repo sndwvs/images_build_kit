@@ -152,6 +152,12 @@ patching_source() {
                         )
                 PATCH_SOURCE="$SOURCE/$ATF_DIR"
             ;;
+        opensbi)
+                dirs=(      "$CWD/patch/opensbi/$SOCFAMILY"
+                            "$CWD/patch/opensbi/$SOCFAMILY/$BOARD_NAME"
+                        )
+                PATCH_SOURCE="$SOURCE/$OPENSBI_DIR"
+            ;;
     esac
 
 
@@ -335,7 +341,8 @@ external_patching_source() {
 gcc_version() {
     local VER
     #VER=$( ${1}gcc --version | grep -oP "GCC.*(?=\))" )
-    VER=$( ${1}gcc --version | grep 'GCC\|Toolchain' | rev | cut -d ')' -f1 | rev | sed 's:^\s::g' )
+    #VER=$( ${1}gcc --version | grep 'GCC\|Toolchain' | rev | cut -d ')' -f1 | rev | sed 's:^\s::g' )
+    VER=$( ${1}gcc --version | rev | cut -d ')' -f1 | rev | head -n 1 | sed 's:^\s::g' )
     eval "$2=\$VER"
 }
 
