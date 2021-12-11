@@ -46,7 +46,7 @@ build_kernel_pkg() {
     message "" "copy" "device tree blob"
     # add device tree
     install -m755 -d "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb-${KERNEL_VERSION}"
-    if [[ ${KARCH} == arm64 ]]; then
+    if [[ ${KARCH} == arm64 || ${KARCH} == riscv ]]; then
             [[ $SOCFAMILY == rk3* ]] && ( cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/rockchip/*.dtb \
               $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb-${KERNEL_VERSION}/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
             [[ $SOCFAMILY == sun* ]] && ( cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/allwinner/*.dtb \
