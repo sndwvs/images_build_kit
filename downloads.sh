@@ -90,6 +90,18 @@ download() {
         git_fetch $SOURCE/$ATF_DIR $ATF_SOURCE ${ATF_BRANCH}
     fi
 
+    if [[ ! -z $OPENSBI ]]; then
+        message "" "download" "$OPENSBI_DIR"
+        # git_fetch <dir> <url> <branch>
+        git_fetch $SOURCE/$OPENSBI_DIR $OPENSBI_SOURCE ${OPENSBI_BRANCH}
+    fi
+
+    if [[ ! -z $SPL_BOOT0_SOURCE ]]; then
+        message "" "download" "$SPL_BOOT0_DIR"
+        # git_fetch <dir> <url> <branch>
+        git_fetch $SOURCE/$SPL_BOOT0_DIR $SPL_BOOT0_SOURCE ${SPL_BOOT0_BRANCH}
+    fi
+
     if [[ ! -z $BOOT_FIP_SOURCE ]]; then
         message "" "download" "$BOOT_FIP_DIR"
         # git_fetch <dir> <url> <branch>
