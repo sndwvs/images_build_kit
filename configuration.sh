@@ -202,14 +202,13 @@ fi
 # clean enviroment
 #---------------------------------------------
 clean_sources (){
-    rm -rf $BUILD/ || exit 1
+    [[ -d $BUILD ]] && rm -rf $BUILD/ || exit 1
 }
 
 #---------------------------------------------
 # create enviroment
 #---------------------------------------------
 prepare_dest (){
-#    mkdir -p $BUILD/{$SOURCE/$PKG,$OUTPUT/{$TOOLS,$IMAGES}} || exit 1
-    mkdir -p {$BUILD/$OUTPUT/{$TOOLS,$IMAGES},$SOURCE/$PKG} || exit 1
+    mkdir -p {$BUILD/$OUTPUT/{$TOOLS,$IMAGES},$SOURCE} || exit 1
 }
 
