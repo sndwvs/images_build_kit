@@ -20,6 +20,8 @@ project site: **[slarm64.org](http://slarm64.org)**
         + [1080P Pinebook](https://wiki.pine64.org/index.php/1080P_Pinebook#SoC_and_Memory_Specification)
         + [SOPine and Baseboard](https://wiki.pine64.org/wiki/PINE_A64-LTS/SOPine#SoC_and_Memory_Specification)
         + [PinePhone](https://wiki.pine64.org/wiki/PinePhone#Specifications)
+    * D1 ([XuanTie C906](https://occ.t-head.cn/vendor/cpu/index?id=3817197695983423488))
+        + [Nezha](https://linux-sunxi.org/Allwinner_Nezha)
 * Rockchip
     * RK3288
         + [Firefly-RK3288](http://en.t-firefly.com/product/rk3288.html)
