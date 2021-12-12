@@ -328,7 +328,7 @@ setting_ntp() {
 
 
 create_initrd() {
-    if [[ $MARCH == "x86_64" ]]; then
+    if [[ $MARCH == "x86_64" || ( $MARCH != "riscv64" && $ARCH == "riscv64" ) ]]; then
         [[ $SOCFAMILY == bcm2* ]] && find "$SOURCE/$ROOTFS/boot/" -type l -exec rm -rf {} \+ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         return 1
     fi
