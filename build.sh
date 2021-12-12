@@ -47,6 +47,8 @@ for _distr in $(grep -oP "(?<=DISTRS=[\"\']).*(?=[\'\"]$)" $CWD/config/environme
     _selected="off"
     if [[ ${_distr} == slarm64 ]] && [[ ${ARCH} == aarch64 || -z ${ARCH} ]]; then
         _selected="on"
+    elif [[ ${_distr} == slarm64 && ${ARCH} == riscv64 ]]; then
+        _selected="on"
     elif [[ ${_distr} == slackware* && ${ARCH} == arm ]]; then
         _selected="on"
     fi
