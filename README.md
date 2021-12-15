@@ -55,6 +55,9 @@ project site: **[slarm64.org](http://slarm64.org)**
         + [Odroid-C4](https://wiki.odroid.com/odroid-c4/hardware/hardware#specifications)
     * S905Y2
         + [Radxa Zero](https://wiki.radxa.com/Zero/getting_started#Features)
+* StarFive
+    * JH7100
+        + [VisionFive V1](https://rvspace.org/en/Product/VisionFive/Technical_Documents/VisionFive_Single_Board_Computer_Quick_Start_Guide#specifications)
 
 
 # BUILD #
