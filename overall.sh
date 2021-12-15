@@ -267,7 +267,7 @@ external_patching_source() {
         SOURCES+=('https://github.com/aircrack-ng/rtl8188eus|rtl8188eu|v5.3.9::')
 
         # Wireless drivers for Realtek 88x2bu chipsets
-        SOURCES+=('https://github.com/cilynx/rtl88x2bu|rtl8822bu|5.6.1_30362.20181109_COEX20180928-6a6a::')
+        SOURCES+=('https://github.com/cilynx/rtl88x2bu|rtl8822bu|5.8.7.1_35809.20191129_COEX20191120-7777::')
 
         # Wireless drivers for Realtek 8723DS chipsets
         [[ $(version $KERNEL_VERSION) -ge $(version 5.4) ]] && \
