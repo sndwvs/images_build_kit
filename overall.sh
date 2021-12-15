@@ -269,6 +269,9 @@ external_patching_source() {
         # Wireless drivers for Realtek 88x2bu chipsets
         SOURCES+=('https://github.com/cilynx/rtl88x2bu|rtl8822bu|5.8.7.1_35809.20191129_COEX20191120-7777::')
 
+        # Wireless drivers for Realtek 88x2cs chipsets
+        SOURCES+=('https://github.com/jethome-ru/rtl88x2cs|rtl88x2cs|tune_for_jethub::')
+
         # Wireless drivers for Realtek 8723DS chipsets
         [[ $(version $KERNEL_VERSION) -ge $(version 5.4) ]] && \
         SOURCES+=('https://github.com/lwfinger/rtl8723ds|rtl8723ds|master::')
