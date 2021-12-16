@@ -158,6 +158,12 @@ patching_source() {
                         )
                 PATCH_SOURCE="$SOURCE/$OPENSBI_DIR"
             ;;
+        second-boot)
+                dirs=(      "$CWD/patch/second-boot/$SOCFAMILY"
+                            "$CWD/patch/second-boot/$SOCFAMILY/$BOARD_NAME"
+                        )
+                PATCH_SOURCE="$SOURCE/$SECOND_BOOT_DIR"
+            ;;
     esac
 
 

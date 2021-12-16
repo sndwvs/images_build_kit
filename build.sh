@@ -220,8 +220,10 @@ if [[ $COMPILE_BINARIES == yes ]]; then
     fi
 
     [[ ! -z $SPL_BOOT0_DIR ]] && compile_spl_boot0
-    [[ ! -z $SECOND_BOOT_DIR ]] && compile_second_boot
     [[ ! -z $DDRINIT_DIR ]] && compile_ddrinit
+
+    [[ $DOWNLOAD_SOURCE_BINARIES == yes ]] && patching_source "second-boot"
+    compile_second_boot
 
     if [[ ! -z $OPENSBI ]]; then
         [[ $DOWNLOAD_SOURCE_BINARIES == yes ]] && patching_source "opensbi"
