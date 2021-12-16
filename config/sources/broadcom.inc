@@ -7,22 +7,19 @@ SERIAL_CONSOLE=ttyS0
 IMAGE_OFFSET=2048
 
 BOOT_LOADER_FIRMWARE_SOURCE=" https://github.com/raspberrypi/firmware.git"
-BOOT_LOADER_FIRMWARE_DIR="boot-loader-firmware-broadcom-${KERNEL_SOURCE}"
+BOOT_LOADER_FIRMWARE_DIR="boot-loader-firmware-broadcom"
+BOOT_LOADER_FIRMWARE_BRANCH="next::"
 
 BOOT_LOADER_BIN="u-boot.bin"
 
 
 case $KERNEL_SOURCE in
     legacy)
-            BOOT_LOADER_FIRMWARE_BRANCH="master::"
-
             LINUX_SOURCE="https://github.com/raspberrypi/linux.git"
             KERNEL_BRANCH="rpi-5.10.y::"
             KERNEL_DIR="linux-$SOCFAMILY-$KERNEL_SOURCE"
     ;;
     next)
-            BOOT_LOADER_FIRMWARE_BRANCH="next::"
-
             LINUX_SOURCE="https://github.com/raspberrypi/linux.git"
             KERNEL_BRANCH="rpi-5.15.y::"
             KERNEL_DIR="linux-$SOCFAMILY-$KERNEL_SOURCE"
