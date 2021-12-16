@@ -102,6 +102,18 @@ download() {
         git_fetch $SOURCE/$SPL_BOOT0_DIR $SPL_BOOT0_SOURCE ${SPL_BOOT0_BRANCH}
     fi
 
+    if [[ ! -z $SECOND_BOOT_SOURCE ]]; then
+        message "" "download" "$SECOND_BOOT_DIR"
+        # git_fetch <dir> <url> <branch>
+        git_fetch $SOURCE/$SECOND_BOOT_DIR $SECOND_BOOT_SOURCE ${SECOND_BOOT_BRANCH}
+    fi
+
+    if [[ ! -z $DDRINIT_SOURCE ]]; then
+        message "" "download" "$DDRINIT_DIR"
+        # git_fetch <dir> <url> <branch>
+        git_fetch $SOURCE/$DDRINIT_DIR $DDRINIT_SOURCE ${DDRINIT_BRANCH}
+    fi
+
     if [[ ! -z $BOOT_FIP_SOURCE ]]; then
         message "" "download" "$BOOT_FIP_DIR"
         # git_fetch <dir> <url> <branch>
