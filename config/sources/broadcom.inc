@@ -39,7 +39,7 @@ create_uboot()
 
 write_uboot()
 {
-cat <<EOF>$SOURCE/$ROOTFS/boot/config.txt
+cat <<EOF>$SOURCE/$IMAGE/boot/config.txt
 # See /boot/overlays/README for all available options
 
 # Our kernels are located on a Linux partition. Chainload U-Boot to load them.
@@ -92,7 +92,7 @@ EOF
     echo "root=/dev/mmcblk0p2 ro rootwait nofont console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 elevator=noop snd-bcm2835.enable_compat_alsa=0" \
     > "$SOURCE/$IMAGE/boot/cmdline.txt"
 
-    cp -v $SOURCE/$BOOT_LOADER_FIRMWARE_DIR/boot/{*.dat,*.bin,*.elf} $SOURCE/$ROOTFS/boot >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    cp -v $SOURCE/$BOOT_LOADER_FIRMWARE_DIR/boot/{*.dat,*.bin,*.elf} $SOURCE/$IMAGE/boot >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     if [[ -f $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN ]]; then
         message "" "write" "bootloader: $BOOT_LOADER_BIN"
