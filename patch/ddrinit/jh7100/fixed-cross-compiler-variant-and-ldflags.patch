@@ -1,0 +1,32 @@
+--- a/build/Makefile	2021-12-16 17:37:22.457037194 +0200
++++ b/build/Makefile	2021-12-16 17:48:42.878889216 +0200
+@@ -2,11 +2,11 @@
+ # Copyright (c) 2020 StarFiveTech, Inc
+ 
+ # compiler tool chain
+-CROSSCOMPILE?=riscv64-unknown-elf-
+-CC=${CROSSCOMPILE}gcc
+-LD=${CROSSCOMPILE}ld
+-OBJCOPY=${CROSSCOMPILE}objcopy
+-OBJDUMP=${CROSSCOMPILE}objdump
++CROSS_COMPILE?=riscv64-unknown-elf-
++CC=${CROSS_COMPILE}gcc
++LD=${CROSS_COMPILE}ld
++OBJCOPY=${CROSS_COMPILE}objcopy
++OBJDUMP=${CROSS_COMPILE}objdump
+ 
+ # SoC IS JH7100 FOR VISIONFIVE OR BEAGLEV OR EVBV1 
+ SoC=JH7100
+@@ -35,10 +35,11 @@
+ CFLAGS += -march=$(RISCV_ARCH)
+ CFLAGS += -mabi=$(RISCV_ABI)
+ CFLAGS += -mcmodel=medany
++CFLAGS += -ffreestanding
+ CFLAGS += $(INCLUDE_DIR)
+ CCASFLAGS= -mcmodel=medany -mexplicit-relocs	
+ 					
+-LDFLAGS = -march=$(RISCV_ARCH) -mabi=$(RISCV_ABI)-T $(LINKER_SCRIPT) -nostartfiles --specs=nano.specs -Wl,-Map,$(MAP_FILE)
++LDFLAGS = -march=$(RISCV_ARCH) -mabi=$(RISCV_ABI)-T $(LINKER_SCRIPT) -nostartfiles -lgcc -Wl,-Map,$(MAP_FILE),--build-id=none
+ 
+ # object list
+ OBJECTLIST=../boot/start.o\

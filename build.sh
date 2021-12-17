@@ -220,7 +220,11 @@ if [[ $COMPILE_BINARIES == yes ]]; then
     fi
 
     [[ ! -z $SPL_BOOT0_DIR ]] && compile_spl_boot0
-    [[ ! -z $DDRINIT_DIR ]] && compile_ddrinit
+
+    if [[ ! -z $DDRINIT_DIR ]]; then
+        [[ $DOWNLOAD_SOURCE_BINARIES == yes ]] && patching_source "ddrinit"
+        compile_ddrinit
+    fi
 
     if [[ ! -z $SECOND_BOOT_DIR ]]; then
         [[ $DOWNLOAD_SOURCE_BINARIES == yes ]] && patching_source "second-boot"

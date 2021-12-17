@@ -164,6 +164,12 @@ patching_source() {
                         )
                 PATCH_SOURCE="$SOURCE/$SECOND_BOOT_DIR"
             ;;
+        ddrinit)
+                dirs=(      "$CWD/patch/ddrinit/$SOCFAMILY"
+                            "$CWD/patch/ddrinit/$SOCFAMILY/$BOARD_NAME"
+                        )
+                PATCH_SOURCE="$SOURCE/$DDRINIT_DIR"
+            ;;
     esac
 
 
