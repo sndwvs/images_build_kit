@@ -60,7 +60,7 @@ compile_boot_loader() {
 
     # starfive
     if [[ $SOCFAMILY == jh7100 ]]; then
-        make $CTHREADS ARCH=$ARCH u-boot.bin u-boot.itb CROSS_COMPILE=$CROSS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        make $CTHREADS ARCH=$ARCH u-boot.bin u-boot.dtb CROSS_COMPILE=$CROSS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
     # allwinner, broadcom, amlogic
