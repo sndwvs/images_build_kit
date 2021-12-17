@@ -219,8 +219,6 @@ if [[ $COMPILE_BINARIES == yes ]]; then
         compile_atf
     fi
 
-    [[ ! -z $SPL_BOOT0_DIR ]] && compile_spl_boot0
-
     if [[ ! -z $DDRINIT_DIR ]]; then
         [[ $DOWNLOAD_SOURCE_BINARIES == yes ]] && patching_source "ddrinit"
         compile_ddrinit

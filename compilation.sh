@@ -127,22 +127,20 @@ compile_opensbi() {
     fi
 }
 
-compile_spl_boot0() {
-    message "" "compiling" "$SPL_BOOT0_DIR $SPL_BOOT0_BRANCH"
-    cd $SOURCE/$SPL_BOOT0_DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
-    #make clean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    make $CTHREADS CROSS_COMPILE=$CROSS p=$SOCFAMILY mmc >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    install -Dm644 nboot/boot0_sdcard_${SOCFAMILY}.bin $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/boot0_sdcard_${SOCFAMILY}.bin >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-}
-
 compile_second_boot() {
     message "" "compiling" "$SECOND_BOOT_DIR $SECOND_BOOT_BRANCH"
     cd $SOURCE/$SECOND_BOOT_DIR/build >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    make clean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    make $CTHREADS CROSS_COMPILE=$CROSS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-#    install -Dm644 boot0_sdcard_${SOCFAMILY}.bin $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/boot0_sdcard_${SOCFAMILY}.bin >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    if [[ $SOCFAMILY == sun20* ]]; then
+        #make clean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        make $CTHREADS CROSS_COMPILE=$CROSS p=$SOCFAMILY mmc >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        install -Dm644 nboot/boot0_sdcard_${SOCFAMILY}.bin $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/boot0_sdcard_${SOCFAMILY}.bin >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
+    if [[ $SOCFAMILY == jh7100 ]]; then
+        make clean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        make $CTHREADS CROSS_COMPILE=$CROSS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        #install -Dm644 boot0_sdcard_${SOCFAMILY}.bin $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/boot0_sdcard_${SOCFAMILY}.bin >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
 }
 
 compile_ddrinit() {
@@ -151,7 +149,7 @@ compile_ddrinit() {
 
     make clean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     make $CTHREADS CROSS_COMPILE=$CROSS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-#    install -Dm644 nboot/boot0_sdcard_${SOCFAMILY}.bin $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/boot0_sdcard_${SOCFAMILY}.bin >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    #install -Dm644 nboot/boot0_sdcard_${SOCFAMILY}.bin $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/boot0_sdcard_${SOCFAMILY}.bin >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 compile_boot_tools() {

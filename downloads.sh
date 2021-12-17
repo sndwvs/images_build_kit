@@ -96,12 +96,6 @@ download() {
         git_fetch $SOURCE/$OPENSBI_DIR $OPENSBI_SOURCE ${OPENSBI_BRANCH}
     fi
 
-    if [[ ! -z $SPL_BOOT0_SOURCE ]]; then
-        message "" "download" "$SPL_BOOT0_DIR"
-        # git_fetch <dir> <url> <branch>
-        git_fetch $SOURCE/$SPL_BOOT0_DIR $SPL_BOOT0_SOURCE ${SPL_BOOT0_BRANCH}
-    fi
-
     if [[ ! -z $SECOND_BOOT_SOURCE ]]; then
         message "" "download" "$SECOND_BOOT_DIR"
         # git_fetch <dir> <url> <branch>
