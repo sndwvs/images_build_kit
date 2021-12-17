@@ -122,7 +122,7 @@ compile_opensbi() {
     fi
     if [[ $SOCFAMILY == jh7100 ]]; then
         make clean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        make $CTHREADS CROSS_COMPILE=$CROSS PLATFORM=$OPENSBI_PLATFORM FW_PAYLOAD_PATH=${BOOT_LOADER_DIR}/u-boot.bin FW_FDT_PATH=${BOOT_LOADER_DIR}/u-boot.dtb >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        make $CTHREADS CROSS_COMPILE=$CROSS PLATFORM=$OPENSBI_PLATFORM FW_PAYLOAD_PATH=../${BOOT_LOADER_DIR}/u-boot.bin FW_FDT_PATH=../${BOOT_LOADER_DIR}/u-boot.dtb >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         ln -fs $SOURCE/$OPENSBI_DIR/build/platform/$OPENSBI_PLATFORM/firmware/$OPENSBI_BLOB $OPENSBI_BLOB
     fi
 }
