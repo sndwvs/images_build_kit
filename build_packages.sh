@@ -51,6 +51,8 @@ build_kernel_pkg() {
               $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb-${KERNEL_VERSION}/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
             [[ $SOCFAMILY == sun* ]] && ( cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/allwinner/*.dtb \
               $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb-${KERNEL_VERSION}/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+            [[ $SOCFAMILY == jh71* ]] && ( cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/starfive/*.dtb \
+              $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb-${KERNEL_VERSION}/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
             if [[ $SOCFAMILY == bcm2* ]]; then
                 install -dm755 "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/overlays/"
                 cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/broadcom/*.dtb \
