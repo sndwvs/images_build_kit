@@ -67,6 +67,11 @@ project site: **[slarm64.org](http://slarm64.org)**
 ARCH=arm ./build.sh
 ```
 
+## cross compilation riscv64 on aarch64 architecture ##
+```bash
+ARCH=riscv64 ./build.sh
+```
+
 ## creating an image from the command line ##
 ```bash
 ARCH=arm DISTR=slackwarearm BOARD_NAME=cubietruck KERNEL_SOURCE=legacy DOWNLOAD_SOURCE_BINARIES=yes COMPILE_BINARIES=yes ./build.sh
