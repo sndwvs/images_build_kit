@@ -233,7 +233,7 @@ transfer() {
             local processed=$(( $processed + $(du -s $dir | awk 'BEGIN{sum=0}{sum+=$1}END{print sum}') ))
             local pct=$(( $processed * 100 / $size ))
             local procent=${pct%.*}
-            cp -rb $dir $OUTPUT/ 2>&1>/dev/null || exit 1
+            cp -arb $dir $OUTPUT/ 2>&1>/dev/null || exit 1
             echo "XXX"
             echo "transfer directory:  $dir"
             echo "XXX"
