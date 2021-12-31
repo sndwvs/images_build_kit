@@ -275,7 +275,7 @@ for image_type in ${DISTR_IMAGES[@]}; do
         if [[ ${DISTR} != crux* ]]; then
             create_initrd
             setting_wifi
-            setting_governor
+            [[ ! -z $CPU_GOVERNOR ]] && setting_governor
         fi
         [[ $NTP == yes ]] && setting_ntp
         setting_modules
