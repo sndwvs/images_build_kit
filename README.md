@@ -2,8 +2,8 @@
 
 to build images you need OS Slackware 14.2 or higher
 
-project site: **[slarm64.org](http://slarm64.org)**  
-**[images](http://dl.slarm64.org/slackware/images/)**  
+project site: **[slarm64.org](https://slarm64.org)**
+**[images](https://dl.slarm64.org/slackware/images/)**
 
 
 # FAQ #
@@ -52,7 +52,7 @@ project site: **[slarm64.org](http://slarm64.org)**
         + [Raspberry Pi 4](https://www.raspberrypi.org/products/raspberry-pi-4-model-b/specifications/) board provided by user [wowbaggerHU](https://www.linuxquestions.org/questions/user/wowbaggerhu-1042789/)
 * Amlogic
     * S905X3
-        + [Odroid-C4](https://wiki.odroid.com/odroid-c4/hardware/hardware#specifications)
+        + [Odroid-C4](https://wiki.odroid.com/odroid-c4/hardware/hardware#specifications) board provided by [Odroid Team](https://forum.odroid.com/viewtopic.php?f=203&t=40256&p=340679#p340679)
     * S905Y2
         + [Radxa Zero](https://wiki.radxa.com/Zero/getting_started#Features)
 * StarFive
