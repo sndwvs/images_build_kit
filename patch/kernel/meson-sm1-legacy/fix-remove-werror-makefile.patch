@@ -1,0 +1,34 @@
+drivers/amlogic/media_modules/stream_input/parser/dvb_ci/aml_spi.c: In function ‘aml_spi_io_test’:
+drivers/amlogic/media_modules/stream_input/parser/dvb_ci/aml_spi.c:1747:9: error: this ‘if’ clause does not guard... [-Werror=misleading-indentation]
+ 1747 |         if (kstrtol(parm[1], 0, &value) == 0)
+      |         ^~
+In file included from ./include/linux/kernel.h:13,
+                 from drivers/amlogic/media_modules/stream_input/parser/dvb_ci/aml_spi.c:22:
+./include/linux/printk.h:277:9: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+  277 |         printk(KERN_ERR pr_fmt(fmt), ##__VA_ARGS__)
+      |         ^~~~~~
+drivers/amlogic/media_modules/stream_input/parser/dvb_ci/aml_spi.c:1749:17: note: in expansion of macro ‘pr_err’
+ 1749 |                 pr_err("%s 0x%x\n", parm[0], addr);
+      |                 ^~~~~~
+  LD      drivers/cdrom/built-in.o
+  LD      drivers/char/ipmi/built-in.o
+  CC [M]  drivers/amlogic/media_modules/stream_input/parser/hw_demux/aml_dmx.o
+  CC [M]  drivers/amlogic/media_modules/stream_input/parser/demux/sw_demux/dvbcsa2/dvbcsa_bs_transpose.o
+  CC      fs/f2fs/inode.o
+  CC [M]  drivers/amlogic/media_modules/stream_input/parser/demux/sw_demux/dvbcsa2/dvbcsa_bs_transpose32.o
+  CC      fs/fat/dir.o
+  CC [M]  drivers/amlogic/media_modules/stream_input/parser/demux/hw_demux/hwdemux.o
+cc1: all warnings being treated as errors
+make[5]: *** [scripts/Makefile.build:337: drivers/amlogic/media_modules/stream_input/parser/dvb_ci/aml_spi.o] Error 1
+
+
+--- a/Makefile	2021-12-31 20:29:07.054052923 +0200
++++ b/Makefile	2021-12-31 20:29:11.290064597 +0200
+@@ -389,7 +389,6 @@
+ 		   -fno-strict-aliasing -fno-common -fshort-wchar \
+ 		   -Werror-implicit-function-declaration \
+ 		   -Wno-format-security \
+-		   -Werror	\
+ 		   -std=gnu89 $(call cc-option,-fno-PIE)
+ 
+ 
