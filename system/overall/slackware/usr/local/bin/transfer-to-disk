@@ -51,7 +51,7 @@ case ${COMPATIBLE} in
     *raspberry*pi*)
             FIX_BOOT_DISK=true
     ;;
-    *amlogic*g12a*)
+    *amlogic*g12a*|*amlogic*sm1*)
             OFFSET_LOADER="1::"
             LOADER="u-boot.bin::"
             BS=512
