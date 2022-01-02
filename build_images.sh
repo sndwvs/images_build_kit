@@ -401,6 +401,8 @@ setting_bootloader() {
     if [[ -f "$CWD/config/boot_scripts/uEnv-$SOCFAMILY.txt" ]]; then
         install -Dm644 $CWD/config/boot_scripts/uEnv-$SOCFAMILY.txt "$SOURCE/$ROOTFS/boot/uEnv.txt"
         echo "fdtfile=${DEVICE_TREE_BLOB}" >> "$SOURCE/$ROOTFS/boot/uEnv.txt"
+        # parameter to configure the boot of the legacy kernel
+        [[ $SOCFAMILY == meson-sm1 && $KERNEL_SOURCE != next ]] && echo "kernel=$KERNEL_SOURCE" >> "$SOURCE/$ROOTFS/boot/uEnv.txt"
     fi
     # change root disk if disk not default
     [[ -n ${ROOT_DISK##*mmcblk0p1} ]] && echo "rootdev=/dev/$ROOT_DISK" >> "$SOURCE/$ROOTFS/boot/uEnv.txt"
