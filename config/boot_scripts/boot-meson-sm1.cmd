@@ -98,10 +98,14 @@ if test "${kernel}" = "legacy"; then
 #    load ${devtype} ${devnum} ${k_addr} boot/zImage
     load ${devtype} ${devnum} ${loadaddr} ${prefix}Image
     load ${devtype} ${devnum} ${dtb_loadaddr} ${prefix}dtb/${fdtfile}
-    load ${devtype} ${devnum} ${initrd_loadaddr} ${prefix}uInitrd
     fdt addr ${dtb_loadaddr}
 #    unzip ${k_addr} ${loadaddr}
-    booti ${loadaddr} ${initrd_loadaddr} ${dtb_loadaddr}
+
+    if load ${devtype} ${devnum} ${initrd_loadaddr} ${prefix}uInitrd; then
+        booti ${loadaddr} ${initrd_loadaddr} ${dtb_loadaddr};
+    else
+        booti ${loadaddr} - ${dtb_loadaddr};
+    fi
 else
     # next kernel
 
