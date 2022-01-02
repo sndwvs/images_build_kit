@@ -2,6 +2,7 @@
 #
 # Please edit /boot/uEnv.txt to set supported parameters
 #
+
 setenv load_addr "0x32000000"
 setenv kernel_addr_r "0x34000000"
 setenv fdt_addr_r "0x4080000"
@@ -10,6 +11,8 @@ setenv rootdev "/dev/mmcblk0p1"
 setenv verbosity "1"
 setenv console "both"
 setenv rootfstype "ext4"
+
+
 
 
 # odroid c4 legacy kernel values from boot.ini
@@ -76,29 +79,53 @@ setenv maxcpus "4"
 # legacy kernel values from boot.ini
 
 
+
+
 if test -e ${devtype} ${devnum} ${prefix}uEnv.txt; then
     load ${devtype} ${devnum} ${load_addr} ${prefix}uEnv.txt
     env import -t ${load_addr} ${filesize}
 fi
 
-if test "${console}" = "display" || test "${console}" = "both"; then setenv consoleargs "console=%SERIAL_CONSOLE%,%SERIAL_CONSOLE_SPEED%n8"; fi
-if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "${consoleargs} console=tty1"; fi
+if test "${kernel}" = "legacy"; then
+    # legacy kernel
 
-setenv bootargs "root=${rootdev} ro rootwait rootfstype=${rootfstype} init=/sbin/init ${consoleargs} consoleblank=0 coherent_pool=2M loglevel=${verbosity} usb-storage.quirks=${usbstoragequirks} ${extraargs} ${extraboardargs}"
+    if test "${console}" = "display" || test "${console}" = "both"; then setenv consoleargs "console=%SERIAL_CONSOLE%,%SERIAL_CONSOLE_SPEED%"; fi
+    if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "${consoleargs} console=tty1"; fi
 
-load ${devtype} ${devnum} ${fdt_addr_r} ${prefix}dtb/${fdtfile}
-load ${devtype} ${devnum} ${kernel_addr_r} ${prefix}Image
-fdt addr ${fdt_addr_r}
-fdt resize 65536
+    setenv bootargs "root=${rootdev} ro rootwait rootfstype=${rootfstype} init=/sbin/init ${consoleargs} consoleblank=0 coherent_pool=2M loglevel=${verbosity} ${amlogic} no_console_suspend fsck.repair=yes net.ifnames=0 elevator=noop hdmimode=${hdmimode} cvbsmode=576cvbs max_freq_a55=${max_freq_a55} maxcpus=${maxcpus} voutmode=${voutmode} ${cmode} disablehpd=${disablehpd} cvbscable=${cvbscable} overscan=${overscan} ${hid_quirks} monitor_onoff=${monitor_onoff} ${cec_enable} sdrmode=${sdrmode}"
+    echo "Legacy bootargs: ${bootargs}"
 
-# read "/chosen" node, property "bootargs", and store in var "dtb_bootargs"
-fdt get value dtb_bootargs /chosen bootargs
-if test "${dtb_bootargs}" != "" ; then setenv bootargs "${bootargs} ${dtb_bootargs}"; fi
-
-if load ${devtype} ${devnum} ${ramdisk_addr_r} ${prefix}uInitrd; then
-    booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r};
+#    load ${devtype} ${devnum} ${k_addr} boot/zImage
+    load ${devtype} ${devnum} ${loadaddr} ${prefix}Image
+    load ${devtype} ${devnum} ${dtb_loadaddr} ${prefix}dtb/${fdtfile}
+    load ${devtype} ${devnum} ${initrd_loadaddr} ${prefix}uInitrd
+    fdt addr ${dtb_loadaddr}
+#    unzip ${k_addr} ${loadaddr}
+    booti ${loadaddr} ${initrd_loadaddr} ${dtb_loadaddr}
 else
-    booti ${kernel_addr_r} - ${fdt_addr_r};
+    # next kernel
+
+    if test "${console}" = "display" || test "${console}" = "both"; then setenv consoleargs "console=%SERIAL_CONSOLE%,%SERIAL_CONSOLE_SPEED%n8"; fi
+    if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "${consoleargs} console=tty1"; fi
+
+    setenv bootargs "root=${rootdev} ro rootwait rootfstype=${rootfstype} init=/sbin/init ${consoleargs} consoleblank=0 coherent_pool=2M loglevel=${verbosity} usb-storage.quirks=${usbstoragequirks} ${extraargs} ${extraboardargs}"
+
+    load ${devtype} ${devnum} ${fdt_addr_r} ${prefix}dtb/${fdtfile}
+    load ${devtype} ${devnum} ${kernel_addr_r} ${prefix}Image
+    fdt addr ${fdt_addr_r}
+    fdt resize 65536
+
+    # read "/chosen" node, property "bootargs", and store in var "dtb_bootargs"
+    fdt get value dtb_bootargs /chosen bootargs
+    if test "${dtb_bootargs}" != "" ; then setenv bootargs "${bootargs} ${dtb_bootargs}"; fi
+
+    echo "Mainline bootargs: ${bootargs}"
+
+    if load ${devtype} ${devnum} ${ramdisk_addr_r} ${prefix}uInitrd; then
+        booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r};
+    else
+        booti ${kernel_addr_r} - ${fdt_addr_r};
+    fi
 fi
 
 # Recompile with:
