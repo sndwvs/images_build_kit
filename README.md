@@ -45,6 +45,8 @@ project site: **[slarm64.org](https://slarm64.org)**
     * RK3568
         + [Rock 3](https://wiki.radxa.com/Rock3/getting_started#Features)
         + [Station P2](https://www.stationpc.com/product/stationp2#spec) [(roc-rk3568-pc)](https://en.t-firefly.com/product/industry/rocrk3568pc.html#spec)
+    * RK3588
+        + [Rock 5](https://wiki.radxa.com/Rock5/getting_started#Features)
 * Broadcom
     * BCM2837
         + [Raspberry Pi 3](https://www.raspberrypi.org/products/raspberry-pi-3-model-b/)
