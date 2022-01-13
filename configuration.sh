@@ -21,7 +21,7 @@ KERNEL_DIR=${KERNEL_DIR:-"linux-$KERNEL_SOURCE"}
 # mainline kernel firmware configuration
 #---------------------------------------------
 KERNEL_FIRMWARE_SOURCE=${KERNEL_FIRMWARE_SOURCE:-"git://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git"}
-KERNEL_FIRMWARE_BRANCH=${KERNEL_FIRMWARE_BRANCH:-"master::"}
+KERNEL_FIRMWARE_BRANCH=${KERNEL_FIRMWARE_BRANCH:-"main::"}
 KERNEL_FIRMWARE_DIR=${KERNEL_FIRMWARE_DIR:-"linux-firmware"}
 
 #---------------------------------------------
