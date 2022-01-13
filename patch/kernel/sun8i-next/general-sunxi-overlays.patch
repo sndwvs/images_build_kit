@@ -2,10 +2,10 @@ diff --git a/arch/arm/boot/dts/Makefile b/arch/arm/boot/dts/Makefile
 index 965a7c0..71a672e 100644
 --- a/arch/arm/boot/dts/Makefile
 +++ b/arch/arm/boot/dts/Makefile
-@@ -1442,3 +1442,5 @@
- 	aspeed-bmc-portwell-neptune.dtb \
- 	aspeed-bmc-quanta-q71l.dtb \
- 	aspeed-bmc-supermicro-x11spi.dtb
+@@ -1524,3 +1524,5 @@
+ 	aspeed-bmc-supermicro-x11spi.dtb \
+ 	aspeed-bmc-inventec-transformers.dtb \
+ 	aspeed-bmc-tyan-s7106.dtb
 +
 +subdir-y	:= overlay
 diff --git a/arch/arm/boot/dts/overlay/Makefile b/arch/arm/boot/dts/overlay/Makefile
