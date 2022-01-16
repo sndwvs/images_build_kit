@@ -19,10 +19,10 @@ diff --git a/include/net/bluetooth/hci.h b/include/net/bluetooth/hci.h
 index 16ab6ce87883..8e4c16210d18 100644
 --- a/include/net/bluetooth/hci.h
 +++ b/include/net/bluetooth/hci.h
-@@ -238,6 +238,13 @@ enum {
- 	 * HCI after resume.
+@@ -255,6 +255,13 @@
+ 	 * during the hdev->setup vendor callback.
  	 */
- 	HCI_QUIRK_NO_SUSPEND_NOTIFIER,
+ 	HCI_QUIRK_BROKEN_READ_TRANSMIT_POWER,
 +
 +	/* When this quirk is set, max_page for local extended features
 +	 * is set to 1, even if controller reports higher number. Some
@@ -32,7 +32,6 @@ index 16ab6ce87883..8e4c16210d18 100644
 +	HCI_QUIRK_BROKEN_LOCAL_EXT_FTR_MAX_PAGE,
  };
  
- /* HCI device flags */
 diff --git a/net/bluetooth/hci_event.c b/net/bluetooth/hci_event.c
 index cfeaee347db3..df3232828978 100644
 --- a/net/bluetooth/hci_event.c
@@ -50,4 +49,3 @@ index cfeaee347db3..df3232828978 100644
  	if (rp->page < HCI_MAX_PAGES)
 -- 
 cgit v1.2.3
-
