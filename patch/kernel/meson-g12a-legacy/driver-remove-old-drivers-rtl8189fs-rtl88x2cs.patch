@@ -1,0 +1,21 @@
+--- a/drivers/net/wireless/realtek/Kconfig	2022-01-23 14:05:12.113463337 +0200
++++ b/drivers/net/wireless/realtek/Kconfig	2022-01-23 16:58:43.574411359 +0200
+@@ -17,8 +17,6 @@
+ source "drivers/net/wireless/realtek/rtl8xxxu/Kconfig"
+ source "drivers/net/wireless/realtek/rtw88/Kconfig"
+ source "drivers/net/wireless/realtek/rtl8188fu/Kconfig"
+-source "drivers/net/wireless/realtek/rtl8189fs/Kconfig"
+ source "drivers/net/wireless/realtek/rtl8821cu/Kconfig"
+-source "drivers/net/wireless/realtek/rtl88x2cs/Kconfig"
+ 
+ endif # WLAN_VENDOR_REALTEK
+--- a/drivers/net/wireless/realtek/Makefile	2022-01-23 16:58:51.554451190 +0200
++++ b/drivers/net/wireless/realtek/Makefile	2022-01-23 16:58:11.898253038 +0200
+@@ -9,7 +9,5 @@
+ obj-$(CONFIG_RTL8XXXU)		+= rtl8xxxu/
+ obj-$(CONFIG_RTW88)		+= rtw88/
+ obj-$(CONFIG_RTL8188FU)		+= rtl8188fu/
+-obj-$(CONFIG_RTL8189FS)		+= rtl8189fs/
+ obj-$(CONFIG_RTL8821CU)		+= rtl8821cu/
+-obj-$(CONFIG_RTL8822CS)		+= rtl88x2cs/
+ 
