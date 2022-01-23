@@ -55,6 +55,7 @@ project site: **[slarm64.org](https://slarm64.org)**
 * Amlogic
     * S905X3
         + [Odroid-C4](https://wiki.odroid.com/odroid-c4/hardware/hardware#specifications) board provided by [Odroid Team](https://forum.odroid.com/viewtopic.php?f=203&t=40256&p=340679#p340679)
+        + [X96 Max Plus](https://)
     * S905Y2
         + [Radxa Zero](https://wiki.radxa.com/Zero/getting_started#Features)
 * StarFive
