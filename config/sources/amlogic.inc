@@ -33,11 +33,13 @@ esac
 
 
 
-# additional function of preparing the bootloader for family g12a or g12b: S922X, S905X3, S905Y
+# additional function of preparing the bootloader for family g12a or g12b: S922X, S905X3, S905Y2
 uboot_g12_processing()
 {
     local g12="$1"
     local FIP_DIR="$SOURCE/$BOOT_FIP_DIR/${BOARD_NAME/_/-}"
+
+    [[ ${BOARD_NAME} == x96_max_plus ]] && ( ln -sf $SOURCE/$BOOT_FIP_DIR/sei610 $FIP_DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
 
     message "" "start" "uboot_${g12}_processing: ${BOARD_NAME}"
 
