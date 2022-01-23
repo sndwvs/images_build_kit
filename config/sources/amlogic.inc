@@ -24,9 +24,8 @@ BOOT_LOADER_BIN="u-boot.bin"
 
 case $KERNEL_SOURCE in
     legacy)
-            SERIAL_CONSOLE=ttyS0
-            LINUX_SOURCE="https://github.com/hardkernel/linux.git"
-            KERNEL_BRANCH="odroidg12-4.9.y::"
+            LINUX_SOURCE="https://github.com/unifreq/linux-5.10.y.git"
+            KERNEL_BRANCH="main::"
             KERNEL_DIR="linux-$SOCFAMILY-$KERNEL_SOURCE"
     ;;
 esac
