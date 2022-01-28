@@ -107,6 +107,8 @@ setting_wifi() {
 build_img() {
     local IMAGE="$1"
 
+    local PART="1"
+
     [[ -z "$IMAGE" ]] && exit 1
 
     message "" "build" "image: $IMAGE"
@@ -118,7 +120,12 @@ build_img() {
     write_uboot $LOOP
 
     message "" "create" "partition"
-    echo -e "\no\nn\np\n1\n$IMAGE_OFFSET\n\nw" | fdisk $LOOP >> $LOG 2>&1 || true
+    if [[ $SOCFAMILY == bcm* || $BOARD_NAME == x96_max_plus ]]; then
+        echo -e "\no\nn\np\n1\n$IMAGE_OFFSET\n+256M\n\nt\nc\nn\np\n2\n\n\nw" | fdisk $LOOP >> $LOG 2>&1 || true
+        PART="2"
+    else
+        echo -e "\no\nn\np\n1\n$IMAGE_OFFSET\n\nw" | fdisk $LOOP >> $LOG 2>&1 || true
+    fi
 
     partprobe $LOOP >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
@@ -127,25 +134,39 @@ build_img() {
     # device is busy
     sleep 2
 
-    # $IMAGE_OFFSET (start) x 512 (block size) = where to mount partition
-    losetup -o $(($IMAGE_OFFSET*512)) $LOOP $SOURCE/$IMAGE.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
     message "" "create" "filesystem"
-    mkfs.ext4 -F -m 0 -L linuxroot $LOOP >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    if [[ $SOCFAMILY == bcm* || $BOARD_NAME == x96_max_plus ]]; then
+        mkfs.vfat ${LOOP}p1 >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
+    mkfs.ext4 -F -m 0 -L linuxroot ${LOOP}p${PART} >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     message "" "tune" "filesystem"
-    tune2fs -o journal_data_writeback $LOOP >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    tune2fs -O ^has_journal $LOOP >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    e2fsck -yf $LOOP >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    tune2fs -o journal_data_writeback ${LOOP}p${PART} >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    tune2fs -O ^has_journal ${LOOP}p${PART} >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    e2fsck -yf ${LOOP}p${PART} >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     message "" "create" "mount point and mount image"
+
     mkdir -p $SOURCE/image
-    mount $LOOP $SOURCE/image
+    mount ${LOOP}p${PART} $SOURCE/image
+    if [[ $SOCFAMILY == bcm* || $BOARD_NAME == x96_max_plus ]]; then
+        mkdir -p $SOURCE/image/boot
+        mount ${LOOP}p1 $SOURCE/image/boot
+    fi
+
+    write_uboot $LOOP
+
     rsync -a "$SOURCE/$IMAGE/" "$SOURCE/image/"
+
+    if [[ $SOCFAMILY == bcm* || $BOARD_NAME == x96_max_plus ]]; then
+        umount $SOURCE/image/boot
+    fi
     umount $SOURCE/image
+
     if [[ -d $SOURCE/image ]]; then
         rm -rf $SOURCE/image
     fi
+
     losetup -d $LOOP
 
     if [[ -f $SOURCE/$IMAGE.img ]]; then
