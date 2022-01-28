@@ -39,8 +39,6 @@ uboot_g12_processing()
     local g12="$1"
     local FIP_DIR="$SOURCE/$BOOT_FIP_DIR/${BOARD_NAME/_/-}"
 
-    [[ ${BOARD_NAME} == x96_max_plus ]] && ( ln -sf $SOURCE/$BOOT_FIP_DIR/sei610 $FIP_DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
-
     message "" "start" "uboot_${g12}_processing: ${BOARD_NAME}"
 
     install -Dm644 $SOURCE/$BOOT_LOADER_DIR/$BOOT_LOADER_BIN $FIP_DIR/bl33.bin >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
@@ -121,15 +119,22 @@ create_uboot()
 #        return 0
 #    fi
 
-    install -Dm644 $SOURCE/$BOOT_FIP_DIR/${BOARD_NAME/_/-}/$BOOT_LOADER_BIN $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    if [[ $BOARD_NAME == x96_max_plus ]]; then
+        install -Dm644 $SOURCE/$BOOT_LOADER_DIR/$BOOT_LOADER_BIN $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/u-boot.ext >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    else
+        install -Dm644 $SOURCE/$BOOT_FIP_DIR/${BOARD_NAME/_/-}/$BOOT_LOADER_BIN $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
 }
 
 
 write_uboot()
 {
+    message "" "write" "bootloader: $BOOT_LOADER_BIN"
     if [[ -f $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN ]]; then
         dd if=$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/$BOOT_LOADER_BIN of=$1 conv=fsync bs=512 seek=1 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        message "" "write" "bootloader: $BOOT_LOADER_BIN"
+    fi
+    if [[ -f $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/u-boot.ext ]]; then
+        install -Dm644 $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/u-boot.ext $SOURCE/$IMAGE/boot/u-boot.ext >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 }
 
