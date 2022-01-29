@@ -68,16 +68,14 @@ setting_debug() {
     message "" "setting" "uart debugging"
     if [[ $DISTR == sla* ]]; then
         sed -e 's/#\(ttyS[0-2]\)/\1/' \
-            -e '/#ttyS3/{n;/^#/i ttyFIQ0
-                 }' \
-            -e '/#ttyp7/{n;/^#/i ttyAMA0
+            -e '/#ttyS3/{n;/^#/i ttyFIQ0\nttyAMA0\nttyAML0
                  }' \
             -i "$SOURCE/$ROOTFS/etc/securetty"
 
         sed -e "s/^#\(\(s\(1\)\).*\)\(ttyS0\).*\(9600\)/\1$SERIAL_CONSOLE $SERIAL_CONSOLE_SPEED/" \
             -i "$SOURCE/$ROOTFS/etc/inittab"
     elif [[ $DISTR == crux* ]]; then
-        sed -e '/ttyS0/{n;/^/i ttyS1\nttyS2\nttyS3\nttyFIQ0\nttyAMA0
+        sed -e '/ttyS0/{n;/^/i ttyS1\nttyS2\nttyS3\nttyFIQ0\nttyAMA0\nttyAML0
                  }' \
             -i "$SOURCE/$ROOTFS/etc/securetty"
 
@@ -438,7 +436,7 @@ setting_bootloader() {
         install -Dm644 $CWD/config/boot_scripts/uEnv-$SOCFAMILY.txt "$SOURCE/$ROOTFS/boot/uEnv.txt"
         echo "fdtfile=${DEVICE_TREE_BLOB}" >> "$SOURCE/$ROOTFS/boot/uEnv.txt"
         # parameter to configure the boot of the legacy kernel
-        [[ $SOCFAMILY == meson-sm1 && $KERNEL_SOURCE != next ]] && echo "kernel=$KERNEL_SOURCE" >> "$SOURCE/$ROOTFS/boot/uEnv.txt"
+        [[ $SOCFAMILY == meson-sm1 && ( $KERNEL_SOURCE != next && $BOARD_NAME != x96_max_plus ) ]] && echo "kernel=$KERNEL_SOURCE" >> "$SOURCE/$ROOTFS/boot/uEnv.txt"
     fi
     # change root disk if disk not default
     [[ -n ${ROOT_DISK##*mmcblk0p1} ]] && echo "rootdev=/dev/$ROOT_DISK" >> "$SOURCE/$ROOTFS/boot/uEnv.txt"
