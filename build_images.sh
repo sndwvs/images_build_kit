@@ -419,22 +419,22 @@ setting_bootloader() {
     # amlogic tv box: compile boot script
     if [[ -f $SOURCE/$ROOTFS/boot/boot-${BOARD_NAME}-aml_autoscript.cmd ]]; then
         install -Dm644 $CWD/config/boot_scripts/boot-${BOARD_NAME}-aml_autoscript.cmd "$SOURCE/$ROOTFS/boot/aml_autoscript.cmd"
-        $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A $ARCH -T script -a 0 -e 0 -d $SOURCE/$ROOTFS/boot/aml_autoscript.cmd \
+        $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A $KARCH -T script -a 0 -e 0 -d $SOURCE/$ROOTFS/boot/aml_autoscript.cmd \
                                                                         "$SOURCE/$ROOTFS/boot/aml_autoscript" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
     if [[ -f $SOURCE/$ROOTFS/boot/boot-${BOARD_NAME}-emmc_autoscript.cmd ]]; then
         install -Dm644 $CWD/config/boot_scripts/boot-${BOARD_NAME}-emmc_autoscript.cmd "$SOURCE/$ROOTFS/boot/aml_autoscript.cmd"
-        $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A $ARCH -T script -a 0 -e 0 -d $SOURCE/$ROOTFS/boot/emmc_autoscript.cmd \
+        $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A $KARCH -T script -a 0 -e 0 -d $SOURCE/$ROOTFS/boot/emmc_autoscript.cmd \
                                                                         "$SOURCE/$ROOTFS/boot/emmc_autoscript" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
     if [[ -f $SOURCE/$ROOTFS/boot/boot-${BOARD_NAME}-s905_autoscript.cmd ]]; then
         install -Dm644 $CWD/config/boot_scripts/boot-${BOARD_NAME}-s905_autoscript.cmd "$SOURCE/$ROOTFS/boot/s905_autoscript.cmd"
-        $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A $ARCH -T script -a 0 -e 0 -d $SOURCE/$ROOTFS/boot/s905_autoscript.cmd \
+        $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A $KARCH -T script -a 0 -e 0 -d $SOURCE/$ROOTFS/boot/s905_autoscript.cmd \
                                                                         "$SOURCE/$ROOTFS/boot/s905_autoscript" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
     # compile boot script
-    [[ -f $SOURCE/$ROOTFS/boot/boot.cmd ]] && ( $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A $ARCH -T script -d $SOURCE/$ROOTFS/boot/boot.cmd \
+    [[ -f $SOURCE/$ROOTFS/boot/boot.cmd ]] && ( $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A $KARCH -T script -d $SOURCE/$ROOTFS/boot/boot.cmd \
                                                                         "$SOURCE/$ROOTFS/boot/boot.scr" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
     # u-boot
     if [[ -f "$CWD/config/boot_scripts/uEnv-$SOCFAMILY.txt" ]]; then
