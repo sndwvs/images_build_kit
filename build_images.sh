@@ -117,19 +117,16 @@ build_img() {
 
     losetup $LOOP $SOURCE/$IMAGE.img || exit 1
 
-    write_uboot $LOOP
-
     message "" "create" "partition"
     if [[ $SOCFAMILY == bcm* || $BOARD_NAME == x96_max_plus ]]; then
         echo -e "\no\nn\np\n1\n$IMAGE_OFFSET\n+256M\n\nt\nc\nn\np\n2\n\n\nw" | fdisk $LOOP >> $LOG 2>&1 || true
         PART="2"
     else
+        write_uboot $LOOP
         echo -e "\no\nn\np\n1\n$IMAGE_OFFSET\n\nw" | fdisk $LOOP >> $LOG 2>&1 || true
     fi
 
     partprobe $LOOP >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
-    losetup -d $LOOP
 
     # device is busy
     sleep 2
@@ -152,9 +149,8 @@ build_img() {
     if [[ $SOCFAMILY == bcm* || $BOARD_NAME == x96_max_plus ]]; then
         mkdir -p $SOURCE/image/boot
         mount ${LOOP}p1 $SOURCE/image/boot
+        write_uboot $LOOP
     fi
-
-    write_uboot $LOOP
 
     rsync -a "$SOURCE/$IMAGE/" "$SOURCE/image/"
 
@@ -417,18 +413,18 @@ setting_bootloader() {
             -i "$SOURCE/$ROOTFS/boot/boot.ini"
     fi
     # amlogic tv box: compile boot script
-    if [[ -f $SOURCE/$ROOTFS/boot/boot-${BOARD_NAME}-aml_autoscript.cmd ]]; then
-        install -Dm644 $CWD/config/boot_scripts/boot-${BOARD_NAME}-aml_autoscript.cmd "$SOURCE/$ROOTFS/boot/aml_autoscript.cmd"
+    if [[ -f $SOURCE/$ROOTFS/boot/boot-${BOARD_NAME/_/-}-aml_autoscript.cmd ]]; then
+        install -Dm644 $CWD/config/boot_scripts/boot-${BOARD_NAME/_/-}-aml_autoscript.cmd "$SOURCE/$ROOTFS/boot/aml_autoscript.cmd"
         $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A $KARCH -T script -a 0 -e 0 -d $SOURCE/$ROOTFS/boot/aml_autoscript.cmd \
                                                                         "$SOURCE/$ROOTFS/boot/aml_autoscript" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
-    if [[ -f $SOURCE/$ROOTFS/boot/boot-${BOARD_NAME}-emmc_autoscript.cmd ]]; then
-        install -Dm644 $CWD/config/boot_scripts/boot-${BOARD_NAME}-emmc_autoscript.cmd "$SOURCE/$ROOTFS/boot/aml_autoscript.cmd"
+    if [[ -f $SOURCE/$ROOTFS/boot/boot-${BOARD_NAME/_/-}-emmc_autoscript.cmd ]]; then
+        install -Dm644 $CWD/config/boot_scripts/boot-${BOARD_NAME/_/-}-emmc_autoscript.cmd "$SOURCE/$ROOTFS/boot/aml_autoscript.cmd"
         $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A $KARCH -T script -a 0 -e 0 -d $SOURCE/$ROOTFS/boot/emmc_autoscript.cmd \
                                                                         "$SOURCE/$ROOTFS/boot/emmc_autoscript" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
-    if [[ -f $SOURCE/$ROOTFS/boot/boot-${BOARD_NAME}-s905_autoscript.cmd ]]; then
-        install -Dm644 $CWD/config/boot_scripts/boot-${BOARD_NAME}-s905_autoscript.cmd "$SOURCE/$ROOTFS/boot/s905_autoscript.cmd"
+    if [[ -f $SOURCE/$ROOTFS/boot/boot-${BOARD_NAME/_/-}-s905_autoscript.cmd ]]; then
+        install -Dm644 $CWD/config/boot_scripts/boot-${BOARD_NAME/_/-}-s905_autoscript.cmd "$SOURCE/$ROOTFS/boot/s905_autoscript.cmd"
         $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A $KARCH -T script -a 0 -e 0 -d $SOURCE/$ROOTFS/boot/s905_autoscript.cmd \
                                                                         "$SOURCE/$ROOTFS/boot/s905_autoscript" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
