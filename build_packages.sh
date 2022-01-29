@@ -31,7 +31,7 @@ build_kernel_pkg() {
     install -Dm644 $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/$KERNEL $BUILD/$PKG/kernel-${SOCFAMILY}/boot/vmlinuz-${KERNEL_VERSION}
     install -Dm644 $SOURCE/$KERNEL_DIR/System.map $BUILD/$PKG/kernel-${SOCFAMILY}/boot/System.map-${KERNEL_VERSION}
     install -Dm644 $SOURCE/$KERNEL_DIR/.config $BUILD/$PKG/kernel-${SOCFAMILY}/boot/config-${KERNEL_VERSION}
-    if [[ $SOCFAMILY != bcm2* || $BOARD_NAME != x96_max_plus ]]; then
+    if [[ $SOCFAMILY != bcm2* && $BOARD_NAME != x96_max_plus ]]; then
         # Make symlinks:
         ln -sf System.map-${KERNEL_VERSION} $BUILD/$PKG/kernel-${SOCFAMILY}/boot/System.map
         ln -sf config-${KERNEL_VERSION} $BUILD/$PKG/kernel-${SOCFAMILY}/boot/config
@@ -72,7 +72,7 @@ build_kernel_pkg() {
         cp -av $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/*.dtb \
               $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb-${KERNEL_VERSION}/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
-    [[ $SOCFAMILY != bcm2* || $BOARD_NAME != x96_max_plus ]] && ( ln -sf dtb-${KERNEL_VERSION} $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+    [[ $SOCFAMILY != bcm2* && $BOARD_NAME != x96_max_plus ]] && ( ln -sf dtb-${KERNEL_VERSION} $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
 
     cd "$CWD" # fix actual current directory
     # clean-up unnecessary files generated during install
