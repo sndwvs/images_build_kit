@@ -414,17 +414,17 @@ setting_bootloader() {
     fi
     # amlogic tv box: compile boot script
     if [[ -f $CWD/config/boot_scripts/boot-${BOARD_NAME//_/-}-aml_autoscript.cmd ]]; then
-        install -Dm644 $CWD/config/boot_scripts/boot-${BOARD_NAME//_/-}-aml_autoscript.cmd "$SOURCE/$ROOTFS/boot/aml_autoscript.cmd"
+        install -Dm644 $CWD/config/boot_scripts/boot-${BOARD_NAME//_/-}-aml_autoscript.cmd "$SOURCE/$ROOTFS/boot/aml_autoscript.cmd" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A $KARCH -T script -a 0 -e 0 -d $SOURCE/$ROOTFS/boot/aml_autoscript.cmd \
                                                                         "$SOURCE/$ROOTFS/boot/aml_autoscript" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
     if [[ -f $CWD/config/boot_scripts/boot-${BOARD_NAME//_/-}-emmc_autoscript.cmd ]]; then
-        install -Dm644 $CWD/config/boot_scripts/boot-${BOARD_NAME//_/-}-emmc_autoscript.cmd "$SOURCE/$ROOTFS/boot/aml_autoscript.cmd"
+        install -Dm644 $CWD/config/boot_scripts/boot-${BOARD_NAME//_/-}-emmc_autoscript.cmd "$SOURCE/$ROOTFS/boot/aml_autoscript.cmd" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A $KARCH -T script -a 0 -e 0 -d $SOURCE/$ROOTFS/boot/emmc_autoscript.cmd \
                                                                         "$SOURCE/$ROOTFS/boot/emmc_autoscript" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
     if [[ -f $CWD/config/boot_scripts/boot-${BOARD_NAME//_/-}-s905_autoscript.cmd ]]; then
-        install -Dm644 $CWD/config/boot_scripts/boot-${BOARD_NAME//_/-}-s905_autoscript.cmd "$SOURCE/$ROOTFS/boot/s905_autoscript.cmd"
+        install -Dm644 $CWD/config/boot_scripts/boot-${BOARD_NAME//_/-}-s905_autoscript.cmd "$SOURCE/$ROOTFS/boot/s905_autoscript.cmd" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A $KARCH -T script -a 0 -e 0 -d $SOURCE/$ROOTFS/boot/s905_autoscript.cmd \
                                                                         "$SOURCE/$ROOTFS/boot/s905_autoscript" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
