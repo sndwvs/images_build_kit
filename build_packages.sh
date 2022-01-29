@@ -65,6 +65,7 @@ build_kernel_pkg() {
             fi
             # amlogic tv box
             if [[ $BOARD_NAME == x96_max_plus ]]; then
+                install -m755 -d "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb"
                 cp -av $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb-${KERNEL_VERSION}/*.dtb $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             fi
     else
