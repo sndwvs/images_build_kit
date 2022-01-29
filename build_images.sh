@@ -152,6 +152,7 @@ build_img() {
         write_uboot $LOOP
     fi
 
+    message "" "copy" "data to image"
     rsync -a "$SOURCE/$IMAGE/" "$SOURCE/image/"
 
     if [[ $SOCFAMILY == bcm2* || $BOARD_NAME == x96_max_plus ]]; then
