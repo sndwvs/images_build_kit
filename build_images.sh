@@ -119,7 +119,7 @@ build_img() {
 
     message "" "create" "partition"
     if [[ $SOCFAMILY == bcm2* || $BOARD_NAME == x96_max_plus ]]; then
-        echo -e "\no\nn\np\n1\n$IMAGE_OFFSET\n+256M\n\nt\nc\nn\np\n2\n\n\nw" | fdisk $LOOP >> $LOG 2>&1 || true
+        echo -e "\no\nn\np\n1\n$IMAGE_OFFSET\n+512M\n\nt\nc\nn\np\n2\n$IMAGE_OFFSET\n\nw" | fdisk $LOOP >> $LOG 2>&1 || true
         PART="2"
     else
         write_uboot $LOOP
