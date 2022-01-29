@@ -46,7 +46,7 @@ setting_fstab() {
         sed -i "s:# tmpfs:tmpfs:" $SOURCE/$ROOTFS/etc/fstab
         if [[ $DISTR == sla* ]]; then
             echo "/dev/$ROOT_DISK    /          ext4    noatime,nodiratime,data=writeback,errors=remount-ro       0       1" >> $SOURCE/$ROOTFS/etc/fstab || exit 1
-            if [[ $SOCFAMILY == bcm2* ]]; then
+            if [[ $SOCFAMILY == bcm2* || $BOARD_NAME == x96_max_plus ]]; then
                 echo "/dev/${ROOT_DISK/p?/p1}    /boot      vfat    defaults       0       1" >> $SOURCE/$ROOTFS/etc/fstab
             elif [[ $SOCFAMILY == rk356* ]]; then
                 echo "/dev/${ROOT_DISK/p?/p1}    /boot      ext4    noatime,nodiratime       0       1" >> $SOURCE/$ROOTFS/etc/fstab
@@ -54,7 +54,7 @@ setting_fstab() {
         elif [[ $DISTR == crux* ]]; then
             sed -i 's:#\(shm\):\1:' $SOURCE/$ROOTFS/etc/fstab || exit 1
             sed -i "/\# End of file/ i \\/dev\/$ROOT_DISK    \/          ext4    noatime,nodiratime,data=writeback,errors=remount-ro       0       1\n" $SOURCE/$ROOTFS/etc/fstab || exit 1
-            if [[ $SOCFAMILY == bcm2* ]]; then
+            if [[ $SOCFAMILY == bcm2* || $BOARD_NAME == x96_max_plus ]]; then
                 sed -i "/\# End of file/ i \\/dev\/${ROOT_DISK/p?/p1}    \/boot      vfat    defaults       0       1\n" $SOURCE/$ROOTFS/etc/fstab
             elif [[ $SOCFAMILY == rk356* ]]; then
                 sed -i "/\# End of file/ i \\/dev\/${ROOT_DISK/p?/p1}    \/boot      ext4    noatime,nodiratime       0       1\n" $SOURCE/$ROOTFS/etc/fstab
@@ -118,7 +118,7 @@ build_img() {
     losetup $LOOP $SOURCE/$IMAGE.img || exit 1
 
     message "" "create" "partition"
-    if [[ $SOCFAMILY == bcm* || $BOARD_NAME == x96_max_plus ]]; then
+    if [[ $SOCFAMILY == bcm2* || $BOARD_NAME == x96_max_plus ]]; then
         echo -e "\no\nn\np\n1\n$IMAGE_OFFSET\n+256M\n\nt\nc\nn\np\n2\n\n\nw" | fdisk $LOOP >> $LOG 2>&1 || true
         PART="2"
     else
@@ -132,7 +132,7 @@ build_img() {
     sleep 2
 
     message "" "create" "filesystem"
-    if [[ $SOCFAMILY == bcm* || $BOARD_NAME == x96_max_plus ]]; then
+    if [[ $SOCFAMILY == bcm2* || $BOARD_NAME == x96_max_plus ]]; then
         mkfs.vfat ${LOOP}p1 >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
     mkfs.ext4 -F -m 0 -L linuxroot ${LOOP}p${PART} >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
@@ -146,7 +146,7 @@ build_img() {
 
     mkdir -p $SOURCE/image
     mount ${LOOP}p${PART} $SOURCE/image
-    if [[ $SOCFAMILY == bcm* || $BOARD_NAME == x96_max_plus ]]; then
+    if [[ $SOCFAMILY == bcm2* || $BOARD_NAME == x96_max_plus ]]; then
         mkdir -p $SOURCE/image/boot
         mount ${LOOP}p1 $SOURCE/image/boot
         write_uboot $LOOP
@@ -154,7 +154,7 @@ build_img() {
 
     rsync -a "$SOURCE/$IMAGE/" "$SOURCE/image/"
 
-    if [[ $SOCFAMILY == bcm* || $BOARD_NAME == x96_max_plus ]]; then
+    if [[ $SOCFAMILY == bcm2* || $BOARD_NAME == x96_max_plus ]]; then
         umount $SOURCE/image/boot
     fi
     umount $SOURCE/image
@@ -347,7 +347,7 @@ setting_ntp() {
 
 create_initrd() {
     if [[ $MARCH == "x86_64" || ( $MARCH != "riscv64" && $ARCH == "riscv64" ) ]]; then
-        if [[ $SOCFAMILY == bcm2* ]]; then
+        if [[ $SOCFAMILY == bcm2* || $BOARD_NAME == x96_max_plus ]]; then
             find "$SOURCE/$ROOTFS/boot/" -type l -exec rm -rf {} \+ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
         return 0
@@ -375,7 +375,7 @@ create_initrd() {
     umount "$SOURCE/$ROOTFS/proc"
     umount "$SOURCE/$ROOTFS/dev"
 
-    if [[ $SOCFAMILY == bcm2* ]]; then
+    if [[ $SOCFAMILY == bcm2* || $BOARD_NAME == x96_max_plus ]]; then
         cp -a "$SOURCE/$ROOTFS/boot/uInitrd-${KERNEL_VERSION}" "$SOURCE/$ROOTFS/boot/uInitrd" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         find "$SOURCE/$ROOTFS/boot/" -type l -exec rm -rf {} \+ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     else
@@ -413,17 +413,17 @@ setting_bootloader() {
             -i "$SOURCE/$ROOTFS/boot/boot.ini"
     fi
     # amlogic tv box: compile boot script
-    if [[ -f $SOURCE/$ROOTFS/boot/boot-${BOARD_NAME/_/-}-aml_autoscript.cmd ]]; then
+    if [[ -f $CWD/config/boot_scripts/boot-${BOARD_NAME/_/-}-aml_autoscript.cmd ]]; then
         install -Dm644 $CWD/config/boot_scripts/boot-${BOARD_NAME/_/-}-aml_autoscript.cmd "$SOURCE/$ROOTFS/boot/aml_autoscript.cmd"
         $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A $KARCH -T script -a 0 -e 0 -d $SOURCE/$ROOTFS/boot/aml_autoscript.cmd \
                                                                         "$SOURCE/$ROOTFS/boot/aml_autoscript" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
-    if [[ -f $SOURCE/$ROOTFS/boot/boot-${BOARD_NAME/_/-}-emmc_autoscript.cmd ]]; then
+    if [[ -f $CWD/config/boot_scripts/boot-${BOARD_NAME/_/-}-emmc_autoscript.cmd ]]; then
         install -Dm644 $CWD/config/boot_scripts/boot-${BOARD_NAME/_/-}-emmc_autoscript.cmd "$SOURCE/$ROOTFS/boot/aml_autoscript.cmd"
         $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A $KARCH -T script -a 0 -e 0 -d $SOURCE/$ROOTFS/boot/emmc_autoscript.cmd \
                                                                         "$SOURCE/$ROOTFS/boot/emmc_autoscript" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
-    if [[ -f $SOURCE/$ROOTFS/boot/boot-${BOARD_NAME/_/-}-s905_autoscript.cmd ]]; then
+    if [[ -f $CWD/config/boot_scripts/boot-${BOARD_NAME/_/-}-s905_autoscript.cmd ]]; then
         install -Dm644 $CWD/config/boot_scripts/boot-${BOARD_NAME/_/-}-s905_autoscript.cmd "$SOURCE/$ROOTFS/boot/s905_autoscript.cmd"
         $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A $KARCH -T script -a 0 -e 0 -d $SOURCE/$ROOTFS/boot/s905_autoscript.cmd \
                                                                         "$SOURCE/$ROOTFS/boot/s905_autoscript" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
