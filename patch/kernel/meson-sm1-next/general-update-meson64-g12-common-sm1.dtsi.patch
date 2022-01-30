@@ -1,0 +1,300 @@
+diff -Naur a/arch/arm64/boot/dts/amlogic/meson-g12-common.dtsi b/arch/arm64/boot/dts/amlogic/meson-g12-common.dtsi
+--- a/arch/arm64/boot/dts/amlogic/meson-g12-common.dtsi	2022-01-30 04:22:16.873634763 +0200
++++ b/arch/arm64/boot/dts/amlogic/meson-g12-common.dtsi	2022-01-30 01:06:25.748069310 +0200
+@@ -18,9 +18,9 @@
+ 	#size-cells = <2>;
+ 
+ 	aliases {
+-		mmc0 = &sd_emmc_b; /* SD card */
+-		mmc1 = &sd_emmc_c; /* eMMC */
+-		mmc2 = &sd_emmc_a; /* SDIO */
++		mmc0 = &sd_emmc_a; /* SDIO */
++		mmc1 = &sd_emmc_b; /* SD card */
++		mmc2 = &sd_emmc_c; /* eMMC */
+ 	};
+ 
+ 	chosen {
+@@ -107,6 +107,12 @@
+ 			no-map;
+ 		};
+ 
++		/* 32 MiB reserved for ARM Trusted Firmware (BL32) */
++		secmon_reserved_bl32: secmon@5300000 {
++			reg = <0x0 0x05300000 0x0 0x2000000>;
++			no-map;
++		};
++
+ 		linux,cma {
+ 			compatible = "shared-dma-pool";
+ 			reusable;
+@@ -159,61 +165,6 @@
+ 			status = "disabled";
+ 		};
+ 
+-		thermal-zones {
+-			cpu_thermal: cpu-thermal {
+-				polling-delay = <1000>;
+-				polling-delay-passive = <100>;
+-				thermal-sensors = <&cpu_temp>;
+-
+-				trips {
+-					cpu_passive: cpu-passive {
+-						temperature = <85000>; /* millicelsius */
+-						hysteresis = <2000>; /* millicelsius */
+-						type = "passive";
+-					};
+-
+-					cpu_hot: cpu-hot {
+-						temperature = <95000>; /* millicelsius */
+-						hysteresis = <2000>; /* millicelsius */
+-						type = "hot";
+-					};
+-
+-					cpu_critical: cpu-critical {
+-						temperature = <110000>; /* millicelsius */
+-						hysteresis = <2000>; /* millicelsius */
+-						type = "critical";
+-					};
+-				};
+-			};
+-
+-			ddr_thermal: ddr-thermal {
+-				polling-delay = <1000>;
+-				polling-delay-passive = <100>;
+-				thermal-sensors = <&ddr_temp>;
+-
+-				trips {
+-					ddr_passive: ddr-passive {
+-						temperature = <85000>; /* millicelsius */
+-						hysteresis = <2000>; /* millicelsius */
+-						type = "passive";
+-					};
+-
+-					ddr_critical: ddr-critical {
+-						temperature = <110000>; /* millicelsius */
+-						hysteresis = <2000>; /* millicelsius */
+-						type = "critical";
+-					};
+-				};
+-
+-				cooling-maps {
+-					map {
+-						trip = <&ddr_passive>;
+-						cooling-device = <&mali THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+-					};
+-				};
+-			};
+-		};
+-
+ 		ethmac: ethernet@ff3f0000 {
+ 			compatible = "amlogic,meson-g12a-dwmac",
+ 				     "snps,dwmac-3.70a",
+@@ -894,6 +845,22 @@
+ 						};
+ 					};
+ 
++					pwm_f_z_pins: pwm-f-z {
++						mux {
++							groups = "pwm_f_z";
++							function = "pwm_f";
++							bias-disable;
++						};
++					};
++
++					pwm_f_a_pins: pwm-f-a {
++						mux {
++							groups = "pwm_f_a";
++							function = "pwm_f";
++							bias-disable;
++						};
++					};
++
+ 					pwm_f_x_pins: pwm-f-x {
+ 						mux {
+ 							groups = "pwm_f_x";
+@@ -1923,7 +1890,7 @@
+ 							groups = "uart_ao_a_tx",
+ 								 "uart_ao_a_rx";
+ 							function = "uart_ao_a";
+-							bias-disable;
++							bias-pull-up;
+ 						};
+ 					};
+ 
+@@ -1932,6 +1899,33 @@
+ 							groups = "uart_ao_a_cts",
+ 								 "uart_ao_a_rts";
+ 							function = "uart_ao_a";
++							bias-pull-up;
++						};
++					};
++
++					uart_ao_b_1_pins: uart-ao-b-1 {
++						mux {
++							groups = "uart_ao_b_tx_2",
++								 "uart_ao_b_rx_3";
++							function = "uart_ao_b";
++							bias-disable;
++						};
++					};
++
++					uart_ao_b_2_pins: uart-ao-b-2 {
++						mux {
++							groups = "uart_ao_b_tx_8",
++								 "uart_ao_b_rx_9";
++							function = "uart_ao_b";
++							bias-disable;
++						};
++					};
++
++					uart_ao_b_cts_rts_pins: uart-ao-b-cts-rts {
++						mux {
++							groups = "uart_ao_b_cts",
++								 "uart_ao_b_rts";
++							function = "uart_ao_b";
+ 							bias-disable;
+ 						};
+ 					};
+@@ -2415,6 +2409,61 @@
+ 		};
+ 	};
+ 
++	thermal-zones {
++		cpu_thermal: cpu-thermal {
++			polling-delay = <1000>;
++			polling-delay-passive = <100>;
++			thermal-sensors = <&cpu_temp>;
++
++			trips {
++				cpu_passive: cpu-passive {
++					temperature = <85000>; /* millicelsius */
++					hysteresis = <2000>; /* millicelsius */
++					type = "passive";
++				};
++
++				cpu_hot: cpu-hot {
++					temperature = <95000>; /* millicelsius */
++					hysteresis = <2000>; /* millicelsius */
++					type = "hot";
++				};
++
++				cpu_critical: cpu-critical {
++					temperature = <110000>; /* millicelsius */
++					hysteresis = <2000>; /* millicelsius */
++					type = "critical";
++				};
++			};
++		};
++
++		ddr_thermal: ddr-thermal {
++			polling-delay = <1000>;
++			polling-delay-passive = <100>;
++			thermal-sensors = <&ddr_temp>;
++
++			trips {
++				ddr_passive: ddr-passive {
++					temperature = <85000>; /* millicelsius */
++					hysteresis = <2000>; /* millicelsius */
++					type = "passive";
++				};
++
++				ddr_critical: ddr-critical {
++					temperature = <110000>; /* millicelsius */
++					hysteresis = <2000>; /* millicelsius */
++					type = "critical";
++				};
++			};
++
++			cooling-maps {
++				map {
++					trip = <&ddr_passive>;
++					cooling-device = <&mali THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
++				};
++			};
++		};
++	};
++
+ 	timer {
+ 		compatible = "arm,armv8-timer";
+ 		interrupts = <GIC_PPI 13
+diff -Naur a/arch/arm64/boot/dts/amlogic/meson-sm1.dtsi b/arch/arm64/boot/dts/amlogic/meson-sm1.dtsi
+--- a/arch/arm64/boot/dts/amlogic/meson-sm1.dtsi	2022-01-30 04:21:45.904945959 +0200
++++ b/arch/arm64/boot/dts/amlogic/meson-sm1.dtsi	2022-01-30 01:06:25.764069355 +0200
+@@ -95,26 +95,6 @@
+ 		compatible = "operating-points-v2";
+ 		opp-shared;
+ 
+-		opp-100000000 {
+-			opp-hz = /bits/ 64 <100000000>;
+-			opp-microvolt = <730000>;
+-		};
+-
+-		opp-250000000 {
+-			opp-hz = /bits/ 64 <250000000>;
+-			opp-microvolt = <730000>;
+-		};
+-
+-		opp-500000000 {
+-			opp-hz = /bits/ 64 <500000000>;
+-			opp-microvolt = <730000>;
+-		};
+-
+-		opp-667000000 {
+-			opp-hz = /bits/ 64 <666666666>;
+-			opp-microvolt = <750000>;
+-		};
+-
+ 		opp-1000000000 {
+ 			opp-hz = /bits/ 64 <1000000000>;
+ 			opp-microvolt = <770000>;
+@@ -154,6 +134,16 @@
+ 			opp-hz = /bits/ 64 <1908000000>;
+ 			opp-microvolt = <950000>;
+ 		};
++
++		opp-2016000000 {
++			opp-hz = /bits/ 64 <2016000000>;
++			opp-microvolt = <1000000>;
++		};
++
++		opp-2100000000 {
++			opp-hz = /bits/ 64 <2100000000>;
++			opp-microvolt = <1022000>;
++		};
+ 	};
+ };
+ 
+@@ -356,6 +346,33 @@
+ 			status = "disabled";
+ 		};
+ 
++		spdifin: audio-controller@400 {
++			compatible = "amlogic,g12a-spdifin",
++			"amlogic,axg-spdifin";
++			reg = <0x0 0x400 0x0 0x30>;
++			#sound-dai-cells = <0>;
++			sound-name-prefix = "SPDIFIN";
++			interrupts = <GIC_SPI 151 IRQ_TYPE_EDGE_RISING>;
++			clocks = <&clkc_audio AUD_CLKID_SPDIFIN>,
++			<&clkc_audio AUD_CLKID_SPDIFIN_CLK>;
++			clock-names = "pclk", "refclk";
++			resets = <&clkc_audio AUD_RESET_SPDIFIN>;
++			status = "disabled";
++		};
++
++		spdifout: audio-controller@480 {
++			compatible = "amlogic,g12a-spdifout",
++			"amlogic,axg-spdifout";
++			reg = <0x0 0x480 0x0 0x50>;
++			#sound-dai-cells = <0>;
++			sound-name-prefix = "SPDIFOUT";
++			clocks = <&clkc_audio AUD_CLKID_SPDIFOUT>,
++			<&clkc_audio AUD_CLKID_SPDIFOUT_CLK>;
++			clock-names = "pclk", "mclk";
++			resets = <&clkc_audio AUD_RESET_SPDIFOUT>;
++			status = "disabled";
++		};
++
+ 		tdmout_a: audio-controller@500 {
+ 			compatible = "amlogic,sm1-tdmout";
+ 			reg = <0x0 0x500 0x0 0x40>;
