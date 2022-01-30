@@ -1,0 +1,11 @@
+--- a/drivers/net/wireless/rtl8723du/core/rtw_p2p.c	2022-01-30 15:57:36.764373353 +0200
++++ b/drivers/net/wireless/rtl8723du/core/rtw_p2p.c	2022-01-30 15:58:03.904352350 +0200
+@@ -2300,7 +2300,7 @@
+ 				rtw_get_p2p_attr_content(p2p_ie, p2p_ielen, P2P_ATTR_DEVICE_INFO , pattr_content, (uint *)&attr_contentlen);
+ 
+ #if LINUX_VERSION_CODE < KERNEL_VERSION(5, 17, 0)
+-				_rtw_memcpy(psta->dev_addr, 	pattr_content, ETH_ALEN);/* P2P Device Address */
++				memcpy(psta->dev_addr, 	pattr_content, ETH_ALEN);/* P2P Device Address */
+ 
+ #else
+ 				dev_addr_set(psta, pattr_content);
