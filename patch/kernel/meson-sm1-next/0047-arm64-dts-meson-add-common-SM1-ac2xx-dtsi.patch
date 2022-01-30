@@ -18,7 +18,7 @@ new file mode 100644
 index 000000000000..b3872983b5ce
 --- /dev/null
 +++ b/arch/arm64/boot/dts/amlogic/meson-sm1-ac2xx.dtsi
-@@ -0,0 +1,298 @@
+@@ -0,0 +1,300 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 +/*
 + * Copyright (c) 2019 BayLibre SAS. All rights reserved.
@@ -256,7 +256,8 @@ index 000000000000..b3872983b5ce
 +
 +	bus-width = <4>;
 +	cap-sd-highspeed;
-+	max-frequency = <100000000>;
++	sd-uhs-sdr104;
++	max-frequency = <200000000>;
 +
 +	non-removable;
 +	disable-wp;
@@ -270,7 +271,7 @@ index 000000000000..b3872983b5ce
 +	vqmmc-supply = <&vddio_ao1v8>;
 +};
 +
-+/* SD card */
++/* SD Card */
 +&sd_emmc_b {
 +	status = "okay";
 +	pinctrl-0 = <&sdcard_c_pins>;
@@ -279,7 +280,8 @@ index 000000000000..b3872983b5ce
 +
 +	bus-width = <4>;
 +	cap-sd-highspeed;
-+	max-frequency = <50000000>;
++	/* CRC errors are observed at 50MHz */
++	max-frequency = <35000000>;
 +	disable-wp;
 +
 +	cd-gpios = <&gpio GPIOC_6 GPIO_ACTIVE_LOW>;
@@ -317,6 +319,3 @@ index 000000000000..b3872983b5ce
 +	status = "okay";
 +	dr_mode = "otg";
 +};
--- 
-2.25.1
-
