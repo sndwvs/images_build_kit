@@ -247,23 +247,6 @@ diff -Naur a/arch/arm64/boot/dts/amlogic/meson-sm1.dtsi b/arch/arm64/boot/dts/am
  		opp-1000000000 {
  			opp-hz = /bits/ 64 <1000000000>;
  			opp-microvolt = <770000>;
-@@ -154,6 +134,16 @@
- 			opp-hz = /bits/ 64 <1908000000>;
- 			opp-microvolt = <950000>;
- 		};
-+
-+		opp-2016000000 {
-+			opp-hz = /bits/ 64 <2016000000>;
-+			opp-microvolt = <1000000>;
-+		};
-+
-+		opp-2100000000 {
-+			opp-hz = /bits/ 64 <2100000000>;
-+			opp-microvolt = <1022000>;
-+		};
- 	};
- };
- 
 @@ -356,6 +346,33 @@
  			status = "disabled";
  		};
