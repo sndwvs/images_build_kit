@@ -18,6 +18,7 @@ PART=1
 RUNLEVEL=$(runlevel)
 RUNLEVEL=${RUNLEVEL#* }
 COMPATIBLE=$(cat /proc/device-tree/compatible | tr -d [:cntrl:])
+MODEL=$(cat /proc/device-tree/model | tr -d [:cntrl:])
 
 
 case ${COMPATIBLE} in
@@ -53,8 +54,10 @@ case ${COMPATIBLE} in
     ;;
     *amlogic*g12a*|*amlogic*sm1*)
             OFFSET_LOADER="1::"
-            LOADER="u-boot.bin::"
-            BS=512
+            if [[ ${MODEL} != *X96*Max* ]]; then
+                LOADER="u-boot.bin::"
+                BS=512
+            fi
             FIX_BOOT_DISK=true
     ;;
     *)
@@ -170,6 +173,11 @@ prepare_disk() {
     UBOOT_OFFSET_LOADER=$(echo $OFFSET_LOADER | cut -d ':' -f2)
     TRUST_OFFSET_LOADER=$(echo $OFFSET_LOADER | cut -d ':' -f3)
 
+    if [[ ${MODEL} == *X96*Max* ]]; then
+        msginfo " ATTENTION " "\nstart backup u-boot default"
+        dd if=/dev/$DISK of=/boot/u-boot-default-aml.img bs=1M count=4 >/dev/null 2>&1
+    fi
+
     # clear partition
     sfdisk --delete /dev/$DISK >/dev/null 2>&1 || true
 
@@ -190,12 +198,18 @@ prepare_disk() {
         dd if=/boot/$TRUST_LOADER of=/dev/$DISK seek=$TRUST_OFFSET_LOADER status=noxfer >/dev/null 2>&1
     fi
 
-    [[ ${COMPATIBLE} =~ raspberry*pi ]] && unset OFFSET && SIZE="+512M"
+    [[ ${COMPATIBLE} =~ raspberry*pi || ${MODEL} == *X96*Max* ]] && unset OFFSET && SIZE="+512M"
 
     echo -e "\no\nn\np\n${PART}\n${OFFSET}\n${SIZE}\nw" | fdisk "/dev/$DISK" >/dev/null 2>&1
 
-    if [[ ${COMPATIBLE} =~ raspberry*pi ]] ;then
+    if [[ ${COMPATIBLE} =~ raspberry*pi || ${MODEL} == *X96*Max* ]]; then
         echo -e "\nn\np\n\n\n\nt\n${PART}\nc\nw" | fdisk "/dev/$DISK" >/dev/null 2>&1
+    fi
+
+    if [[ ${MODEL} == *X96*Max* ]]; then
+        msginfo " ATTENTION " "\nstart restore u-boot"
+        dd if=/boot/u-boot-default-aml.img of="/dev/$DISK" conv=fsync bs=1 count=442 >/dev/null 2>&1
+        dd if=/boot/u-boot-default-aml.img of="/dev/$DISK" conv=fsync bs=512 skip=1 seek=1 >/dev/null 2>&1
     fi
 
     if [[ $DISK =~ mmc* ]] ;then
@@ -204,9 +218,9 @@ prepare_disk() {
         DISK=${DISK}${PART}
     fi
 
-    if [[ ${COMPATIBLE} =~ raspberry*pi ]] ;then
+    if [[ ${COMPATIBLE} =~ raspberry*pi || ${MODEL} == *X96*Max* ]]; then
         DISK0=$DISK
-        DISK=${DISK/1/2}
+        DISK=$(echo ${DISK} | sed 's:\(\w\)$:2:g')
         mkfs.vfat -F 32 "/dev/$DISK0" >/dev/null 2>&1
     fi
 
@@ -286,16 +300,17 @@ DISK=$OUT
 
 mount /dev/$DISK $OUTPUT
 
-if [[ ${COMPATIBLE} =~ raspberry*pi ]] ;then
+if [[ ${COMPATIBLE} =~ raspberry*pi || ${MODEL} == *X96*Max* ]] ;then
     mkdir -p $OUTPUT/boot
-    mount /dev/${DISK/2/1} $OUTPUT/boot
+    DISK0=$(echo ${DISK} | sed 's:\(\w\)$:1:g')
+    mount /dev/$DISK0 $OUTPUT/boot
 fi
 
 transfer
 
 fix_config "$DISK"
 
-[[ ${COMPATIBLE} =~ raspberry*pi ]] && umount $OUTPUT/boot
+[[ ${COMPATIBLE} =~ raspberry*pi || ${MODEL} == *X96*Max* ]] && umount $OUTPUT/boot
 
 umount $OUTPUT
 
