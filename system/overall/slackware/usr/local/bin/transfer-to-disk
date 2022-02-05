@@ -285,7 +285,7 @@ fix_config() {
 #---------------------------------------------
 [[ $RUNLEVEL > 2 ]] && ( msginfo " ATTENTION " "\ncurrent runlevel $RUNLEVEL\nin order to correctly transfer the system,\nyou must go to runlevel 2 or lower\nbash$ init 2" && exit 1 )
 
-[[ -z $FIX_BOOT_DISK ]] && ( msginfo " ATTENTION " "\nsystem migration is not supported\nfor your hardware '$COMPATIBLE'" && exit 1 )
+[[ -z $FIX_BOOT_DISK ]] && ( msginfo " ATTENTION " "\nsystem migration is not supported\nfor your hardware\nSoC: '$COMPATIBLE'\nmodel: '$MODEL'" && exit 1 )
 
 options+=("1" "system moving on the emmc, hdd, ssd or nand")
 
