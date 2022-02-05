@@ -54,11 +54,15 @@ case ${COMPATIBLE} in
     ;;
     *amlogic*g12a*|*amlogic*sm1*)
             OFFSET_LOADER="1::"
+            LOADER="u-boot.bin::"
+            BS=512
+#            if [[ ${MODEL} != *X96*Max* ]]; then
+#                LOADER="u-boot.bin::"
+#                BS=512
+#            fi
             if [[ ${MODEL} != *X96*Max* ]]; then
-                LOADER="u-boot.bin::"
-                BS=512
+                FIX_BOOT_DISK=true
             fi
-            FIX_BOOT_DISK=true
     ;;
     *)
             exit
@@ -200,7 +204,7 @@ prepare_disk() {
 
     [[ ${COMPATIBLE} =~ raspberry*pi || ${MODEL} == *X96*Max* ]] && unset OFFSET && SIZE="+512M"
 
-    echo -e "\no\nn\np\n${PART}\n${OFFSET}\n${SIZE}\nw" | fdisk "/dev/$DISK" >/dev/null 2>&1
+    echo -e "\no\nn\np\n${PART}\n${OFFSET}\n${SIZE}\nw" | fdisk "/dev/$DISK" >/dev/null 2>&1 || true
 
     if [[ ${COMPATIBLE} =~ raspberry*pi || ${MODEL} == *X96*Max* ]]; then
         echo -e "\nn\np\n\n\n\nt\n${PART}\nc\nw" | fdisk "/dev/$DISK" >/dev/null 2>&1
@@ -208,8 +212,9 @@ prepare_disk() {
 
     if [[ ${MODEL} == *X96*Max* ]]; then
         msginfo " ATTENTION " "\nstart restore u-boot"
-        dd if=/boot/u-boot-default-aml.img of="/dev/$DISK" conv=fsync bs=1 count=442 >/dev/null 2>&1
-        dd if=/boot/u-boot-default-aml.img of="/dev/$DISK" conv=fsync bs=512 skip=1 seek=1 >/dev/null 2>&1
+        dd if=/boot/u-boot-default-aml.img of="/dev/$DISK" bs=1M count=4 >/dev/null 2>&1
+        #dd if=/boot/u-boot-default-aml.img of="/dev/$DISK" conv=fsync bs=1 count=442 >/dev/null 2>&1
+        #dd if=/boot/u-boot-default-aml.img of="/dev/$DISK" conv=fsync bs=512 skip=1 seek=1 >/dev/null 2>&1
     fi
 
     if [[ $DISK =~ mmc* ]] ;then
