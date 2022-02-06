@@ -425,7 +425,7 @@ create_img() {
     [[ -z "$IMAGE" ]] && exit 1
 
     # +1600M for create swap firstrun
-    ROOTFS_SIZE=$(rsync -an --stats $SOURCE/$IMAGE test | grep "Total file size" | sed 's/[^0-9]//g' | xargs -I{} expr {} / $((1024*1024)) + 1600)"M"
+    ROOTFS_SIZE=$(rsync -an --stats $SOURCE/$IMAGE test | grep "Total file size" | sed 's/[^0-9]//g' | xargs -I{} expr {} / $((1024*1024)) + 2200)"M"
 
     message "" "create" "image size $ROOTFS_SIZE"
 
