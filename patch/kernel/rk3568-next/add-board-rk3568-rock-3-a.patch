@@ -7,9 +7,9 @@ diff -Naur a/arch/arm64/boot/dts/rockchip/Makefile b/arch/arm64/boot/dts/rockchi
  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3568-evb1-v10.dtb
 +dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3568-rock-3-a.dtb
 diff -Naur /dev/null b/arch/arm64/boot/dts/rockchip/rk3568-rock-3-a.dts
---- /dev/null	2021-12-26 20:37:56.532000032 +0200
-+++ b/arch/arm64/boot/dts/rockchip/rk3568-rock-3-a.dts	2021-12-27 17:20:39.582283378 +0200
-@@ -0,0 +1,803 @@
+--- /dev/null	2022-02-01 21:29:21.712000021 +0200
++++ b/arch/arm64/boot/dts/rockchip/rk3568-rock-3-a.dts	2022-02-06 12:20:20.218557294 +0200
+@@ -0,0 +1,795 @@
 +/dts-v1/;
 +#include <dt-bindings/gpio/gpio.h>
 +#include <dt-bindings/pwm/pwm.h>
@@ -660,15 +660,7 @@ diff -Naur /dev/null b/arch/arm64/boot/dts/rockchip/rk3568-rock-3-a.dts
 +	status = "okay";
 +};
 +
-+&usbdrd_dwc3 {
-+	status="okay";
-+};
-+
 +&usbdrd30 {
-+	status = "okay";
-+};
-+
-+&usbhost_dwc3 {
 +	status = "okay";
 +};
 +
