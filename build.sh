@@ -229,13 +229,13 @@ if [[ $COMPILE_BINARIES == yes ]]; then
         compile_second_boot
     fi
 
-    [[ $DOWNLOAD_SOURCE_BINARIES == yes ]] && patching_source "u-boot"
-    compile_boot_loader
-
     if [[ ! -z $OPENSBI ]]; then
         [[ $DOWNLOAD_SOURCE_BINARIES == yes ]] && patching_source "opensbi"
         compile_opensbi
     fi
+
+    [[ $DOWNLOAD_SOURCE_BINARIES == yes ]] && patching_source "u-boot"
+    compile_boot_loader
 
     if [[ $DOWNLOAD_SOURCE_BINARIES == yes ]]; then
         external_patching_source
