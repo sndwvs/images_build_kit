@@ -1,0 +1,22 @@
+--- a/drivers/net/wireless/rtl8723du/core/rtw_p2p.c	2022-02-08 20:50:34.319680792 +0200
++++ b/drivers/net/wireless/rtl8723du/core/rtw_p2p.c	2022-02-08 21:17:51.368189273 +0200
+@@ -2303,7 +2303,7 @@
+ 				memcpy(psta->dev_addr, 	pattr_content, ETH_ALEN);/* P2P Device Address */
+ 
+ #else
+-				dev_addr_set(psta, pattr_content);
++				dev_addr_set((u8)&psta, pattr_content);
+ #endif
+ 
+ 				pattr_content += ETH_ALEN;
+--- a/drivers/net/wireless/rtl8723du/os_dep/rtw_proc.c	2022-02-08 21:20:27.740611584 +0200
++++ b/drivers/net/wireless/rtl8723du/os_dep/rtw_proc.c	2022-02-08 21:21:14.396737218 +0200
+@@ -25,6 +25,8 @@
+ #if (LINUX_VERSION_CODE < KERNEL_VERSION(3, 10, 0))
+ #define PDE_DATA(inode) PDE((inode))->data
+ #define proc_get_parent_data(inode) PDE((inode))->parent->data
++#elif (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 17, 0))
++#define PDE_DATA(inode) pde_data(inode)
+ #endif
+ 
+ #if (LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 24))
