@@ -8,8 +8,8 @@ diff -Naur a/arch/arm64/boot/dts/rockchip/Makefile b/arch/arm64/boot/dts/rockchi
 +dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3568-rock-3-a.dtb
 diff -Naur /dev/null b/arch/arm64/boot/dts/rockchip/rk3568-rock-3-a.dts
 --- /dev/null	2022-02-01 21:29:21.712000021 +0200
-+++ b/arch/arm64/boot/dts/rockchip/rk3568-rock-3-a.dts	2022-02-06 12:20:20.218557294 +0200
-@@ -0,0 +1,795 @@
++++ b/arch/arm64/boot/dts/rockchip/rk3568-rock-3-a.dts	2022-02-12 19:11:48.524936164 +0200
+@@ -0,0 +1,809 @@
 +/dts-v1/;
 +#include <dt-bindings/gpio/gpio.h>
 +#include <dt-bindings/pwm/pwm.h>
@@ -128,13 +128,13 @@ diff -Naur /dev/null b/arch/arm64/boot/dts/rockchip/rk3568-rock-3-a.dts
 +		vin-supply = <&vcc5v0_sys>;
 +	};
 +
-+	vcc5v0_usb30_host: vcc5v0_usb30_host {
++	vcc5v0_usb_host: vcc5v0_usb_host {
 +		compatible = "regulator-fixed";
-+		regulator-name = "vcc5v0_usb30_host";
++		regulator-name = "vcc5v0_usb_host";
 +		enable-active-high;
-+		gpio = <&gpio0 RK_PC5 GPIO_ACTIVE_HIGH>;
++		gpio = <&gpio0 RK_PA6 GPIO_ACTIVE_HIGH>;
 +		pinctrl-names = "default";
-+		pinctrl-0 = <&vcc5v0_usb30_host_en_h>;
++		pinctrl-0 = <&vcc5v0_usb_host_en_h>;
 +		regulator-always-on;
 +		regulator-min-microvolt = <5000000>;
 +		regulator-max-microvolt = <5000000>;
@@ -145,13 +145,23 @@ diff -Naur /dev/null b/arch/arm64/boot/dts/rockchip/rk3568-rock-3-a.dts
 +		compatible = "regulator-fixed";
 +		regulator-name = "vcc5v0_usb_otg";
 +		enable-active-high;
-+		gpio = <&gpio0 RK_PC6 GPIO_ACTIVE_HIGH>;
++		gpio = <&gpio0 RK_PA5 GPIO_ACTIVE_HIGH>;
 +		pinctrl-names = "default";
 +		pinctrl-0 = <&vcc5v0_usb_otg_en_h>;
 +		regulator-always-on;
 +		regulator-min-microvolt = <5000000>;
 +		regulator-max-microvolt = <5000000>;
 +		vin-supply = <&vcc5v0_sys>;
++	};
++
++	vcc5v0_usb_hub: vcc5v0-usb_hub-regulator {
++		compatible = "regulator-fixed";
++		enable-active-high;
++		gpio = <&gpio0 RK_PD5 GPIO_ACTIVE_HIGH>;
++		pinctrl-names = "default";
++		pinctrl-0 = <&vcc5v0_usb_hub_en>;
++		regulator-name = "vcc5v0_sys";
++		regulator-always-on;
 +	};
 +
 +	pcie30_avdd0v9: pcie30-avdd0v9 {
@@ -537,7 +547,7 @@ diff -Naur /dev/null b/arch/arm64/boot/dts/rockchip/rk3568-rock-3-a.dts
 +};
 +
 +&i2c5 {
-+	status = "okay";	
++	status = "okay";
 +	pinctrl-0 = <&i2c5m0_xfer>;
 +};
 +
@@ -621,7 +631,7 @@ diff -Naur /dev/null b/arch/arm64/boot/dts/rockchip/rk3568-rock-3-a.dts
 +};
 +
 +&u2phy0_host {
-+	phy-supply = <&vcc5v0_usb30_host>;
++	phy-supply = <&vcc5v0_usb_host>;
 +	status = "okay";
 +};
 +
@@ -635,12 +645,12 @@ diff -Naur /dev/null b/arch/arm64/boot/dts/rockchip/rk3568-rock-3-a.dts
 +};
 +
 +&u2phy1_host {
-+	phy-supply = <&vcc5v0_usb30_host>;
++	phy-supply = <&vcc5v0_usb_host>;
 +	status = "okay";
 +};
 +
 +&u2phy1_otg {
-+	phy-supply = <&vcc5v0_usb30_host>;
++	phy-supply = <&vcc5v0_usb_host>;
 +	status = "okay";
 +};
 +
@@ -711,9 +721,9 @@ diff -Naur /dev/null b/arch/arm64/boot/dts/rockchip/rk3568-rock-3-a.dts
 +};
 +
 +&pcie2x1 {
-+	reset-gpios = <&gpio3 RK_PC1 GPIO_ACTIVE_HIGH>;	
++	reset-gpios = <&gpio2 RK_PC1 GPIO_ACTIVE_HIGH>;
 +	vpcie3v3-supply = <&pcie30_3v3>;
-+	pinctrl-0 = <&pcie20m1_pins>; 
++	pinctrl-0 = <&pcie20m1_pins>;
 +	status = "okay";
 +};
 +
@@ -732,12 +742,16 @@ diff -Naur /dev/null b/arch/arm64/boot/dts/rockchip/rk3568-rock-3-a.dts
 +	};
 +
 +	usb {
-+		vcc5v0_usb30_host_en_h: vcc5v0-usb30-host-en_h {
-+			rockchip,pins = <0 RK_PC5 RK_FUNC_GPIO &pcfg_pull_none>;
++		vcc5v0_usb_host_en_h: vcc5v0-usb-host-en_h {
++			rockchip,pins = <0 RK_PA6 RK_FUNC_GPIO &pcfg_pull_none>;
 +		};
 +
 +		vcc5v0_usb_otg_en_h: vcc5v0-usb-otg-en_h {
-+			rockchip,pins = <0 RK_PC6 RK_FUNC_GPIO &pcfg_pull_none>;
++			rockchip,pins = <0 RK_PA5 RK_FUNC_GPIO &pcfg_pull_none>;
++		};
++
++		vcc5v0_usb_hub_en: vcc5v0-usb-hub-en {
++			rockchip,pins = <0 RK_PD5 RK_FUNC_GPIO &pcfg_pull_none>;
 +		};
 +	};
 +
