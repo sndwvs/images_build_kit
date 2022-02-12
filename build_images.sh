@@ -266,7 +266,7 @@ setting_default_start_x() {
 
 
 setting_for_desktop() {
-    if [[ $SOCFAMILY == sun* ]]; then
+    if [[ $SOCFAMILY == sun* && -e $SOURCE/$ROOTFS_DESKTOP/boot/boot.cmd ]]; then
         # adjustment for vdpau
         sed -i 's#sunxi_ve_mem_reserve=0#sunxi_ve_mem_reserve=128#' "$SOURCE/$ROOTFS_DESKTOP/boot/boot.cmd"
         $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A arm -T script -d $SOURCE/$ROOTFS_DESKTOP/boot/boot.cmd \
