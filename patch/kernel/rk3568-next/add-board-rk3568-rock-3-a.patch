@@ -9,7 +9,7 @@ diff -Naur a/arch/arm64/boot/dts/rockchip/Makefile b/arch/arm64/boot/dts/rockchi
 diff -Naur /dev/null b/arch/arm64/boot/dts/rockchip/rk3568-rock-3-a.dts
 --- /dev/null	2022-02-01 21:29:21.712000021 +0200
 +++ b/arch/arm64/boot/dts/rockchip/rk3568-rock-3-a.dts	2022-02-12 19:11:48.524936164 +0200
-@@ -0,0 +1,809 @@
+@@ -0,0 +1,811 @@
 +/dts-v1/;
 +#include <dt-bindings/gpio/gpio.h>
 +#include <dt-bindings/pwm/pwm.h>
@@ -623,6 +623,8 @@ diff -Naur /dev/null b/arch/arm64/boot/dts/rockchip/rk3568-rock-3-a.dts
 +};
 +
 +&tsadc {
++	rockchip,hw-tshut-mode = <1>;
++	rockchip,hw-tshut-polarity = <0>;
 +	status = "okay";
 +};
 +
