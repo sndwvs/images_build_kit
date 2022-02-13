@@ -125,9 +125,9 @@ diff -Naur a/drivers/net/wireless/rtl8814au/core/rtw_recv.c b/drivers/net/wirele
  				RTW_INFO("#############################\n");
  				_rtw_memset(pmppriv->mplink_buf, '\0' , sizeof(pmppriv->mplink_buf));
  				_rtw_memcpy(pmppriv->mplink_buf, ptr, precv_frame->u.hdr.len);
-diff -Naur a/drivers/net/wireless/rtl8822bu/core/efuse/rtw_efuse.c b/drivers/net/wireless/rtl8822bu/core/efuse/rtw_efuse.c
---- a/drivers/net/wireless/rtl8822bu/core/efuse/rtw_efuse.c	2021-10-08 18:41:26.992131984 +0000
-+++ b/drivers/net/wireless/rtl8822bu/core/efuse/rtw_efuse.c	2021-10-08 21:30:16.625812359 +0000
+diff -Naur a/drivers/net/wireless/rtl8822cs/core/efuse/rtw_efuse.c b/drivers/net/wireless/rtl8822cs/core/efuse/rtw_efuse.c
+--- a/drivers/net/wireless/rtl8822cs/core/efuse/rtw_efuse.c	2021-10-08 18:41:26.992131984 +0000
++++ b/drivers/net/wireless/rtl8822cs/core/efuse/rtw_efuse.c	2021-10-08 21:30:16.625812359 +0000
 @@ -778,8 +778,9 @@
  	j = 0;
  
@@ -139,9 +139,9 @@ diff -Naur a/drivers/net/wireless/rtl8822bu/core/efuse/rtw_efuse.c b/drivers/net
  			_RTW_PRINT_SEL(RTW_DBGDUMP, "%02X%s"
  				, pEfuseHal->fakeEfuseInitMap[i]
  				, ((i + 1) % 16 == 0) ? "\n" : (((i + 1) % 8 == 0) ? "	  " : " ")
-diff -Naur a/drivers/net/wireless/rtl8822bu/core/rtw_mlme.c b/drivers/net/wireless/rtl8822bu/core/rtw_mlme.c
---- a/drivers/net/wireless/rtl8822bu/core/rtw_mlme.c	2021-10-08 18:41:27.040131877 +0000
-+++ b/drivers/net/wireless/rtl8822bu/core/rtw_mlme.c	2021-10-08 20:47:18.642922824 +0000
+diff -Naur a/drivers/net/wireless/rtl8822cs/core/rtw_mlme.c b/drivers/net/wireless/rtl8822cs/core/rtw_mlme.c
+--- a/drivers/net/wireless/rtl8822cs/core/rtw_mlme.c	2021-10-08 18:41:27.040131877 +0000
++++ b/drivers/net/wireless/rtl8822cs/core/rtw_mlme.c	2021-10-08 20:47:18.642922824 +0000
 @@ -3191,12 +3191,14 @@
  	ssc_chk = rtw_sitesurvey_condition_check(padapter, _FALSE);
  	if( ssc_chk == SS_DENY_BUSY_TRAFFIC) {
@@ -159,17 +159,36 @@ diff -Naur a/drivers/net/wireless/rtl8822bu/core/rtw_mlme.c b/drivers/net/wirele
  	}
  	else if (ssc_chk != SS_ALLOW)
  		goto exit;
-diff -Naur a/drivers/net/wireless/rtl8822bu/core/rtw_wlan_util.c b/drivers/net/wireless/rtl8822bu/core/rtw_wlan_util.c
---- a/drivers/net/wireless/rtl8822bu/core/rtw_wlan_util.c	2021-10-08 18:41:27.084131779 +0000
-+++ b/drivers/net/wireless/rtl8822bu/core/rtw_wlan_util.c	2021-10-08 21:04:10.433064388 +0000
-@@ -3224,8 +3224,9 @@
- 		goto exit;
- 	else {
- 		if(*(p+1) > 6 ) {
--			for(i=0; i<9;i++)
-+			for( i=0; i<9; i++ ) {
- 				RTW_INFO("p[%d]=0x%x",i,*(p+i) );
+diff -Naur a/drivers/net/wireless/rtl8822cs/core/rtw_recv.c b/drivers/net/wireless/rtl8822cs/core/rtw_recv.c
+--- a/drivers/net/wireless/rtl8822cs/core/rtw_recv.c	2021-09-21 17:36:33.378916540 +0000
++++ b/drivers/net/wireless/rtl8822cs/core/rtw_recv.c	2021-10-08 21:06:53.364735113 +0000
+@@ -3555,9 +3555,10 @@
+ 			int i;
+ 			RTW_INFO("############ type:0x%02x subtype:0x%02x #################\n", type, subtype);
+ 
+-			for (i = 0; i < precv_frame->u.hdr.len; i = i + 8)
++			for (i = 0; i < precv_frame->u.hdr.len; i = i + 8) {
+ 				RTW_INFO("%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X:\n", *(ptr + i),
+ 					*(ptr + i + 1), *(ptr + i + 2) , *(ptr + i + 3) , *(ptr + i + 4), *(ptr + i + 5), *(ptr + i + 6), *(ptr + i + 7));
 +			}
- 				RTW_INFO("\n");
- 			if(*(p+6) != 2)
- 				goto exit;
+ 				RTW_INFO("#############################\n");
+ 				_rtw_memset(pmppriv->mplink_buf, '\0' , sizeof(pmppriv->mplink_buf));
+ 				_rtw_memcpy(pmppriv->mplink_buf, ptr, precv_frame->u.hdr.len);
+--- a/drivers/net/wireless/rtl8822cs/os_dep/linux/ioctl_cfg80211.c.1	2022-02-13 19:04:07.946515034 +0200
++++ b/drivers/net/wireless/rtl8822cs/os_dep/linux/ioctl_cfg80211.c	2022-02-13 19:05:34.442821706 +0200
+@@ -4483,6 +4483,7 @@
+ }
+ 
+ #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 31))
++#ifdef CONFIG_RTW_DEBUG
+ static const char *nl80211_tx_power_setting_str(int type)
+ {
+ 	switch (type) {
+@@ -4496,6 +4497,7 @@
+ 		return "UNKNOWN";
+ 	};
+ }
++#endif	/*	CONFIG_RTW_DEBUG	*/
+ 
+ static int cfg80211_rtw_set_txpower(struct wiphy *wiphy,
+ #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0))
