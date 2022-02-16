@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# disp_hdmi.sh
+echo "hdmi init start "
+echo disp0 > /sys/kernel/debug/dispdbg/name
+echo switch > /sys/kernel/debug/dispdbg/command
+echo 4 5 0 0 0x4 0x101 0 0 0 8 > /sys/kernel/debug/dispdbg/param
+echo 1 > /sys/kernel/debug/dispdbg/start
+echo "hdmi init end"
+
+# disp_mipi.sh
+#echo "mipi init start "
+#echo disp0 > /sys/kernel/debug/dispdbg/name
+#echo switch1 > /sys/kernel/debug/dispdbg/command
+#echo 1 4 0 0 0x4 0x101 0 0 0 8 > /sys/kernel/debug/dispdbg/param
+#echo 1 > /sys/kernel/debug/dispdbg/start
+#echo "mipi init end"
