@@ -1,12 +1,19 @@
 #!/bin/bash
 
+if [[ $(grep 'video_output=hdmi' /proc/cmdline) && $(mount | grep 'debugfs') ]]
+then
+    pushd /sys/kernel/debug/dispdbg 2>&1 >/dev/null
+    echo disp0 > name; echo switch1 > command; echo 4 10 0 0 0x4 0x101 0 0 0 8 > param; echo 1 > start;
+    popd 2>&1 >/dev/null
+fi
+
 # disp_hdmi.sh
-echo "hdmi init start "
-echo disp0 > /sys/kernel/debug/dispdbg/name
-echo switch > /sys/kernel/debug/dispdbg/command
-echo 4 5 0 0 0x4 0x101 0 0 0 8 > /sys/kernel/debug/dispdbg/param
-echo 1 > /sys/kernel/debug/dispdbg/start
-echo "hdmi init end"
+#echo "hdmi init start "
+#echo disp0 > /sys/kernel/debug/dispdbg/name
+#echo switch > /sys/kernel/debug/dispdbg/command
+#echo 4 5 0 0 0x4 0x101 0 0 0 8 > /sys/kernel/debug/dispdbg/param
+#echo 1 > /sys/kernel/debug/dispdbg/start
+#echo "hdmi init end"
 
 # disp_mipi.sh
 #echo "mipi init start "
