@@ -46,7 +46,9 @@ setting_fstab() {
         sed -i "s:# tmpfs:tmpfs:" $SOURCE/$ROOTFS/etc/fstab
         if [[ $DISTR == sla* ]]; then
             echo "/dev/$ROOT_DISK    /          ext4    noatime,nodiratime,data=writeback,errors=remount-ro       0       1" >> $SOURCE/$ROOTFS/etc/fstab || exit 1
-            if [[ $SOCFAMILY == bcm2* || $BOARD_NAME == x96_max_plus ]]; then
+            if [[ $SOCFAMILY == sun20iw1p1 && $KERNEL_SOURCE != next ]]; then
+                echo "debugfs    /sys/kernel/debug      debugfs  defaults       0       0" >> $SOURCE/$ROOTFS/etc/fstab
+            elif [[ $SOCFAMILY == bcm2* || $BOARD_NAME == x96_max_plus ]]; then
                 echo "/dev/${ROOT_DISK/p?/p1}    /boot      vfat    defaults       0       1" >> $SOURCE/$ROOTFS/etc/fstab
             elif [[ $SOCFAMILY == rk356* ]]; then
                 echo "/dev/${ROOT_DISK/p?/p1}    /boot      ext4    noatime,nodiratime       0       1" >> $SOURCE/$ROOTFS/etc/fstab
