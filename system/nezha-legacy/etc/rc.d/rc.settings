@@ -3,7 +3,8 @@
 if [[ $(grep 'video_output=hdmi' /proc/cmdline) && $(mount | grep 'debugfs') ]]
 then
     pushd /sys/kernel/debug/dispdbg 2>&1 >/dev/null
-    echo disp0 > name; echo switch1 > command; echo 4 10 0 0 0x4 0x101 0 0 0 8 > param; echo 1 > start;
+    # 4:720p50 5:720p60 9:1080p60 10:1080p60
+    echo disp0 > name; echo switch1 > command; echo 4 5 0 0 0x4 0x101 0 0 0 8 > param; echo 1 > start;
     popd 2>&1 >/dev/null
 fi
 
