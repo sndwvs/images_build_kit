@@ -41,6 +41,8 @@ done
 
 echo "Started build ${INITRD_NAME}-${KERNEL_VERSION}"
 
+# mkinitrd corrupted for ARM
+[[ $KARCH == arm ]] && export MKINITRD_ALLOWEXEC=yes
 mkinitrd -R -L -u -w 2 -c -k ${KERNEL_VERSION} -m ${INITRD_MODULES} \
          -s /tmp/initrd-tree -o /tmp/initrd.gz
 
