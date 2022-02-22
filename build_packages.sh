@@ -172,8 +172,11 @@ build_kernel_pkg() {
 }
 
 
-create_bootloader_pack(){
-    message "" "create" "bootloader pack"
+#---------------------------------------------
+# creation of the archive with the bootloader
+#---------------------------------------------
+create_archive_bootloader() {
+    message "" "create" "archive bootloader"
     cd $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/ || exit 1
     tar cJf $BUILD/$OUTPUT/$IMAGES/boot-${ROOTFS_VERSION}.tar.xz boot || exit 1
 }

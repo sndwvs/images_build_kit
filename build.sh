@@ -253,7 +253,7 @@ for image_type in ${DISTR_IMAGES[@]}; do
 
     if [[ ${image_type} == server || ${image_type} == core ]]; then
         prepare_rootfs
-        create_bootloader_pack
+        create_archive_bootloader
         download_pkg $DISTR_URL "${image_type}"
         install_pkg "${image_type}"
         if [[ ${DISTR} == crux* ]]; then
