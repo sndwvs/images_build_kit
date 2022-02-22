@@ -22,8 +22,9 @@ build_kernel_pkg() {
 
     # adding custom firmware
     if [[ $FIRMWARE == "yes" ]];then
-        cp -vaf $CWD/blobs/firmware/* $BUILD/$PKG/kernel-modules/lib/firmware/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        [[ -d $CWD/blobs/firmware-${BOARD_NAME} ]] && ( cp -vaf $CWD/blobs/firmware-${BOARD_NAME}/* $BUILD/$PKG/kernel-modules/lib/firmware/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+        cp -vaf $CWD/blobs/firmware/overall/* $BUILD/$PKG/kernel-modules/lib/firmware/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        [[ -d $CWD/blobs/overall/${BOARD_NAME} ]] && ( cp -vaf $CWD/blobs/overall/${BOARD_NAME}/* $BUILD/$PKG/kernel-modules/lib/firmware/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+        [[ -d $CWD/blobs/overall/${BOARD_NAME}-${KERNEL_SOURCE} ]] && ( cp -vaf $CWD/blobs/overall/${BOARD_NAME}-${KERNEL_SOURCE}/* $BUILD/$PKG/kernel-modules/lib/firmware/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
     fi
 
     message "" "copy" "kernel"
