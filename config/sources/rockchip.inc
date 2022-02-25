@@ -9,6 +9,7 @@ RKBIN_DIR="rkbin"
 RKBIN_BRANCH="master::"
 
 BOOT_LOADER_TOOLS_SOURCE="https://github.com/rockchip-linux/u-boot.git"
+#BOOT_LOADER_TOOLS_SOURCE="https://github.com/Caesar-github/u-boot.git"
 BOOT_LOADER_TOOLS_DIR="u-boot-tools-rockchip"
 BOOT_LOADER_TOOLS_BRANCH="next-dev::"
 
@@ -41,6 +42,13 @@ create_uboot()
 {
     pushd $SOURCE/$BOOT_LOADER_DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
+    LOAD_ADDRESS="0x200000"
+
+    local TPL="tpl/u-boot-tpl.bin"
+    # Using proprietary TPL bootloader
+    # TPL (memory initialization) have appeared only in u-boot 2019.10, and some users report stability issues.
+    [[ $USE_DDR_BLOB == yes ]] && TPL=$SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$DDR
+
     if [[ $SOCFAMILY == rk32* ]]; then
         # U-Boot SPL, with SPL_BACK_TO_BROM option enabled
 #        tools/mkimage -n $SOCFAMILY -T rksd -d spl/u-boot-spl-dtb.bin $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
@@ -59,15 +67,10 @@ create_uboot()
 #            for i in `seq 1 128`; do dd count=4 status=none; dd if=/dev/zero count=4 status=none; done < rkspi_loader.img > rkspi_loader.tmp
 #            mv rkspi_loader.tmp rkspi_loader.img
 #            dd if=u-boot.itb of=rkspi_loader.img seek=1024 conv=notrunc
-        if [[ $BOARD_NAME == rockpro64     || $BOARD_NAME == rock_pi_4*     || $BOARD_NAME == pinebook_pro || \
-              $BOARD_NAME == rock64        || $BOARD_NAME == firefly_rk3399 || $BOARD_NAME == rock_pi_e || \
-              $BOARD_NAME == helios64      || $BOARD_NAME == orange_pi_4*   || $BOARD_NAME == station_m1 ]]; then
-            local TPL="tpl/u-boot-tpl.bin"
-            # Using proprietary TPL bootloader
-            # TPL (memory initialization) have appeared only in u-boot 2019.10, and some users report stability issues.
-            [[ $USE_DDR_BLOB == yes ]] && TPL=$SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$DDR
-            tools/mkimage -n $SOCFAMILY -T rksd -d $TPL $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-            cat spl/u-boot-spl.bin >> $BOOT_LOADER_BIN || exit 1
+        if [[ $BOARD_NAME == rockpro64     || $BOARD_NAME == rock_pi_4*     || $BOARD_NAME == pinebook_pro      || \
+              $BOARD_NAME == rock64        || $BOARD_NAME == firefly_rk3399 || $BOARD_NAME == rock_pi_e         || \
+              $BOARD_NAME == helios64      || $BOARD_NAME == orange_pi_4*   || $BOARD_NAME == station_m1_broken    ]]; then
+            tools/mkimage -n $SOCFAMILY -T rksd -d ${TPL}:spl/u-boot-spl.bin $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             install -Dm644 u-boot.itb $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/u-boot.itb >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
             # remove ATF because it is included in u-boot.itb
@@ -81,7 +84,7 @@ create_uboot()
         else
             # The ddr binary files for ARM64 platforms from Rockchip, likes RK3399 and RK3328 should not skip first 4 bytes.
             # U-Boot SPL, with SPL_BACK_TO_BROM option disabled SD
-            tools/mkimage -n $SOCFAMILY -T rksd -d $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$DDR $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            tools/mkimage -n $SOCFAMILY -T rksd -d ${TPL}:spl/u-boot-spl.bin $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             cat $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$MINI_LOADER >> $BOOT_LOADER_BIN || exit 1
 
             # u-boot
@@ -89,7 +92,6 @@ create_uboot()
             # Total hours wasted before finding that the new "load address" parameter is not optional: 3
             # https://github.com/rockchip-linux/build/commit/fff8f5a2d91fd11f8c4f6d605cac704d28baab4d
             #
-            LOAD_ADDRESS="0x200000"
             [[ $SOCFAMILY == rk3308 ]] && LOAD_ADDRESS="0x600000"
             $SOURCE/$BOOT_LOADER_TOOLS_DIR/tools/loaderimage --pack --uboot u-boot-dtb.bin uboot.img $LOAD_ADDRESS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             install -Dm644 uboot.img $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/uboot.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
@@ -97,7 +99,6 @@ create_uboot()
     fi
 
     if [[ $SOCFAMILY == rk35* ]]; then
-        [[ $USE_DDR_BLOB == yes ]] && TPL=$SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$DDR
         tools/mkimage -n rk356x -T rksd -d ${TPL}:spl/u-boot-spl.bin $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         install -Dm644 u-boot.itb $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/u-boot.itb >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
