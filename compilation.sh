@@ -48,12 +48,11 @@ compile_boot_loader() {
 
         make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-        # for rk33: rockpro64, rock pi 4, pinebook pro, rock64, firefly-rk3399, rock pi e, helios64, orange pi 4
+        # for rk33: rockpro64, rock pi 4, pinebook pro, rock64, firefly-rk3399, rock pi e, helios64, orange pi 4, station_m1
         # rk35: quartz64, rock 3, station p2/m2
-        # broken: station m1
         if [[ $BOARD_NAME == rockpro64     || $BOARD_NAME == rock_pi_4*     || $BOARD_NAME == pinebook_pro        || \
               $BOARD_NAME == rock64        || $BOARD_NAME == firefly_rk3399 || $BOARD_NAME == rock_pi_e           || \
-              $BOARD_NAME == helios64      || $BOARD_NAME == orange_pi_4*   || $BOARD_NAME == station_m1_broken   || \
+              $BOARD_NAME == helios64      || $BOARD_NAME == orange_pi_4*   || $BOARD_NAME == station_m1          || \
               $BOARD_NAME == quartz64      || $BOARD_NAME == rock_3         || $BOARD_NAME == station_*2             ]]; then
             make $CTHREADS ARCH=$ARCH u-boot.itb CROSS_COMPILE=$CROSS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
