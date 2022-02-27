@@ -1,0 +1,9 @@
+#
+# setting the time on boards without RTC
+#
+
+# run at starter
+@reboot /usr/local/bin/fakehwclock.sh
+
+# run every 15 munutes
+*/15 * * * * /usr/local/bin/fakehwclock.sh

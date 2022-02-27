@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+# SPDX-License-Identifier: GPL-2.0
+# slarm64
+
+TYPE=$(basename $0)
+TEMP_SOURCE+=("/sys/devices/virtual/thermal/thermal_zone0/temp")
+TEMP_SOURCE+=("/sys/devices/virtual/thermal/thermal_zone1/temp")
+TEMP_SOURCE+=("/sys/class/hwmon/hwmon0/temp1_input")
+TYPE_SUFFIX="type"
+
+for temp_src in ${TEMP_SOURCE[*]}; do
+    if [[ -f $temp_src ]]; then
+        [[ $temp_src =~ "hwmon" ]] && TYPE_SUFFIX="name"
+        TYPE=$(echo $temp_src | rev | cut -d '/' -f2- | rev | sed "s:\$:/$TYPE_SUFFIX:" | xargs cat)
+        if [[ $TYPE == soc* && $TYPE == cpu* ]]; then
+            CPU_TEMP=$(cat $temp_src)
+            CPU_TEMP="$(( $CPU_TEMP / 1000 ))"
+            echo "${CPU_TEMP} °C"
+        elif [[ $TYPE == gpu* && $TYPE == gpu* ]]; then
+            GPU_TEMP=$(cat $temp_src)
+            GPU_TEMP="$(( $GPU_TEMP / 1000 ))"
+            echo "${GPU_TEMP} °C"
+        fi
+    fi
+done
