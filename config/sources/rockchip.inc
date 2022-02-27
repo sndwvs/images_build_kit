@@ -74,7 +74,7 @@ create_uboot()
             install -Dm644 u-boot.itb $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/u-boot.itb >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
             # remove ATF because it is included in u-boot.itb
-            [[ -f $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img ]] && rm $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            [[ -e $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img && $BOARD_NAME != station_m1 ]] && ( rm $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
 
             tools/mkimage -n $SOCFAMILY -T rkspi -d tpl/u-boot-tpl.bin:spl/u-boot-spl.bin rkspi_tpl_spl.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             dd if=/dev/zero of=rkspi_loader.img count=8192 status=none >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1

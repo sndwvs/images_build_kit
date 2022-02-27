@@ -279,7 +279,13 @@ setting_for_desktop() {
 
 setting_bootloader_move_to_disk() {
     message "" "save" "bootloader data for move to disk"
-    rsync -ar $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/ $SOURCE/$ROOTFS/boot >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    [[ ${BOARD_NAME} == station_m1 ]] && EXCLUDES+=("trust.img" "uboot.img")
+
+    for exclude in ${EXCLUDES[*]};do
+        EXCLUDE+="--exclude=$exclude "
+    done
+
+    rsync -ar $EXCLUDE $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/ $SOURCE/$ROOTFS/boot >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 
