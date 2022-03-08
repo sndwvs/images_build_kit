@@ -89,105 +89,6 @@ index 5dd4afc5f1fe..dc08368d62fe 100644
  .. c:type:: v4l2_hevc_dpb_entry
  
  .. raw:: latex
-diff --git a/Documentation/userspace-api/media/v4l/vidioc-queryctrl.rst b/Documentation/userspace-api/media/v4l/vidioc-queryctrl.rst
-index f9ecf6276129..2f491c17dd5d 100644
---- a/Documentation/userspace-api/media/v4l/vidioc-queryctrl.rst
-+++ b/Documentation/userspace-api/media/v4l/vidioc-queryctrl.rst
-@@ -495,6 +495,12 @@ See also the examples in :ref:`control`.
-       - n/a
-       - A struct :c:type:`v4l2_ctrl_hevc_slice_params`, containing HEVC
- 	slice parameters for stateless video decoders.
-+    * - ``V4L2_CTRL_TYPE_HEVC_SCALING_MATRIX``
-+      - n/a
-+      - n/a
-+      - n/a
-+      - A struct :c:type:`v4l2_ctrl_hevc_scaling_matrix`, containing HEVC
-+	scaling matrix for stateless video decoders.
-     * - ``V4L2_CTRL_TYPE_VP8_FRAME``
-       - n/a
-       - n/a
-diff --git a/drivers/media/v4l2-core/v4l2-ctrls-core.c b/drivers/media/v4l2-core/v4l2-ctrls-core.c
-index b4802c9989fd..f557aca9d966 100644
---- a/drivers/media/v4l2-core/v4l2-ctrls-core.c
-+++ b/drivers/media/v4l2-core/v4l2-ctrls-core.c
-@@ -906,6 +906,9 @@ static int std_validate_compound(const struct v4l2_ctrl *ctrl, u32 idx,
- 
- 		break;
- 
-+	case V4L2_CTRL_TYPE_HEVC_SCALING_MATRIX:
-+		break;
-+
- 	case V4L2_CTRL_TYPE_AREA:
- 		area = p;
- 		if (!area->width || !area->height)
-@@ -1465,6 +1468,9 @@ static struct v4l2_ctrl *v4l2_ctrl_new(struct v4l2_ctrl_handler *hdl,
- 	case V4L2_CTRL_TYPE_HEVC_SLICE_PARAMS:
- 		elem_size = sizeof(struct v4l2_ctrl_hevc_slice_params);
- 		break;
-+	case V4L2_CTRL_TYPE_HEVC_SCALING_MATRIX:
-+		elem_size = sizeof(struct v4l2_ctrl_hevc_scaling_matrix);
-+		break;
- 	case V4L2_CTRL_TYPE_HEVC_DECODE_PARAMS:
- 		elem_size = sizeof(struct v4l2_ctrl_hevc_decode_params);
- 		break;
-diff --git a/drivers/media/v4l2-core/v4l2-ctrls-defs.c b/drivers/media/v4l2-core/v4l2-ctrls-defs.c
-index 22a031e25499..bca21812e216 100644
---- a/drivers/media/v4l2-core/v4l2-ctrls-defs.c
-+++ b/drivers/media/v4l2-core/v4l2-ctrls-defs.c
-@@ -1001,6 +1001,7 @@ const char *v4l2_ctrl_get_name(u32 id)
- 	case V4L2_CID_MPEG_VIDEO_HEVC_SPS:			return "HEVC Sequence Parameter Set";
- 	case V4L2_CID_MPEG_VIDEO_HEVC_PPS:			return "HEVC Picture Parameter Set";
- 	case V4L2_CID_MPEG_VIDEO_HEVC_SLICE_PARAMS:		return "HEVC Slice Parameters";
-+	case V4L2_CID_MPEG_VIDEO_HEVC_SCALING_MATRIX:		return "HEVC Scaling Matrix";
- 	case V4L2_CID_MPEG_VIDEO_HEVC_DECODE_PARAMS:		return "HEVC Decode Parameters";
- 	case V4L2_CID_MPEG_VIDEO_HEVC_DECODE_MODE:		return "HEVC Decode Mode";
- 	case V4L2_CID_MPEG_VIDEO_HEVC_START_CODE:		return "HEVC Start Code";
-@@ -1502,6 +1503,9 @@ void v4l2_ctrl_fill(u32 id, const char **name, enum v4l2_ctrl_type *type,
- 	case V4L2_CID_MPEG_VIDEO_HEVC_SLICE_PARAMS:
- 		*type = V4L2_CTRL_TYPE_HEVC_SLICE_PARAMS;
- 		break;
-+	case V4L2_CID_MPEG_VIDEO_HEVC_SCALING_MATRIX:
-+		*type = V4L2_CTRL_TYPE_HEVC_SCALING_MATRIX;
-+		break;
- 	case V4L2_CID_MPEG_VIDEO_HEVC_DECODE_PARAMS:
- 		*type = V4L2_CTRL_TYPE_HEVC_DECODE_PARAMS;
- 		break;
-diff --git a/include/media/hevc-ctrls.h b/include/media/hevc-ctrls.h
-index 53c0038c792b..0e5c4a2eecff 100644
---- a/include/media/hevc-ctrls.h
-+++ b/include/media/hevc-ctrls.h
-@@ -19,6 +19,7 @@
- #define V4L2_CID_MPEG_VIDEO_HEVC_SPS		(V4L2_CID_CODEC_BASE + 1008)
- #define V4L2_CID_MPEG_VIDEO_HEVC_PPS		(V4L2_CID_CODEC_BASE + 1009)
- #define V4L2_CID_MPEG_VIDEO_HEVC_SLICE_PARAMS	(V4L2_CID_CODEC_BASE + 1010)
-+#define V4L2_CID_MPEG_VIDEO_HEVC_SCALING_MATRIX	(V4L2_CID_CODEC_BASE + 1011)
- #define V4L2_CID_MPEG_VIDEO_HEVC_DECODE_PARAMS	(V4L2_CID_CODEC_BASE + 1012)
- #define V4L2_CID_MPEG_VIDEO_HEVC_DECODE_MODE	(V4L2_CID_CODEC_BASE + 1015)
- #define V4L2_CID_MPEG_VIDEO_HEVC_START_CODE	(V4L2_CID_CODEC_BASE + 1016)
-@@ -27,6 +28,7 @@
- #define V4L2_CTRL_TYPE_HEVC_SPS 0x0120
- #define V4L2_CTRL_TYPE_HEVC_PPS 0x0121
- #define V4L2_CTRL_TYPE_HEVC_SLICE_PARAMS 0x0122
-+#define V4L2_CTRL_TYPE_HEVC_SCALING_MATRIX 0x0123
- #define V4L2_CTRL_TYPE_HEVC_DECODE_PARAMS 0x0124
- 
- enum v4l2_mpeg_video_hevc_decode_mode {
-@@ -224,6 +226,15 @@ struct v4l2_ctrl_hevc_decode_params {
- 	__u64	flags;
- };
- 
-+struct v4l2_ctrl_hevc_scaling_matrix {
-+	__u8	scaling_list_4x4[6][16];
-+	__u8	scaling_list_8x8[6][64];
-+	__u8	scaling_list_16x16[6][64];
-+	__u8	scaling_list_32x32[2][64];
-+	__u8	scaling_list_dc_coef_16x16[6];
-+	__u8	scaling_list_dc_coef_32x32[2];
-+};
-+
- /*  MPEG-class control IDs specific to the Hantro driver as defined by V4L2 */
- #define V4L2_CID_CODEC_HANTRO_BASE				(V4L2_CTRL_CLASS_CODEC | 0x1200)
- /*
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Jonas Karlman <jonas@kwiboo.se>
@@ -3505,14 +3406,6 @@ index da32a6350344..4fb05e8b5a54 100644
  	{ /* sentinel */ }
  };
  MODULE_DEVICE_TABLE(of, of_rkvdec_match);
-@@ -1218,6 +1255,7 @@ static int rkvdec_probe(struct platform_device *pdev)
- {
- 	struct rkvdec_dev *rkvdec;
- 	struct resource *res;
-+	const struct rkvdec_variant *variant;
- 	unsigned int i;
- 	int ret, irq;
- 
 @@ -1243,6 +1281,12 @@ static int rkvdec_probe(struct platform_device *pdev)
  	if (ret)
  		return ret;
@@ -3656,3 +3549,16 @@ index 831484253e27..64b36cc8ef94 100644
  	};
  
  	gpu: gpu@ffa30000 {
+
+diff --git a/drivers/staging/media/rkvdec/rkvdec.c b/drivers/staging/media/rkvdec/rkvdec.c
+index aa2f4e582..d9a437d6e 100644
+--- a/drivers/staging/media/rkvdec/rkvdec.c
++++ b/drivers/staging/media/rkvdec/rkvdec.c
+@@ -1208,6 +1208,7 @@ static const char * const rkvdec_clk_names[] = {
+ static int rkvdec_probe(struct platform_device *pdev)
+ {
+ 	struct rkvdec_dev *rkvdec;
++	const struct rkvdec_variant *variant;
+ 	unsigned int i;
+ 	int ret, irq;
+ 
