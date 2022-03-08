@@ -89,7 +89,21 @@ index 0edfb89e04a8..40dd68c20159 100644
  #include <linux/mutex.h>
  #include <linux/module.h>
  #include <linux/usb/pd_vdo.h>
-@@ -134,15 +136,53 @@ static int dp_altmode_status_update(struct dp_altmode *dp)
+diff --git a/drivers/usb/typec/altmodes/displayport.c b/drivers/usb/typec/altmodes/displayport.c
+index ba1387ab5..4d2eaeab1 100644
+--- a/drivers/usb/typec/altmodes/displayport.c
++++ b/drivers/usb/typec/altmodes/displayport.c
+@@ -78,7 +78,9 @@ static int dp_altmode_notify(struct dp_altmode *dp)
+ 	if (dp->data.conf) {
+ 		state = get_count_order(DP_CONF_GET_PIN_ASSIGN(dp->data.conf));
+ 		conf = TYPEC_MODAL_STATE(state);
++		dp_altmode_update_extcon(dp, false);
+ 	} else {
++		dp_altmode_update_extcon(dp, true);
+ 		conf = TYPEC_STATE_USB;
+ 	}
+ 
+@@ -154,6 +156,40 @@ static int dp_altmode_status_update(struct dp_altmode *dp)
  	return ret;
  }
  
@@ -129,34 +143,7 @@ index 0edfb89e04a8..40dd68c20159 100644
 +
  static int dp_altmode_configured(struct dp_altmode *dp)
  {
- 	int ret;
- 
  	sysfs_notify(&dp->alt->dev.kobj, "displayport", "configuration");
- 
--	if (!dp->data.conf)
-+	if (!dp->data.conf) {
-+		dp_altmode_update_extcon(dp, true);
- 		return typec_altmode_notify(dp->alt, TYPEC_STATE_USB,
- 					    &dp->data);
-+    }
-+
-+	dp_altmode_update_extcon(dp, false);
- 
- 	ret = dp_altmode_notify(dp);
- 	if (ret)
-@@ -169,9 +209,11 @@ static int dp_altmode_configure_vdm(struct dp_altmode *dp, u32 conf)
- 	if (ret) {
- 		if (DP_CONF_GET_PIN_ASSIGN(dp->data.conf))
- 			dp_altmode_notify(dp);
--		else
-+		else {
-+			dp_altmode_update_extcon(dp, true);
- 			typec_altmode_notify(dp->alt, TYPEC_STATE_USB,
- 					     &dp->data);
-+		}
- 	}
- 
- 	return ret;
 @@ -210,6 +252,8 @@ static void dp_altmode_work(struct work_struct *work)
  	case DP_STATE_EXIT:
  		if (typec_altmode_exit(dp->alt))
@@ -215,10 +202,11 @@ index 82b19ebd7838..6f00b17afc15 100644
  #include <linux/hrtimer.h>
  #include <linux/jiffies.h>
  #include <linux/kernel.h>
-@@ -322,6 +323,11 @@ struct tcpm_port {
- 	/* port belongs to a self powered device */
- 	bool self_powered;
- 
+@@ -476,6 +477,12 @@ struct tcpm_port {
+	 * SNK_READY for non-pd link.
+	 */
+	bool slow_charger_loop;
++
 +#ifdef CONFIG_EXTCON
 +	struct extcon_dev *extcon;
 +	unsigned int *extcon_cables;
@@ -292,7 +280,7 @@ index 82b19ebd7838..6f00b17afc15 100644
  		port->partner_altmode[i] = altmode;
  	}
  }
-@@ -1589,9 +1628,11 @@
+@@ -1167,9 +1207,11 @@ static int tcpm_pd_svdm(struct tcpm_port *port, const __le32 *payload, int cnt,
  			modep->svid_index++;
  			if (modep->svid_index < modep->nsvids) {
  				u16 svid = modep->svids[modep->svid_index];
@@ -302,8 +290,8 @@ index 82b19ebd7838..6f00b17afc15 100644
  			} else {
 +				tcpm_log(port, "Got all patner modes, registering");
  				tcpm_register_partner_altmodes(port);
- 				port->vdm_sm_running = false;
  			}
+ 			break;
 @@ -2693,6 +2735,7 @@ static int tcpm_src_attach(struct tcpm_port *port)
  static void tcpm_typec_disconnect(struct tcpm_port *port)
  {
