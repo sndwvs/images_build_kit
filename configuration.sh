@@ -27,8 +27,8 @@ KERNEL_FIRMWARE_DIR=${KERNEL_FIRMWARE_DIR:-"linux-firmware"}
 #---------------------------------------------
 # configuration linux distribution
 #---------------------------------------------
-#DISTR=${DISTR:-"slackwarearm"}
 if [[ $DISTR == sla* ]]; then
+    [[ $DISTR == slackwarearm ]] && DISTR_VERSION="15.0"
     DISTR_VERSION=${DISTR_VERSION:-"current"} # or 15.0
 elif [[ $DISTR == crux* ]]; then
     DISTR_VERSION=${DISTR_VERSION:-"3.6"}
