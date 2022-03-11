@@ -51,7 +51,7 @@ index 0bd1e98a0eef..ed7cd5f53046 100644
  		vin-supply = <&vcc_5v>;
  
 -		enable-gpio = <&gpio_ao GPIOE_2 GPIO_OPEN_DRAIN>;
-++		enable-gpio = <&gpio_ao GPIOE_2 GPIO_ACTIVE_HIGH>;
++		enable-gpio = <&gpio_ao GPIOE_2 GPIO_ACTIVE_HIGH>;
  		enable-active-high;
  		regulator-always-on;
  
