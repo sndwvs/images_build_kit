@@ -14,19 +14,6 @@ diff -Naur a/arch/arm64/boot/dts/amlogic/meson-g12-common.dtsi b/arch/arm64/boot
  	};
  
  	chosen {
-@@ -107,6 +107,12 @@
- 			no-map;
- 		};
- 
-+		/* 32 MiB reserved for ARM Trusted Firmware (BL32) */
-+		secmon_reserved_bl32: secmon@5300000 {
-+			reg = <0x0 0x05300000 0x0 0x2000000>;
-+			no-map;
-+		};
-+
- 		linux,cma {
- 			compatible = "shared-dma-pool";
- 			reusable;
 @@ -159,61 +165,6 @@
  			status = "disabled";
  		};
