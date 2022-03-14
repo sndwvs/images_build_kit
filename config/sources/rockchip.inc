@@ -3,8 +3,8 @@ INITRD_MODULES="tun:btrfs:xfs"
 
 ATF_BRANCH="master:tag:v2.6"
 
-RKBIN_SOURCE="https://github.com/rockchip-linux/rkbin.git"
-#RKBIN_SOURCE="https://github.com/Caesar-github/rkbin.git"
+#RKBIN_SOURCE="https://github.com/rockchip-linux/rkbin.git"
+RKBIN_SOURCE="https://github.com/Caesar-github/rkbin.git"
 RKBIN_DIR="rkbin"
 RKBIN_BRANCH="master::"
 
