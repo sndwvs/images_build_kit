@@ -16,7 +16,6 @@ Specification
 
 Signed-off-by: hmz007 <hmz007@gmail.com>
 ---
- arch/arm/dts/Makefile                         |   1 +
  .../arm/dts/rk3399-nanopi-r4s-4gb-u-boot.dtsi |   8 ++
  arch/arm/dts/rk3399-nanopi-r4s-4gb.dts        | 114 ++++++++++++++++++
  arch/arm/dts/rk3399-nanopi-r4s-u-boot.dtsi    |   7 ++
@@ -31,18 +30,6 @@ Signed-off-by: hmz007 <hmz007@gmail.com>
  create mode 100644 configs/nanopi-r4s-4gb-rk3399_defconfig
  create mode 100644 configs/nanopi-r4s-rk3399_defconfig
 
-diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
-index f8f529435b..55ca25bb22 100644
---- a/arch/arm/dts/Makefile
-+++ b/arch/arm/dts/Makefile
-@@ -131,6 +131,7 @@ dtb-$(CONFIG_ROCKCHIP_RK3399) += \
- 	rk3399-nanopi-m4.dtb \
- 	rk3399-nanopi-m4-2gb.dtb \
- 	rk3399-nanopi-neo4.dtb \
-+	rk3399-nanopi-r4s.dtb \
- 	rk3399-orangepi.dtb \
- 	rk3399-pinebook-pro.dtb \
- 	rk3399-puma-haikou.dtb \
 diff --git a/arch/arm/dts/rk3399-nanopi-r4s-4gb-u-boot.dtsi b/arch/arm/dts/rk3399-nanopi-r4s-4gb-u-boot.dtsi
 new file mode 100644
 index 0000000000..b291830640
