@@ -88,7 +88,16 @@ index 0edfb89e04a8..40dd68c20159 100644
 +#include <linux/extcon-provider.h>
  #include <linux/mutex.h>
  #include <linux/module.h>
- #include <linux/usb/pd_vdo.h>
+ #include <linux/property.h>
+@@ -68,6 +70,8 @@
+ 	struct fwnode_handle *connector_fwnode;
+ };
+ 
++static void dp_altmode_update_extcon(struct dp_altmode *dp, bool disconnect);
++
+ static int dp_altmode_notify(struct dp_altmode *dp)
+ {
+ 	unsigned long conf;
 diff --git a/drivers/usb/typec/altmodes/displayport.c b/drivers/usb/typec/altmodes/displayport.c
 index ba1387ab5..4d2eaeab1 100644
 --- a/drivers/usb/typec/altmodes/displayport.c
