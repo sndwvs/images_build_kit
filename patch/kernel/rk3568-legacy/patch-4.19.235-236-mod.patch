@@ -24,6 +24,22 @@ index 2ff81f3736c85..e442bf7427ae1 100644
  		compatible = "rockchip,rk3288-crypto";
  		reg = <0x0 0xff8a0000 0x0 0x4000>;
  		interrupts = <GIC_SPI 48 IRQ_TYPE_LEVEL_HIGH>;
+--- a/arch/arm64/include/asm/asm-uaccess.h	2022-03-24 06:43:28.416348630 +0200
++++ b/arch/arm64/include/asm/asm-uaccess.h	2022-03-23 10:10:45.000000000 +0200
+@@ -78,9 +78,10 @@
+ /*
+  * Remove the address tag from a virtual address, if present.
+  */
+-	.macro	untagged_addr, dst, addr
+-	sbfx	\dst, \addr, #0, #56
+-	and	\dst, \dst, \addr
++	.macro	clear_address_tag, dst, addr
++	tst	\addr, #(1 << 55)
++	bic	\dst, \addr, #(0xff << 56)
++	csel	\dst, \dst, \addr, eq
+ 	.endm
+ 
+ #endif
 diff --git a/arch/arm/include/asm/kvm_host.h b/arch/arm/include/asm/kvm_host.h
 index ae073fceb3f05..db20534912cdd 100644
 --- a/arch/arm/include/asm/kvm_host.h
@@ -480,7 +496,14 @@ diff --git a/arch/arm64/kernel/cpu_errata.c b/arch/arm64/kernel/cpu_errata.c
 index d191ce8410dba..d0b7dd60861bc 100644
 --- a/arch/arm64/kernel/cpu_errata.c
 +++ b/arch/arm64/kernel/cpu_errata.c
-@@ -24,6 +24,7 @@
+@@ -17,12 +17,14 @@
+  */
+ 
+ #include <linux/arm-smccc.h>
++#include <linux/psci.h>
+ #include <linux/types.h>
+ #include <linux/cpu.h>
+ #include <asm/cpu.h>
  #include <asm/cputype.h>
  #include <asm/cpufeature.h>
  #include <asm/smp_plat.h>
@@ -488,7 +511,7 @@ index d191ce8410dba..d0b7dd60861bc 100644
  
  static bool __maybe_unused
  is_affected_midr_range(const struct arm64_cpu_capabilities *entry, int scope)
-@@ -97,6 +98,16 @@ DEFINE_PER_CPU_READ_MOSTLY(struct bp_hardening_data, bp_hardening_data);
+@@ -96,6 +98,16 @@
  #ifdef CONFIG_KVM_INDIRECT_VECTORS
  extern char __smccc_workaround_1_smc_start[];
  extern char __smccc_workaround_1_smc_end[];
@@ -505,7 +528,7 @@ index d191ce8410dba..d0b7dd60861bc 100644
  
  static void __copy_hyp_vect_bpi(int slot, const char *hyp_vecs_start,
  				const char *hyp_vecs_end)
-@@ -110,11 +121,11 @@ static void __copy_hyp_vect_bpi(int slot, const char *hyp_vecs_start,
+@@ -109,11 +121,11 @@
  	__flush_icache_range((uintptr_t)dst, (uintptr_t)dst + SZ_2K);
  }
  
@@ -518,7 +541,7 @@ index d191ce8410dba..d0b7dd60861bc 100644
  	int cpu, slot = -1;
  
  	spin_lock(&bp_lock);
-@@ -133,6 +144,7 @@ static void install_bp_hardening_cb(bp_hardening_cb_t fn,
+@@ -132,6 +144,7 @@
  
  	__this_cpu_write(bp_hardening_data.hyp_vectors_slot, slot);
  	__this_cpu_write(bp_hardening_data.fn, fn);
@@ -526,7 +549,95 @@ index d191ce8410dba..d0b7dd60861bc 100644
  	spin_unlock(&bp_lock);
  }
  #else
-@@ -839,6 +851,13 @@ const struct arm64_cpu_capabilities arm64_errata[] = {
+@@ -146,7 +159,9 @@
+ }
+ #endif	/* CONFIG_KVM_INDIRECT_VECTORS */
+ 
++#include <uapi/linux/psci.h>
+ #include <linux/arm-smccc.h>
++#include <linux/psci.h>
+ 
+ static void call_smc_arch_workaround_1(void)
+ {
+@@ -190,8 +205,11 @@
+ 	struct arm_smccc_res res;
+ 	u32 midr = read_cpuid_id();
+ 
+-	switch (arm_smccc_1_1_get_conduit()) {
+-	case SMCCC_CONDUIT_HVC:
++	if (psci_ops.smccc_version == SMCCC_VERSION_1_0)
++		return -1;
++
++	switch (psci_ops.conduit) {
++	case PSCI_CONDUIT_HVC:
+ 		arm_smccc_1_1_hvc(ARM_SMCCC_ARCH_FEATURES_FUNC_ID,
+ 				  ARM_SMCCC_ARCH_WORKAROUND_1, &res);
+ 		switch ((int)res.a0) {
+@@ -209,7 +227,7 @@
+ 		}
+ 		break;
+ 
+-	case SMCCC_CONDUIT_SMC:
++	case PSCI_CONDUIT_SMC:
+ 		arm_smccc_1_1_smc(ARM_SMCCC_ARCH_FEATURES_FUNC_ID,
+ 				  ARM_SMCCC_ARCH_WORKAROUND_1, &res);
+ 		switch ((int)res.a0) {
+@@ -283,11 +301,11 @@
+ 
+ 	BUG_ON(nr_inst != 1);
+ 
+-	switch (arm_smccc_1_1_get_conduit()) {
+-	case SMCCC_CONDUIT_HVC:
++	switch (psci_ops.conduit) {
++	case PSCI_CONDUIT_HVC:
+ 		insn = aarch64_insn_get_hvc_value();
+ 		break;
+-	case SMCCC_CONDUIT_SMC:
++	case PSCI_CONDUIT_SMC:
+ 		insn = aarch64_insn_get_smc_value();
+ 		break;
+ 	default:
+@@ -326,12 +344,12 @@
+ 		return;
+ 	}
+ 
+-	switch (arm_smccc_1_1_get_conduit()) {
+-	case SMCCC_CONDUIT_HVC:
++	switch (psci_ops.conduit) {
++	case PSCI_CONDUIT_HVC:
+ 		arm_smccc_1_1_hvc(ARM_SMCCC_ARCH_WORKAROUND_2, state, NULL);
+ 		break;
+ 
+-	case SMCCC_CONDUIT_SMC:
++	case PSCI_CONDUIT_SMC:
+ 		arm_smccc_1_1_smc(ARM_SMCCC_ARCH_WORKAROUND_2, state, NULL);
+ 		break;
+ 
+@@ -365,13 +383,20 @@
+ 		goto out_printmsg;
+ 	}
+ 
+-	switch (arm_smccc_1_1_get_conduit()) {
+-	case SMCCC_CONDUIT_HVC:
++	if (psci_ops.smccc_version == SMCCC_VERSION_1_0) {
++		ssbd_state = ARM64_SSBD_UNKNOWN;
++		if (!this_cpu_safe)
++			__ssb_safe = false;
++		return false;
++	}
++
++	switch (psci_ops.conduit) {
++	case PSCI_CONDUIT_HVC:
+ 		arm_smccc_1_1_hvc(ARM_SMCCC_ARCH_FEATURES_FUNC_ID,
+ 				  ARM_SMCCC_ARCH_WORKAROUND_2, &res);
+ 		break;
+ 
+-	case SMCCC_CONDUIT_SMC:
++	case PSCI_CONDUIT_SMC:
+ 		arm_smccc_1_1_smc(ARM_SMCCC_ARCH_FEATURES_FUNC_ID,
+ 				  ARM_SMCCC_ARCH_WORKAROUND_2, &res);
+ 		break;
+@@ -826,6 +851,13 @@
  		.matches = has_ssbd_mitigation,
  		.midr_range_list = arm64_ssb_cpus,
  	},
@@ -540,7 +651,7 @@ index d191ce8410dba..d0b7dd60861bc 100644
  #ifdef CONFIG_ARM64_ERRATUM_1463225
  	{
  		.desc = "ARM erratum 1463225",
-@@ -875,14 +894,39 @@ ssize_t cpu_show_spectre_v1(struct device *dev, struct device_attribute *attr,
+@@ -862,14 +894,39 @@
  	return sprintf(buf, "Mitigation: __user pointer sanitization\n");
  }
  
@@ -583,7 +694,7 @@ index d191ce8410dba..d0b7dd60861bc 100644
  
  	return sprintf(buf, "Vulnerable\n");
  }
-@@ -903,3 +947,332 @@ ssize_t cpu_show_spec_store_bypass(struct device *dev,
+@@ -890,3 +947,332 @@
  
  	return sprintf(buf, "Vulnerable\n");
  }
@@ -2836,3 +2947,67 @@ index 34d08ee637471..a161951e55a54 100644
  		}
  		break;
  	default:
+--- a/drivers/firmware/psci.c	2022-03-24 08:25:01.286677303 +0200
++++ b/drivers/firmware/psci.c	2022-03-23 10:10:45.000000000 +0200
+@@ -61,26 +61,11 @@
+ 
+ struct psci_operations psci_ops = {
+ 	.conduit = PSCI_CONDUIT_NONE,
+-	.smccc_version = ARM_SMCCC_VERSION_1_0,
++	.smccc_version = SMCCC_VERSION_1_0,
+ };
+ 
+ enum arm_smccc_conduit arm_smccc_1_1_get_conduit(void)
+ {
+-	if (psci_ops.smccc_version < ARM_SMCCC_VERSION_1_1)
+-		return SMCCC_CONDUIT_NONE;
+-
+-	switch (psci_ops.conduit) {
+-	case PSCI_CONDUIT_SMC:
+-		return SMCCC_CONDUIT_SMC;
+-	case PSCI_CONDUIT_HVC:
+-		return SMCCC_CONDUIT_HVC;
+-	default:
+-		return SMCCC_CONDUIT_NONE;
+-	}
+-}
+-
+-enum arm_smccc_conduit arm_smccc_1_1_get_conduit(void)
+-{
+ 	if (psci_ops.smccc_version < SMCCC_VERSION_1_1)
+ 		return SMCCC_CONDUIT_NONE;
+ 
+@@ -552,8 +537,8 @@
+ 	if (feature != PSCI_RET_NOT_SUPPORTED) {
+ 		u32 ret;
+ 		ret = invoke_psci_fn(ARM_SMCCC_VERSION_FUNC_ID, 0, 0, 0);
+-		if (ret >= ARM_SMCCC_VERSION_1_1) {
+-			psci_ops.smccc_version = ret;
++		if (ret == ARM_SMCCC_VERSION_1_1) {
++			psci_ops.smccc_version = SMCCC_VERSION_1_1;
+ 			ver = ret;
+ 		}
+ 	}
+--- a/include/linux/psci.h	2022-03-24 06:44:56.840493345 +0200
++++ b/include/linux/psci.h	2022-03-23 10:10:45.000000000 +0200
+@@ -31,6 +31,11 @@
+ 	PSCI_CONDUIT_HVC,
+ };
+ 
++enum smccc_version {
++	SMCCC_VERSION_1_0,
++	SMCCC_VERSION_1_1,
++};
++
+ struct psci_operations {
+ 	u32 (*get_version)(void);
+ 	int (*cpu_suspend)(u32 state, unsigned long entry_point);
+@@ -41,7 +46,7 @@
+ 			unsigned long lowest_affinity_level);
+ 	int (*migrate_info_type)(void);
+ 	enum psci_conduit conduit;
+-	u32 smccc_version;
++	enum smccc_version smccc_version;
+ };
+ 
+ extern struct psci_operations psci_ops;
