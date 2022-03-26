@@ -21,7 +21,7 @@ case $KERNEL_SOURCE in
     ;;
     next)
             LINUX_SOURCE="https://github.com/raspberrypi/linux.git"
-            KERNEL_BRANCH="rpi-5.16.y::"
+            KERNEL_BRANCH="rpi-5.17.y::"
             KERNEL_DIR="linux-$SOCFAMILY-$KERNEL_SOURCE"
     ;;
 esac
