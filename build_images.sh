@@ -509,6 +509,14 @@ setting_modules() {
 }
 
 
+setting_overlays() {
+    if [[ ! -z ${OVERLAYS} ]]; then
+        message "" "setting" "up dtbo files: ${OVERLAYS}"
+        echo "overlays=${OVERLAYS}" >> "$SOURCE/$ROOTFS/boot/uEnv.txt"
+    fi
+}
+
+
 removed_default_xorg_conf() {
     [[ ! -z "$1" ]] && local ROOTFS="$1"
 

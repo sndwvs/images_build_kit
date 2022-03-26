@@ -265,6 +265,7 @@ for image_type in ${DISTR_IMAGES[@]}; do
         install_kernel
         setting_system
         setting_bootloader
+        setting_overlays
         setting_hostname
         setting_fstab
         setting_debug
