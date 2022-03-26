@@ -44,36 +44,24 @@ build_kernel_pkg() {
         install -Dm644 $SOURCE/$KERNEL_DIR/.config $BUILD/$PKG/kernel-${SOCFAMILY}/boot/config
     fi
 
-    message "" "copy" "device tree blob"
-    # add device tree
-    install -m755 -d "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb-${KERNEL_VERSION}"
-    if [[ ${KARCH} == arm64 || ${KARCH} == riscv ]]; then
-            [[ $SOCFAMILY == rk3* ]] && ( cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/rockchip/*.dtb \
-              $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb-${KERNEL_VERSION}/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
-            [[ $SOCFAMILY == sun* ]] && ( cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/allwinner/*.dtb \
-              $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb-${KERNEL_VERSION}/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
-            [[ $SOCFAMILY == jh71* ]] && ( cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/starfive/*.dtb \
-              $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb-${KERNEL_VERSION}/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
-            [[ $SOCFAMILY == meson* ]] && ( cp -a $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/amlogic/*.dtb \
-              $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb-${KERNEL_VERSION}/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
-            if [[ $SOCFAMILY == bcm2* ]]; then
-                install -dm755 "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/overlays/"
-                cp -av $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/broadcom/*.dtb \
-                        $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb-${KERNEL_VERSION}/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-                cp -av $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb-${KERNEL_VERSION}/*.dtb $BUILD/$PKG/kernel-${SOCFAMILY}/boot/
-                cp -av $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/overlays/{*.dtbo,README} \
-                        $BUILD/$PKG/kernel-${SOCFAMILY}/boot/overlays/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-            fi
-            # amlogic tv box
-            if [[ $BOARD_NAME == x96_max_plus ]]; then
-                install -m755 -d "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb"
-                cp -av $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb-${KERNEL_VERSION}/*.dtb $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-            fi
-    else
-        cp -av $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/*.dtb \
-              $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb-${KERNEL_VERSION}/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    message "" "setup" "device tree blobs"
+    # setup device tree blobs
+    [[ $SOCFAMILY != bcm2* && $BOARD_NAME != x96_max_plus ]] && ( ln -sf $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtbs/${KERNEL_VERSION}/* -r $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+
+    if [[ $SOCFAMILY == bcm2* ]]; then
+        install -dm755 "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/{overlays,dtb}"
+        cp -av $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtbs/${KERNEL_VERSION}/broadcom/* \
+                $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        cp -av $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtbs/${KERNEL_VERSION}/broadcom/* \
+                $BUILD/$PKG/kernel-${SOCFAMILY}/boot/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+#        cp -av $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/overlays/{*.dtbo,README} \
+#                $BUILD/$PKG/kernel-${SOCFAMILY}/boot/overlays/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
-    [[ $SOCFAMILY != bcm2* && $BOARD_NAME != x96_max_plus ]] && ( ln -sf dtb-${KERNEL_VERSION} $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+    # amlogic tv box
+    if [[ $BOARD_NAME == x96_max_plus ]]; then
+        install -dm755 "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb"
+        cp -av $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtbs/${KERNEL_VERSION}/* $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
 
     cd "$CWD" # fix actual current directory
     # clean-up unnecessary files generated during install

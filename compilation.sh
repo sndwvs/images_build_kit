@@ -223,6 +223,7 @@ compile_kernel() {
 
     make $CTHREADS O=$(pwd) ARCH=$KARCH CROSS_COMPILE=$CROSS INSTALL_MOD_PATH=$BUILD/$PKG/kernel-modules modules_install >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     make $CTHREADS O=$(pwd) ARCH=$KARCH CROSS_COMPILE=$CROSS INSTALL_HDR_PATH=$BUILD/$PKG/kernel-headers/usr headers_install >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    make ARCH=$KARCH CROSS_COMPILE=$CROSS INSTALL_PATH=$BUILD/$PKG/kernel-${SOCFAMILY}/boot dtbs_install >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
 
 
