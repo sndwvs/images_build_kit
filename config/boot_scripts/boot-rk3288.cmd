@@ -15,8 +15,8 @@ setenv earlycon "off"
 part uuid mmc 1 part_exists
 
 if test -n ${part_exists}; then
-        setenv rootdev "/dev/mmcblk0p1"
-        setenv devnum "1"
+    setenv rootdev "/dev/mmcblk0p1"
+    setenv devnum "1"
 fi
 
 echo "Boot script loaded from ${devtype} ${devnum}"
@@ -35,6 +35,28 @@ load ${devtype} ${devnum} ${fdt_addr_r} ${prefix}dtb/${fdtfile}
 load ${devtype} ${devnum} ${kernel_addr_r} ${prefix}zImage
 fdt addr ${fdt_addr_r}
 fdt resize 65536
+
+for overlay_file in ${overlays}; do
+    if load ${devtype} ${devnum} ${load_addr} ${prefix}dtb/overlay/${overlay_file}.dtbo; then
+        echo "Applying kernel provided DT overlay ${overlay_file}.dtbo"
+        fdt apply ${load_addr} || setenv overlay_error "true"
+    fi
+done
+
+if test "${overlay_error}" = "true"; then
+    echo "Error applying DT overlays, restoring original DT"
+    load ${devtype} ${devnum} ${fdt_addr_r} ${prefix}dtb/${fdtfile}
+else
+    if load ${devtype} ${devnum} ${load_addr} ${prefix}dtb/overlay/${overlay_prefix}-fixup.scr; then
+        echo "Applying kernel provided DT fixup script (${overlay_prefix}-fixup.scr)"
+        source ${load_addr}
+    fi
+    if test -e ${devtype} ${devnum} ${prefix}overlay-user/fixup.scr; then
+        load ${devtype} ${devnum} ${load_addr} ${prefix}overlay-user/fixup.scr
+        echo "Applying user provided fixup script (overlay-user/fixup.scr)"
+        source ${load_addr}
+    fi
+fi
 
 if ${devtype} ${devnum} ${ramdisk_addr_r} ${prefix}uInitrd; then
     bootz ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r};

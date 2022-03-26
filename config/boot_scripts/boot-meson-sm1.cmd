@@ -6,6 +6,7 @@
 setenv load_addr "0x32000000"
 setenv kernel_addr_r "0x34000000"
 setenv fdt_addr_r "0x4080000"
+setenv overlay_error "false"
 # default values
 setenv rootdev "/dev/mmcblk0p1"
 setenv verbosity "1"
@@ -101,6 +102,28 @@ if test "${kernel}" = "legacy"; then
     fdt addr ${dtb_loadaddr}
 #    unzip ${k_addr} ${loadaddr}
 
+    for overlay_file in ${overlays}; do
+        if load ${devtype} ${devnum} ${loadaddr} ${prefix}dtb/overlay/${overlay_file}.dtbo; then
+            echo "Applying kernel provided DT overlay ${overlay_file}.dtbo"
+            fdt apply ${loadaddr} || setenv overlay_error "true"
+        fi
+    done
+
+    if test "${overlay_error}" = "true"; then
+        echo "Error applying DT overlays, restoring original DT"
+        load ${devtype} ${devnum} ${dtb_loadaddr} ${prefix}dtb/${fdtfile}
+    else
+        if load ${devtype} ${devnum} ${loadaddr} ${prefix}dtb/overlay/${overlay_prefix}-fixup.scr; then
+            echo "Applying kernel provided DT fixup script (${overlay_prefix}-fixup.scr)"
+            source ${loadaddr}
+        fi
+        if test -e ${devtype} ${devnum} ${prefix}overlay-user/fixup.scr; then
+            load ${devtype} ${devnum} ${loadaddr} ${prefix}overlay-user/fixup.scr
+            echo "Applying user provided fixup script (overlay-user/fixup.scr)"
+            source ${loadaddr}
+        fi
+    fi
+
     if load ${devtype} ${devnum} ${initrd_loadaddr} ${prefix}uInitrd; then
         booti ${loadaddr} ${initrd_loadaddr} ${dtb_loadaddr};
     else
@@ -124,6 +147,28 @@ else
     if test "${dtb_bootargs}" != "" ; then setenv bootargs "${bootargs} ${dtb_bootargs}"; fi
 
     echo "Mainline bootargs: ${bootargs}"
+
+    for overlay_file in ${overlays}; do
+        if load ${devtype} ${devnum} ${load_addr} ${prefix}dtb/overlay/${overlay_file}.dtbo; then
+            echo "Applying kernel provided DT overlay ${overlay_file}.dtbo"
+            fdt apply ${load_addr} || setenv overlay_error "true"
+        fi
+    done
+
+    if test "${overlay_error}" = "true"; then
+        echo "Error applying DT overlays, restoring original DT"
+        load ${devtype} ${devnum} ${fdt_addr_r} ${prefix}dtb/${fdtfile}
+    else
+        if load ${devtype} ${devnum} ${load_addr} ${prefix}dtb/overlay/${overlay_prefix}-fixup.scr; then
+            echo "Applying kernel provided DT fixup script (${overlay_prefix}-fixup.scr)"
+            source ${load_addr}
+        fi
+        if test -e ${devtype} ${devnum} ${prefix}overlay-user/fixup.scr; then
+            load ${devtype} ${devnum} ${load_addr} ${prefix}overlay-user/fixup.scr
+            echo "Applying user provided fixup script (overlay-user/fixup.scr)"
+            source ${load_addr}
+        fi
+    fi
 
     if load ${devtype} ${devnum} ${ramdisk_addr_r} ${prefix}uInitrd; then
         booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r};
