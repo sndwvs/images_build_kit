@@ -1,0 +1,49 @@
+--- a/arch/arm64/boot/dts/rockchip/rk3568-rock-3-a.dts	2022-03-26 10:58:51.328854735 +0200
++++ b/arch/arm64/boot/dts/rockchip/rk3568-rock-3-a.dts	2022-03-26 10:55:32.464442155 +0200
+@@ -22,7 +22,7 @@
+ 		interrupts = <GIC_SPI 252 IRQ_TYPE_LEVEL_LOW>;
+ 		pinctrl-names = "default";
+ 		pinctrl-0 = <&uart2m0_xfer>;
+-		status = "disabled";
++		status = "okay";
+ 	};
+ 
+ 	debug: debug@fd904000 {
+@@ -716,7 +716,7 @@
+ };
+ 
+ &rknpu_mmu {
+-	status = "okay";
++	status = "disabled";
+ };
+ 
+ &saradc {
+@@ -950,6 +950,10 @@
+ 	pinctrl-0 = <&uart1m0_xfer &uart1m0_ctsn>;
+ };
+ 
++&uart2 {
++	status = "disabled";
++};
++
+ &reserved_memory {
+ 	ramoops: ramoops@110000 {
+ 		compatible = "ramoops";
+@@ -1040,3 +1044,17 @@
+ 		};
+ 	};
+ };
++
++&can1 {
++	status = "okay";
++	assigned-clocks = <&cru 323>;
++	assigned-clock-rates = <100000000>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&can1m1_pins>;
++};
++
++&pwm8 {
++	status = "okay";
++	pinctrl-names = "active";
++	pinctrl-0 = <&pwm8m0_pins>;
++};
