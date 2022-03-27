@@ -101,7 +101,7 @@ create_uboot()
     fi
 
     if [[ $SOCFAMILY == rk35* ]]; then
-        tools/mkimage -n rk356x -T rksd -d ${TPL}:spl/u-boot-spl.bin $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        tools/mkimage -n $SOCFAMILY -T rksd -d ${TPL}:spl/u-boot-spl.bin $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         install -Dm644 u-boot.itb $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/u-boot.itb >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 
