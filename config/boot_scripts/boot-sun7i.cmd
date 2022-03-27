@@ -42,8 +42,8 @@ fdt addr ${fdt_addr_r}
 fdt resize 65536
 
 for overlay_file in ${overlays}; do
-    if load ${devtype} ${devnum} ${load_addr} ${prefix}dtb/overlay/${overlay_prefix}-${overlay_file}.dtbo; then
-        echo "Applying kernel provided DT overlay ${overlay_prefix}-${overlay_file}.dtbo"
+    if load ${devtype} ${devnum} ${load_addr} ${prefix}dtb/overlay/${overlay_file}.dtbo; then
+        echo "Applying kernel provided DT overlay ${overlay_file}.dtbo"
         fdt apply ${load_addr} || setenv overlay_error "true"
     fi
 done
