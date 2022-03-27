@@ -149,7 +149,7 @@ else
     echo "Mainline bootargs: ${bootargs}"
 
     for overlay_file in ${overlays}; do
-        if load ${devtype} ${devnum} ${load_addr} ${prefix}dtb/overlay/${overlay_file}.dtbo; then
+        if load ${devtype} ${devnum} ${load_addr} ${prefix}dtb/${overlay_prefix}/overlay/${overlay_file}.dtbo; then
             echo "Applying kernel provided DT overlay ${overlay_file}.dtbo"
             fdt apply ${load_addr} || setenv overlay_error "true"
         fi
@@ -159,7 +159,7 @@ else
         echo "Error applying DT overlays, restoring original DT"
         load ${devtype} ${devnum} ${fdt_addr_r} ${prefix}dtb/${fdtfile}
     else
-        if load ${devtype} ${devnum} ${load_addr} ${prefix}dtb/overlay/${overlay_prefix}-fixup.scr; then
+        if load ${devtype} ${devnum} ${load_addr} ${prefix}dtb/${overlay_prefix}/overlay/${overlay_prefix}-fixup.scr; then
             echo "Applying kernel provided DT fixup script (${overlay_prefix}-fixup.scr)"
             source ${load_addr}
         fi
