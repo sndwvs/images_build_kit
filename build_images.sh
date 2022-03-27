@@ -439,7 +439,10 @@ setting_bootloader() {
     fi
 
     # compile boot script
-    [[ -f $SOURCE/$ROOTFS/boot/boot.cmd ]] && ( $SOURCE/$BOOT_LOADER_DIR/tools/mkimage -C none -A $KARCH -T script -d $SOURCE/$ROOTFS/boot/boot.cmd \
+    # for rk35xx, when using mkimage from the rockchip/radxa team/firefly team
+    # repository, an incorrect header is generated
+    [[ $SOCFAMILY != rk35* ]] && MKIMAGE_PATH="$SOURCE/$BOOT_LOADER_DIR/tools/"
+    [[ -f $SOURCE/$ROOTFS/boot/boot.cmd ]] && ( ${MKIMAGE_PATH}mkimage -C none -A $KARCH -T script -d $SOURCE/$ROOTFS/boot/boot.cmd \
                                                                         "$SOURCE/$ROOTFS/boot/boot.scr" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
     # u-boot
     if [[ -f "$CWD/config/boot_scripts/uEnv-$SOCFAMILY.txt" ]]; then
