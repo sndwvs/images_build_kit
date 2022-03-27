@@ -49,13 +49,13 @@ build_kernel_pkg() {
     [[ $SOCFAMILY != bcm2* && $BOARD_NAME != x96_max_plus ]] && ( ln -sf $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtbs/${KERNEL_VERSION}/* -r $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
 
     if [[ $SOCFAMILY == bcm2* ]]; then
-        install -dm755 "$BUILD/$PKG/kernel-${SOCFAMILY}/boot/{overlays,dtb}"
+        install -dm755 $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb
         cp -av $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtbs/${KERNEL_VERSION}/broadcom/* \
                 $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtb/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         cp -av $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtbs/${KERNEL_VERSION}/broadcom/* \
                 $BUILD/$PKG/kernel-${SOCFAMILY}/boot/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-#        cp -av $SOURCE/$KERNEL_DIR/arch/${KARCH}/boot/dts/overlays/{*.dtbo,README} \
-#                $BUILD/$PKG/kernel-${SOCFAMILY}/boot/overlays/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        cp -av $BUILD/$PKG/kernel-${SOCFAMILY}/boot/dtbs/${KERNEL_VERSION}/overlays \
+                $BUILD/$PKG/kernel-${SOCFAMILY}/boot/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
     # amlogic tv box
     if [[ $BOARD_NAME == x96_max_plus ]]; then
