@@ -38,8 +38,8 @@ fdt addr ${fdt_addr_r}
 fdt resize 65536
 
 for overlay_file in ${overlays}; do
-    if load ${devtype} ${devnum} ${load_addr} ${prefix}dtb/overlay/${overlay_file}.dtbo; then
-        echo "Applying kernel provided DT overlay ${overlay_file}.dtbo"
+    if load ${devtype} ${devnum} ${load_addr} ${prefix}dtb/overlay/${overlay_prefix}-${overlay_file}.dtbo; then
+        echo "Applying kernel provided DT overlay ${overlay_prefix}-${overlay_file}.dtbo"
         fdt apply ${load_addr} || setenv overlay_error "true"
     fi
 done
@@ -52,9 +52,9 @@ else
         echo "Applying kernel provided DT fixup script (${overlay_prefix}-fixup.scr)"
         source ${load_addr}
     fi
-    if test -e ${devtype} ${devnum} ${prefix}overlay-user/fixup.scr; then
-        load ${devtype} ${devnum} ${load_addr} ${prefix}overlay-user/fixup.scr
-        echo "Applying user provided fixup script (overlay-user/fixup.scr)"
+    if test -e ${devtype} ${devnum} ${prefix}fixup.scr; then
+        load ${devtype} ${devnum} ${load_addr} ${prefix}fixup.scr
+        echo "Applying user provided fixup script (fixup.scr)"
         source ${load_addr}
     fi
 fi
