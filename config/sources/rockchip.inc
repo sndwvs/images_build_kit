@@ -22,6 +22,7 @@ IMAGE_OFFSET=32768
 
 BOOT_LOADER_BIN="idbloader.img"
 
+OVERLAY_PREFIX="rockchip"
 
 
 case $KERNEL_SOURCE in

@@ -21,6 +21,7 @@ IMAGE_OFFSET=1368064
 BOOT_LOADER_BRANCH="master:tag:v2022.01"
 BOOT_LOADER_BIN="u-boot.bin"
 
+OVERLAY_PREFIX="meson"
 
 case $KERNEL_SOURCE in
     legacy)

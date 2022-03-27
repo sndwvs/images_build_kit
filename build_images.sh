@@ -514,6 +514,9 @@ setting_overlays() {
         message "" "setting" "up dtbo files: ${OVERLAYS}"
         echo "overlays=${OVERLAYS}" >> "$SOURCE/$ROOTFS/boot/uEnv.txt"
     fi
+    if [[ ! -z $OVERLAY_PREFIX ]]; then
+        echo "overlay_prefix=$OVERLAY_PREFIX" >> "$SOURCE/$ROOTFS/boot/uEnv.txt"
+    fi
 }
 
 
