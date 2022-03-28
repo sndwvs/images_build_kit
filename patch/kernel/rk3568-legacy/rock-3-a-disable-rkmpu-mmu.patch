@@ -1,0 +1,11 @@
+--- a/arch/arm64/boot/dts/rockchip/rk3568-rock-3-a.dts	2022-03-26 10:58:51.328854735 +0200
++++ b/arch/arm64/boot/dts/rockchip/rk3568-rock-3-a.dts	2022-03-26 10:55:32.464442155 +0200
+@@ -716,7 +716,7 @@
+ };
+ 
+ &rknpu_mmu {
+-	status = "okay";
++	status = "disabled";
+ };
+ 
+ &saradc {
