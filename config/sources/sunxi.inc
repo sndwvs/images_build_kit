@@ -13,6 +13,14 @@ ROOT_DISK="mmcblk0p1"
 BOOT_LOADER_BRANCH="master:tag:v2021.10"
 BOOT_LOADER_BIN="u-boot-sunxi-with-spl.bin"
 
+if [[ ${SOCFAMILY} == sun7i ]]; then
+    OVERLAY_PREFIX="${SOCFAMILY}-a20"
+elif [[ ${SOCFAMILY} == sun8i ]]; then
+    OVERLAY_PREFIX="${SOCFAMILY}-h3"
+elif [[ ${SOCFAMILY%w*}-a64 == sun50iw1 ]]; then
+    OVERLAY_PREFIX="${SOCFAMILY%w*}-a64"
+fi
+
 
 case $KERNEL_SOURCE in
     legacy)
