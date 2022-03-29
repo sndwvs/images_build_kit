@@ -38,13 +38,13 @@ diff --git a/drivers/devfreq/Makefile b/drivers/devfreq/Makefile
 index 338ae8440db6..ec568406ef50 100644
 --- a/drivers/devfreq/Makefile
 +++ b/drivers/devfreq/Makefile
-@@ -10,6 +10,7 @@ obj-$(CONFIG_DEVFREQ_GOV_PASSIVE)	+= governor_passive.o
- # DEVFREQ Drivers
+@@ -12,6 +12,7 @@
+ obj-$(CONFIG_ARM_IMX_BUS_DEVFREQ)	+= imx-bus.o
  obj-$(CONFIG_ARM_IMX8M_DDRC_DEVFREQ)	+= imx8m-ddrc.o
  obj-$(CONFIG_ARM_RK3399_DMC_DEVFREQ)	+= rk3399_dmc.o
 +obj-$(CONFIG_ARM_RK3328_DMC_DEVFREQ)	+= rk3328_dmc.o
+ obj-$(CONFIG_ARM_SUN8I_A33_MBUS_DEVFREQ)	+= sun8i-a33-mbus.o
  obj-$(CONFIG_ARM_TEGRA_DEVFREQ)		+= tegra30-devfreq.o
- obj-$(CONFIG_ARM_TEGRA20_DEVFREQ)	+= tegra20-devfreq.o
  
 diff --git a/drivers/devfreq/rk3328_dmc.c b/drivers/devfreq/rk3328_dmc.c
 new file mode 100644
