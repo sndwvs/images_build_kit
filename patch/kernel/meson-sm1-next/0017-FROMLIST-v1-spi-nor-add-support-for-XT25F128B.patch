@@ -77,7 +77,7 @@ index 000000000000..a10102d8b3e2
 +
 +static const struct flash_info xtx_parts[] = {
 + /* XTX (Shenzhen Xin Tian Xia Tech) */
-+ { "xt25f128b", INFO(0x0b4018, 0, 64 * 1024, 256, SECT_4K) },
++ { "xt25f128b", INFO(0x0b4018, 0, 64 * 1024, 256) },
 +};
 +
 +const struct spi_nor_manufacturer spi_nor_xtx = {
