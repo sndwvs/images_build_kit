@@ -1,0 +1,26 @@
+--- a/drivers/net/wireless/realtek/rtl8723cs/include/osdep_service_linux.h	2022-04-06 10:26:31.478175041 +0300
++++ b/drivers/net/wireless/realtek/rtl8723cs/include/osdep_service_linux.h	2022-04-06 10:27:06.614259630 +0300
+@@ -159,7 +159,11 @@
+ 	typedef int		thread_return;
+ 	typedef void*	thread_context;
+ 
+-	#define thread_exit() complete_and_exit(NULL, 0)
++#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 17, 0)
++#define thread_exit() complete_and_exit(NULL, 0)
++#else
++#define thread_exit() kthread_complete_and_exit(NULL, 0)
++#endif
+ 
+ 	typedef void timer_hdl_return;
+ 	typedef void* timer_hdl_context;
+--- a/drivers/net/wireless/realtek/rtl8723cs/os_dep/linux/rtw_proc.c	2022-04-06 10:28:32.082465392 +0300
++++ a/drivers/net/wireless/realtek/rtl8723cs/os_dep/linux/rtw_proc.c	2022-04-06 10:30:07.078694093 +0300
+@@ -44,6 +44,8 @@
+ #if (LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0))
+ #define PDE_DATA(inode) PDE((inode))->data
+ #define proc_get_parent_data(inode) PDE((inode))->parent->data
++#elif (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 17, 0))
++#define PDE_DATA(inode) pde_data(inode)
+ #endif
+ 
+ #if(LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24))
