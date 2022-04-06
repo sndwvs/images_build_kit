@@ -5,13 +5,13 @@ Subject: [PATCH 4/4] arm64: dts: allwinner: h6: tanix-tx6: Enable ethernet
 
 Signed-off-by: Jernej Skrabec <jernej.skrabec@siol.net>
 ---
- .../dts/allwinner/sun50i-h6-tanix-tx6.dts     | 32 +++++++++++++++++++
+ .../dts/allwinner/sun50i-h6-tanix.dtsi     | 32 +++++++++++++++++++
  1 file changed, 32 insertions(+)
 
-diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h6-tanix-tx6.dts b/arch/arm64/boot/dts/allwinner/sun50i-h6-tanix-tx6.dts
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-h6-tanix.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-h6-tanix.dtsi
 index 83e6cb0e59ce..41a2e3454be5 100644
---- a/arch/arm64/boot/dts/allwinner/sun50i-h6-tanix-tx6.dts
-+++ b/arch/arm64/boot/dts/allwinner/sun50i-h6-tanix-tx6.dts
+--- a/arch/arm64/boot/dts/allwinner/sun50i-h6-tanix.dtsi
++++ b/arch/arm64/boot/dts/allwinner/sun50i-h6-tanix.dtsi
 @@ -12,6 +12,7 @@
  	compatible = "oranth,tanix-tx6", "allwinner,sun50i-h6";
  
