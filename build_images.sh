@@ -492,6 +492,7 @@ setting_ssh() {
     message "" "setting" "ssh login under the root"
     sed -e 's/^\(#\)\(PermitRootLogin\).*/\2 yes/g' \
         -e 's/^\(#\)\(PasswordAuth.*\)/\2/g' \
+        -e 's/^\(#\)\(PermitEmptyPasswords\).*/\2 yes/g' \
     -i "$SOURCE/$ROOTFS/etc/ssh/sshd_config"
     # crux-arm added sshd in service
     if [[ $DISTR == crux* ]]; then
