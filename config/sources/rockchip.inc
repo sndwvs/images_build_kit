@@ -13,7 +13,7 @@ BOOT_LOADER_TOOLS_SOURCE="https://github.com/rockchip-linux/u-boot.git"
 BOOT_LOADER_TOOLS_DIR="u-boot-tools-rockchip"
 BOOT_LOADER_TOOLS_BRANCH="next-dev::"
 
-BOOT_LOADER_BRANCH="master:tag:v2022.01"
+BOOT_LOADER_BRANCH="master:tag:v2022.04"
 
 SERIAL_CONSOLE_SPEED=115200
 SERIAL_CONSOLE=ttyS0
