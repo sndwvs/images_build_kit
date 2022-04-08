@@ -10,7 +10,7 @@ IMAGE_OFFSET=2048
 
 ROOT_DISK="mmcblk0p1"
 
-BOOT_LOADER_BRANCH="master:tag:v2021.10"
+BOOT_LOADER_BRANCH="master:tag:v2022.04"
 BOOT_LOADER_BIN="u-boot-sunxi-with-spl.bin"
 
 if [[ ${SOCFAMILY} == sun7i ]]; then
