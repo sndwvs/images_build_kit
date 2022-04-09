@@ -74,13 +74,17 @@ dtoverlay=upstream
 # overscan is only needed on old TV sets and if analog gear is in the chain (e.g. DPI)
 disable_overscan=1
 
+#http://lists.infradead.org/pipermail/linux-rpi-kernel/2020-November/007906.html
+disable_fw_kms_setup=1
+
+
 [pi3]
 # These are not applied automatically? Needed to use respective upstream drivers.
 dtoverlay=vc4-kms-v3d,cma-default
 dtoverlay=dwc2
 
 [pi4]
-dtoverlay=vc4-fkms-v3d
+#dtoverlay=vc4-fkms-v3d
 #dtoverlay=vc4-kms-v3d
 
 [all]
