@@ -2,9 +2,9 @@ diff --git a/drivers/mtd/nand/raw/nand_base.c b/drivers/mtd/nand/raw/nand_base.c
 index 71050a0..5f36704 100644
 --- a/drivers/mtd/nand/raw/nand_base.c
 +++ b/drivers/mtd/nand/raw/nand_base.c
-@@ -460,10 +460,7 @@ static int nand_block_checkbad(struct mtd_info *mtd, loff_t ofs, int allowbbt)
- 	struct nand_chip *chip = mtd_to_nand(mtd);
- 
+@@ -627,10 +627,7 @@
+ static int nand_block_checkbad(struct nand_chip *chip, loff_t ofs, int allowbbt)
+ {
  	/* Return info from the table */
 -	if (chip->bbt)
 -		return nand_isbad_bbt(chip, ofs, allowbbt);
@@ -14,14 +14,12 @@ index 71050a0..5f36704 100644
  }
  
  /**
-@@ -4283,19 +4283,7 @@ static int nand_block_isbad(struct mtd_info *mtd, loff_t offs)
+@@ -4581,17 +4578,7 @@
  	int chipnr = (int)(offs >> chip->chip_shift);
  	int ret;
  
 -	/* Select the NAND device */
--	ret = nand_get_device(chip);
--	if (ret)
--		return ret;
+-	nand_get_device(chip);
 -
 -	nand_select_target(chip, chipnr);
 -
