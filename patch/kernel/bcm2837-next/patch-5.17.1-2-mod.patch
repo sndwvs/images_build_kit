@@ -12456,6 +12456,38 @@ index bd46396a1ae07..1afcd54fbbd53 100644
  	v3d->va_width = 30 + V3D_GET_FIELD(mmu_debug, V3D_MMU_VA_WIDTH);
  
  	ident1 = V3D_READ(V3D_HUB_IDENT1);
+--- a/drivers/gpu/drm/vc4/vc4_hdmi.c	2022-04-09 07:12:48.946210043 +0300
++++ b/drivers/gpu/drm/vc4/vc4_hdmi.c	2022-04-09 07:17:34.974898648 +0300
+@@ -1611,12 +1611,12 @@
+ 	case VC4_HDMI_OUTPUT_RGB:
+ 		drm_dbg(dev, "RGB Format, checking the constraints.\n");
+ 
+-		if (bpc == 10 && !(info->edid_hdmi_dc_modes & DRM_EDID_HDMI_DC_30)) {
++		if (bpc == 10 && !(info->edid_hdmi_rgb444_dc_modes & DRM_EDID_HDMI_DC_30)) {
+ 			drm_dbg(dev, "10 BPC but sink doesn't support Deep Color 30.\n");
+ 			return false;
+ 		}
+ 
+-		if (bpc == 12 && !(info->edid_hdmi_dc_modes & DRM_EDID_HDMI_DC_36)) {
++		if (bpc == 12 && !(info->edid_hdmi_rgb444_dc_modes & DRM_EDID_HDMI_DC_36)) {
+ 			drm_dbg(dev, "12 BPC but sink doesn't support Deep Color 36.\n");
+ 			return false;
+ 		}
+@@ -1650,12 +1650,12 @@
+ 			return false;
+ 		}
+ 
+-		if (bpc == 10 && !(info->edid_hdmi_dc_modes & DRM_EDID_HDMI_DC_30)) {
++		if (bpc == 10 && !(info->edid_hdmi_rgb444_dc_modes & DRM_EDID_HDMI_DC_30)) {
+ 			drm_dbg(dev, "10 BPC but sink doesn't support Deep Color 30.\n");
+ 			return false;
+ 		}
+ 
+-		if (bpc == 12 && !(info->edid_hdmi_dc_modes & DRM_EDID_HDMI_DC_36)) {
++		if (bpc == 12 && !(info->edid_hdmi_rgb444_dc_modes & DRM_EDID_HDMI_DC_36)) {
+ 			drm_dbg(dev, "12 BPC but sink doesn't support Deep Color 36.\n");
+ 			return false;
+ 		}
 diff --git a/drivers/gpu/host1x/dev.c b/drivers/gpu/host1x/dev.c
 index 6994f8c0e02ea..80c685ab3e30d 100644
 --- a/drivers/gpu/host1x/dev.c
