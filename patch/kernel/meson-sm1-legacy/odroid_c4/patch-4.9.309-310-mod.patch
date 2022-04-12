@@ -932,20 +932,23 @@ diff --git a/arch/arm64/kernel/cpu_errata.c b/arch/arm64/kernel/cpu_errata.c
 index 3b680a32886b9..f0cdf21b1006b 100644
 --- a/arch/arm64/kernel/cpu_errata.c
 +++ b/arch/arm64/kernel/cpu_errata.c
-@@ -23,16 +23,23 @@
+@@ -23,16 +23,25 @@
  #include <asm/cpu.h>
  #include <asm/cputype.h>
  #include <asm/cpufeature.h>
--#include <linux/psci.h>
--#include <linux/arm-smccc.h>
 +#include <asm/vectors.h>
+ #include <linux/psci.h>
+ #include <linux/arm-smccc.h>
  
  static bool __maybe_unused
  is_affected_midr_range(const struct arm64_cpu_capabilities *entry, int scope)
  {
 +	u32 midr = read_cpuid_id();
 +
-+	WARN_ON(scope != SCOPE_LOCAL_CPU || preemptible());
+ 	WARN_ON(scope != SCOPE_LOCAL_CPU || preemptible());
+-	return MIDR_IS_CPU_MODEL_RANGE(read_cpuid_id(), entry->midr_model,
+-				       entry->midr_range_min,
+-				       entry->midr_range_max);
 +	return is_midr_in_range(midr, &entry->midr_range);
 +}
 +
@@ -953,15 +956,12 @@ index 3b680a32886b9..f0cdf21b1006b 100644
 +is_affected_midr_range_list(const struct arm64_cpu_capabilities *entry,
 +			    int scope)
 +{
- 	WARN_ON(scope != SCOPE_LOCAL_CPU || preemptible());
--	return MIDR_IS_CPU_MODEL_RANGE(read_cpuid_id(), entry->midr_model,
--				       entry->midr_range_min,
--				       entry->midr_range_max);
++	WARN_ON(scope != SCOPE_LOCAL_CPU || preemptible());
 +	return is_midr_in_range_list(read_cpuid_id(), entry->midr_range_list);
  }
  
  static bool
-@@ -50,17 +57,18 @@
+@@ -50,17 +59,18 @@
  	       (arm64_ftr_reg_ctrel0.sys_val & mask);
  }
  
@@ -982,7 +982,7 @@ index 3b680a32886b9..f0cdf21b1006b 100644
  DEFINE_PER_CPU_READ_MOSTLY(struct bp_hardening_data, bp_hardening_data);
  
  #ifdef CONFIG_KVM
-@@ -68,6 +76,16 @@
+@@ -68,6 +78,16 @@
  extern char __smccc_workaround_1_smc_end[];
  extern char __smccc_workaround_1_hvc_start[];
  extern char __smccc_workaround_1_hvc_end[];
@@ -999,7 +999,7 @@ index 3b680a32886b9..f0cdf21b1006b 100644
  
  static void __copy_hyp_vect_bpi(int slot, const char *hyp_vecs_start,
  				const char *hyp_vecs_end)
-@@ -81,12 +99,14 @@
+@@ -81,12 +101,14 @@
  	flush_icache_range((uintptr_t)dst, (uintptr_t)dst + SZ_2K);
  }
  
@@ -1016,7 +1016,7 @@ index 3b680a32886b9..f0cdf21b1006b 100644
  	int cpu, slot = -1;
  
  	spin_lock(&bp_lock);
-@@ -107,6 +127,8 @@
+@@ -107,6 +129,8 @@
  
  	__this_cpu_write(bp_hardening_data.hyp_vectors_slot, slot);
  	__this_cpu_write(bp_hardening_data.fn, fn);
@@ -1025,7 +1025,7 @@ index 3b680a32886b9..f0cdf21b1006b 100644
  	spin_unlock(&bp_lock);
  }
  #else
-@@ -120,6 +142,7 @@
+@@ -120,6 +144,7 @@
  				      const char *hyp_vecs_end)
  {
  	__this_cpu_write(bp_hardening_data.fn, fn);
@@ -1033,7 +1033,7 @@ index 3b680a32886b9..f0cdf21b1006b 100644
  }
  #endif	/* CONFIG_KVM */
  
-@@ -154,25 +177,25 @@
+@@ -154,25 +179,25 @@
  	arm_smccc_1_1_hvc(ARM_SMCCC_ARCH_WORKAROUND_1, NULL);
  }
  
@@ -1064,7 +1064,7 @@ index 3b680a32886b9..f0cdf21b1006b 100644
  		cb = call_hvc_arch_workaround_1;
  		smccc_start = __smccc_workaround_1_hvc_start;
  		smccc_end = __smccc_workaround_1_hvc_end;
-@@ -182,22 +205,44 @@
+@@ -182,22 +207,44 @@
  		arm_smccc_1_1_smc(ARM_SMCCC_ARCH_FEATURES_FUNC_ID,
  				  ARM_SMCCC_ARCH_WORKAROUND_1, &res);
  		if ((int)res.a0 < 0)
@@ -1112,7 +1112,7 @@ index 3b680a32886b9..f0cdf21b1006b 100644
  #ifdef CONFIG_ARM64_SSBD
  DEFINE_PER_CPU_READ_MOSTLY(u64, arm64_ssbd_callback_required);
  
-@@ -233,28 +278,6 @@
+@@ -233,28 +280,6 @@
  }
  early_param("ssbd", ssbd_cfg);
  
@@ -1141,7 +1141,7 @@ index 3b680a32886b9..f0cdf21b1006b 100644
  void __init arm64_enable_wa2_handling(struct alt_instr *alt,
  				      __le32 *origptr, __le32 *updptr,
  				      int nr_inst)
-@@ -370,19 +393,60 @@
+@@ -370,19 +395,60 @@
  }
  #endif	/* CONFIG_ARM64_SSBD */
  
@@ -1215,7 +1215,7 @@ index 3b680a32886b9..f0cdf21b1006b 100644
  
  const struct arm64_cpu_capabilities arm64_errata[] = {
  #if	defined(CONFIG_ARM64_ERRATUM_826319) || \
-@@ -392,8 +456,8 @@
+@@ -392,8 +458,8 @@
  	/* Cortex-A53 r0p[012] */
  		.desc = "ARM errata 826319, 827319, 824069",
  		.capability = ARM64_WORKAROUND_CLEAN_CACHE,
@@ -1226,7 +1226,7 @@ index 3b680a32886b9..f0cdf21b1006b 100644
  	},
  #endif
  #ifdef CONFIG_ARM64_ERRATUM_819472
-@@ -401,8 +465,8 @@
+@@ -401,8 +467,8 @@
  	/* Cortex-A53 r0p[01] */
  		.desc = "ARM errata 819472",
  		.capability = ARM64_WORKAROUND_CLEAN_CACHE,
@@ -1237,7 +1237,7 @@ index 3b680a32886b9..f0cdf21b1006b 100644
  	},
  #endif
  #ifdef CONFIG_ARM64_ERRATUM_832075
-@@ -410,8 +474,9 @@
+@@ -410,8 +476,9 @@
  	/* Cortex-A57 r0p0 - r1p2 */
  		.desc = "ARM erratum 832075",
  		.capability = ARM64_WORKAROUND_DEVICE_LOAD_ACQUIRE,
@@ -1249,7 +1249,7 @@ index 3b680a32886b9..f0cdf21b1006b 100644
  	},
  #endif
  #ifdef CONFIG_ARM64_ERRATUM_834220
-@@ -419,8 +484,9 @@
+@@ -419,8 +486,9 @@
  	/* Cortex-A57 r0p0 - r1p2 */
  		.desc = "ARM erratum 834220",
  		.capability = ARM64_WORKAROUND_834220,
@@ -1261,7 +1261,7 @@ index 3b680a32886b9..f0cdf21b1006b 100644
  	},
  #endif
  #ifdef CONFIG_ARM64_ERRATUM_845719
-@@ -428,7 +494,7 @@
+@@ -428,7 +496,7 @@
  	/* Cortex-A53 r0p[01234] */
  		.desc = "ARM erratum 845719",
  		.capability = ARM64_WORKAROUND_845719,
@@ -1270,7 +1270,7 @@ index 3b680a32886b9..f0cdf21b1006b 100644
  	},
  #endif
  #ifdef CONFIG_CAVIUM_ERRATUM_23154
-@@ -436,7 +502,7 @@
+@@ -436,7 +504,7 @@
  	/* Cavium ThunderX, pass 1.x */
  		.desc = "Cavium erratum 23154",
  		.capability = ARM64_WORKAROUND_CAVIUM_23154,
@@ -1279,7 +1279,7 @@ index 3b680a32886b9..f0cdf21b1006b 100644
  	},
  #endif
  #ifdef CONFIG_CAVIUM_ERRATUM_27456
-@@ -444,103 +510,402 @@
+@@ -444,103 +512,402 @@
  	/* Cavium ThunderX, T88 pass 1.x - 2.1 */
  		.desc = "Cavium erratum 27456",
  		.capability = ARM64_WORKAROUND_CAVIUM_27456,
@@ -1385,8 +1385,7 @@ index 3b680a32886b9..f0cdf21b1006b 100644
 - * an errata not detected at boot, fail this CPU.
 + * We try to ensure that the mitigation state can never change as the result of
 + * onlining a late CPU.
-  */
--void verify_local_cpu_errata_workarounds(void)
++ */
 +static void __maybe_unused update_mitigation_state(enum mitigation_state *oldp,
 +						   enum mitigation_state new)
 +{
@@ -1410,7 +1409,8 @@ index 3b680a32886b9..f0cdf21b1006b 100644
 + * - Has the 'Exception Clears Branch History Buffer' (ECBHB) feature, so no
 + *   software mitigation in the vectors is needed.
 + * - Has CSV2.3, so is unaffected.
-+ */
+  */
+-void verify_local_cpu_errata_workarounds(void)
 +static enum mitigation_state spectre_bhb_state;
 +
 +enum mitigation_state arm64_get_spectre_bhb_state(void)
@@ -1540,12 +1540,23 @@ index 3b680a32886b9..f0cdf21b1006b 100644
 +
 +bool is_spectre_bhb_affected(const struct arm64_cpu_capabilities *entry,
 +			     int scope)
-+{
+ {
+-	const struct arm64_cpu_capabilities *caps = arm64_errata;
 +	WARN_ON(scope != SCOPE_LOCAL_CPU || preemptible());
 +
 +	if (supports_csv2p3(scope))
 +		return false;
-+
+ 
+-	for (; caps->matches; caps++) {
+-		if (cpus_have_cap(caps->capability)) {
+-			if (caps->enable)
+-				caps->enable((void *)caps);
+-		} else if (caps->matches(caps, SCOPE_LOCAL_CPU)) {
+-			pr_crit("CPU%d: Requires work around for %s, not detected"
+-					" at boot time\n",
+-				smp_processor_id(),
+-				caps->desc ? : "an erratum");
+-			cpu_die_early();
 +	if (supports_clearbhb(scope))
 +		return true;
 +
@@ -1581,8 +1592,7 @@ index 3b680a32886b9..f0cdf21b1006b 100644
 +
 +#ifdef CONFIG_KVM
 +static const char *kvm_bhb_get_vecs_end(const char *start)
- {
--	const struct arm64_cpu_capabilities *caps = arm64_errata;
++{
 +	if (start == __smccc_workaround_3_smc_start)
 +		return __smccc_workaround_3_smc_end;
 +	else if (start == __spectre_bhb_loop_k8_start)
@@ -1596,17 +1606,7 @@ index 3b680a32886b9..f0cdf21b1006b 100644
 +
 +	return NULL;
 +}
- 
--	for (; caps->matches; caps++) {
--		if (cpus_have_cap(caps->capability)) {
--			if (caps->enable)
--				caps->enable((void *)caps);
--		} else if (caps->matches(caps, SCOPE_LOCAL_CPU)) {
--			pr_crit("CPU%d: Requires work around for %s, not detected"
--					" at boot time\n",
--				smp_processor_id(),
--				caps->desc ? : "an erratum");
--			cpu_die_early();
++
 +static void kvm_setup_bhb_slot(const char *hyp_vecs_start)
 +{
 +	int cpu, slot = -1;
@@ -1655,12 +1655,10 @@ index 3b680a32886b9..f0cdf21b1006b 100644
 -	update_cpu_capabilities(arm64_errata, "enabling workaround for");
 +	return !is_midr_in_range_list(read_cpuid_id(),
 +				      arm64_bp_harden_smccc_cpus);
- }
- 
--void __init enable_errata_workarounds(void)
++}
++
 +void spectre_bhb_enable_mitigation(const struct arm64_cpu_capabilities *entry)
- {
--	enable_cpu_capabilities(arm64_errata);
++{
 +	enum mitigation_state fw_state, state = SPECTRE_VULNERABLE;
 +
 +	if (!is_spectre_bhb_affected(entry, SCOPE_LOCAL_CPU))
@@ -1713,12 +1711,14 @@ index 3b680a32886b9..f0cdf21b1006b 100644
 +	}
 +
 +	update_mitigation_state(&spectre_bhb_state, state);
-+}
-+
+ }
+ 
+-void __init enable_errata_workarounds(void)
 +/* Patched to correct the immediate */
 +void __init spectre_bhb_patch_loop_iter(struct alt_instr *alt,
 +					__le32 *origptr, __le32 *updptr, int nr_inst)
-+{
+ {
+-	enable_cpu_capabilities(arm64_errata);
 +	u8 rd;
 +	u32 insn;
 +	u16 loop_count = spectre_bhb_loop_affected(SCOPE_SYSTEM);
@@ -1740,7 +1740,7 @@ diff --git a/arch/arm64/kernel/cpufeature.c b/arch/arm64/kernel/cpufeature.c
 index 8cf001baee219..9b7e7d2f236ee 100644
 --- a/arch/arm64/kernel/cpufeature.c
 +++ b/arch/arm64/kernel/cpufeature.c
-@@ -20,16 +20,18 @@
+@@ -20,6 +20,7 @@
  
  #include <linux/bsearch.h>
  #include <linux/cpumask.h>
@@ -1748,11 +1748,7 @@ index 8cf001baee219..9b7e7d2f236ee 100644
  #include <linux/sort.h>
  #include <linux/stop_machine.h>
  #include <linux/types.h>
--#include <linux/mm.h>
-+
- #include <asm/cpu.h>
- #include <asm/cpufeature.h>
- #include <asm/cpu_ops.h>
+@@ -30,6 +31,7 @@
  #include <asm/mmu_context.h>
  #include <asm/processor.h>
  #include <asm/sysreg.h>
@@ -1781,20 +1777,7 @@ index 8cf001baee219..9b7e7d2f236ee 100644
  static const struct arm64_ftr_bits ftr_id_aa64pfr0[] = {
  	ARM64_FTR_BITS(FTR_NONSTRICT, FTR_LOWER_SAFE, ID_AA64PFR0_CSV3_SHIFT, 4, 0),
  	ARM64_FTR_BITS(FTR_NONSTRICT, FTR_LOWER_SAFE, ID_AA64PFR0_CSV2_SHIFT, 4, 0),
-@@ -114,12 +123,7 @@
- 	ARM64_FTR_BITS(FTR_STRICT, FTR_EXACT, 32, 32, 0),
- 	S_ARM64_FTR_BITS(FTR_STRICT, FTR_EXACT, ID_AA64MMFR0_TGRAN4_SHIFT, 4, ID_AA64MMFR0_TGRAN4_NI),
- 	S_ARM64_FTR_BITS(FTR_STRICT, FTR_EXACT, ID_AA64MMFR0_TGRAN64_SHIFT, 4, ID_AA64MMFR0_TGRAN64_NI),
--#ifdef CONFIG_AMLOGIC_MODIFY
--	ARM64_FTR_BITS(FTR_NONSTRICT, FTR_EXACT,
--		ID_AA64MMFR0_TGRAN16_SHIFT, 4, ID_AA64MMFR0_TGRAN16_NI),
--#else
- 	ARM64_FTR_BITS(FTR_STRICT, FTR_EXACT, ID_AA64MMFR0_TGRAN16_SHIFT, 4, ID_AA64MMFR0_TGRAN16_NI),
--#endif
- 	ARM64_FTR_BITS(FTR_STRICT, FTR_EXACT, ID_AA64MMFR0_BIGENDEL0_SHIFT, 4, 0),
- 	/* Linux shouldn't care about secure memory */
- 	ARM64_FTR_BITS(FTR_NONSTRICT, FTR_EXACT, ID_AA64MMFR0_SNSMEM_SHIFT, 4, 0),
-@@ -333,6 +337,7 @@
+@@ -333,6 +342,7 @@
  	/* Op1 = 0, CRn = 0, CRm = 6 */
  	ARM64_FTR_REG(SYS_ID_AA64ISAR0_EL1, ftr_id_aa64isar0),
  	ARM64_FTR_REG(SYS_ID_AA64ISAR1_EL1, ftr_aa64raz),
@@ -1802,7 +1785,7 @@ index 8cf001baee219..9b7e7d2f236ee 100644
  
  	/* Op1 = 0, CRn = 0, CRm = 7 */
  	ARM64_FTR_REG(SYS_ID_AA64MMFR0_EL1, ftr_id_aa64mmfr0),
-@@ -445,6 +450,9 @@
+@@ -445,6 +455,9 @@
  	reg->strict_mask = strict_mask;
  }
  
@@ -1812,7 +1795,7 @@ index 8cf001baee219..9b7e7d2f236ee 100644
  void __init init_cpu_features(struct cpuinfo_arm64 *info)
  {
  	/* Before we start using the tables, make sure it is sorted */
-@@ -457,6 +465,7 @@
+@@ -457,6 +470,7 @@
  	init_cpu_ftr_reg(SYS_ID_AA64DFR1_EL1, info->reg_id_aa64dfr1);
  	init_cpu_ftr_reg(SYS_ID_AA64ISAR0_EL1, info->reg_id_aa64isar0);
  	init_cpu_ftr_reg(SYS_ID_AA64ISAR1_EL1, info->reg_id_aa64isar1);
@@ -1820,7 +1803,7 @@ index 8cf001baee219..9b7e7d2f236ee 100644
  	init_cpu_ftr_reg(SYS_ID_AA64MMFR0_EL1, info->reg_id_aa64mmfr0);
  	init_cpu_ftr_reg(SYS_ID_AA64MMFR1_EL1, info->reg_id_aa64mmfr1);
  	init_cpu_ftr_reg(SYS_ID_AA64MMFR2_EL1, info->reg_id_aa64mmfr2);
-@@ -482,6 +491,11 @@
+@@ -482,6 +496,11 @@
  		init_cpu_ftr_reg(SYS_MVFR2_EL1, info->reg_mvfr2);
  	}
  
@@ -1832,7 +1815,7 @@ index 8cf001baee219..9b7e7d2f236ee 100644
  }
  
  static void update_cpu_ftr_reg(struct arm64_ftr_reg *reg, u64 new)
-@@ -563,6 +577,8 @@
+@@ -563,6 +582,8 @@
  				      info->reg_id_aa64isar0, boot->reg_id_aa64isar0);
  	taint |= check_update_ftr_reg(SYS_ID_AA64ISAR1_EL1, cpu,
  				      info->reg_id_aa64isar1, boot->reg_id_aa64isar1);
@@ -1841,7 +1824,7 @@ index 8cf001baee219..9b7e7d2f236ee 100644
  
  	/*
  	 * Differing PARange support is fine as long as all peripherals and
-@@ -682,6 +698,7 @@
+@@ -682,6 +703,7 @@
  	case SYS_ID_AA64MMFR2_EL1:	return read_cpuid(ID_AA64MMFR2_EL1);
  	case SYS_ID_AA64ISAR0_EL1:	return read_cpuid(ID_AA64ISAR0_EL1);
  	case SYS_ID_AA64ISAR1_EL1:	return read_cpuid(ID_AA64ISAR1_EL1);
@@ -1849,7 +1832,7 @@ index 8cf001baee219..9b7e7d2f236ee 100644
  
  	case SYS_CNTFRQ_EL0:		return read_cpuid(CNTFRQ_EL0);
  	case SYS_CTR_EL0:		return read_cpuid(CTR_EL0);
-@@ -734,13 +751,11 @@
+@@ -734,13 +756,11 @@
  static bool has_no_hw_prefetch(const struct arm64_cpu_capabilities *entry, int __unused)
  {
  	u32 midr = read_cpuid_id();
@@ -1866,16 +1849,7 @@ index 8cf001baee219..9b7e7d2f236ee 100644
  }
  
  static bool runs_at_el2(const struct arm64_cpu_capabilities *entry, int __unused)
-@@ -751,7 +766,7 @@
- static bool hyp_offset_low(const struct arm64_cpu_capabilities *entry,
- 			   int __unused)
- {
--	phys_addr_t idmap_addr = __pa_symbol(__hyp_idmap_text_start);
-+	phys_addr_t idmap_addr = virt_to_phys(__hyp_idmap_text_start);
- 
- 	/*
- 	 * Activate the lower HYP offset only if:
-@@ -767,6 +782,17 @@
+@@ -767,6 +787,18 @@
  static bool unmap_kernel_at_el0(const struct arm64_cpu_capabilities *entry,
  				int __unused)
  {
@@ -1890,10 +1864,11 @@ index 8cf001baee219..9b7e7d2f236ee 100644
 +		MIDR_ALL_VERSIONS(MIDR_CORTEX_A72),
 +		MIDR_ALL_VERSIONS(MIDR_CORTEX_A73),
 +	};
++
  	char const *str = "command line option";
  	u64 pfr0 = read_system_reg(SYS_ID_AA64PFR0_EL1);
  
-@@ -792,23 +818,16 @@
+@@ -792,23 +824,16 @@
  		return true;
  
  	/* Don't force KPTI for CPUs that are not vulnerable */
@@ -1920,7 +1895,7 @@ index 8cf001baee219..9b7e7d2f236ee 100644
  {
  	typedef void (kpti_remap_fn)(int, int, phys_addr_t);
  	extern kpti_remap_fn idmap_kpti_install_ng_mappings;
-@@ -817,8 +836,14 @@
+@@ -817,8 +842,14 @@
  	static bool kpti_applied = false;
  	int cpu = smp_processor_id();
  
@@ -1936,16 +1911,16 @@ index 8cf001baee219..9b7e7d2f236ee 100644
  
  	remap_fn = (void *)__pa_symbol(idmap_kpti_install_ng_mappings);
  
-@@ -829,7 +854,7 @@
+@@ -828,8 +859,6 @@
+ 
  	if (!cpu)
  		kpti_applied = true;
- 
+-
 -	return 0;
-+	return;
  }
  
  static int __init parse_kpti(char *str)
-@@ -846,7 +871,7 @@
+@@ -846,7 +875,7 @@
  early_param("kpti", parse_kpti);
  #endif	/* CONFIG_UNMAP_KERNEL_AT_EL0 */
  
@@ -1954,7 +1929,7 @@ index 8cf001baee219..9b7e7d2f236ee 100644
  {
  	/*
  	 * Copy register values that aren't redirected by hardware.
-@@ -858,15 +883,13 @@
+@@ -858,15 +887,13 @@
  	 */
  	if (!alternatives_applied)
  		write_sysreg(read_sysreg(tpidr_el1), tpidr_el2);
@@ -1971,7 +1946,7 @@ index 8cf001baee219..9b7e7d2f236ee 100644
  		.matches = has_useable_gicv3_cpuif,
  		.sys_reg = SYS_ID_AA64PFR0_EL1,
  		.field_pos = ID_AA64PFR0_GIC_SHIFT,
-@@ -877,20 +900,20 @@
+@@ -877,20 +904,20 @@
  	{
  		.desc = "Privileged Access Never",
  		.capability = ARM64_HAS_PAN,
@@ -1995,7 +1970,7 @@ index 8cf001baee219..9b7e7d2f236ee 100644
  		.matches = has_cpuid_feature,
  		.sys_reg = SYS_ID_AA64ISAR0_EL1,
  		.field_pos = ID_AA64ISAR0_ATOMICS_SHIFT,
-@@ -901,39 +924,42 @@
+@@ -901,39 +928,42 @@
  	{
  		.desc = "Software prefetching using PRFM",
  		.capability = ARM64_HAS_NO_HW_PREFETCH,
@@ -2045,7 +2020,7 @@ index 8cf001baee219..9b7e7d2f236ee 100644
  		.matches = has_cpuid_feature,
  		.sys_reg = SYS_ID_AA64PFR0_EL1,
  		.sign = FTR_UNSIGNED,
-@@ -943,31 +969,31 @@
+@@ -943,31 +973,31 @@
  	{
  		.desc = "Reduced HYP mapping offset",
  		.capability = ARM64_HYP_OFFSET_LOW,
@@ -2083,7 +2058,7 @@ index 8cf001baee219..9b7e7d2f236ee 100644
  		.hwcap = cap,					\
  	}
  
-@@ -1044,7 +1070,7 @@
+@@ -1044,7 +1074,7 @@
  static void __init setup_elf_hwcaps(const struct arm64_cpu_capabilities *hwcaps)
  {
  	for (; hwcaps->matches; hwcaps++)
@@ -2092,7 +2067,7 @@ index 8cf001baee219..9b7e7d2f236ee 100644
  			cap_set_elf_hwcap(hwcaps);
  }
  
-@@ -1067,11 +1093,11 @@
+@@ -1067,11 +1097,11 @@
  	return false;
  }
  
@@ -2107,7 +2082,7 @@ index 8cf001baee219..9b7e7d2f236ee 100644
  			continue;
  
  		if (!cpus_have_cap(caps->capability) && caps->desc)
-@@ -1080,11 +1106,20 @@
+@@ -1080,11 +1110,20 @@
  	}
  }
  
@@ -2129,7 +2104,7 @@ index 8cf001baee219..9b7e7d2f236ee 100644
  {
  	for (; caps->matches; caps++) {
  		unsigned int num = caps->capability;
-@@ -1095,14 +1130,15 @@
+@@ -1095,14 +1134,15 @@
  		/* Ensure cpus_have_const_cap(num) works */
  		static_branch_enable(&cpu_hwcap_keys[num]);
  
@@ -2147,7 +2122,7 @@ index 8cf001baee219..9b7e7d2f236ee 100644
  		}
  	}
  }
-@@ -1160,12 +1196,45 @@
+@@ -1160,12 +1200,45 @@
  					smp_processor_id(), caps->desc);
  			cpu_die_early();
  		}
@@ -2211,17 +2186,7 @@ diff --git a/arch/arm64/kernel/entry.S b/arch/arm64/kernel/entry.S
 index ca978d7d98eb4..1f79abb1e5ddb 100644
 --- a/arch/arm64/kernel/entry.S
 +++ b/arch/arm64/kernel/entry.S
-@@ -32,9 +32,7 @@
- #include <asm/memory.h>
- #include <asm/mmu.h>
- #include <asm/processor.h>
--#include <asm/ptrace.h>
- #include <asm/thread_info.h>
--#include <asm/uaccess.h>
- #include <asm/asm-uaccess.h>
- #include <asm/unistd.h>
- #include <asm/kernel-pgtable.h>
-@@ -76,26 +74,33 @@
+@@ -76,26 +76,33 @@
  
  	.macro kernel_ventry, el, label, regsize = 64
  	.align 7
@@ -2261,130 +2226,7 @@ index ca978d7d98eb4..1f79abb1e5ddb 100644
  	.endm
  
  	// This macro corrupts x0-x3. It is the caller's duty
-@@ -107,7 +112,7 @@
- alternative_cb_end
- 	ldr_this_cpu	\tmp2, arm64_ssbd_callback_required, \tmp1
- 	cbz	\tmp2, \targ
--	ldr	\tmp2, [tsk, #TSK_TI_FLAGS]
-+	ldr	\tmp2, [tsk, #TI_FLAGS]
- 	tbnz	\tmp2, #TIF_SSBD, \targ
- 	mov	w0, #ARM_SMCCC_ARCH_WORKAROUND_2
- 	mov	w1, #\state
-@@ -139,8 +144,9 @@
- 
- 	.if	\el == 0
- 	mrs	x21, sp_el0
--	ldr_this_cpu	tsk, __entry_task, x20	// Ensure MDSCR_EL1.SS is clear,
--	ldr	x19, [tsk, #TSK_TI_FLAGS]	// since we can unmask debug
-+	mov	tsk, sp
-+	and	tsk, tsk, #~(THREAD_SIZE - 1)	// Ensure MDSCR_EL1.SS is clear,
-+	ldr	x19, [tsk, #TI_FLAGS]		// since we can unmask debug
- 	disable_step_tsk x19, x20		// exceptions when scheduling.
- 
- 	apply_ssbd 1, 1f, x22, x23
-@@ -156,41 +162,15 @@
- 	add	x21, sp, #S_FRAME_SIZE
- 	get_thread_info tsk
- 	/* Save the task's original addr_limit and set USER_DS */
--	ldr	x20, [tsk, #TSK_TI_ADDR_LIMIT]
-+	ldr	x20, [tsk, #TI_ADDR_LIMIT]
- 	str	x20, [sp, #S_ORIG_ADDR_LIMIT]
- 	mov	x20, #USER_DS
--	str	x20, [tsk, #TSK_TI_ADDR_LIMIT]
-+	str	x20, [tsk, #TI_ADDR_LIMIT]
- 	/* No need to reset PSTATE.UAO, hardware's already set it to 0 for us */
- 	.endif /* \el == 0 */
- 	mrs	x22, elr_el1
- 	mrs	x23, spsr_el1
- 	stp	lr, x21, [sp, #S_LR]
--
--#ifdef CONFIG_ARM64_SW_TTBR0_PAN
--	/*
--	 * Set the TTBR0 PAN bit in SPSR. When the exception is taken from
--	 * EL0, there is no need to check the state of TTBR0_EL1 since
--	 * accesses are always enabled.
--	 * Note that the meaning of this bit differs from the ARMv8.1 PAN
--	 * feature as all TTBR0_EL1 accesses are disabled, not just those to
--	 * user mappings.
--	 */
--alternative_if ARM64_HAS_PAN
--	b	1f				// skip TTBR0 PAN
--alternative_else_nop_endif
--
--	.if	\el != 0
--	mrs	x21, ttbr0_el1
--	tst	x21, #TTBR_ASID_MASK		// Check for the reserved ASID
--	orr	x23, x23, #PSR_PAN_BIT		// Set the emulated PAN in the saved SPSR
--	b.eq	1f				// TTBR0 access already disabled
--	and	x23, x23, #~PSR_PAN_BIT		// Clear the emulated PAN in the saved SPSR
--	.endif
--
--	__uaccess_ttbr0_disable x21
--1:
--#endif
--
- 	stp	x22, x23, [sp, #S_PC]
- 
- 	/*
-@@ -221,7 +201,7 @@
- 	.if	\el != 0
- 	/* Restore the task's original addr_limit. */
- 	ldr	x20, [sp, #S_ORIG_ADDR_LIMIT]
--	str	x20, [tsk, #TSK_TI_ADDR_LIMIT]
-+	str	x20, [tsk, #TI_ADDR_LIMIT]
- 
- 	/* No need to restore UAO, it will be restored from SPSR_EL1 */
- 	.endif
-@@ -229,40 +209,6 @@
- 	ldp	x21, x22, [sp, #S_PC]		// load ELR, SPSR
- 	.if	\el == 0
- 	ct_user_enter
--	.endif
--
--#ifdef CONFIG_ARM64_SW_TTBR0_PAN
--	/*
--	 * Restore access to TTBR0_EL1. If returning to EL0, no need for SPSR
--	 * PAN bit checking.
--	 */
--alternative_if ARM64_HAS_PAN
--	b	2f				// skip TTBR0 PAN
--alternative_else_nop_endif
--
--	.if	\el != 0
--	tbnz	x22, #22, 1f			// Skip re-enabling TTBR0 access if the PSR_PAN_BIT is set
--	.endif
--
--	__uaccess_ttbr0_enable x0, x1
--
--	.if	\el == 0
--	/*
--	 * Enable errata workarounds only if returning to user. The only
--	 * workaround currently required for TTBR0_EL1 changes are for the
--	 * Cavium erratum 27456 (broadcast TLBI instructions may cause I-cache
--	 * corruption).
--	 */
--	bl	post_ttbr_update_workaround
--	.endif
--1:
--	.if	\el != 0
--	and	x22, x22, #~PSR_PAN_BIT		// ARMv8.0 CPUs do not understand this bit
--	.endif
--2:
--#endif
--
--	.if	\el == 0
- 	ldr	x23, [sp, #S_SP]		// load return stack pointer
- 	msr	sp_el0, x23
- 	tst	x22, #PSR_MODE32_BIT		// native task?
-@@ -282,7 +228,6 @@
- 	apply_ssbd 0, 5f, x0, x1
- 5:
- 	.endif
--
- 	msr	elr_el1, x21			// set up the return data
- 	msr	spsr_el1, x22
- 	ldp	x0, x1, [sp, #16 * 0]
-@@ -300,37 +245,44 @@
+@@ -300,21 +307,25 @@
  	ldp	x24, x25, [sp, #16 * 12]
  	ldp	x26, x27, [sp, #16 * 13]
  	ldp	x28, x29, [sp, #16 * 14]
@@ -2416,120 +2258,7 @@ index ca978d7d98eb4..1f79abb1e5ddb 100644
  	eret
  	.endif
  	.endm
- 
-+	.macro	get_thread_info, rd
-+	mrs	\rd, sp_el0
-+	.endm
-+
- 	.macro	irq_stack_entry
- 	mov	x19, sp			// preserve the original sp
- 
- 	/*
--	 * Compare sp with the base of the task stack.
--	 * If the top ~(THREAD_SIZE - 1) bits match, we are on a task stack,
--	 * and should switch to the irq stack.
--	 */
--	ldr	x25, [tsk, TSK_STACK]
--	eor	x25, x25, x19
--	and	x25, x25, #~(THREAD_SIZE - 1)
--	cbnz	x25, 9998f
-+	 * Compare sp with the current thread_info, if the top
-+	 * ~(THREAD_SIZE - 1) bits match, we are on a task stack, and
-+	 * should switch to the irq stack.
-+	 */
-+	and	x25, x19, #~(THREAD_SIZE - 1)
-+	cmp	x25, tsk
-+	b.ne	9998f
- 
- 	adr_this_cpu x25, irq_stack, x26
- 	mov	x26, #IRQ_STACK_START_SP
-@@ -424,9 +376,6 @@
- 	mov	x0, sp
- 	mov	x1, #\reason
- 	mrs	x2, esr_el1
--#ifdef CONFIG_AMLOGIC_USER_FAULT
--	mrs	x3, far_el1
--#endif
- 	b	bad_mode
- 	.endm
- 
-@@ -549,9 +498,6 @@
- 	mov	x0, sp
- 	mov	x2, x1
- 	mov	x1, #BAD_SYNC
--#ifdef CONFIG_AMLOGIC_USER_FAULT
--	mrs	x3, far_el1
--#endif
- 	b	bad_mode
- ENDPROC(el1_sync)
- 
-@@ -566,9 +512,9 @@
- 	irq_handler
- 
- #ifdef CONFIG_PREEMPT
--	ldr	w24, [tsk, #TSK_TI_PREEMPT]	// get preempt count
-+	ldr	w24, [tsk, #TI_PREEMPT]		// get preempt count
- 	cbnz	w24, 1f				// preempt count != 0
--	ldr	x0, [tsk, #TSK_TI_FLAGS]	// get flags
-+	ldr	x0, [tsk, #TI_FLAGS]		// get flags
- 	tbz	x0, #TIF_NEED_RESCHED, 1f	// needs rescheduling?
- 	bl	el1_preempt
- 1:
-@@ -583,7 +529,7 @@
- el1_preempt:
- 	mov	x24, lr
- 1:	bl	preempt_schedule_irq		// irq en/disable is done inside
--	ldr	x0, [tsk, #TSK_TI_FLAGS]	// get new tasks TI_FLAGS
-+	ldr	x0, [tsk, #TI_FLAGS]		// get new tasks TI_FLAGS
- 	tbnz	x0, #TIF_NEED_RESCHED, 1b	// needs rescheduling?
- 	ret	x24
- #endif
-@@ -822,7 +768,8 @@
- 	ldp	x29, x9, [x8], #16
- 	ldr	lr, [x8]
- 	mov	sp, x9
--	msr	sp_el0, x1
-+	and	x9, x9, #~(THREAD_SIZE - 1)
-+	msr	sp_el0, x9
- 	ret
- ENDPROC(cpu_switch_to)
- 
-@@ -833,7 +780,7 @@
- ret_fast_syscall:
- 	disable_irq				// disable interrupts
- 	str	x0, [sp, #S_X0]			// returned x0
--	ldr	x1, [tsk, #TSK_TI_FLAGS]	// re-check for syscall tracing
-+	ldr	x1, [tsk, #TI_FLAGS]		// re-check for syscall tracing
- 	and	x2, x1, #_TIF_SYSCALL_WORK
- 	cbnz	x2, ret_fast_syscall_trace
- 	and	x2, x1, #_TIF_WORK_MASK
-@@ -853,14 +800,14 @@
- #ifdef CONFIG_TRACE_IRQFLAGS
- 	bl	trace_hardirqs_on		// enabled while in userspace
- #endif
--	ldr	x1, [tsk, #TSK_TI_FLAGS]	// re-check for single-step
-+	ldr	x1, [tsk, #TI_FLAGS]		// re-check for single-step
- 	b	finish_ret_to_user
- /*
-  * "slow" syscall return path.
-  */
- ret_to_user:
- 	disable_irq				// disable interrupts
--	ldr	x1, [tsk, #TSK_TI_FLAGS]
-+	ldr	x1, [tsk, #TI_FLAGS]
- 	and	x2, x1, #_TIF_WORK_MASK
- 	cbnz	x2, work_pending
- finish_ret_to_user:
-@@ -893,7 +840,7 @@
- 	enable_dbg_and_irq
- 	ct_user_exit 1
- 
--	ldr	x16, [tsk, #TSK_TI_FLAGS]	// check for syscall hooks
-+	ldr	x16, [tsk, #TI_FLAGS]		// check for syscall hooks
- 	tst	x16, #_TIF_SYSCALL_WORK
- 	b.ne	__sys_trace
- 	cmp     scno, sc_nr                     // check upper syscall limit
-@@ -947,32 +894,17 @@
+@@ -947,12 +958,7 @@
  
  	.popsection				// .entry.text
  
@@ -2542,30 +2271,8 @@ index ca978d7d98eb4..1f79abb1e5ddb 100644
 +	// Move from tramp_pg_dir to swapper_pg_dir
  	.macro tramp_map_kernel, tmp
  	mrs	\tmp, ttbr1_el1
--	sub	\tmp, \tmp, #(SWAPPER_DIR_SIZE + RESERVED_TTBR0_SIZE)
-+	sub	\tmp, \tmp, #SWAPPER_DIR_SIZE
- 	bic	\tmp, \tmp, #USER_ASID_FLAG
- 	msr	ttbr1_el1, \tmp
--#ifdef CONFIG_ARCH_MSM8996
--	/* ASID already in \tmp[63:48] */
--	movk	\tmp, #:abs_g2_nc:(TRAMP_VALIAS >> 12)
--	movk	\tmp, #:abs_g1_nc:(TRAMP_VALIAS >> 12)
--	/* 2MB boundary containing the vectors, so we nobble the walk cache */
--	movk	\tmp, #:abs_g0_nc:((TRAMP_VALIAS & ~(SZ_2M - 1)) >> 12)
--	isb
--	tlbi	vae1, \tmp
--	dsb	nsh
--#endif /* CONFIG_ARCH_MSM8996 */
- 	.endm
- 
- 	.macro tramp_unmap_kernel, tmp
- 	mrs	\tmp, ttbr1_el1
--	add	\tmp, \tmp, #(SWAPPER_DIR_SIZE + RESERVED_TTBR0_SIZE)
-+	add	\tmp, \tmp, #SWAPPER_DIR_SIZE
- 	orr	\tmp, \tmp, #USER_ASID_FLAG
- 	msr	ttbr1_el1, \tmp
- 	/*
-@@ -982,12 +914,47 @@
+ 	sub	\tmp, \tmp, #(SWAPPER_DIR_SIZE + RESERVED_TTBR0_SIZE)
+@@ -982,12 +988,47 @@
  	 */
  	.endm
  
@@ -2614,7 +2321,7 @@ index ca978d7d98eb4..1f79abb1e5ddb 100644
  	/*
  	 * Defend against branch aliasing attacks by pushing a dummy
  	 * entry onto the return stack and using a RET instruction to
-@@ -997,45 +964,74 @@
+@@ -997,45 +1038,74 @@
  	b	.
  2:
  	tramp_map_kernel	x30
@@ -2628,54 +2335,54 @@ index ca978d7d98eb4..1f79abb1e5ddb 100644
 -	ldr	x30, =vectors
 -#endif
 -	prfm	plil1strm, [x30, #(1b - tramp_vectors)]
-+	tramp_data_read_var	x30, vectors
-+	prfm	plil1strm, [x30, #(1b - \vector_start)]
++	tramp_data_read_var     x30, vectors
++	prfm    plil1strm, [x30, #(1b - \vector_start)]
  	msr	vbar_el1, x30
 -	add	x30, x30, #(1b - tramp_vectors)
  	isb
 +	.else
-+	ldr	x30, =vectors
++	ldr     x30, =vectors
 +	.endif // \kpti == 1
 +
-+	.if	\bhb == BHB_MITIGATION_FW
++	.if     \bhb == BHB_MITIGATION_FW
 +	/*
 +	 * The firmware sequence must appear before the first indirect branch.
 +	 * i.e. the ret out of tramp_ventry. But it also needs the stack to be
 +	 * mapped to save/restore the registers the SMC clobbers.
-+	 */
++	*/
 +	__mitigate_spectre_bhb_fw
 +	.endif // \bhb == BHB_MITIGATION_FW
 +
-+	add	x30, x30, #(1b - \vector_start + 4)
++	add     x30, x30, #(1b - \vector_start + 4)
  	ret
-+.org 1b + 128	// Did we overflow the ventry slot?
++	.org 1b + 128  // Did we overflow the ventry slot?
  	.endm
  
  	.macro tramp_exit, regsize = 64
 -	adr	x30, tramp_vectors
-+	tramp_data_read_var	x30, this_cpu_vector
++	tramp_data_read_var     x30, this_cpu_vector
 +alternative_if_not ARM64_HAS_VIRT_HOST_EXTN
-+	mrs	x29, tpidr_el1
++	mrs     x29, tpidr_el1
 +alternative_else
-+	mrs	x29, tpidr_el2
++	mrs     x29, tpidr_el2
 +alternative_endif
-+	ldr	x30, [x30, x29]
++	ldr     x30, [x30, x29]
 +
  	msr	vbar_el1, x30
 -	tramp_unmap_kernel	x30
-+	ldr	lr, [sp, #S_LR]
-+	tramp_unmap_kernel	x29
++	ldr     lr, [sp, #S_LR]
++	tramp_unmap_kernel      x29
  	.if	\regsize == 64
 -	mrs	x30, far_el1
-+	mrs	x29, far_el1
++	mrs     x29, far_el1
  	.endif
-+	add	sp, sp, #S_FRAME_SIZE		// restore sp
++	add     sp, sp, #S_FRAME_SIZE           // restore sp
  	eret
  	.endm
  
 -	.align	11
 -ENTRY(tramp_vectors)
-+	.macro	generate_tramp_vector,	kpti, bhb
++	.macro  generate_tramp_vector,  kpti, bhb
 +.Lvector_start\@:
  	.space	0x400
  
@@ -2688,11 +2395,11 @@ index ca978d7d98eb4..1f79abb1e5ddb 100644
 -	tramp_ventry	32
 -	tramp_ventry	32
 -	tramp_ventry	32
-+	.rept	4
-+	tramp_ventry	.Lvector_start\@, 64, \kpti, \bhb
++	.rept   4
++	tramp_ventry    .Lvector_start\@, 64, \kpti, \bhb
 +	.endr
-+	.rept	4
-+	tramp_ventry	.Lvector_start\@, 32, \kpti, \bhb
++	.rept   4
++	tramp_ventry    .Lvector_start\@, 32, \kpti, \bhb
 +	.endr
 +	.endm
 +
@@ -2703,18 +2410,18 @@ index ca978d7d98eb4..1f79abb1e5ddb 100644
 + * arm64_bp_harden_el1_vectors enum.
 + */
 +	.pushsection ".entry.tramp.text", "ax"
-+	.align	11
++	.align  11
 +ENTRY(tramp_vectors)
 +#ifdef CONFIG_MITIGATE_SPECTRE_BRANCH_HISTORY
-+	generate_tramp_vector	kpti=1, bhb=BHB_MITIGATION_LOOP
-+	generate_tramp_vector	kpti=1, bhb=BHB_MITIGATION_FW
-+	generate_tramp_vector	kpti=1, bhb=BHB_MITIGATION_INSN
++	generate_tramp_vector   kpti=1, bhb=BHB_MITIGATION_LOOP
++	generate_tramp_vector   kpti=1, bhb=BHB_MITIGATION_FW
++	generate_tramp_vector   kpti=1, bhb=BHB_MITIGATION_INSN
 +#endif /* CONFIG_MITIGATE_SPECTRE_BRANCH_HISTORY */
-+	generate_tramp_vector	kpti=1, bhb=BHB_MITIGATION_NONE
++	generate_tramp_vector   kpti=1, bhb=BHB_MITIGATION_NONE
  END(tramp_vectors)
  
  ENTRY(tramp_exit_native)
-@@ -1053,12 +1049,55 @@
+@@ -1053,12 +1123,55 @@
  	.align PAGE_SHIFT
  	.globl	__entry_tramp_data_start
  __entry_tramp_data_start:
