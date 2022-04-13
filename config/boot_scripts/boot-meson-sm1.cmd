@@ -90,12 +90,15 @@ fi
 if test "${kernel}" = "legacy"; then
     # legacy kernel
 
+    # default overlay suffix
+    setenv overlay_suffix "overlay/"
+
     if test "${variant}" = "c4" || test "${variant}" = "hc4" ; then
-        setenv overlay_suffix "odroidc4/"
+        setenv overlay_suffix "overlays/odroidc4/"
     fi
 
     if test "${variant}" = "n2" || test "${variant}" = "n2-plus" ; then
-        setenv overlay_suffix "odroidn2/"
+        setenv overlay_suffix "overlays/odroidn2/"
     fi
 
     if test "${console}" = "display" || test "${console}" = "both"; then setenv consoleargs "console=ttyS0,%SERIAL_CONSOLE_SPEED%"; fi
@@ -111,7 +114,7 @@ if test "${kernel}" = "legacy"; then
 #    unzip ${k_addr} ${loadaddr}
 
     for overlay_file in ${overlays}; do
-        if load ${devtype} ${devnum} ${loadaddr} ${prefix}dtb/amlogic/overlay/${overlay_suffix}${overlay_file}.dtbo; then
+        if load ${devtype} ${devnum} ${loadaddr} ${prefix}dtb/amlogic/${overlay_suffix}${overlay_file}.dtbo; then
             echo "Applying kernel provided DT overlay ${overlay_file}.dtbo"
             fdt apply ${loadaddr} || setenv overlay_error "true"
         fi
@@ -121,7 +124,7 @@ if test "${kernel}" = "legacy"; then
         echo "Error applying DT overlays, restoring original DT"
         load ${devtype} ${devnum} ${dtb_loadaddr} ${prefix}dtb/${fdtfile}
     else
-        if load ${devtype} ${devnum} ${loadaddr} ${prefix}dtb/amlogic/overlay/${overlay_suffix}${overlay_prefix}-fixup.scr; then
+        if load ${devtype} ${devnum} ${loadaddr} ${prefix}dtb/amlogic/${overlay_suffix}${overlay_prefix}-fixup.scr; then
             echo "Applying kernel provided DT fixup script (${overlay_prefix}-fixup.scr)"
             source ${loadaddr}
         fi
