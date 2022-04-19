@@ -77,6 +77,18 @@ disable_overscan=1
 #http://lists.infradead.org/pipermail/linux-rpi-kernel/2020-November/007906.html
 disable_fw_kms_setup=1
 
+# u-boot expects RPi's UART to have a compatible string not supported anymore in
+# linux upstream, while this is fixed, make sure the name shows up in the
+# device-tree. This is only needed for RPi, RPi2 and RPi0, but applied
+# generally so as to avoid complexity.
+dtoverlay=uboot-bcm2835-pl011
+
+# Enables Bluetooth over the PL011 UART. Users wanting to disable it should add
+# 'dtoverlay=disable-bt'
+dtoverlay=enable-bt
+
+# Add minimal SMBIOS info
+dtoverlay=smbios
 
 [pi3]
 # These are not applied automatically? Needed to use respective upstream drivers.
@@ -86,6 +98,12 @@ dtoverlay=dwc2
 [pi4]
 #dtoverlay=vc4-fkms-v3d
 #dtoverlay=vc4-kms-v3d
+
+[cm4]
+# The USB interface is disabled to save power by default on CM4. Enable it
+# to ease the installation process. For more information see:
+# https://datasheets.raspberrypi.org/cm4/cm4-datasheet.pdf
+dtoverlay=dwc2
 
 [all]
 dtparam=i2c_arm=on
