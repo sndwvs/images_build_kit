@@ -3,7 +3,7 @@
 # Please edit /boot/uEnv.txt to set supported parameters
 #
 
-setenv load_addr "0x39000000"
+setenv load_addr "0x02400000"
 setenv rootdev "/dev/mmcblk0p2"
 setenv console "both"
 setenv verbosity "4"
