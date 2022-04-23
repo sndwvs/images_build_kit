@@ -1,0 +1,227 @@
+--- /dev/null	2013-01-18 10:50:48.232000013 +0200
++++ b/include/dt-bindings/soc/rockchip,suspend.h	2022-04-23 14:48:20.614878790 +0300
+@@ -0,0 +1,61 @@
++/*
++ * Header providing constants for Rockchip suspend bindings.
++ *
++ * Copyright (C) 2017, Fuzhou Rockchip Electronics Co., Ltd
++ * Author: Tony.Xie
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#ifndef __DT_BINDINGS_SUSPEND_ROCKCHIP_RK3399_H__
++#define __DT_BINDINGS_SUSPEND_ROCKCHIP_RK3399_H__
++
++/* the suspend mode */
++#define RKPM_SLP_WFI				(1 << 0)
++#define RKPM_SLP_ARMPD				(1 << 1)
++#define RKPM_SLP_PERILPPD			(1 << 2)
++#define RKPM_SLP_DDR_RET			(1 << 3)
++#define RKPM_SLP_PLLPD				(1 << 4)
++#define RKPM_SLP_OSC_DIS			(1 << 5)
++#define RKPM_SLP_CENTER_PD			(1 << 6)
++#define RKPM_SLP_AP_PWROFF			(1 << 7)
++
++/* the wake up source */
++#define RKPM_CLUSTER_L_WKUP_EN			(1 << 0)
++#define RKPM_CLUSTER_B_WKUPB_EN			(1 << 1)
++#define RKPM_GPIO_WKUP_EN			(1 << 2)
++#define RKPM_SDIO_WKUP_EN			(1 << 3)
++#define RKPM_SDMMC_WKUP_EN			(1 << 4)
++#define RKPM_TIMER_WKUP_EN			(1 << 6)
++#define RKPM_USB_WKUP_EN			(1 << 7)
++#define RKPM_SFT_WKUP_EN			(1 << 8)
++#define RKPM_WDT_M0_WKUP_EN			(1 << 9)
++#define RKPM_TIME_OUT_WKUP_EN			(1 << 10)
++#define RKPM_PWM_WKUP_EN			(1 << 11)
++#define RKPM_PCIE_WKUP_EN			(1 << 13)
++#define RKPM_USB_LINESTATE_WKUP_EN		(1 << 14)
++
++/* the pwm regulator */
++#define PWM0_REGULATOR_EN			(1 << 0)
++#define PWM1_REGULATOR_EN			(1 << 1)
++#define PWM2_REGULATOR_EN			(1 << 2)
++#define PWM3A_REGULATOR_EN			(1 << 3)
++#define PWM3B_REGULATOR_EN			(1 << 4)
++
++/* the APIO voltage domain */
++#define RKPM_APIO0_SUSPEND			(1 << 0)
++#define RKPM_APIO1_SUSPEND			(1 << 1)
++#define RKPM_APIO2_SUSPEND			(1 << 2)
++#define RKPM_APIO3_SUSPEND			(1 << 3)
++#define RKPM_APIO4_SUSPEND			(1 << 4)
++#define RKPM_APIO5_SUSPEND			(1 << 5)
++
++#endif
+--- a/arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi	2022-04-23 14:34:53.819331574 +0300
++++ b/arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi	2022-04-23 13:06:39.495968459 +0300
+@@ -13,6 +13,7 @@
+ 
+ /dts-v1/;
+ #include <dt-bindings/input/linux-event-codes.h>
++#include <dt-bindings/soc/rockchip,suspend.h>
+ #include "rk3399.dtsi"
+ #include "rk3399-opp.dtsi"
+ 
+@@ -23,10 +24,20 @@
+ 		mmc2 = &sdhci;
+ 	};
+ 
+-	chosen {
++	chosen: chosen {
++		bootargs = "swiotlb=1 coherent_pool=1m";
+ 		stdout-path = "serial2:1500000n8";
+ 	};
+ 
++	mach: board {
++		compatible = "friendlyelec,board";
++		machine = "NANOPI4";
++		hwrev = <255>;
++		model = "NanoPi 4 Series";
++		nvmem-cells = <&cpu_id>;
++		nvmem-cell-names = "id";
++	};
++
+ 	clkin_gmac: external-gmac-clock {
+ 		compatible = "fixed-clock";
+ 		clock-frequency = <125000000>;
+@@ -105,11 +116,11 @@
+ 		regulator-name = "vbus_typec";
+ 	};
+ 
+-	gpio-keys {
++	keys: gpio-keys {
+ 		compatible = "gpio-keys";
+ 		autorepeat;
+ 		pinctrl-names = "default";
+-		pinctrl-0 = <&power_key>;
++		pinctrl-0 = <&key_pins>;
+ 
+ 		power {
+ 			debounce-interval = <100>;
+@@ -123,7 +134,7 @@
+ 	leds: gpio-leds {
+ 		compatible = "gpio-leds";
+ 		pinctrl-names = "default";
+-		pinctrl-0 = <&status_led_pin>;
++		pinctrl-0 = <&leds_pin>;
+ 
+ 		status_led: led-0 {
+ 			gpios = <&gpio0 RK_PB5 GPIO_ACTIVE_HIGH>;
+@@ -132,6 +143,36 @@
+ 		};
+ 	};
+ 
++	pm_config: rockchip-suspend {
++		compatible = "rockchip,pm-rk3399";
++		rockchip,sleep-debug-en = <1>;
++		rockchip,sleep-mode-config = <
++			(0
++			| RKPM_SLP_ARMPD
++			| RKPM_SLP_PERILPPD
++			| RKPM_SLP_DDR_RET
++			| RKPM_SLP_PLLPD
++			| RKPM_SLP_CENTER_PD
++			| RKPM_SLP_AP_PWROFF
++			)
++			>;
++		rockchip,wakeup-config = <
++			(0
++			| RKPM_GPIO_WKUP_EN
++			| RKPM_PWM_WKUP_EN
++			)
++			>;
++		rockchip,pwm-regulator-config = <
++			(0
++			| PWM2_REGULATOR_EN
++			)
++			>;
++		rockchip,power-ctrl =
++			<&gpio1 17 GPIO_ACTIVE_HIGH>,
++			<&gpio1 14 GPIO_ACTIVE_HIGH>;
++		status = "okay";
++	};
++
+ 	sdio_pwrseq: sdio-pwrseq {
+ 		compatible = "mmc-pwrseq-simple";
+ 		clocks = <&rk808 1>;
+@@ -502,6 +543,10 @@
+ 	status = "okay";
+ };
+ 
++/*&reboot_mode {
++	status = "okay";
++};*/
++
+ &pcie_phy {
+ 	assigned-clock-parents = <&cru SCLK_PCIEPHY_REF100M>;
+ 	assigned-clock-rates = <100000000>;
+@@ -524,7 +569,7 @@
+ 	};
+ 
+ 	gpio-leds {
+-		status_led_pin: status-led-pin {
++		leds_pin: status-led-pin {
+ 			rockchip,pins = <0 RK_PB5 RK_FUNC_GPIO &pcfg_pull_none>;
+ 		};
+ 	};
+@@ -554,7 +599,7 @@
+ 	};
+ 
+ 	rockchip-key {
+-		power_key: power-key {
++		key_pins: key-pins {
+ 			rockchip,pins = <0 RK_PA5 RK_FUNC_GPIO &pcfg_pull_up>;
+ 		};
+ 	};
+@@ -608,6 +653,10 @@
+ 	status = "okay";
+ };
+ 
++/*&rng {
++	status = "okay";
++};*/
++
+ &saradc {
+ 	vref-supply = <&vcca1v8_s3>;
+ 	status = "okay";
+@@ -615,6 +664,7 @@
+ 
+ &sdhci {
+ 	bus-width = <8>;
++	disable-cqe;
+ 	mmc-hs200-1_8v;
+ 	non-removable;
+ 	status = "okay";
+@@ -644,6 +694,7 @@
+ 	sd-uhs-sdr104;
+ 	vmmc-supply = <&vcc3v0_sd>;
+ 	vqmmc-supply = <&vcc_sdio>;
++	vqmmc-off-microvolt = <3000000>;
+ 	status = "okay";
+ };
+ 
+@@ -720,10 +771,14 @@
+ };
+ 
+ &usbdrd_dwc3_0 {
++	snps,xhci-slow-suspend-quirk;
++	snps,xhci-trb-ent-quirk;
+ 	status = "okay";
+ };
+ 
+ &usbdrd_dwc3_1 {
++	snps,xhci-slow-suspend-quirk;
++	snps,xhci-trb-ent-quirk;
+ 	dr_mode = "host";
+ 	status = "okay";
+ };
