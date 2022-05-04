@@ -1,0 +1,38 @@
+--- a/include/linux/blkdev.h	2022-05-04 08:46:55.480261278 +0300
++++ b/include/linux/blkdev.h	2022-05-01 18:00:38.000000000 +0300
+@@ -650,12 +645,15 @@
+ 	struct delayed_work	requeue_work;
+ 
+ 	struct mutex		sysfs_lock;
++	struct mutex		sysfs_dir_lock;
+ 
+ 	int			bypass_depth;
+ 	atomic_t		mq_freeze_depth;
+ 
++#if defined(CONFIG_BLK_DEV_BSG)
+ 	bsg_job_fn		*bsg_job_fn;
+ 	struct bsg_class_device bsg_dev;
++#endif
+ 
+ #ifdef CONFIG_BLK_DEV_THROTTLING
+ 	/* Throttle data */
+--- a/include/linux/pci.h	2022-05-04 08:46:40.948221457 +0300
++++ b/include/linux/pci.h	2022-05-01 18:00:38.000000000 +0300
+@@ -377,6 +375,9 @@
+ 	bool		match_driver;		/* Skip attaching driver */
+ 
+ 	unsigned int	transparent:1;		/* Subtractive decode bridge */
++	unsigned int	io_window:1;		/* Bridge has I/O window */
++	unsigned int	pref_window:1;		/* Bridge has pref mem window */
++	unsigned int	pref_64_window:1;	/* Pref mem window is 64-bit */
+ 	unsigned int	multifunction:1;	/* Multi-function device */
+ 
+ 	unsigned int	is_busmaster:1;		/* Is busmaster */
+@@ -585,06 +581,7 @@
+	ANDROID_KABI_RESERVE(2);
+	ANDROID_KABI_RESERVE(3);
+	ANDROID_KABI_RESERVE(4);
++	unsigned int		unsafe_warn:1;	/* warned about RW1C config write */
+ };
+ 
+ #define to_pci_bus(n)	container_of(n, struct pci_bus, dev)
