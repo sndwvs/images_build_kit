@@ -1529,14 +1529,6 @@ diff --git a/drivers/usb/dwc3/gadget.c b/drivers/usb/dwc3/gadget.c
 index 8620ac8e33296..8be95ca95ef97 100644
 --- a/drivers/usb/dwc3/gadget.c
 +++ b/drivers/usb/dwc3/gadget.c
-@@ -2415,6 +2415,7 @@ static int dwc3_gadget_ep_cleanup_completed_request(struct dwc3_ep *dep,
- 		const struct dwc3_event_depevt *event,
- 		struct dwc3_request *req, int status)
- {
-+	int request_status;
- 	int ret;
- 
- 	if (req->request.num_mapped_sgs)
 @@ -2894,7 +2894,35 @@
  		goto out;
  	}
@@ -1574,6 +1566,14 @@ index 8620ac8e33296..8be95ca95ef97 100644
  
  out:
  	return ret;
+@@ -3749,6 +3777,7 @@
+  */
+ int dwc3_gadget_init(struct dwc3 *dwc)
+ {
++	int request_status;
+ 	int ret;
+ 	int irq;
+ 
 diff --git a/drivers/usb/gadget/configfs.c b/drivers/usb/gadget/configfs.c
 index 3d4710cc34bc1..2350e97a1662c 100644
 --- a/drivers/usb/gadget/configfs.c
