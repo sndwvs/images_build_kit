@@ -174,7 +174,7 @@ diff -Naur a/drivers/net/wireless/rtl8822cs/core/rtw_recv.c b/drivers/net/wirele
  				RTW_INFO("#############################\n");
  				_rtw_memset(pmppriv->mplink_buf, '\0' , sizeof(pmppriv->mplink_buf));
  				_rtw_memcpy(pmppriv->mplink_buf, ptr, precv_frame->u.hdr.len);
---- a/drivers/net/wireless/rtl8822cs/os_dep/linux/ioctl_cfg80211.c.1	2022-02-13 19:04:07.946515034 +0200
+--- a/drivers/net/wireless/rtl8822cs/os_dep/linux/ioctl_cfg80211.c	2022-02-13 19:04:07.946515034 +0200
 +++ b/drivers/net/wireless/rtl8822cs/os_dep/linux/ioctl_cfg80211.c	2022-02-13 19:05:34.442821706 +0200
 @@ -4483,6 +4483,7 @@
  }
@@ -189,6 +189,26 @@ diff -Naur a/drivers/net/wireless/rtl8822cs/core/rtw_recv.c b/drivers/net/wirele
  	};
  }
 +#endif	/*	CONFIG_RTW_DEBUG	*/
+ 
+ static int cfg80211_rtw_set_txpower(struct wiphy *wiphy,
+ #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0))
+--- a/drivers/net/wireless/rtl8189es/os_dep/linux/ioctl_cfg80211.c	2022-05-25 16:24:47.194958238 +0300
++++ b/drivers/net/wireless/rtl8189es/os_dep/linux/ioctl_cfg80211.c	2022-05-25 16:25:03.127012179 +0300
+@@ -4120,7 +4120,7 @@
+ }
+ 
+ #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 31))
+-static const char *nl80211_tx_power_setting_str(int type)
++/*static const char *nl80211_tx_power_setting_str(int type)
+ {
+ 	switch (type) {
+ 	case NL80211_TX_POWER_AUTOMATIC:
+@@ -4132,7 +4132,7 @@
+ 	default:
+ 		return "UNKNOWN";
+ 	};
+-}
++}*/
  
  static int cfg80211_rtw_set_txpower(struct wiphy *wiphy,
  #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0))
