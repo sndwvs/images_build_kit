@@ -14,30 +14,7 @@ diff -Naur a/arch/arm64/boot/dts/amlogic/meson-g12-common.dtsi b/arch/arm64/boot
  	};
  
  	chosen {
-@@ -894,6 +845,22 @@
- 						};
- 					};
- 
-+					pwm_f_z_pins: pwm-f-z {
-+						mux {
-+							groups = "pwm_f_z";
-+							function = "pwm_f";
-+							bias-disable;
-+						};
-+					};
-+
-+					pwm_f_a_pins: pwm-f-a {
-+						mux {
-+							groups = "pwm_f_a";
-+							function = "pwm_f";
-+							bias-disable;
-+						};
-+					};
-+
- 					pwm_f_x_pins: pwm-f-x {
- 						mux {
- 							groups = "pwm_f_x";
-@@ -1923,7 +1890,7 @@
+@@ -1890,7 +1890,7 @@
  							groups = "uart_ao_a_tx",
  								 "uart_ao_a_rx";
  							function = "uart_ao_a";
@@ -46,7 +23,7 @@ diff -Naur a/arch/arm64/boot/dts/amlogic/meson-g12-common.dtsi b/arch/arm64/boot
  						};
  					};
  
-@@ -1932,6 +1899,33 @@
+@@ -1899,6 +1899,24 @@
  							groups = "uart_ao_a_cts",
  								 "uart_ao_a_rts";
  							function = "uart_ao_a";
@@ -68,79 +45,6 @@ diff -Naur a/arch/arm64/boot/dts/amlogic/meson-g12-common.dtsi b/arch/arm64/boot
 +							groups = "uart_ao_b_tx_8",
 +								 "uart_ao_b_rx_9";
 +							function = "uart_ao_b";
-+							bias-disable;
-+						};
-+					};
-+
-+					uart_ao_b_cts_rts_pins: uart-ao-b-cts-rts {
-+						mux {
-+							groups = "uart_ao_b_cts",
-+								 "uart_ao_b_rts";
-+							function = "uart_ao_b";
  							bias-disable;
  						};
  					};
-diff -Naur a/arch/arm64/boot/dts/amlogic/meson-sm1.dtsi b/arch/arm64/boot/dts/amlogic/meson-sm1.dtsi
---- a/arch/arm64/boot/dts/amlogic/meson-sm1.dtsi	2022-01-30 04:21:45.904945959 +0200
-+++ b/arch/arm64/boot/dts/amlogic/meson-sm1.dtsi	2022-01-30 01:06:25.764069355 +0200
-@@ -95,26 +95,6 @@
- 		compatible = "operating-points-v2";
- 		opp-shared;
- 
--		opp-100000000 {
--			opp-hz = /bits/ 64 <100000000>;
--			opp-microvolt = <730000>;
--		};
--
--		opp-250000000 {
--			opp-hz = /bits/ 64 <250000000>;
--			opp-microvolt = <730000>;
--		};
--
--		opp-500000000 {
--			opp-hz = /bits/ 64 <500000000>;
--			opp-microvolt = <730000>;
--		};
--
--		opp-667000000 {
--			opp-hz = /bits/ 64 <666666666>;
--			opp-microvolt = <750000>;
--		};
--
- 		opp-1000000000 {
- 			opp-hz = /bits/ 64 <1000000000>;
- 			opp-microvolt = <770000>;
-@@ -356,6 +346,33 @@
- 			status = "disabled";
- 		};
- 
-+		spdifin: audio-controller@400 {
-+			compatible = "amlogic,g12a-spdifin",
-+			"amlogic,axg-spdifin";
-+			reg = <0x0 0x400 0x0 0x30>;
-+			#sound-dai-cells = <0>;
-+			sound-name-prefix = "SPDIFIN";
-+			interrupts = <GIC_SPI 151 IRQ_TYPE_EDGE_RISING>;
-+			clocks = <&clkc_audio AUD_CLKID_SPDIFIN>,
-+			<&clkc_audio AUD_CLKID_SPDIFIN_CLK>;
-+			clock-names = "pclk", "refclk";
-+			resets = <&clkc_audio AUD_RESET_SPDIFIN>;
-+			status = "disabled";
-+		};
-+
-+		spdifout: audio-controller@480 {
-+			compatible = "amlogic,g12a-spdifout",
-+			"amlogic,axg-spdifout";
-+			reg = <0x0 0x480 0x0 0x50>;
-+			#sound-dai-cells = <0>;
-+			sound-name-prefix = "SPDIFOUT";
-+			clocks = <&clkc_audio AUD_CLKID_SPDIFOUT>,
-+			<&clkc_audio AUD_CLKID_SPDIFOUT_CLK>;
-+			clock-names = "pclk", "mclk";
-+			resets = <&clkc_audio AUD_RESET_SPDIFOUT>;
-+			status = "disabled";
-+		};
-+
- 		tdmout_a: audio-controller@500 {
- 			compatible = "amlogic,sm1-tdmout";
- 			reg = <0x0 0x500 0x0 0x40>;
