@@ -2,10 +2,10 @@ diff --git a/arch/arm/boot/dts/sun8i-h3-nanopi-neo.dts b/arch/arm/boot/dts/sun8i
 index 561182a9f..ada548028 100644
 --- a/arch/arm/boot/dts/sun8i-h3-nanopi-neo.dts
 +++ b/arch/arm/boot/dts/sun8i-h3-nanopi-neo.dts
-@@ -45,6 +45,42 @@
- / {
- 	model = "FriendlyARM NanoPi NEO";
- 	compatible = "friendlyarm,nanopi-neo", "allwinner,sun8i-h3";
+@@ -49,6 +49,42 @@
+ 	aliases {
+ 		ethernet0 = &emac;
+ 	};
 +
 +	leds {
 +		compatible = "gpio-leds";
@@ -44,4 +44,4 @@ index 561182a9f..ada548028 100644
 +	cpu-supply = <&vdd_cpux>;
  };
  
- &mmc2 {
+ &ehci0 {

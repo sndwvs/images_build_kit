@@ -72,20 +72,10 @@ index 6246d3ef..a2b6e0b2 100644
  &mmc0 {
  	vmmc-supply = <&reg_vcc3v3>;
  	bus-width = <4>;
-@@ -103,12 +162,100 @@
- 	};
+@@ -113,6 +172,73 @@
+ 	status = "okay";
  };
  
-+&mmc2 {
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&mmc2_8bit_pins>;
-+	vmmc-supply = <&reg_vcc3v3>;
-+	bus-width = <8>;
-+	non-removable;
-+	cap-mmc-hw-reset;
-+	status = "okay";
-+};
-+
 +&mmc2_8bit_pins {
 +	/* Increase drive strength for DDR modes */
 +	drive-strength = <40>;
@@ -156,15 +146,10 @@ index 6246d3ef..a2b6e0b2 100644
  &uart0 {
  	pinctrl-names = "default";
  	pinctrl-0 = <&uart0_pa_pins>;
- 	status = "okay";
+@@ -137,6 +263,11 @@
+ 	};
  };
  
-+&uart3 {
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&uart3_pins>, <&uart3_rts_cts_pins>;
-+	status = "okay";
-+};
-+
 +&usb_otg {
 +	dr_mode = "peripheral";
 +	status = "okay";
