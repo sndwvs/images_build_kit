@@ -555,11 +555,12 @@ diff --git a/drivers/soc/rockchip/Makefile b/drivers/soc/rockchip/Makefile
 index afca0a4c4b72..a15c0a395a33 100644
 --- a/drivers/soc/rockchip/Makefile
 +++ b/drivers/soc/rockchip/Makefile
-@@ -4,3 +4,4 @@
- #
+@@ -5,4 +5,5 @@
  obj-$(CONFIG_ROCKCHIP_GRF) += grf.o
+ obj-$(CONFIG_ROCKCHIP_IODOMAIN) += io-domain.o
  obj-$(CONFIG_ROCKCHIP_PM_DOMAINS) += pm_domains.o
 +obj-$(CONFIG_ROCKCHIP_SUSPEND_MODE) += rockchip_pm_config.o
+ obj-$(CONFIG_ROCKCHIP_DTPM) += dtpm.o
 diff --git a/drivers/soc/rockchip/rockchip_pm_config.c b/drivers/soc/rockchip/rockchip_pm_config.c
 new file mode 100644
 index 000000000000..4a3038f22639
