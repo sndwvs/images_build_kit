@@ -3223,11 +3223,10 @@ index da32a6350344..4fb05e8b5a54 100644
  #include <linux/platform_device.h>
  #include <linux/pm.h>
  #include <linux/pm_runtime.h>
-@@ -269,21 +270,6 @@ static const u32 rkvdec_vp9_decoded_fmts[] = {
- };
+@@ -258,21 +258,6 @@
  
  static const struct rkvdec_coded_fmt_desc rkvdec_coded_fmts[] = {
--	{
+ 	{
 -		.fourcc = V4L2_PIX_FMT_H264_SLICE,
 -		.frmsize = {
 -			.min_width = 48,
@@ -3239,40 +3238,17 @@ index da32a6350344..4fb05e8b5a54 100644
 -		},
 -		.ctrls = &rkvdec_h264_ctrls,
 -		.ops = &rkvdec_h264_fmt_ops,
--		.num_decoded_fmts = ARRAY_SIZE(rkvdec_h264_decoded_fmts),
--		.decoded_fmts = rkvdec_h264_decoded_fmts,
+-		.num_decoded_fmts = ARRAY_SIZE(rkvdec_h264_vp9_decoded_fmts),
+-		.decoded_fmts = rkvdec_h264_vp9_decoded_fmts,
 -	},
- 	{
+-	{
  		.fourcc = V4L2_PIX_FMT_HEVC_SLICE,
  		.frmsize = {
-@@ -298,6 +284,23 @@ static const struct rkvdec_coded_fmt_desc rkvdec_coded_fmts[] = {
- 		.ops = &rkvdec_hevc_fmt_ops,
- 		.num_decoded_fmts = ARRAY_SIZE(rkvdec_hevc_decoded_fmts),
- 		.decoded_fmts = rkvdec_hevc_decoded_fmts,
-+		.capability = RKVDEC_CAPABILITY_HEVC,
-+	},
-+	{
-+		.fourcc = V4L2_PIX_FMT_H264_SLICE,
-+		.frmsize = {
-+			.min_width = 48,
-+			.max_width = 4096,
-+			.step_width = 16,
-+			.min_height = 48,
-+			.max_height = 2304,
-+			.step_height = 16,
-+		},
-+		.ctrls = &rkvdec_h264_ctrls,
-+		.ops = &rkvdec_h264_fmt_ops,
-+		.num_decoded_fmts = ARRAY_SIZE(rkvdec_h264_decoded_fmts),
-+		.decoded_fmts = rkvdec_h264_decoded_fmts,
-+		.capability = RKVDEC_CAPABILITY_H264,
- 	},
- 	{
- 		.fourcc = V4L2_PIX_FMT_VP9_FRAME,
-@@ -313,16 +316,31 @@ static const struct rkvdec_coded_fmt_desc rkvdec_coded_fmts[] = {
+ 			.min_width = 64,
+@@ -318,16 +303,31 @@
  		.ops = &rkvdec_vp9_fmt_ops,
- 		.num_decoded_fmts = ARRAY_SIZE(rkvdec_vp9_decoded_fmts),
- 		.decoded_fmts = rkvdec_vp9_decoded_fmts,
+ 		.num_decoded_fmts = ARRAY_SIZE(rkvdec_h264_vp9_decoded_fmts),
+ 		.decoded_fmts = rkvdec_h264_vp9_decoded_fmts,
 -	}
 +		.capability = RKVDEC_CAPABILITY_VP9,
 +	},

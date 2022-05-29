@@ -95,9 +95,11 @@ diff --git a/drivers/media/rc/keymaps/Makefile b/drivers/media/rc/keymaps/Makefi
 index 5b1399af6..ec9ce1206 100644
 --- a/drivers/media/rc/keymaps/Makefile
 +++ b/drivers/media/rc/keymaps/Makefile
-@@ -117,4 +117,5 @@ obj-$(CONFIG_RC_MAP) += rc-adstech-dvb-t-pci.o \
+@@ -133,6 +133,7 @@
+ 			rc-wetek-play2.o \
+ 			rc-winfast.o \
  			rc-winfast-usbii-deluxe.o \
- 			rc-su3000.o \
- 			rc-xbox-dvd.o \
 +			rc-xt-q8l-v10.o \
  			rc-x96max.o \
+ 			rc-xbox-360.o \
+ 			rc-xbox-dvd.o \
