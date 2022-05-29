@@ -3498,3 +3498,13 @@ index e40bd3c858a..6a47ae2078b 100644
  	 * which would have called the encoder cleanup.  Do it manually.
  	 */
  	if (IS_ERR(hdmi->hdmi)) {
+--- a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c	2022-05-29 07:05:28.983505768 +0300
++++ b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c	2022-05-29 06:34:26.936504644 +0300
+@@ -15,6 +15,7 @@
+ #include <drm/drm_of.h>
+ #include <drm/drm_probe_helper.h>
+ #include <drm/drm_simple_kms_helper.h>
++#include <drm/drm_connector.h>
+ 
+ #include "rockchip_drm_drv.h"
+ #include "rockchip_drm_vop.h"
