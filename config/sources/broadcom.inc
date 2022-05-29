@@ -84,11 +84,11 @@ dtoverlay=vc4-kms-v3d,cma-default
 dtoverlay=dwc2
 
 [pi4]
-dtoverlay=vc4-fkms-v3d-pi4,cma-512
+#dtoverlay=vc4-fkms-v3d-pi4,cma-512
 #dtoverlay=vc4-kms-v3d-pi4,cma-512
 
 [cm4]
-dtoverlay=vc4-fkms-v3d-pi4,cma-512
+#dtoverlay=vc4-fkms-v3d-pi4,cma-512
 #dtoverlay=vc4-kms-v3d-pi4,cma-512
 # The USB interface is disabled to save power by default on CM4. Enable it
 # to ease the installation process. For more information see:
