@@ -1,14 +1,14 @@
 --- a/drivers/net/wireless/hflps170/fullmac/bl_main.c	2022-05-29 05:16:22.046853126 +0300
 +++ b/drivers/net/wireless/hflps170/fullmac/bl_main.c	2022-02-12 22:19:54.678249495 +0200
-@@ -14587,7 +14587,7 @@
- +        memcpy(ndev->dev_addr, params->macaddr, ETH_ALEN);
- +    else {
- +        memcpy(ndev->dev_addr, bl_hw->wiphy->perm_addr, ETH_ALEN);
--+        ndev->dev_addr[5] ^= vif_idx;
-++        ndev->dev_addr = ndev->dev_addr[5] ^ vif_idx;
- +    }
- +
- +    if (params) {
+@@ -896,7 +896,7 @@
+         memcpy(ndev->dev_addr, params->macaddr, ETH_ALEN);
+     else {
+         memcpy(ndev->dev_addr, bl_hw->wiphy->perm_addr, ETH_ALEN);
+-        ndev->dev_addr[5] ^= vif_idx;
++        ndev->dev_addr = ndev->dev_addr[5] ^ vif_idx;
+     }
+ 
+     if (params) {
 --- a/drivers/net/wireless/hflps170/fullmac/bl_defs.h	2022-05-30 09:10:20.360783516 +0300
 +++ b/drivers/net/wireless/hflps170/fullmac/bl_defs.h	2022-05-30 09:10:40.404868961 +0300
 @@ -37,6 +38,13 @@
