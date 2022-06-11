@@ -1,10 +1,16 @@
---- a/arch/riscv/dts/sun20i-d1-nezha-u-boot.dtsi	2021-12-11 18:13:30.464180279 +0200
-+++ b/arch/riscv/dts/sun20i-d1-nezha-u-boot.dtsi	2021-12-11 18:14:02.704287141 +0200
-@@ -6,6 +6,6 @@
- 	// FIXME: this is temporary.
- 	memory {
- 		device_type = "memory";
--		reg = <0x40000000 0x20000000>; /* 512 MB */
-+		reg = <0x40000000 0x40000000>; /* 1 GB */
+--- a/arch/riscv/dts/sun20i-d1-nezha.dts	2022-06-11 22:14:53.840128767 +0300
++++ b/arch/riscv/dts/sun20i-d1-nezha.dts	2022-06-11 22:15:40.432239027 +0300
+@@ -28,6 +28,13 @@
+ 		stdout-path = "serial0:115200n8";
  	};
- };
+ 
++	// FIXME: this is temporary.
++	memory {
++		device_type = "memory";
++//		reg = <0x40000000 0x20000000>; /* 512 MB */
++		reg = <0x40000000 0x40000000>; /* 1 GB */
++	};
++
+ 	hdmi_connector: connector {
+ 		compatible = "hdmi-connector";
+ 		type = "a";
