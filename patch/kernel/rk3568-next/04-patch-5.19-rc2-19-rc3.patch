@@ -12640,17 +12640,19 @@ diff --git a/kernel/printk/printk.c b/kernel/printk/printk.c
 index ea3dd55709e72..b095fb5f5f61b 100644
 --- a/kernel/printk/printk.c
 +++ b/kernel/printk/printk.c
-@@ -250,6 +250,9 @@ static atomic_t console_kthreads_active = ATOMIC_INIT(0);
+@@ -250,7 +250,10 @@ static atomic_t console_kthreads_active
  #define console_kthread_printing_exit() \
  	atomic_dec(&console_kthreads_active)
  
+-static bool block_console_kthreads;
++extern bool block_console_kthreads;
++
 +/* Block console kthreads to avoid processing new messages. */
 +bool block_console_kthreads;
-+
+ 
  /*
   * Helper macros to handle lockdep when locking/unlocking console_sem. We use
-  * macros instead of functions so that _RET_IP_ contains useful information.
-@@ -3753,7 +3753,9 @@
+@@ -3750,7 +3753,9 @@ static bool printer_should_wake(struct c
  
  	if (con->blocked ||
  	    console_kthreads_atomically_blocked() ||
