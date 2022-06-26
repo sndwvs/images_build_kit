@@ -11930,21 +11930,6 @@ index 6491fa8fba6d5..15b940ec1eac9 100644
  .macro ANNOTATE_NOENDBR
  .Lhere_\@:
  	.pushsection .discard.noendbr
-diff --git a/include/linux/printk.h b/include/linux/printk.h
-index 10ec29bc01356..f88ec15f83dcc 100644
---- a/include/linux/printk.h
-+++ b/include/linux/printk.h
-@@ -238,6 +238,10 @@
- 	return true;
- }
- 
-+static inline void try_block_console_kthreads(int timeout_ms)
-+{
-+}
-+
- static inline int printk_ratelimit(void)
- {
- 	return 0;
 diff --git a/include/linux/serial_core.h b/include/linux/serial_core.h
 index cbd5070bc87f4..657a0fc68a3fb 100644
 --- a/include/linux/serial_core.h
