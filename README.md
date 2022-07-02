@@ -22,6 +22,7 @@ project site: **[slarm64.org](https://slarm64.org)**
         + [PinePhone](https://wiki.pine64.org/wiki/PinePhone#Specifications)
     * D1 ([XuanTie C906](https://occ.t-head.cn/vendor/cpu/index?id=3817197695983423488))
         + [Nezha](https://linux-sunxi.org/Allwinner_Nezha)
+        + [Lichee RV Dock](https://linux-sunxi.org/Sipeed_Lichee_RV)
 * Rockchip
     * RK3288
         + [Firefly-RK3288](http://en.t-firefly.com/product/rk3288.html)
