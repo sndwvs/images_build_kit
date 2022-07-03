@@ -20,17 +20,14 @@ diff --git a/arch/riscv/dts/Makefile b/arch/riscv/dts/Makefile
 index 524ce14169cd..27c4e2d64762 100644
 --- a/arch/riscv/dts/Makefile
 +++ b/arch/riscv/dts/Makefile
-@@ -7,7 +7,10 @@ dtb-$(CONFIG_TARGET_OPENPITON_RISCV64) += openpiton-riscv64.dtb
- dtb-$(CONFIG_TARGET_SIFIVE_UNLEASHED) += hifive-unleashed-a00.dtb
- dtb-$(CONFIG_TARGET_SIFIVE_UNMATCHED) += hifive-unmatched-a00.dtb
- dtb-$(CONFIG_TARGET_SIPEED_MAIX) += k210-maix-bit.dtb
--dtb-$(CONFIG_TARGET_SUNXI) += sun20i-d1-nezha.dtb
-+dtb-$(CONFIG_TARGET_SUNXI) += \
-+	sun20i-d1-lichee-rv.dtb \
-+	sun20i-d1-lichee-rv-dock.dtb \
-+	sun20i-d1-nezha.dtb
+@@ -11,6 +11,8 @@ dtb-$(CONFIG_TARGET_SUNXI) += sun20i-d1-
+ dtb-$(CONFIG_TARGET_SUNXI) += sun20i-d1-nezha-512m.dtb
+ dtb-$(CONFIG_TARGET_SUNXI) += sun20i-d1-nezha-1g.dtb
+ dtb-$(CONFIG_TARGET_SUNXI) += sun20i-d1-nezha-2g.dtb
++dtb-$(CONFIG_TARGET_SUNXI) += sun20i-d1-lichee-rv.dtb
++dtb-$(CONFIG_TARGET_SUNXI) += sun20i-d1-lichee-rv-dock.dtb
  
- include $(srctree)/scripts/Makefile.dts
+ targets += $(dtb-y)
  
 diff --git a/arch/riscv/dts/sun20i-d1-lichee-rv-dock.dts b/arch/riscv/dts/sun20i-d1-lichee-rv-dock.dts
 new file mode 100644
