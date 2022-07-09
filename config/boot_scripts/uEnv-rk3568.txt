@@ -1,2 +1,1 @@
-verbosity=4
-console=both
+uEnv-rk3588.txt
