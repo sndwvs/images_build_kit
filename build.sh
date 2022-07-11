@@ -72,7 +72,7 @@ if [[ -z $DISTR ]]; then
     # Duplicate file descriptor 1 on descriptor 3
     exec 3>&1
     while true; do
-        DISTR=$(dialog --title "board $BOARD_NAME" \
+        DISTR=$(dialog --title " build for board ${BOARD_NAME/_/-} " \
                     --radiolist "select distribution" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
                     "${DISTRS[@]}" \
         2>&1 1>&3)
@@ -95,7 +95,7 @@ if [[ $NO_MENU == yes ]]; then
     [ ! -z ${KERNEL_SOURCES##*:} ] && kernel_sources_options+=("${KERNEL_SOURCES##*:}" "mainline kernel source" "off")
     while true; do
         # kernel source
-        KERNEL_SOURCE=$(dialog --title "build for $BOARD_NAME" \
+        KERNEL_SOURCE=$(dialog --title " build kernel for ${BOARD_NAME/_/-} " \
                 --radiolist "select kernel source" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
                 "${kernel_sources_options[@]}" \
         2>&1 1>&3)
@@ -119,7 +119,7 @@ if [[ $NO_MENU == yes ]]; then
     # Duplicate file descriptor 1 on descriptor 3
     exec 3>&1
     while true; do
-        result=$(dialog --title "build $KERNEL_SOURCE for $BOARD_NAME" \
+        result=$(dialog --title " build $KERNEL_SOURCE for ${BOARD_NAME/_/-} " \
                --checklist "select build options" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
                "${options[@]}" \
         2>&1 1>&3)
@@ -154,10 +154,11 @@ if [[ $(uname -m) == "x86_64" ]]; then
     # Duplicate file descriptor 1 on descriptor 3
     exec 3>&1
     while true; do
-        result=$(dialog --title "build $KERNEL_SOURCE for $BOARD_NAME" \
+        result=$(dialog --title " build $KERNEL_SOURCE for ${BOARD_NAME/_/-} " \
                 --radiolist "select build architecture" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
                 "arm" "ARM-v7 32-bit architecture" "off" \
                 "aarch64" "ARM-v8 64-bit architecture" "off" \
+                "riscv64" "RISC-V 64-bit architecture" "off" \
         2>&1 1>&3)
         if [[ ! -z $result ]]; then break; fi
     done
@@ -170,6 +171,8 @@ if [[ $(uname -m) == "x86_64" ]]; then
         if [ "$arg" == "arm" ]; then
                 ARCH=$arg
         elif [ "$arg" == "aarch64" ]; then
+                ARCH=$arg
+        elif [ "$arg" == "riscv64" ]; then
                 ARCH=$arg
         fi
     done
