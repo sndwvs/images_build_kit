@@ -51,20 +51,19 @@ if [[ -z $BOARD_NAME ]]; then
     exec 3>&-
 fi
 
-
 #---------------------------------------------
 # get linux distributions
 #---------------------------------------------
 for _distr in $(grep -oP "(?<=DISTRS=[\"\']).*(?=[\'\"]$)" $CWD/config/environment/environment.conf); do
     _selected="off"
-    if [[ ${_distr} == slarm64 ]] && [[ ${ARCH} == aarch64 || -z ${ARCH} ]]; then
-        _selected="on"
-    elif [[ ${_distr} == slarm64 && ${ARCH} == riscv64 ]]; then
-        _selected="on"
-    elif [[ ${_distr} == slackware* && ${ARCH} == arm ]]; then
-        _selected="on"
+    _distribution_architecture=$(grep -oP "(?<=DISTRIBUTION_ARCHITECTURE=[\"\']).*(?=[\'\"]$)" $CWD/config/boards/${BOARD_NAME}/${BOARD_NAME}.conf)
+    if [[ ${_distr} == slarm64 && ${_distribution_architecture} =~ (aarch|riscv)64 ]]; then
+        DISTRS+=(${_distr} "linux" ${_selected})
+    elif [[ ${_distr} == slackwarearm* && ${_distribution_architecture} =~ arm ]]; then
+        DISTRS+=(${_distr} "linux" ${_selected})
+    elif [[ ${_distr} == crux* && ${_distribution_architecture} =~ (arm|aarch64) ]]; then
+        DISTRS+=(${_distr} "linux" ${_selected})
     fi
-    DISTRS+=(${_distr} "linux" ${_selected})
 done
 if [[ -z $DISTR ]]; then
     # no menu
