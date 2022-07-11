@@ -15,10 +15,22 @@ TTY_Y=$(($(stty size | cut -f1 -d " ")-10)) # determine terminal height
 
 
 #---------------------------------------------
+# board configuration
+#---------------------------------------------
+source $CWD/overall.sh || exit 1
+
+#---------------------------------------------
+# set global architecture
+#---------------------------------------------
+set_architecture
+
+#---------------------------------------------
 # get boards
 #---------------------------------------------
 for board in $CWD/config/boards/*/*.conf ;do
-    BOARDS+=( $(echo $board | rev | cut -d '/' -f1 | cut -d '.' -f2 | rev) "$(sed -n '/^#/{3p}' $board | sed 's:#\s::')" "off")
+    if [[ $(grep -oP "(?<=DISTRIBUTION_ARCHITECTURE=[\"\']).*(?=[\'\"]$)" $board) =~ $ARCH ]]; then
+        BOARDS+=( $(echo $board | rev | cut -d '/' -f1 | cut -d '.' -f2 | rev) "$(sed -n '/^#/{3p}' $board | sed 's:#\s::')" "off")
+    fi
 done
 
 if [[ -z $BOARD_NAME ]]; then
@@ -28,7 +40,7 @@ if [[ -z $BOARD_NAME ]]; then
     # Duplicate file descriptor 1 on descriptor 3
     exec 3>&1
     while true; do
-        BOARD_NAME=$(dialog --title "build rootfs" \
+        BOARD_NAME=$(dialog --title " build a distribution image of $ARCH architecture " \
                     --radiolist "selected your board" $TTY_Y $TTY_X $(($TTY_Y - 8)) \
                     "${BOARDS[@]}" \
         2>&1 1>&3)

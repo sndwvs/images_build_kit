@@ -22,3 +22,4 @@ boards
 | MODULES                      | forced loading of kernel modules |
 | MODULES_BLACKLIST            | prohibiting loading kernel modules |
 | OVERLAYS                     | list of dtbo files |
+| DISTRIBUTION_ARCHITECTURE    | list of distribution architectures arm:aarch64:riscv64 or arm: or :riscv64 |

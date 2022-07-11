@@ -8,6 +8,29 @@ fi
 
 
 #---------------------------------------------
+# set MARCH - host, KARCH - kernel, ARCH - distribution architecture
+#---------------------------------------------
+set_architecture() {
+    MARCH=$( uname -m )
+    case "$MARCH" in
+        armv7hl) export MARCH=$MARCH ;;
+        arm*)    export MARCH=arm ;;
+        *)       export MARCH=$MARCH ;;
+    esac
+
+    [[ -z $ARCH ]] && export ARCH=${ARCH:-$MARCH}
+
+    if [[ $ARCH == arm* ]]; then
+        KARCH=${KARCH:-$ARCH}
+    elif [[ $ARCH == aarch64 ]]; then
+        KARCH="arm64"
+    elif [[ $ARCH == riscv64 ]]; then
+        KARCH="riscv"
+    fi
+    export KARCH
+}
+
+#---------------------------------------------
 # display message
 #---------------------------------------------
 message() {
