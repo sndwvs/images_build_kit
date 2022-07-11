@@ -90,7 +90,7 @@ setting_debug() {
 setting_motd() {
     message "" "setting" "motd message"
     # http://patorjk.com/ font: rectangles
-    [[ -f "$CWD/config/enviroment/motd.${DISTR}" ]] && install -m644 -D "$CWD/config/enviroment/motd.${DISTR}" "$SOURCE/$ROOTFS/etc/motd"
+    [[ -f "$CWD/config/environment/motd.${DISTR}" ]] && install -m644 -D "$CWD/config/environment/motd.${DISTR}" "$SOURCE/$ROOTFS/etc/motd"
     [[ -f "$CWD/config/boards/$BOARD_NAME/motd.board" ]] && cat "$CWD/config/boards/$BOARD_NAME/motd.board" >> "$SOURCE/$ROOTFS/etc/motd"
     return 0
 }
