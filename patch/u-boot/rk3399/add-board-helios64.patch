@@ -2228,5 +2228,21 @@ index 00000000..6fca9a6b
 +#endif
 +
 +#endif
+--- a/drivers/scsi/Kconfig	2022-04-08 08:33:46.385898882 +0300
++++ a/drivers/scsi/Kconfig	2022-07-12 19:51:06.403344174 +0300
+@@ -45,4 +45,13 @@
+ 
+ 	  This is deprecated and is not needed when CONFIG_DM_SCSI is enabled.
+ 
++config SYS_SCSI_MAX_DEVICE
++	int "Maximum supporedt SCSI DEVICE"
++	default 1
++	help
++	  Sets the maximum number of SCSI DIVICEs to scan when looking for devices.
++	  IDs from 0 to (this value - 1) are scanned.
++
++	  This is deprecated and is not needed when BLK is enabled.
++
+ endif
 --
 Created with Armbian build tools https://github.com/armbian/build
