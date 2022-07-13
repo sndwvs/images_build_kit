@@ -1,0 +1,121 @@
+--- a/drivers/video/drm/dw_hdmi.c	2022-03-27 08:38:05.920009047 +0300
++++ a/drivers/video/drm/dw_hdmi.c	2022-07-13 20:04:17.757620982 +0300
+@@ -202,6 +202,7 @@ struct dw_hdmi {
+ 	u8 (*read)(struct dw_hdmi *hdmi, int offset);
+ 
+ 	bool hdcp1x_enable;
++	bool output_bus_format_rgb;
+ };
+ 
+ static void dw_hdmi_writel(struct dw_hdmi *hdmi, u8 val, int offset)
+@@ -1887,7 +1888,10 @@ void dw_hdmi_set_sample_rate(struct dw_h
+ 
+ static int dw_hdmi_hdcp_load_key(struct dw_hdmi *hdmi)
+ {
+-	int i, j, ret, val;
++	int i, j, val;
++#if defined(CONFIG_ROCKCHIP_VENDOR_PARTITION)
++	int ret;
++#endif
+ 	struct hdcp_keys *hdcp_keys;
+ 
+ 	val = sizeof(*hdcp_keys);
+@@ -1897,12 +1901,14 @@ static int dw_hdmi_hdcp_load_key(struct
+ 
+ 	memset(hdcp_keys, 0, val);
+ 
++#if defined(CONFIG_ROCKCHIP_VENDOR_PARTITION)
+ 	ret = vendor_storage_read(HDMI_HDCP1X_ID, hdcp_keys, val);
+ 	if (ret < val) {
+ 		printf("HDCP: read size %d\n", ret);
+ 		free(hdcp_keys);
+ 		return -EINVAL;
+ 	}
++#endif
+ 
+ 	if (hdcp_keys->KSV[0] == 0x00 &&
+ 	    hdcp_keys->KSV[1] == 0x00 &&
+@@ -2309,6 +2315,12 @@ int rockchip_dw_hdmi_init(struct display
+ 	else
+ 		hdmi->hdcp1x_enable = false;
+ 
++	if (ofnode_read_bool(hdmi_node, "force_output_bus_format_RGB") ||
++	    ofnode_read_bool(hdmi_node, "unsupported-yuv-input"))
++		hdmi->output_bus_format_rgb = true;
++	else
++		hdmi->output_bus_format_rgb = false;
++
+ 	ddc_node = of_parse_phandle(ofnode_to_np(hdmi_node), "ddc-i2c-bus", 0);
+ 	if (ddc_node) {
+ 		uclass_get_device_by_ofnode(UCLASS_I2C, np_to_ofnode(ddc_node),
+@@ -2460,7 +2472,7 @@ int rockchip_dw_hdmi_get_timing(struct d
+ 
+ 	drm_mode_sort(&hdmi->edid_data);
+ 	drm_rk_selete_output(&hdmi->edid_data, conn_state, &bus_format,
+-			     overscan, hdmi->dev_type);
++			     overscan, hdmi->dev_type, hdmi->output_bus_format_rgb);
+ 
+ 	*mode = *hdmi->edid_data.preferred_mode;
+ 	hdmi->vic = drm_match_cea_mode(mode);
+--- a/drivers/video/drm/dw_hdmi.h	2022-03-27 08:38:05.924009054 +0300
++++ a/drivers/video/drm/dw_hdmi.h	2022-07-13 20:04:17.757620982 +0300
+@@ -1408,7 +1408,8 @@ void drm_rk_selete_output(struct hdmi_ed
+ 			  struct connector_state *conn_state,
+ 			  unsigned int *bus_format,
+ 			  struct overscan *overscan,
+-			  enum dw_hdmi_devtype dev_type);
++			  enum dw_hdmi_devtype dev_type,
++			  bool output_bus_format_rgb);
+ void inno_dw_hdmi_set_domain(void *grf, int status);
+ void dw_hdmi_set_iomux(void *grf, int dev_type);
+ 
+--- a/drivers/video/drm/rockchip_dw_hdmi.c	2022-03-27 08:38:05.952009105 +0300
++++ b/drivers/video/drm/rockchip_dw_hdmi.c	2022-07-13 20:04:17.761620997 +0300
+@@ -188,7 +188,8 @@ static const struct dw_hdmi_phy_config r
+ 
+ static unsigned int drm_rk_select_color(struct hdmi_edid_data *edid_data,
+ 					struct base_screen_info *screen_info,
+-					enum dw_hdmi_devtype dev_type)
++					enum dw_hdmi_devtype dev_type,
++					bool output_bus_format_rgb)
+ {
+ 	struct drm_display_info *info = &edid_data->display_info;
+ 	struct drm_display_mode *mode = edid_data->preferred_mode;
+@@ -237,6 +238,9 @@ static unsigned int drm_rk_select_color(
+ 		break;
+ 	}
+ 
++	if (output_bus_format_rgb)
++		color_format = DRM_HDMI_OUTPUT_DEFAULT_RGB;
++
+ 	if (color_format == DRM_HDMI_OUTPUT_DEFAULT_RGB &&
+ 	    info->edid_hdmi_dc_modes & DRM_EDID_HDMI_DC_30)
+ 		support_dc = true;
+@@ -326,7 +330,8 @@ void drm_rk_selete_output(struct hdmi_ed
+ 			  struct connector_state *conn_state,
+ 			  unsigned int *bus_format,
+ 			  struct overscan *overscan,
+-			  enum dw_hdmi_devtype dev_type)
++			  enum dw_hdmi_devtype dev_type,
++			  bool output_bus_format_rgb)
+ {
+ 	int ret, i, screen_size;
+ 	struct base_disp_info base_parameter;
+@@ -347,7 +352,7 @@ void drm_rk_selete_output(struct hdmi_ed
+ 	overscan->top_margin = max_scan;
+ 	overscan->bottom_margin = max_scan;
+ 
+-	if (dev_type == RK3288_HDMI)
++	if (dev_type == RK3288_HDMI || output_bus_format_rgb)
+ 		*bus_format = MEDIA_BUS_FMT_RGB888_1X24;
+ 	else
+ 		*bus_format = MEDIA_BUS_FMT_YUV8_1X24;
+@@ -446,7 +451,7 @@ null_basep:
+ 	drm_rk_select_mode(edid_data, screen_info);
+ 
+ 	*bus_format = drm_rk_select_color(edid_data, screen_info,
+-					  dev_type);
++					  dev_type, output_bus_format_rgb);
+ }
+ 
+ void inno_dw_hdmi_set_domain(void *grf, int status)
