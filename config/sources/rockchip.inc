@@ -1,7 +1,7 @@
 
 INITRD_MODULES="tun:btrfs:xfs"
 
-ATF_BRANCH="master:tag:v2.6"
+ATF_BRANCH="master:tag:v2.7.0"
 
 RKBIN_SOURCE="https://github.com/rockchip-linux/rkbin.git"
 RKBIN_DIR="rkbin"
