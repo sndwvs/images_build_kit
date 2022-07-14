@@ -1,0 +1,1124 @@
+--- a/arch/arm64/boot/dts/rockchip/overlay/Makefile	2022-07-14 20:30:56.206283616 +0300
++++ b/arch/arm64/boot/dts/rockchip/overlay/Makefile	2022-07-14 20:35:14.667405730 +0300
+@@ -53,7 +53,27 @@ dtbo-$(CONFIG_ARCH_ROCKCHIP) += \
+ 	rock-3ab-rpi-camera-v1p3-ov5647.dtbo \
+ 	rock-3b-disable-hdmicec.dtbo \
+ 	rock-3b-hdmi-and-sharp-lq133t1jw01-edp-lcd.dtbo \
+-	rock-3b-radxa-10p1inch-display.dtbo
++	rock-3b-radxa-10p1inch-display.dtbo \
++	odroid-m1-can0.dtbo \
++	odroid-m1-display_vu8m.dtbo \
++	odroid-m1-i2c0.dtbo \
++	odroid-m1-imx219.dtbo \
++	odroid-m1-mcp2515.dtbo \
++	odroid-m1-ov5647.dtbo \
++	odroid-m1-pwm2.dtbo \
++	odroid-m1-rknpu.dtbo \
++	odroid-m1-ttyfiq0_115200.dtbo \
++	odroid-m1-uart0.dtbo \
++	odroid-m1-dht11.dtbo \
++	odroid-m1-hktft32.dtbo \
++	odroid-m1-i2c1.dtbo \
++	odroid-m1-imx477.dtbo \
++	odroid-m1-onewire.dtbo \
++	odroid-m1-pwm1.dtbo \
++	odroid-m1-pwm9.dtbo \
++	odroid-m1-spi0.dtbo \
++	odroid-m1-uart0-with-ctsrts.dtbo \
++	odroid-m1-uart1.dtbo
+ 
+ scr-$(CONFIG_ARCH_ROCKCHIP) += \
+ 	rockchip-fixup.scr
+diff -Naurp a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-can0.dts b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-can0.dts
+--- a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-can0.dts	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-can0.dts	2022-07-14 20:26:07.489023751 +0300
+@@ -0,0 +1,13 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		//can@fe570000
++		target = <&can0>;
++
++		__overlay__ {
++			status = "okay";
++		};
++	};
++};
+diff -Naurp a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-dht11.dts b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-dht11.dts
+--- a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-dht11.dts	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-dht11.dts	2022-07-14 20:26:07.501023803 +0300
+@@ -0,0 +1,19 @@
++/dts-v1/;
++/plugin/;
++
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/pinctrl/rockchip.h>
++
++/ {
++	fragment@0 {
++		target-path = "/";
++
++		__overlay__ {
++				huminity_sensor {
++					compatible = "dht11";
++					gpios = <&gpio3 RK_PB2 GPIO_ACTIVE_HIGH>;
++					status = "okay";
++			};
++		};
++	};
++};
+diff -Naurp a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-display_vu8m.dts b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-display_vu8m.dts
+--- a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-display_vu8m.dts	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-display_vu8m.dts	2022-07-14 20:26:07.513023856 +0300
+@@ -0,0 +1,184 @@
++/dts-v1/;
++/plugin/;
++
++#include "../rk3568-pinctrl.dtsi"
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/interrupt-controller/arm-gic.h>
++#include <dt-bindings/interrupt-controller/irq.h>
++#include <dt-bindings/pinctrl/rockchip.h>
++#include <dt-bindings/display/drm_mipi_dsi.h>
++
++/{
++	fragment@0 {
++		target = <&dsi0>;
++		__overlay__ {
++			status = "okay";
++                        #address-cells = <1>;
++                        #size-cells = <0>;
++			dsi0_panel: panel@0 {
++				status = "okay";
++				compatible = "odroid,hj080be31ia1";
++				reg = <0>;
++				backlight = <&backlight>;
++				power-supply = <&lcd_pwren>;
++				reset-gpios = <&gpio2 RK_PC6 GPIO_ACTIVE_LOW>;
++				dsi,flags = <(MIPI_DSI_MODE_VIDEO | MIPI_DSI_MODE_VIDEO_BURST |
++						MIPI_DSI_MODE_EOT_PACKET)>;
++				dsi,format = <MIPI_DSI_FMT_RGB888>;
++
++				ports {
++					#address-cells = <1>;
++					#size-cells = <0>;
++
++					port@0 {
++						reg = <0>;
++						panel_in_dsi: endpoint {
++							remote-endpoint = <&dsi_out_panel>;
++						};
++					};
++				};
++			};
++			ports {
++				#address-cells = <1>;
++				#size-cells = <0>;
++
++				port@1 {
++					reg = <1>;
++					dsi_out_panel: endpoint {
++						remote-endpoint = <&panel_in_dsi>;
++					};
++				};
++			};
++		};
++	};
++	fragment@1 {
++		target = <&pwm4>;
++		__overlay__ {
++			status = "okay";
++		};
++	};
++	fragment@2 {
++		target-path = "/";
++		__overlay__ {
++			lcd_pwren: lcd-pwren {
++				compatible = "regulator-fixed";
++				regulator-name = "lcd_pwren";
++				regulator-boot-on;
++				enable-active-high;
++				gpio = <&gpio0 RK_PC7 GPIO_ACTIVE_HIGH>;
++				vin-supply = <&vcc3v3_sys>;
++			};
++		};
++	};
++	fragment@3 {
++		target-path = "/";
++		__overlay__ {
++			backlight: backlight {
++				compatible = "pwm-backlight";
++				pwms = <&pwm4 0 25000 0>;
++				brightness-levels = <
++					0  20  20  21  21  22  22  23
++					23  24  24  25  25  26  26  27
++					27  28  28  29  29  30  30  31
++					31  32  32  33  33  34  34  35
++					35  36  36  37  37  38  38  39
++					40  41  42  43  44  45  46  47
++					48  49  50  51  52  53  54  55
++					56  57  58  59  60  61  62  63
++					64  65  66  67  68  69  70  71
++					72  73  74  75  76  77  78  79
++					80  81  82  83  84  85  86  87
++					88  89  90  91  92  93  94  95
++					96  97  98  99 100 101 102 103
++					104 105 106 107 108 109 110 111
++					112 113 114 115 116 117 118 119
++					120 121 122 123 124 125 126 127
++					128 129 130 131 132 133 134 135
++					136 137 138 139 140 141 142 143
++					144 145 146 147 148 149 150 151
++					152 153 154 155 156 157 158 159
++					160 161 162 163 164 165 166 167
++					168 169 170 171 172 173 174 175
++					176 177 178 179 180 181 182 183
++					184 185 186 187 188 189 190 191
++					192 193 194 195 196 197 198 199
++					200 201 202 203 204 205 206 207
++					208 209 210 211 212 213 214 215
++					216 217 218 219 220 221 222 223
++					224 225 226 227 228 229 230 231
++					232 233 234 235 236 237 238 239
++					240 241 242 243 244 245 246 247
++					248 249 250 251 252 253 254 255
++					>;
++				default-brightness-level = <200>;
++			};
++		};
++	};
++
++	fragment@4 {
++		target = <&i2c4>;
++		__overlay__ {
++			status = "okay";
++			clock-frequency = <400000>;
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			touch: touch@5d {
++				compatible = "goodix,gt911";
++				reg = <0x5d>;
++
++				pinctrl-names = "default";
++				pinctrl-0 = <&tp_gpio>;
++
++				interrupt-parent = <&gpio0>;
++				interrupts = <RK_PC4 IRQ_TYPE_LEVEL_LOW>;
++
++				irq-gpios = <&gpio0 RK_PC4 IRQ_TYPE_LEVEL_LOW>;
++				reset-gpios = <&gpio4 RK_PB0 GPIO_ACTIVE_LOW>;
++			};
++		};
++	};
++	fragment@5 {
++		target = <&pinctrl>;
++		__overlay__ {
++			tp {
++				tp_gpio: tp-gpio {
++					rockchip,pins =
++						<4 RK_PB0 RK_FUNC_GPIO &pcfg_pull_up>,
++						<0 RK_PC4 RK_FUNC_GPIO &pcfg_pull_up>;
++				};
++			};
++		};
++	};
++	fragment@6 {
++		target = <&dsi0_in_vp0>;
++		__overlay__ {
++			status = "disabled";
++		};
++	};
++	fragment@7 {
++		target = <&dsi0_in_vp1>;
++		__overlay__ {
++			status = "okay";
++		};
++	};
++	fragment@8 {
++		target = <&route_dsi0>;
++		__overlay__ {
++			status = "okay";
++			connect = <&vp1_out_dsi0>;
++		};
++	};
++	fragment@9 {
++		target = <&vop>;
++		__overlay__ {
++			support-multi-area;
++		};
++	};
++	fragment@10 {
++		target = <&video_phy0>;
++		__overlay__ {
++			status = "okay";
++		};
++	};
++};
+diff -Naurp a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-hktft32.dts b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-hktft32.dts
+--- a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-hktft32.dts	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-hktft32.dts	2022-07-14 20:26:07.525023908 +0300
+@@ -0,0 +1,63 @@
++/dts-v1/;
++/plugin/;
++
++#include "../rk3568-pinctrl.dtsi"
++#include <dt-bindings/gpio/gpio.h>
++
++/{
++	fragment@0 {
++		target = <&spi0>;
++
++		__overlay__ {
++			status = "okay";
++
++			pinctrl-0 = <&spi0m1_pins>;
++			pinctrl-1 = <&spi0m1_pins_hs>;
++
++			num_chipselect = <2>;
++			cs-gpios = <&gpio2 RK_PD2 GPIO_ACTIVE_LOW>,
++			           <&gpio3 RK_PD2 GPIO_ACTIVE_LOW>;
++
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			hktft32: hktft32@0 {
++				status = "okay";
++				compatible = "odroid,hktft32";
++				reg = <0>;
++				spi-max-frequency = <40000000>;
++				rotate = <90>;
++				reset-gpios = <&gpio0 RK_PC1 GPIO_ACTIVE_LOW>;
++				dc-gpios = <&gpio3 RK_PB2 GPIO_ACTIVE_LOW>;
++				pinctrl-names = "hktft32";
++				pinctrl-0 = <&hktft32_pins>;
++				hktft32_pins: hktft32-pins {
++					rockchip,pins = <0 RK_PC1 0 &pcfg_pull_none>,
++						<3 RK_PB2 0 &pcfg_pull_none>;
++				};
++			};
++
++			ads7846: ads7846@1 {
++				status = "okay";
++				compatible = "ti,ads7846";
++
++				spi-max-frequency = <2000000>;
++				reg = <1>;
++
++				interrupt-parent = <&gpio0>;
++				interrupts = <RK_PC0 0>;
++				pendown-gpio = <&gpio0 RK_PC0 GPIO_ACTIVE_HIGH>;
++
++				ti,swap-xy = <1>;
++				ti,x-min = /bits/ 16 <0>;
++				ti,x-max = /bits/ 16 <8000>;
++				ti,y-min = /bits/ 16 <0>;
++				ti,y-max = /bits/ 16 <4800>;
++				ti,x-plate-ohms = /bits/ 16 <40>;
++				ti,pressure-max = /bits/ 16 <255>;
++
++				linux,wakeup;
++			};
++		};
++	};
++};
+diff -Naurp a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-i2c0.dts b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-i2c0.dts
+--- a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-i2c0.dts	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-i2c0.dts	2022-07-14 20:26:07.537023961 +0300
+@@ -0,0 +1,14 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		// i2c3 aliased with i2c0.
++		// This activates i2c3 but it will be named as i2c0 on the userspace.
++		target = <&i2c3>;
++
++		__overlay__ {
++			status = "okay";
++		};
++	};
++};
+diff -Naurp a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-i2c1.dts b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-i2c1.dts
+--- a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-i2c1.dts	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-i2c1.dts	2022-07-14 20:26:07.549024013 +0300
+@@ -0,0 +1,12 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target = <&i2c1>;
++
++		__overlay__ {
++			status = "okay";
++		};
++	};
++};
+\ No newline at end of file
+diff -Naurp a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-imx219.dts b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-imx219.dts
+--- a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-imx219.dts	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-imx219.dts	2022-07-14 20:26:07.557024048 +0300
+@@ -0,0 +1,149 @@
++/dts-v1/;
++/plugin/;
++
++#include <dt-bindings/clock/rk3568-cru.h>
++#include <dt-bindings/power/rk3568-power.h>
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/pinctrl/rockchip.h>
++#include "../rk3568-pinctrl.dtsi"
++
++/ {
++	fragment@0 {
++		target = <&csi2_dphy_hw>;
++
++		__overlay__ {
++			status = "okay";
++		};
++	};
++
++	fragment@1 {
++		target = <&csi2_dphy0>;
++
++		__overlay__ {
++			status = "okay";
++
++			ports {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				port@0 {
++					reg = <0>;
++					#address-cells = <1>;
++					#size-cells = <0>;
++
++					mipi_in_ucam2: endpoint@3 {
++						reg = <3>;
++						remote-endpoint = <&imx219_out>;
++						data-lanes = <1 2>;
++					};
++				};
++				port@1 {
++					reg = <1>;
++					#address-cells = <1>;
++					#size-cells = <0>;
++
++					csidphy_out: endpoint@0 {
++						reg = <0>;
++						remote-endpoint = <&isp0_in>;
++					};
++				};
++			};
++		};
++	};
++
++	fragment@2 {
++		target = <&rkisp>;
++
++		__overlay__ {
++			status = "okay";
++		};
++	};
++
++	fragment@3 {
++		target = <&rkisp_mmu>;
++
++		__overlay__ {
++			status = "okay";
++		};
++	};
++
++	fragment@4 {
++		target = <&rkisp_vir0>;
++
++		__overlay__ {
++			status = "okay";
++
++			port {
++				#address-cells = <1>;
++				#size-cells = <0>;
++
++				isp0_in: endpoint@0 {
++					reg = <0>;
++					remote-endpoint = <&csidphy_out>;
++				};
++			};
++		};
++	};
++
++	fragment@5 {
++		target = <&pinctrl>;
++
++		__overlay__ {
++			cam_pins {
++				cam_pwr: cam-pwr {
++					rockchip,pins = <4 RK_PA5 RK_FUNC_GPIO &pcfg_pull_none>;
++				};
++			};
++		};
++	};
++
++	fragment@6 {
++		// i2c2, i2c@fe5b0000
++		target = <&i2c2>;
++
++		__overlay__ {
++			status = "okay";
++
++			imx219: imx219@10 {
++				status = "okay";
++				compatible = "sony,imx219";
++				reg = <0x10>;
++				clocks = <&pmucru CLK_WIFI>;
++				clock-names = "xvclk";
++				power-domains = <&power RK3568_PD_VI>;
++				pinctrl-names = "default";
++
++				rockchip,camera-module-index = <0>;
++				rockchip,camera-module-facing = "back";
++				rockchip,camera-module-name = "TongJu";
++				rockchip,camera-module-lens-name = "CHT842-MD";
++
++				port {
++					imx219_out: endpoint {
++						remote-endpoint = <&mipi_in_ucam2>;
++						data-lanes = <1 2>;
++					};
++				};
++			};
++		};
++	};
++
++	fragment@7 {
++		target-path = "/";
++
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		__overlay__ {
++			vcc_cam: vcc-camera {
++				compatible = "regulator-fixed";
++				regulator-name = "vcc_cam";
++				pinctrl-names = "default";
++				pinctrl-0 = <&cam_pwr>;
++				enable-active-high;
++				gpio = <&gpio4 RK_PA5 GPIO_ACTIVE_HIGH>;
++				regulator-always-on;
++				regulator-boot-on;
++			};
++		};
++	};
++};
+diff -Naurp a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-imx477.dts b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-imx477.dts
+--- a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-imx477.dts	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-imx477.dts	2022-07-14 20:26:07.569024101 +0300
+@@ -0,0 +1,173 @@
++/dts-v1/;
++/plugin/;
++
++#include <dt-bindings/clock/rk3568-cru.h>
++#include <dt-bindings/power/rk3568-power.h>
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/pinctrl/rockchip.h>
++#include "../rk3568-pinctrl.dtsi"
++
++/ {
++	fragment@0 {
++		target = <&csi2_dphy_hw>;
++
++		__overlay__ {
++			status = "okay";
++		};
++	};
++
++	fragment@1 {
++		target = <&csi2_dphy0>;
++
++		__overlay__ {
++			status = "okay";
++
++			ports {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				port@0 {
++					reg = <0>;
++					#address-cells = <1>;
++					#size-cells = <0>;
++
++					mipi_in_ucam2: endpoint@3 {
++						reg = <3>;
++						remote-endpoint = <&imx477_out>;
++						data-lanes = <1 2>;
++						clock-lanes = <0>;
++						clock-noncontinuous;
++					};
++				};
++				port@1 {
++					reg = <1>;
++					#address-cells = <1>;
++					#size-cells = <0>;
++
++					csidphy_out: endpoint@0 {
++						reg = <0>;
++						remote-endpoint = <&isp0_in>;
++					};
++				};
++			};
++		};
++	};
++
++	fragment@2 {
++		target = <&rkisp>;
++
++		__overlay__ {
++			status = "okay";
++		};
++	};
++
++	fragment@3 {
++		target = <&rkisp_mmu>;
++
++		__overlay__ {
++			status = "okay";
++		};
++	};
++
++	fragment@4 {
++		target = <&rkisp_vir0>;
++
++		__overlay__ {
++			status = "okay";
++
++			port {
++				#address-cells = <1>;
++				#size-cells = <0>;
++
++				isp0_in: endpoint@0 {
++					reg = <0>;
++					remote-endpoint = <&csidphy_out>;
++				};
++			};
++		};
++	};
++
++	fragment@5 {
++		target = <&pinctrl>;
++
++		__overlay__ {
++			cam_pins {
++				cam_pwr: cam-pwr {
++					rockchip,pins = <4 RK_PA5 RK_FUNC_GPIO &pcfg_pull_none>;
++				};
++			};
++		};
++	};
++
++	fragment@6 {
++		// i2c2, i2c@fe5b0000
++		target = <&i2c2>;
++
++		__overlay__ {
++			status = "okay";
++
++			imx477: imx477@1a {
++				status = "okay";
++				compatible = "sony,imx477";
++				reg = <0x1a>;
++				clocks = <&pmucru CLK_WIFI>;
++				clock-names = "xclk";
++				power-domains = <&power RK3568_PD_VI>;
++				pinctrl-names = "default";
++
++				VANA-supply = <&imx477_vana>;	/* 2.8v */
++				VDIG-supply = <&imx477_vdig>;	/* 1.05v */
++				VDDL-supply = <&imx477_vddl>;	/* 1.8v */
++
++				rockchip,camera-module-index = <0>;
++				rockchip,camera-module-facing = "back";
++				rockchip,camera-module-name = "TongJu";
++				rockchip,camera-module-lens-name = "CHT842-MD";
++
++				port {
++					imx477_out: endpoint {
++						remote-endpoint = <&mipi_in_ucam2>;
++						data-lanes = <1 2>;
++						clock-lanes = <0>;
++						clock-noncontinuous;
++						link-frequencies =
++							/bits/ 64 <450000000>;
++					};
++				};
++			};
++		};
++	};
++
++	fragment@7 {
++		target-path = "/";
++
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		__overlay__ {
++			imx477_vana: vcc-camera {
++				compatible = "regulator-fixed";
++				pinctrl-names = "default";
++				pinctrl-0 = <&cam_pwr>;
++				enable-active-high;
++				gpio = <&gpio4 RK_PA5 GPIO_ACTIVE_HIGH>;
++
++				regulator-name = "imx477_vana";
++				startup-delay-us = <300000>;
++				regulator-min-microvolt = <2800000>;
++				regulator-max-microvolt = <2800000>;
++			};
++			imx477_vdig: fixedregulator@0 {
++				compatible = "regulator-fixed";
++				regulator-name = "imx477_vdig";
++				regulator-min-microvolt = <1050000>;
++				regulator-max-microvolt = <1050000>;
++			};
++			imx477_vddl: fixedregulator@1 {
++				compatible = "regulator-fixed";
++				regulator-name = "imx477_vddl";
++				regulator-min-microvolt = <1800000>;
++				regulator-max-microvolt = <1800000>;
++			};
++		};
++	};
++};
+diff -Naurp a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-mcp2515.dts b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-mcp2515.dts
+--- a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-mcp2515.dts	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-mcp2515.dts	2022-07-14 20:26:07.581024153 +0300
+@@ -0,0 +1,69 @@
++/dts-v1/;
++/plugin/;
++
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/pinctrl/rockchip.h>
++#include <dt-bindings/interrupt-controller/irq.h>
++#include "../rk3568-pinctrl.dtsi"
++
++/ {
++	fragment@0 {
++		target = <&spi0>;
++
++		__overlay__ {
++			pinctrl-0 = <&spi0m1_cs0 &spi0m1_pins>;
++			pinctrl-1 = <&spi0m1_cs0 &spi0m1_pins_hs>;
++			num_chipselect = <2>;
++
++			cs-gpios = <&gpio2 RK_PD2 GPIO_ACTIVE_LOW>,
++				<&gpio3 RK_PD2 GPIO_ACTIVE_LOW>;
++			status = "okay";
++		};
++	};
++
++	fragment@1 {
++		target = <&pinctrl>;
++
++		__overlay__ {
++			can_pins {
++				mcp2515_can0: mcp2515_can0 {
++					rockchip,pins = <RK_GPIO0 RK_PC0 RK_FUNC_GPIO &pcfg_pull_none>;
++				};
++			};
++		};
++	};
++
++	fragment@2 {
++		target-path = "/";
++
++		__overlay__ {
++			can0_clk: can0_clk {
++				compatible = "fixed-clock";
++				#clock-cells = <0>;
++				clock-frequency = <8000000>;
++			};
++		};
++	};
++
++	fragment@3 {
++		target = <&spi0>;
++
++		__overlay__ {
++			/* needed to avoid dtc warning */
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			mcp2515: can@0 {
++				compatible = "microchip,mcp2515";
++				pinctrl-names = "default";
++				pinctrl-0 = <&mcp2515_can0>;
++				reg = <1>;
++				clocks = <&can0_clk>;
++				interrupt-parent = <&gpio0>;
++				interrupts = <RK_PC0 IRQ_TYPE_EDGE_FALLING>;
++				spi-max-frequency = <10000000>;
++				status = "okay";
++			};
++		};
++	};
++};
+diff -Naurp a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-onewire.dts b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-onewire.dts
+--- a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-onewire.dts	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-onewire.dts	2022-07-14 20:26:07.589024188 +0300
+@@ -0,0 +1,19 @@
++/dts-v1/;
++/plugin/;
++
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/pinctrl/rockchip.h>
++
++/ {
++	fragment@0 {
++		target-path = "/";
++
++		__overlay__ {
++				onewire:onewire {
++					compatible = "w1-gpio";
++					gpios = <&gpio3 RK_PB2 GPIO_ACTIVE_HIGH>;
++					status = "okay";
++			};
++		};
++	};
++};
+diff -Naurp a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-ov5647.dts b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-ov5647.dts
+--- a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-ov5647.dts	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-ov5647.dts	2022-07-14 20:26:07.601024241 +0300
+@@ -0,0 +1,149 @@
++/dts-v1/;
++/plugin/;
++
++#include <dt-bindings/clock/rk3568-cru.h>
++#include <dt-bindings/power/rk3568-power.h>
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/pinctrl/rockchip.h>
++#include "../rk3568-pinctrl.dtsi"
++
++/ {
++	fragment@0 {
++		target = <&csi2_dphy_hw>;
++
++		__overlay__ {
++			status = "okay";
++		};
++	};
++
++	fragment@1 {
++		target = <&csi2_dphy0>;
++
++		__overlay__ {
++			status = "okay";
++
++			ports {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				port@0 {
++					reg = <0>;
++					#address-cells = <1>;
++					#size-cells = <0>;
++
++					mipi_in_ucam2: endpoint@3 {
++						reg = <3>;
++						remote-endpoint = <&ov5647_out>;
++						data-lanes = <1 2>;
++					};
++				};
++				port@1 {
++					reg = <1>;
++					#address-cells = <1>;
++					#size-cells = <0>;
++
++					csidphy_out: endpoint@0 {
++						reg = <0>;
++						remote-endpoint = <&isp0_in>;
++					};
++				};
++			};
++		};
++	};
++
++	fragment@2 {
++		target = <&rkisp>;
++
++		__overlay__ {
++			status = "okay";
++		};
++	};
++
++	fragment@3 {
++		target = <&rkisp_mmu>;
++
++		__overlay__ {
++			status = "okay";
++		};
++	};
++
++	fragment@4 {
++		target = <&rkisp_vir0>;
++
++		__overlay__ {
++			status = "okay";
++
++			port {
++				#address-cells = <1>;
++				#size-cells = <0>;
++
++				isp0_in: endpoint@0 {
++					reg = <0>;
++					remote-endpoint = <&csidphy_out>;
++				};
++			};
++		};
++	};
++
++	fragment@5 {
++		target = <&pinctrl>;
++
++		__overlay__ {
++			camif {
++				cam_pwdn: cam-pwdn {
++					rockchip,pins = <4 RK_PA5 RK_FUNC_GPIO &pcfg_pull_none>;
++				};
++			};
++		};
++	};
++
++	fragment@6 {
++		// i2c2, i2c@fe5b0000
++		target = <&i2c2>;
++
++		__overlay__ {
++			status = "okay";
++
++			ov5647: ov5647@36 {
++				status = "okay";
++				compatible = "ovti,ov5647";
++				reg = <0x36>;
++				clocks = <&pmucru CLK_WIFI>;
++				clock-names = "xvclk";
++				power-domains = <&power RK3568_PD_VI>;
++				pinctrl-names = "default";
++
++				rockchip,camera-module-index = <0>;
++				rockchip,camera-module-facing = "back";
++				rockchip,camera-module-name = "TongJu";
++				rockchip,camera-module-lens-name = "CHT842-MD";
++
++				port {
++					ov5647_out: endpoint {
++						remote-endpoint = <&mipi_in_ucam2>;
++						data-lanes = <1 2>;
++					};
++				};
++			};
++		};
++	};
++
++	fragment@7 {
++		target-path = "/";
++
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		__overlay__ {
++			vcc_cam: vcc-camera {
++				compatible = "regulator-fixed";
++				regulator-name = "vcc_cam";
++				pinctrl-names = "default";
++				pinctrl-0 = <&cam_pwdn>;
++				enable-active-high;
++				gpio = <&gpio4 RK_PA5 GPIO_ACTIVE_HIGH>;
++				regulator-always-on;
++				regulator-boot-on;
++			};
++		};
++	};
++};
+diff -Naurp a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-pwm1.dts b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-pwm1.dts
+--- a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-pwm1.dts	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-pwm1.dts	2022-07-14 20:26:07.613024293 +0300
+@@ -0,0 +1,13 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		// pwmchip0, pwm@fdd70010
++		target = <&pwm1>;
++
++		__overlay__ {
++			status = "okay";
++		};
++	};
++};
+diff -Naurp a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-pwm2.dts b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-pwm2.dts
+--- a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-pwm2.dts	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-pwm2.dts	2022-07-14 20:26:07.621024329 +0300
+@@ -0,0 +1,13 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		// pwmchip1, pwm@fdd70020
++		target = <&pwm2>;
++
++		__overlay__ {
++			status = "okay";
++		};
++	};
++};
+diff -Naurp a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-pwm9.dts b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-pwm9.dts
+--- a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-pwm9.dts	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-pwm9.dts	2022-07-14 20:26:07.633024381 +0300
+@@ -0,0 +1,13 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		// pwmchip3, pwm@fe6f0010
++		target = <&pwm9>;
++
++		__overlay__ {
++			status = "okay";
++		};
++	};
++};
+\ No newline at end of file
+diff -Naurp a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-rknpu.dts b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-rknpu.dts
+--- a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-rknpu.dts	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-rknpu.dts	2022-07-14 20:26:07.645024434 +0300
+@@ -0,0 +1,22 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		// npu@fde40000
++		target = <&rknpu>;
++
++		__overlay__ {
++			status = "okay";
++		};
++	};
++
++	fragment@1 {
++		// iommu@fde4b000
++		target = <&rknpu_mmu>;
++
++		__overlay__ {
++			status = "okay";
++		};
++	};
++};
+diff -Naurp a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-spi0.dts b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-spi0.dts
+--- a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-spi0.dts	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-spi0.dts	2022-07-14 20:26:07.653024469 +0300
+@@ -0,0 +1,25 @@
++/dts-v1/;
++/plugin/;
++
++#include "../rk3568-pinctrl.dtsi"
++
++/ {
++	fragment@0 {
++		target = <&spi0>;
++
++		__overlay__ {
++			status = "okay";
++
++			pinctrl-0 = <&spi0m1_cs0 &spi0m1_pins>;
++			pinctrl-1 = <&spi0m1_cs0 &spi0m1_pins_hs>;
++
++			spidev: spidev@0 {
++				status = "okay";
++				compatible = "rockchip,spidev";
++				reg = <0>;
++				/* spi default max clock 100Mhz */
++				spi-max-frequency = <100000000>;
++			};
++		};
++	};
++};
+diff -Naurp a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-ttyfiq0_115200.dts b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-ttyfiq0_115200.dts
+--- a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-ttyfiq0_115200.dts	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-ttyfiq0_115200.dts	2022-07-14 20:26:07.665024521 +0300
+@@ -0,0 +1,18 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright (c) 2021 Hardkernel Co., Ltd.
++ *
++ */
++
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		target = <&fiq_debugger>;
++
++		__overlay__ {
++			rockchip,baudrate = <115200>;
++		};
++	};
++};
+diff -Naurp a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-uart0-with-ctsrts.dts b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-uart0-with-ctsrts.dts
+--- a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-uart0-with-ctsrts.dts	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-uart0-with-ctsrts.dts	2022-07-14 20:26:07.677024574 +0300
+@@ -0,0 +1,14 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		// uart1 aliased with serial0.
++		target = <&uart1>;
++
++		__overlay__ {
++			status = "okay";
++			pinctrl-names = "not_use_it", "default";
++		};
++	};
++};
+diff -Naurp a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-uart0.dts b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-uart0.dts
+--- a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-uart0.dts	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-uart0.dts	2022-07-14 20:26:07.689024626 +0300
+@@ -0,0 +1,13 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		// uart1 aliased with serial0.
++		target = <&uart1>;
++
++		__overlay__ {
++			status = "okay";
++		};
++	};
++};
+diff -Naurp a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-uart1.dts b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-uart1.dts
+--- a/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-uart1.dts	1970-01-01 03:00:00.000000000 +0300
++++ b/arch/arm64/boot/dts/rockchip/overlay/odroid-m1-uart1.dts	2022-07-14 20:26:07.697024661 +0300
+@@ -0,0 +1,15 @@
++/dts-v1/;
++/plugin/;
++
++/ {
++	fragment@0 {
++		// uart0 aliased with serial1.
++		target = <&uart0>;
++
++		__overlay__ {
++			status = "okay";
++
++			dma-names = "tx", "rx";
++		};
++	};
++};
+\ No newline at end of file
