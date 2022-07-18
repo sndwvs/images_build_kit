@@ -114,6 +114,7 @@ options+=("download" "download source and use pre-built binaries" "on")
 options+=("compile" "build binaries locally" "on")
 options+=($DISTR_IMAGES "create default image" "on")
 [[ $DESKTOP == yes && $DISTR != crux* ]] && options+=("desktop" "create an image with a desktop (optional)" "on")
+unset DISTR_IMAGES
 
 if [[ $NO_MENU == yes ]]; then
     # Duplicate file descriptor 1 on descriptor 3
@@ -141,6 +142,9 @@ if [[ $NO_MENU == yes ]]; then
                     ;;
              desktop)
                         DESKTOP_SELECTED=yes
+                    ;;
+             server)
+                        DISTR_IMAGES="server"
                     ;;
         esac
     done
@@ -265,7 +269,7 @@ for image_type in ${DISTR_IMAGES[@]}; do
     get_name_rootfs ${image_type}
     clean_rootfs ${image_type}
 
-    if [[ ${image_type} == server || ${image_type} == core ]]; then
+    if [[ ${image_type} == server || ${image_type} == core || $DESKTOP_SELECTED == yes ]]; then
         prepare_rootfs
         create_archive_bootloader
         download_pkg $DISTR_URL "${image_type}"
