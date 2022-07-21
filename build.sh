@@ -269,7 +269,7 @@ for image_type in ${DISTR_IMAGES[@]}; do
     get_name_rootfs ${image_type}
     clean_rootfs ${image_type}
 
-    if [[ ( ${image_type} == server || ${image_type} == core ) && $DESKTOP_SELECTED == yes ]]; then
+    if [[ ${image_type} =~ server|core || ( $DESKTOP_SELECTED == yes && ! ${DISTR_IMAGES[@]} =~ server|core ) ]]; then
         prepare_rootfs
         create_archive_bootloader
         download_pkg $DISTR_URL "${image_type}"
