@@ -284,17 +284,17 @@
 +		status = "disabled";
 +	};
 +
-+//	vcc3v3_pcie: vcc3v3_pcie {
-+//		compatible = "regulator-fixed";
-+//		regulator-name = "vcc3v3_pcie";
-+//		enable-active-high;
-+//		gpio = <&gpio0 RK_PA6 GPIO_ACTIVE_HIGH>;
-+//		pinctrl-names = "default";
++	vcc3v3_pcie: vcc3v3_pcie {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc3v3_pcie";
++		enable-active-high;
++		gpio = <&gpio0 RK_PA6 GPIO_ACTIVE_HIGH>;
++		pinctrl-names = "default";
 +//		pinctrl-0 = <&vcc3v3_pcie_en_h>;
-+//		regulator-min-microvolt = <3300000>;
-+//		regulator-max-microvolt = <3300000>;
-+//		vin-supply = <&vcc_3v3>;
-+//	};
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		vin-supply = <&vcc_3v3>;
++	};
 +
 +	rk809-sound {
 +		compatible = "simple-audio-card";
@@ -731,16 +731,16 @@
 +	};
 +};
 +
-+//&pcie30phy {
-+//       status = "okay";
-+//};
++&pcie30phy {
++       status = "okay";
++};
 +
-+//&pcie3x2 {
-+//        reset-gpios = <&gpio2 RK_PD6 GPIO_ACTIVE_HIGH>;
-+//        vpcie3v3-supply = <&pcie30_3v3>;
++&pcie3x2 {
++        reset-gpios = <&gpio2 RK_PD6 GPIO_ACTIVE_HIGH>;
++        vpcie3v3-supply = <&pcie30_3v3>;
 +
-+//       status = "okay";
-+//};
++       status = "okay";
++};
 +
 +&gic {
 +    status = "okay";
