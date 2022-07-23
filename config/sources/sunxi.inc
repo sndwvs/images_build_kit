@@ -1,7 +1,7 @@
 
 INITRD_MODULES="tun:btrfs:xfs"
 
-ATF_BRANCH="master:tag:v2.7.0"
+ATF_BRANCH="master:tag:v2.7"
 
 SERIAL_CONSOLE_SPEED=115200
 SERIAL_CONSOLE=ttyS0
