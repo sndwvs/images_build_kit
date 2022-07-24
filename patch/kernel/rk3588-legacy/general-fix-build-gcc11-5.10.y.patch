@@ -118,27 +118,3 @@
  	rtc->grf = syscon_regmap_lookup_by_phandle(np, "rockchip,grf");
  	if (IS_ERR(rtc->grf)) {
  		dev_warn(dev, "Missing rockchip,grf property\n");
---- a/drivers/media/platform/rockchip/isp/capture_v30.c	2022-07-10 15:25:03.201087117 +0300
-+++ b/drivers/media/platform/rockchip/isp/capture_v30.c	2022-07-10 15:24:49.149020117 +0300
-@@ -15,6 +15,10 @@
- 
- #define CIF_ISP_REQ_BUFS_MIN 0
- 
-+int rkisp_dvbm_get(struct rkisp_device *dev) { return -EINVAL; }
-+int rkisp_dvbm_init(struct rkisp_stream *stream) { return -EINVAL; }
-+void rkisp_dvbm_deinit(void) {}
-+
- static int mi_frame_end(struct rkisp_stream *stream);
- 
- static const struct capture_fmt fbc_fmts[] = {
---- a/drivers/media/platform/rockchip/isp/rkisp.c	2022-07-10 14:14:58.422525802 +0300
-+++ a/drivers/media/platform/rockchip/isp/rkisp.c	2022-07-10 15:01:06.766536928 +0300
-@@ -87,6 +87,8 @@
- 
- static void rkisp_config_cmsk(struct rkisp_device *dev);
- 
-+int rkisp_dvbm_event(struct rkisp_device *dev, u32 event) { return -EINVAL; }
-+
- struct backup_reg {
- 	const u32 base;
- 	const u32 shd;
