@@ -1,0 +1,11 @@
+--- a/arch/arm/Kconfig	2022-07-29 18:51:28.955982530 +0300
++++ b/arch/arm/Kconfig	2022-07-29 18:53:02.648330498 +0300
+@@ -1909,6 +1909,8 @@
+ 	select DM_SPI_FLASH
+ 	select ENABLE_ARM_SOC_BOOT0_HOOK
+ 	select OF_CONTROL
++	select OF_LIBFDT
++	select OF_LIBFDT_OVERLAY
+ 	select SPI
+ 	select SPL_DM if SPL
+ 	select SPL_DM_SPI if SPL
