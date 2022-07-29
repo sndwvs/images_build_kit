@@ -27,7 +27,7 @@ case ${COMPATIBLE} in
             LOADER="idbloader.img:uboot.img:trust.img"
             FIX_BOOT_DISK=true
     ;;
-    *rockpro64*|*firefly*rk33*|*helios64*)
+    *rockpro64*|*firefly*rk33*|*helios64*|*station*p1*)
             OFFSET_LOADER="64:16384:"
             LOADER="idbloader.img:u-boot.itb:"
             FIX_BOOT_DISK=true
