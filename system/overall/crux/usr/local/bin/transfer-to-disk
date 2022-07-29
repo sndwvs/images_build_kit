@@ -22,12 +22,12 @@ MODEL=$(cat /proc/device-tree/model | tr -d [:cntrl:])
 
 
 case ${COMPATIBLE} in
-#    *firefly*rk33*)
-#            OFFSET_LOADER="64:16384:24576"
-#            LOADER="idbloader.img:uboot.img:trust.img"
-#            FIX_BOOT_DISK=true
-#    ;;
-    *rock*64*|*rock*pi*|*pinebook*pro*|*firefly*rk33*|*helios64*)
+    *rock64*|*rock*pi*|*pinebook*pro*|*station*m1*)
+            OFFSET_LOADER="64:16384:24576"
+            LOADER="idbloader.img:uboot.img:trust.img"
+            FIX_BOOT_DISK=true
+    ;;
+    *rockpro64*|*firefly*rk33*|*helios64*)
             OFFSET_LOADER="64:16384:"
             LOADER="idbloader.img:u-boot.itb:"
             FIX_BOOT_DISK=true
