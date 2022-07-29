@@ -280,7 +280,7 @@ setting_for_desktop() {
 
 setting_bootloader_move_to_disk() {
     message "" "save" "bootloader data for move to disk"
-    [[ ${BOARD_NAME} == station_m1 ]] && EXCLUDES+=("trust.img" "uboot.img")
+#    [[ ${BOARD_NAME} == station_m1 ]] && EXCLUDES+=("trust.img" "uboot.img")
 
     for exclude in ${EXCLUDES[*]};do
         EXCLUDE+="--exclude=$exclude "
