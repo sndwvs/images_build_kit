@@ -67,15 +67,12 @@ create_uboot()
 #            for i in `seq 1 128`; do dd count=4 status=none; dd if=/dev/zero count=4 status=none; done < rkspi_loader.img > rkspi_loader.tmp
 #            mv rkspi_loader.tmp rkspi_loader.img
 #            dd if=u-boot.itb of=rkspi_loader.img seek=1024 conv=notrunc
-        if [[ $BOARD_NAME == rockpro64     || $BOARD_NAME == rock_pi_4*     || $BOARD_NAME == pinebook_pro      || \
-              $BOARD_NAME == rock64        || $BOARD_NAME == firefly_rk3399 || $BOARD_NAME == rock_pi_e         || \
-              $BOARD_NAME == helios64      || $BOARD_NAME == orange_pi_4*   || $BOARD_NAME == station_m1        || \
-              $BOARD_NAME == nanopi_r4s                                                                            ]]; then
+        if [[ $USE_DDR_BLOB != yes ]]; then
             tools/mkimage -n $SOCFAMILY -T rksd -d ${TPL}:spl/u-boot-spl.bin $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             install -Dm644 u-boot.itb $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/u-boot.itb >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
             # remove ATF because it is included in u-boot.itb
-            [[ -e $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img && $BOARD_NAME != station_m1 ]] && ( rm $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+            [[ -e $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img ]] && ( rm $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
 
             tools/mkimage -n $SOCFAMILY -T rkspi -d tpl/u-boot-tpl.bin:spl/u-boot-spl.bin rkspi_tpl_spl.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             dd if=/dev/zero of=rkspi_loader.img count=8192 status=none >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
