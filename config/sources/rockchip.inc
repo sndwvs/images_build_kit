@@ -82,8 +82,9 @@ create_uboot()
         else
             # The ddr binary files for ARM64 platforms from Rockchip, likes RK3399 and RK3328 should not skip first 4 bytes.
             # U-Boot SPL, with SPL_BACK_TO_BROM option disabled SD
-            tools/mkimage -n $SOCFAMILY -T rksd -d ${TPL}:spl/u-boot-spl.bin $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-            cat $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$MINI_LOADER >> $BOOT_LOADER_BIN || exit 1
+#            tools/mkimage -n $SOCFAMILY -T rksd -d ${TPL}:spl/u-boot-spl.bin $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+#            cat $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$MINI_LOADER >> $BOOT_LOADER_BIN || exit 1
+            tools/mkimage -n $SOCFAMILY -T rksd -d ${TPL}:$SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$MINI_LOADER $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
             # u-boot
             #
