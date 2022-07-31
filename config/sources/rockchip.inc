@@ -122,7 +122,7 @@ write_uboot()
     fi
     if [[ -f $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/uboot.img ]]; then
         dd if=$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/uboot.img of=$1 seek=16384 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        message "" "write" "bootloader: uboot-img"
+        message "" "write" "bootloader: uboot.img"
     fi
     if [[ -f $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img ]]; then
         dd if=$BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img of=$1 seek=24576 status=noxfer >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
