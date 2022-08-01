@@ -1,14 +1,15 @@
 --- a/arch/arm64/boot/dts/amlogic/Makefile	2022-01-30 04:21:45.884945514 +0200
 +++ b/arch/arm64/boot/dts/amlogic/Makefile	2022-01-30 04:30:04.296442984 +0200
-@@ -66,5 +66,8 @@
- dtb-$(CONFIG_ARCH_MESON) += meson-sm1-sei610.dtb
- dtb-$(CONFIG_ARCH_MESON) += meson-sm1-x96-air.dtb
- dtb-$(CONFIG_ARCH_MESON) += meson-sm1-x96-air-gbit.dtb
+@@ -65,6 +65,9 @@
+ dtb-$(CONFIG_ARCH_MESON) += meson-sm1-odroid-hc4.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-sm1-x96-air-100.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-sm1-x96-air-1000.dtb
 +dtb-$(CONFIG_ARCH_MESON) += meson-sm1-x96-max-plus-100m.dtb
 +dtb-$(CONFIG_ARCH_MESON) += meson-sm1-x96-max-plus-oc.dtb
 +dtb-$(CONFIG_ARCH_MESON) += meson-sm1-x96-max-plus.dtb
- dtb-$(CONFIG_ARCH_MESON) += meson-a1-ad401.dtb
- dtb-$(CONFIG_ARCH_MESON) += meson-s4-s805x2-aq222.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-sm1-sei610.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-sm1-x96-air-gbit.dtb
+ dtb-$(CONFIG_ARCH_MESON) += meson-sm1-x96-air.dtb
 diff -Naur a/arch/arm64/boot/dts/amlogic/meson-sm1-x96-max-plus-100m.dts b/arch/arm64/boot/dts/amlogic/meson-sm1-x96-max-plus-100m.dts
 --- a/arch/arm64/boot/dts/amlogic/meson-sm1-x96-max-plus-100m.dts	1970-01-01 03:00:00.000000000 +0300
 +++ b/arch/arm64/boot/dts/amlogic/meson-sm1-x96-max-plus-100m.dts	2022-01-30 01:06:25.764069355 +0200

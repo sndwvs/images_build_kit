@@ -31,14 +31,14 @@ diff --git a/drivers/mtd/spi-nor/Makefile b/drivers/mtd/spi-nor/Makefile
 index 653923896205..3f7a52d7fa0b 100644
 --- a/drivers/mtd/spi-nor/Makefile
 +++ b/drivers/mtd/spi-nor/Makefile
-@@ -17,6 +17,7 @@ spi-nor-objs			+= sst.o
+@@ -17,6 +17,7 @@
  spi-nor-objs			+= winbond.o
  spi-nor-objs			+= xilinx.o
  spi-nor-objs			+= xmc.o
 +spi-nor-objs			+= xtx.o
+ spi-nor-$(CONFIG_DEBUG_FS)	+= debugfs.o
  obj-$(CONFIG_MTD_SPI_NOR)	+= spi-nor.o
  
- obj-$(CONFIG_MTD_SPI_NOR)	+= controllers/
 diff --git a/drivers/mtd/spi-nor/core.c b/drivers/mtd/spi-nor/core.c
 index 0522304f52fa..9a89ec473e4b 100644
 --- a/drivers/mtd/spi-nor/core.c
@@ -87,4 +87,3 @@ index 000000000000..a10102d8b3e2
 +};
 -- 
 2.25.1
-
