@@ -304,7 +304,7 @@ for image_type in ${DISTR_IMAGES[@]}; do
         [[ $IMAGE_COMPRESSION == yes ]] && image_compression "$ROOTFS"
     fi
 
-    if [[ ${image_type} != server && ${image_type} != core ]]; then
+    if [[ ! ${image_type} =~ server|core || ( $DESKTOP_SELECTED == yes && ${#DISTR_IMAGES[@]} == 1 ) ]]; then
         message "" "create" "$ROOTFS_DESKTOP"
         mv $SOURCE/$ROOTFS $SOURCE/$ROOTFS_DESKTOP >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
