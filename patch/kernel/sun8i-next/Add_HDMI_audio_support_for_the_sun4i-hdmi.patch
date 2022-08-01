@@ -110,14 +110,10 @@ index 7ad3f06c127e..28621d289655 100644
  struct sun4i_hdmi {
  	struct drm_connector	connector;
  	struct drm_encoder	encoder;
-@@ -283,9 +313,14 @@ struct sun4i_hdmi {
- 	struct regmap_field	*field_ddc_sda_en;
- 	struct regmap_field	*field_ddc_sck_en;
+@@ -285,6 +315,10 @@ struct sun4i_hdmi {
  
-+
  	struct sun4i_drv	*drv;
  
- 	bool			hdmi_monitor;
 +	bool			hdmi_audio;
 +
 +	struct sun4i_hdmi_audio audio;
@@ -125,7 +121,7 @@ index 7ad3f06c127e..28621d289655 100644
  	struct cec_adapter	*cec_adap;
  
  	const struct sun4i_hdmi_variant	*variant;
-@@ -294,5 +329,7 @@ struct sun4i_hdmi {
+@@ -293,5 +327,7 @@ struct sun4i_hdmi {
  int sun4i_ddc_create(struct sun4i_hdmi *hdmi, struct clk *clk);
  int sun4i_tmds_create(struct sun4i_hdmi *hdmi);
  int sun4i_hdmi_i2c_create(struct device *dev, struct sun4i_hdmi *hdmi);
@@ -593,16 +589,16 @@ diff --git a/drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c b/drivers/gpu/drm/sun4i/sun4
 index 68d4644ac2dc..4cd35c97c503 100644
 --- a/drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c
 +++ b/drivers/gpu/drm/sun4i/sun4i_hdmi_enc.c
-@@ -23,6 +23,8 @@
- #include <drm/drm_print.h>
+@@ -24,6 +24,8 @@
  #include <drm/drm_probe_helper.h>
+ #include <drm/drm_simple_kms_helper.h>
  
 +#include <sound/soc.h>
 +
  #include "sun4i_backend.h"
  #include "sun4i_crtc.h"
  #include "sun4i_drv.h"
-@@ -87,6 +89,10 @@ static void sun4i_hdmi_disable(struct drm_encoder *encoder)
+@@ -88,6 +90,10 @@ static void sun4i_hdmi_disable(struct dr
  
  	DRM_DEBUG_DRIVER("Disabling the HDMI Output\n");
  
@@ -613,7 +609,7 @@ index 68d4644ac2dc..4cd35c97c503 100644
  	val = readl(hdmi->base + SUN4I_HDMI_VID_CTRL_REG);
  	val &= ~SUN4I_HDMI_VID_CTRL_ENABLE;
  	writel(val, hdmi->base + SUN4I_HDMI_VID_CTRL_REG);
-@@ -114,6 +120,11 @@ static void sun4i_hdmi_enable(struct drm_encoder *encoder)
+@@ -116,6 +122,11 @@ static void sun4i_hdmi_enable(struct drm
  		val |= SUN4I_HDMI_VID_CTRL_HDMI_MODE;
  
  	writel(val, hdmi->base + SUN4I_HDMI_VID_CTRL_REG);
@@ -625,13 +621,14 @@ index 68d4644ac2dc..4cd35c97c503 100644
  }
  
  static void sun4i_hdmi_mode_set(struct drm_encoder *encoder,
-@@ -218,6 +229,9 @@ static int sun4i_hdmi_get_modes(struct drm_connector *connector)
+@@ -216,6 +227,10 @@ static int sun4i_hdmi_get_modes(struct d
  	if (!edid)
  		return 0;
  
 +#ifdef CONFIG_DRM_SUN4I_HDMI_AUDIO
 +	hdmi->hdmi_audio = drm_detect_monitor_audio(edid);
 +#endif
- 	hdmi->hdmi_monitor = drm_detect_hdmi_monitor(edid);
++
  	DRM_DEBUG_DRIVER("Monitor is %s monitor\n",
- 			 hdmi->hdmi_monitor ? "an HDMI" : "a DVI");
+ 			 connector->display_info.is_hdmi ? "an HDMI" : "a DVI");
+ 
