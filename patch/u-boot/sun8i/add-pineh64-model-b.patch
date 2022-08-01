@@ -1,11 +1,3 @@
-diff --git a/arch/arm/dts/sun50i-h6-pine-h64-model-b.dts b/arch/arm/dts/sun50i-h6-pine-h64-model-b.dts
-new file mode 120000
-index 00000000..76280222
---- /dev/null
-+++ b/arch/arm/dts/sun50i-h6-pine-h64-model-b.dts
-@@ -0,0 +1 @@
-+sun50i-h6-pine-h64.dts
-\ No newline at end of file
 diff --git a/configs/pine_h64-model-b_defconfig b/configs/pine_h64-model-b_defconfig
 new file mode 100644
 index 00000000..ace3e84e
@@ -30,17 +22,3 @@ index 00000000..ace3e84e
 +CONFIG_DEFAULT_DEVICE_TREE="sun50i-h6-pine-h64-model-b"
 +CONFIG_USB_EHCI_HCD=y
 +CONFIG_USB_OHCI_HCD=y
-diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
-index 7a791cba..e74adc94 100644
---- a/arch/arm/dts/Makefile
-+++ b/arch/arm/dts/Makefile
-@@ -525,7 +525,8 @@ dtb-$(CONFIG_MACH_SUN50I_H6) += \
- 	sun50i-h6-beelink-gs1.dtb \
- 	sun50i-h6-orangepi-lite2.dtb \
- 	sun50i-h6-orangepi-one-plus.dtb \
--	sun50i-h6-pine-h64.dtb \
-+	sun50i-h6-pine-h64.dtb \
-+	sun50i-h6-pine-h64-model-b.dtb \
- 	sun50i-h6-tanix-tx6.dtb
- dtb-$(CONFIG_MACH_SUN50I) += \
- 	sun50i-a64-amarula-relic.dtb \
