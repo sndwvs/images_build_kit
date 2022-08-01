@@ -10,6 +10,8 @@ BOOT_LOADER_FIRMWARE_SOURCE=" https://github.com/raspberrypi/firmware.git"
 BOOT_LOADER_FIRMWARE_DIR="boot-loader-firmware-broadcom"
 BOOT_LOADER_FIRMWARE_BRANCH="next::"
 
+BOOT_LOADER_BRANCH="master:tag:v2022.07"
+
 BOOT_LOADER_BIN="u-boot.bin"
 
 
@@ -21,7 +23,7 @@ case $KERNEL_SOURCE in
     ;;
     next)
             LINUX_SOURCE="https://github.com/raspberrypi/linux.git"
-            KERNEL_BRANCH="rpi-5.18.y::"
+            KERNEL_BRANCH="rpi-5.19.y::"
             KERNEL_DIR="linux-$SOCFAMILY-$KERNEL_SOURCE"
     ;;
 esac
