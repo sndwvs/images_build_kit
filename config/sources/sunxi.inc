@@ -10,7 +10,7 @@ IMAGE_OFFSET=2048
 
 ROOT_DISK="mmcblk0p1"
 
-BOOT_LOADER_BRANCH="master:tag:v2022.04"
+BOOT_LOADER_BRANCH="master:tag:v2022.07"
 BOOT_LOADER_BIN="u-boot-sunxi-with-spl.bin"
 
 if [[ ${SOCFAMILY} == sun7i ]]; then
@@ -30,7 +30,7 @@ case $KERNEL_SOURCE in
     ;;
     next)
             LINUX_SOURCE="https://github.com/megous/linux"
-            KERNEL_BRANCH="orange-pi-5.18::"
+            KERNEL_BRANCH="orange-pi-5.19::"
             KERNEL_DIR="linux-$SOCFAMILY-$KERNEL_SOURCE"
     ;;
 esac
