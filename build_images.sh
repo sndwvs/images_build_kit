@@ -45,21 +45,21 @@ setting_fstab() {
         message "" "setting" "fstab"
         sed -i "s:# tmpfs:tmpfs:" $SOURCE/$ROOTFS/etc/fstab
         if [[ $DISTR == sla* ]]; then
-            echo "/dev/$ROOT_DISK    /          ext4    noatime,nodiratime,data=writeback,errors=remount-ro       0       1" >> $SOURCE/$ROOTFS/etc/fstab || exit 1
+            echo "UUID=${UUID_ROOT_FS_EXT4}    /          ext4    noatime,nodiratime,data=writeback,errors=remount-ro       0       1" >> $SOURCE/$ROOTFS/etc/fstab || exit 1
             if [[ $SOCFAMILY == sun20iw1p1 && $KERNEL_SOURCE != next ]]; then
                 echo "debugfs    /sys/kernel/debug      debugfs  defaults       0       0" >> $SOURCE/$ROOTFS/etc/fstab
             elif [[ $SOCFAMILY == bcm2* || $BOARD_NAME == x96_max_plus ]]; then
-                echo "/dev/${ROOT_DISK/p?/p1}    /boot      vfat    defaults       0       1" >> $SOURCE/$ROOTFS/etc/fstab
+                echo "UUID=${UUID_BOOT_FS_VFAT}    /boot      vfat    defaults       0       1" >> $SOURCE/$ROOTFS/etc/fstab
             elif [[ $SOCFAMILY == rk356* ]]; then
-                echo "/dev/${ROOT_DISK/p?/p1}    /boot      ext4    noatime,nodiratime       0       1" >> $SOURCE/$ROOTFS/etc/fstab
+                echo "UUID=${UUID_BOOT_FS_EXT4}    /boot      ext4    noatime,nodiratime       0       1" >> $SOURCE/$ROOTFS/etc/fstab
             fi
         elif [[ $DISTR == crux* ]]; then
             sed -i 's:#\(shm\):\1:' $SOURCE/$ROOTFS/etc/fstab || exit 1
-            sed -i "/\# End of file/ i \\/dev\/$ROOT_DISK    \/          ext4    noatime,nodiratime,data=writeback,errors=remount-ro       0       1\n" $SOURCE/$ROOTFS/etc/fstab || exit 1
+            sed -i "/\# End of file/ i UUID=${UUID_ROOT_FS_EXT4}    \/          ext4    noatime,nodiratime,data=writeback,errors=remount-ro       0       1\n" $SOURCE/$ROOTFS/etc/fstab || exit 1
             if [[ $SOCFAMILY == bcm2* || $BOARD_NAME == x96_max_plus ]]; then
-                sed -i "/\# End of file/ i \\/dev\/${ROOT_DISK/p?/p1}    \/boot      vfat    defaults       0       1\n" $SOURCE/$ROOTFS/etc/fstab
+                sed -i "/\# End of file/ i UUID=${UUID_BOOT_FS_VFAT}    \/boot      vfat    defaults       0       1\n" $SOURCE/$ROOTFS/etc/fstab
             elif [[ $SOCFAMILY == rk356* ]]; then
-                sed -i "/\# End of file/ i \\/dev\/${ROOT_DISK/p?/p1}    \/boot      ext4    noatime,nodiratime       0       1\n" $SOURCE/$ROOTFS/etc/fstab
+                sed -i "/\# End of file/ i UUID=${UUID_BOOT_FS_EXT4}    \/boot      ext4    noatime,nodiratime       0       1\n" $SOURCE/$ROOTFS/etc/fstab
             fi
         fi
     fi
@@ -135,6 +135,8 @@ build_img() {
     message "" "create" "filesystem"
     if [[ $SOCFAMILY == bcm2* || $BOARD_NAME == x96_max_plus ]]; then
         mkfs.vfat ${LOOP}p1 >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        # set UUID
+        mkfs.vfat -i ${UUID_BOOT_FS_VFAT/-/} ${LOOP}p1 >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
     mkfs.ext4 -F -m 0 -L linuxroot ${LOOP}p${PART} >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
@@ -142,6 +144,8 @@ build_img() {
     tune2fs -o journal_data_writeback ${LOOP}p${PART} >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     tune2fs -O ^has_journal ${LOOP}p${PART} >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     e2fsck -yf ${LOOP}p${PART} >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    # set UUID
+    echo y | tune2fs -U ${UUID_ROOT_FS_EXT4} ${LOOP}p${PART} >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     message "" "create" "mount point and mount image"
 
@@ -455,7 +459,8 @@ setting_bootloader() {
         [[ $SOCFAMILY == meson-sm1 && ( $KERNEL_SOURCE != next && $BOARD_NAME != x96_max_plus ) ]] && echo "kernel=$KERNEL_SOURCE" >> "$SOURCE/$ROOTFS/boot/uEnv.txt"
     fi
     # change root disk if disk not default
-    [[ -n ${ROOT_DISK##*mmcblk0p1} ]] && echo "rootdev=/dev/$ROOT_DISK" >> "$SOURCE/$ROOTFS/boot/uEnv.txt"
+    #[[ -n ${ROOT_DISK##*mmcblk0p1} ]] && echo "rootdev=/dev/$ROOT_DISK" >> "$SOURCE/$ROOTFS/boot/uEnv.txt"
+    echo "rootdev=UUID=${UUID_ROOT_FS_EXT4}" >> "$SOURCE/$ROOTFS/boot/uEnv.txt"
     return 0
 }
 
