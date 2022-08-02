@@ -10,6 +10,7 @@ fi
 #---------------------------------------------
 # configuration
 #---------------------------------------------
+unset UUID_BOOT_FS_VFAT UUID_BOOT_FS_EXT4 UUID_ROOT_FS_EXT4
 ROOT_DISK=$(lsblk -in |  grep "/$" | cut -d '-' -f2 | cut -d ' ' -f1 | sed 's/^\([a-z]*\)\([0-9]*\)\(\w*\)/\1\2/')
 OUTPUT="/prepare"
 DIRS=( $(find / -maxdepth 1 | grep -vP "^\/$|dev|mnt|proc|run|sys|lost\+found|${OUTPUT}") )
@@ -227,9 +228,13 @@ prepare_disk() {
         DISK0=$DISK
         DISK=$(echo ${DISK} | sed 's:\(\w\)$:2:g')
         mkfs.vfat -F 32 "/dev/$DISK0" >/dev/null 2>&1
+        # get UUID
+        export UUID_BOOT_FS_VFAT=$(blkid -s UUID -o value /dev/$DISK0)
     fi
 
     echo y | mkfs.ext4 -F -m 0 -L linuxroot "/dev/$DISK" >/dev/null 2>&1
+    # get UUID
+    export UUID_ROOT_FS_EXT4=$(blkid -s UUID -o value /dev/$DISK)
 
     # tune filesystem
     tune2fs -o journal_data_writeback "/dev/$DISK" >/dev/null 2>&1
@@ -269,9 +274,11 @@ transfer() {
 fix_config() {
     DISK="$1"
     if [[ ! -z $FIX_BOOT_DISK ]]; then
-        sed -e "\$a rootdev=\/dev\/${DISK}" -e '/rootdev.*/d' -i $OUTPUT/boot/uEnv.txt
+        sed -e "\$a rootdev=UUID=${UUID_ROOT_FS_EXT4}" -e '/rootdev.*/d' -i $OUTPUT/boot/uEnv.txt
+        [[ ! -z ${UUID_BOOT_FS_VFAT} ]] && sed "s#^\(UUID=\)\(.*\)\(\s.*\s\/boot\s.*\)#\1${UUID_BOOT_FS_VFAT} \3#g" -i $OUTPUT/etc/fstab
+        [[ ! -z ${UUID_ROOT_FS_EXT4} ]] && sed "s#^\(UUID=\)\(.*\)\(\s.*\s\/\s.*\)#\1${UUID_ROOT_FS_EXT4} \3#g" -i $OUTPUT/etc/fstab
+
         DISK=${DISK%[0-9]*}
-        [[ ! $(grep "^/dev/${DISK}" $OUTPUT/etc/fstab) ]] && sed -i "s#^/dev/\([a-z0-9]\)*#/dev/${DISK}\1    #g" $OUTPUT/etc/fstab
         [[ ${COMPATIBLE} =~ raspberry*pi && ! $(grep "${DISK}" $OUTPUT/boot/cmdline.txt 2>/dev/null) ]] && sed -i "s/\(root=\/dev\/\).*/\1${DISK}/g" $OUTPUT/boot/cmdline.txt
     fi
     sed -i '/\(=.*\)/,/^$/d;/\(if.*\)/,/^$/d' $OUTPUT/etc/issue
