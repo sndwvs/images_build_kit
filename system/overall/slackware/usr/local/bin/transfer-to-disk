@@ -207,10 +207,12 @@ prepare_disk() {
 
     echo -e "\no\nn\np\n${PART}\n${OFFSET}\n${SIZE}\nw" | fdisk "/dev/$DISK" >/dev/null 2>&1 || true
 
+    # device is busy
+    sleep 2
+
     if [[ ${COMPATIBLE} =~ raspberry*pi || ${MODEL} == *X96*Max* ]]; then
         echo -e "\nn\np\n\n\n\nt\n${PART}\nc\nw" | fdisk "/dev/$DISK" >/dev/null 2>&1
     fi
-
     if [[ ${MODEL} == *X96*Max* ]]; then
         msginfo " ATTENTION " "\nstart restore u-boot"
         dd if=/boot/u-boot-default-aml.img of="/dev/$DISK" bs=1M count=4 >/dev/null 2>&1
@@ -271,20 +273,22 @@ fix_config() {
     DISK="$1"
     if [[ ! -z $FIX_BOOT_DISK ]]; then
 
-        [[ $DISK =~ mmc* ]] && SUFFIX_PART="p"
+        DISK0=$(echo ${DISK} | sed 's:\(\w\)$:1:g')
 
-        if [[ -b /dev/${DISK}${SUFFIX_PART}1 ]]; then
-            # get UUID for root
-            UUID_ROOT_FS=$(blkid -s UUID -o value /dev/${DISK}${SUFFIX_PART}1)
-        fi
-        if [[ -b /dev/${DISK}${SUFFIX_PART}2 ]]; then
+        if [[ -b /dev/${DISK0} ]]; then
             # get UUID for boot
-            UUID_BOOT_FS=$(blkid -s UUID -o value /dev/${DISK}${SUFFIX_PART}2)
-        if
+            UUID_BOOT_FS=$(blkid -s UUID -o value /dev/${DISK0})
+        fi
+        if [[ -b /dev/${DISK} ]]; then
+            # get UUID for root
+            UUID_ROOT_FS=$(blkid -s UUID -o value /dev/${DISK})
+        fi
 
-        sed -e "\$a rootdev=UUID=${UUID_ROOT_FS}" -e '/rootdev.*/d' -i $OUTPUT/boot/uEnv.txt
         [[ ! -z ${UUID_BOOT_FS} ]] && sed "s#^\(UUID=\)\(.*\)\(\s.*\s\/boot\s.*\)#\1${UUID_BOOT_FS} \3#g" -i $OUTPUT/etc/fstab
-        [[ ! -z ${UUID_ROOT_FS} ]] && sed "s#^\(UUID=\)\(.*\)\(\s.*\s\/\s.*\)#\1${UUID_ROOT_FS} \3#g" -i $OUTPUT/etc/fstab
+        if [[ ! -z ${UUID_ROOT_FS} ]]; then
+            sed -e "\$a rootdev=UUID=${UUID_ROOT_FS}" -e '/rootdev.*/d' -i $OUTPUT/boot/uEnv.txt
+            sed "s#^\(UUID=\)\(.*\)\(\s.*\s\/\s.*\)#\1${UUID_ROOT_FS} \3#g" -i $OUTPUT/etc/fstab
+        fi
 
         DISK=${DISK%[0-9]*}
         [[ ${COMPATIBLE} =~ raspberry*pi && ! $(grep "${DISK}" $OUTPUT/boot/cmdline.txt 2>/dev/null) ]] && sed -i "s/\(root=\/dev\/\).*/\1${DISK}/g" $OUTPUT/boot/cmdline.txt
