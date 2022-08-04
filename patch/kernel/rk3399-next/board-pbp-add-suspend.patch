@@ -195,14 +195,14 @@ diff --git a/drivers/firmware/Makefile b/drivers/firmware/Makefile
 index e9fb838af4df..575f45d55939 100644
 --- a/drivers/firmware/Makefile
 +++ b/drivers/firmware/Makefile
-@@ -29,6 +29,7 @@ obj-y				+= meson/
- obj-$(CONFIG_GOOGLE_FIRMWARE)	+= google/
- obj-$(CONFIG_EFI)		+= efi/
- obj-$(CONFIG_UEFI_CPER)		+= efi/
+@@ -25,6 +25,7 @@ obj-$(CONFIG_SYSFB_SIMPLEFB)	+= sysfb_si
+ obj-$(CONFIG_TI_SCI_PROTOCOL)	+= ti_sci.o
+ obj-$(CONFIG_TRUSTED_FOUNDATIONS) += trusted_foundations.o
+ obj-$(CONFIG_TURRIS_MOX_RWTM)	+= turris-mox-rwtm.o
 +obj-$(CONFIG_ROCKCHIP_SIP)	+= rockchip_sip.o
- obj-y				+= imx/
- obj-y				+= tegra/
- obj-y				+= xilinx/
+ 
+ obj-y				+= arm_ffa/
+ obj-y				+= arm_scmi/
 diff --git a/drivers/firmware/rockchip_sip.c b/drivers/firmware/rockchip_sip.c
 new file mode 100644
 index 000000000000..6844c5bad5b1
