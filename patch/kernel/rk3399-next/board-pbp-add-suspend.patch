@@ -762,7 +762,7 @@ index 000000000000..4a3038f22639
 +					"rockchip,virtual-poweroff",
 +					&virtual_poweroff_en, 1) &&
 +	    virtual_poweroff_en)
-+		pm_power_off_prepare = rockchip_pm_virt_pwroff_prepare;
++		pm_power_off = rockchip_pm_virt_pwroff_prepare;
 +
 +	return 0;
 +}
