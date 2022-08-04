@@ -1,0 +1,66 @@
+--- a/arch/arm64/boot/dts/rockchip/overlay/Makefile
++++ b/arch/arm64/boot/dts/rockchip/overlay/Makefile
+@@ -3,6 +3,8 @@ dtbo-$(CONFIG_ARCH_ROCKCHIP) += \
+ 	rockchip-i2c7.dtbo \
+ 	rockchip-i2c8.dtbo \
+ 	rockchip-pcie-gen2.dtbo \
++	rockchip-rk3308-opp-1.2ghz.dtbo \
++	rockchip-rk3308-opp-1.3ghz.dtbo \
+ 	rockchip-rk3328-opp-1.4ghz.dtbo \
+ 	rockchip-rk3328-opp-1.5ghz.dtbo \
+ 	rockchip-rk3399-opp-2ghz.dtbo \
+--- a/arch/arm64/boot/dts/rockchip/overlay/README.rockchip-overlays
++++ b/arch/arm64/boot/dts/rockchip/overlay/README.rockchip-overlays
+@@ -29,6 +29,16 @@ I2C8 pins (SCL, SDA): GPIO1-C5, GPIO1-C4
+ Enables PCIe Gen2 link speed on RK3399.
+ WARNING! Not officially supported by Rockchip!!!
+ 
++### rk3308-opp-1.2ghz
++
++Adds the 1.2GHz opp for overclocking
++WARNING! Not officially supported by Rockchip!!!
++
++### rk3308-opp-1.3ghz
++
++Adds the 1.3GHz opp for overclocking
++WARNING! Not officially supported by Rockchip!!!
++
+ ### rk3328-opp-1.4ghz
+ 
+ Adds the 1.4GHz opp for overclocking
+--- /dev/null
++++ b/arch/arm64/boot/dts/rockchip/overlay/rockchip-rk3308-opp-1.2ghz.dts
+@@ -0,0 +1,15 @@
++/dts-v1/;
++
++/ {
++    compatible = "rockchip,rk3308";
++    fragment@0 {
++        target-path = "/opp-table-0";
++        __overlay__ {
++		opp-1200000000 {
++			opp-hz = /bits/ 64 <1200000000>;
++			opp-microvolt = <1250000 1250000 1340000>;
++			clock-latency-ns = <40000>;
++		};
++        };
++    };
++};
+--- /dev/null
++++ b/arch/arm64/boot/dts/rockchip/overlay/rockchip-rk3308-opp-1.3ghz.dts
+@@ -0,0 +1,15 @@
++/dts-v1/;
++
++/ {
++    compatible = "rockchip,rk3308";
++    fragment@0 {
++        target-path = "/opp-table-0";
++        __overlay__ {
++		opp-1296000000 {
++			opp-hz = /bits/ 64 <1296000000>;
++			opp-microvolt = <1300000 1300000 1340000>;
++			clock-latency-ns = <40000>;
++		};
++        };
++    };
++};
