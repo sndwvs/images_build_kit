@@ -41,7 +41,7 @@ prepare_rootfs() {
 
 
 setting_fstab() {
-    if [[ ! $(cat $SOURCE/$ROOTFS/etc/fstab | grep $ROOT_DISK) ]];then
+    if [[ ! $(grep ${UUID_ROOT_FS_EXT4} "$SOURCE/$ROOTFS/etc/fstab") ]]; then
         message "" "setting" "fstab"
         sed -i "s:# tmpfs:tmpfs:" $SOURCE/$ROOTFS/etc/fstab
         if [[ $DISTR == sla* ]]; then
@@ -407,7 +407,7 @@ setting_bootloader() {
         install -Dm644 $CWD/config/boot_scripts/extlinux-$SOCFAMILY.conf "$SOURCE/$ROOTFS/boot/extlinux/extlinux.conf"
         # u-boot serial inteface config
         sed -e "s:%DISTR%:${DISTR}:g" \
-            -e "s:%ROOT_DISK%:${ROOT_DISK}:g" \
+            -e "s:%ROOT_DISK%:UUID=${UUID_BOOT_FS_EXT4}:g" \
             -e "s:%DEVICE_TREE_BLOB%:${DEVICE_TREE_BLOB}:g" \
             -e "s:%SERIAL_CONSOLE%:${SERIAL_CONSOLE}:g" \
             -e "s:%SERIAL_CONSOLE_SPEED%:${SERIAL_CONSOLE_SPEED}:g" \
@@ -458,10 +458,10 @@ setting_bootloader() {
         # parameter to configure the boot of the legacy kernel
         [[ $SOCFAMILY == meson-sm1 && ( $KERNEL_SOURCE != next && $BOARD_NAME != x96_max_plus ) ]] && echo "kernel=$KERNEL_SOURCE" >> "$SOURCE/$ROOTFS/boot/uEnv.txt"
     fi
-    # change root disk if disk not default
-    #[[ -n ${ROOT_DISK##*mmcblk0p1} ]] && echo "rootdev=/dev/$ROOT_DISK" >> "$SOURCE/$ROOTFS/boot/uEnv.txt"
-    echo "rootdev=UUID=${UUID_ROOT_FS_EXT4}" >> "$SOURCE/$ROOTFS/boot/uEnv.txt"
-    return 0
+    # set root disk
+    if [[ ! $(grep ${UUID_ROOT_FS_EXT4} "$SOURCE/$ROOTFS/boot/uEnv.txt") ]]; then
+        echo "rootdev=UUID=${UUID_ROOT_FS_EXT4}" >> "$SOURCE/$ROOTFS/boot/uEnv.txt"
+    fi
 }
 
 
