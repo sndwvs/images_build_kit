@@ -92,7 +92,7 @@ compile_atf() {
     if [[ $SOCFAMILY == rk3* ]]; then
         if [[ ${BOOT_LOADER_BUILD_TYPE} == "blobs" || ${BOOT_LOADER_BUILD_TYPE} == "spl-blob" ||
               ${BOOT_LOADER_BUILD_TYPE} == "tpl-spl-blob" ]]; then
-            ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL31_BLOB == "blobs" bl31.elf
+            ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL31_BLOB bl31.elf
             ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL31_BLOB bl31.bin
             #[[ ! -z $BL32_BLOB ]] && ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL32_BLOB bl32.bin
         else
