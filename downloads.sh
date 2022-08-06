@@ -29,22 +29,16 @@ git_fetch() {
         # fixed: fatal dumb http transport does not support shallow capabilities
         [[ 0 -ne $status && ! -d $DIR ]] && ( git clone -b ${BRANCH} $URL $DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
     else
-        cd $DIR && ( git reset --hard && git clean -xdfq && git checkout -f ${BRANCH} && git fetch && git pull origin ${BRANCH} ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        cd $DIR && ( git reset --hard && git clean -xdfq && git checkout -f ${BRANCH} && git fetch && git checkout remotes/origin/${BRANCH} ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
     pushd $DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
-    set +e
-    if [[ $TYPE == commit && ! $(git log --format=format:%H | grep $VAR) ]]; then
-        i=1
-        while [ ! $(git log --format=format:%H | grep $VAR) ]; do
-            git fetch --depth=$((i+=600)) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-#            git log --format=format:%H | grep $VAR
-        done
-    fi
-    set -e
     case $TYPE in
-        tag)    ( git fetch -t && git checkout -f ${VAR} ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 ;;
-        commit) ( git reset --hard ${VAR} && git fetch ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 ;;
+        tag)
+            ( git fetch -t && git checkout -f ${VAR} ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        ;;
+        commit)
+            ( git fetch origin ${VAR} && git reset --hard ${VAR} ) >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        ;;
     esac
     popd >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 }
