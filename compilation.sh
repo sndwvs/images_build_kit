@@ -27,10 +27,12 @@ compile_boot_loader() {
     # added in name suffix
     change_name_version "-$SOCFAMILY"
 
-# fixed
-#    [[ ! -z $ATF && ! -z $BL31_BLOB ]] && export BL31=$SOURCE/$ATF_DIR/bl31.${BL31_BLOB##*.}
-#    [[ ! -z $ATF && -z $BL31_BLOB ]] && export BL31=$SOURCE/$ATF_DIR/bl31.bin
+    if [[ ! -z $ATF ]]; then
+        export BL31=$SOURCE/$ATF_DIR/bl31.${BL31_BLOB##*.}
+        #export BL31=$SOURCE/$ATF_DIR/bl31.bin
+    fi
 
+    # fixed: transfer to with compile_atf()
     if [[ $SOCFAMILY == rk35* ]]; then
         [[ ! -z $ATF && ! -z $BL31_BLOB ]] && ln -fs $SOURCE/$ATF_DIR/bl31.${BL31_BLOB##*.} bl31.${BL31_BLOB##*.}
         [[ ! -z $ATF && ! -z $OPTEE ]] && ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$OPTEE tee.bin
