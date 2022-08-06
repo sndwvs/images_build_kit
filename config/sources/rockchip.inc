@@ -90,7 +90,7 @@ create_uboot()
     elif [[ $BOOT_LOADER_BUILD_TYPE == "blobs" ]]; then
 
         tools/mkimage -n $SOCFAMILY -T rksd -d $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$DDR_BLOB $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        cat $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$MINI_LOADER >> $BOOT_LOADER_BIN || exit 1
+        cat $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$MINI_LOADER_BLOB >> $BOOT_LOADER_BIN || exit 1
         $SOURCE/$BOOT_LOADER_TOOLS_DIR/tools/loaderimage --pack --uboot u-boot-dtb.bin uboot.img $LOAD_ADDRESS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         install -Dm644 uboot.img $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/uboot.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
