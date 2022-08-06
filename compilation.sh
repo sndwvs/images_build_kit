@@ -15,6 +15,9 @@ compile_boot_loader() {
     gcc_version "$CROSS" GCC_VERSION
     message "" "compiler" "gcc $GCC_VERSION"
 
+    # uboot prepare
+    [[ $(type -t uboot_prepare) == function ]] && uboot_prepare
+
     if [[ $ARCH == arm* || $ARCH == aarch* ]]; then
         local ARCH=arm
     elif [[ $ARCH == riscv* ]]; then
@@ -27,16 +30,8 @@ compile_boot_loader() {
     # added in name suffix
     change_name_version "-$SOCFAMILY"
 
-    if [[ ! -z $ATF ]]; then
-        export BL31=$SOURCE/$ATF_DIR/bl31.${BL31_BLOB##*.}
-        #export BL31=$SOURCE/$ATF_DIR/bl31.bin
-    fi
-
-    # fixed: transfer to with compile_atf()
-    if [[ $SOCFAMILY == rk35* ]]; then
-        [[ ! -z $ATF && ! -z $BL31_BLOB ]] && ln -fs $SOURCE/$ATF_DIR/bl31.${BL31_BLOB##*.} bl31.${BL31_BLOB##*.}
-        [[ ! -z $ATF && ! -z $OPTEE ]] && ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$OPTEE tee.bin
-    fi
+    # for build u-boot.itb
+    export BL31=$SOURCE/$ATF_DIR/bl31.elf
 
     if [[ $SOCFAMILY == sun20* ]]; then
         [[ ! -z $OPENSBI && ! -z $OPENSBI_BLOB ]] && ln -fs $SOURCE/$OPENSBI_DIR/$OPENSBI_BLOB $OPENSBI_BLOB
@@ -72,13 +67,15 @@ compile_boot_loader() {
 
     # create bootloader
     [[ $(type -t create_uboot) == function ]] && create_uboot
+
+    unset BL31
 }
 
 compile_atf() {
     message "" "compiling" "$ATF_DIR $ATF_BRANCH"
     cd $SOURCE/$ATF_DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    if [[ ${BOOT_LOADER_BUILD_TYPE} != "blobs" && $SOCFAMILY == rk33* ]]; then
+    if [[ ${BOOT_LOADER_BUILD_TYPE} != "blobs" && ${BOOT_LOADER_BUILD_TYPE} != "atf-blob" && $SOCFAMILY == rk33* ]]; then
         make realclean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         CFLAGS='-gdwarf-2' \
         CROSS_COMPILE=$CROSS \
@@ -89,20 +86,6 @@ compile_atf() {
     if [[ $SOCFAMILY == sun50* ]]; then
         make realclean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         make PLAT=$ATF_PLAT DEBUG=0 bl31 >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    fi
-
-    if [[ $SOCFAMILY == rk3* ]]; then
-        if [[ ${BOOT_LOADER_BUILD_TYPE} == "blobs" || ${BOOT_LOADER_BUILD_TYPE} == "spl-blob" ||
-              ${BOOT_LOADER_BUILD_TYPE} == "tpl-spl-blob" ]]; then
-            ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL31_BLOB bl31.elf
-            ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL31_BLOB bl31.bin
-            #[[ ! -z $BL32_BLOB ]] && ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL32_BLOB bl32.bin
-        else
-            ln -fs ./build/$ATF_PLAT/release/bl31/bl31.elf bl31.elf
-            ln -fs ./build/$ATF_PLAT/release/bl31/bl31.elf bl31.bin
-        fi
-    elif [[ $SOCFAMILY == sun50* ]]; then
-        [[ -e ./build/$ATF_PLAT/release/bl31.bin ]] && ln -fs ./build/$ATF_PLAT/release/bl31.bin bl31.bin
     fi
 }
 

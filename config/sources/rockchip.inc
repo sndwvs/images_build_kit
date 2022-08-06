@@ -26,9 +26,9 @@ BOOT_LOADER_BIN="idbloader.img"
 #
 # Available options for BOOT_LOADER_BUILD_TYPE are:
 # 1: blobs: proprietary rockchip ddrbin, miniloader and ATF
-# 2: spl-blob: proprietary rockchip ddrblob and ATF, but uses mainline u-boot SPL in place of rockchip miniloader
-# 3: tpl-spl-blob: uses mainline u-boot TPL and SPL with proprietary rockchip ATF blob
-# 4: tpl-blob-atf-mainline: proprietary rockchip ddrblob + mainline u-boot SPL + mainline ATF
+# 2: tpl-atf-blob: proprietary rockchip ddrblob and ATF, but uses mainline u-boot SPL in place of rockchip miniloader
+# 3: atf-blob: uses mainline u-boot TPL and SPL with proprietary rockchip ATF blob
+# 4: tpl-blob: proprietary rockchip ddrblob + mainline u-boot SPL + mainline ATF
 # 5: free-blobs: mainline u-boot TPL + mainline u-boot SPL + mainline ATF
 
 BOOT_LOADER_BUILD_TYPE="free-blobs"
@@ -55,6 +55,22 @@ esac
 
 
 
+uboot_prepare()
+{
+    if [[ ! -z $ATF ]]; then
+
+        if [[ ${BOOT_LOADER_BUILD_TYPE} == "blobs" || ${BOOT_LOADER_BUILD_TYPE} == "tpl-atf-blob" ||
+              ${BOOT_LOADER_BUILD_TYPE} == "atf-blob" ]]; then
+            ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL31_BLOB -r $SOURCE/$ATF_DIR/bl31.elf
+            #[[ ! -z $BL32_BLOB ]] && ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL32_BLOB -r $SOURCE/$ATF_DIR/bl32.bin
+            [[ ! -z $OPTEE_BLOB ]] && ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$OPTEE_BLOB -r $SOURCE/$ATF_DIR/tee.bin
+        else
+            ln -fs $SOURCE/$ATF_DIR/build/$ATF_PLAT/release/bl31/bl31.elf -r $SOURCE/$ATF_DIR/bl31.elf
+        fi
+
+    fi
+}
+
 create_uboot()
 {
     pushd $SOURCE/$BOOT_LOADER_DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
@@ -76,12 +92,12 @@ create_uboot()
     fi
 
 
-    if [[ $BOOT_LOADER_BUILD_TYPE == "free-blobs" || $BOOT_LOADER_BUILD_TYPE == "tpl-spl-blob" ]]; then
+    if [[ $BOOT_LOADER_BUILD_TYPE == "free-blobs" || $BOOT_LOADER_BUILD_TYPE == "atf-blob" ]]; then
 
         tools/mkimage -n $SOCFAMILY -T rksd -d tpl/u-boot-tpl.bin:spl/u-boot-spl.bin $BOOT_LOADER_BIN >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         install -Dm644 u-boot.itb $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/u-boot.itb >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    elif [[ $BOOT_LOADER_BUILD_TYPE == "spl-blob" || $BOOT_LOADER_BUILD_TYPE == "tpl-blob-atf-mainline" ]]; then
+    elif [[ $BOOT_LOADER_BUILD_TYPE == "tpl-blob" || $BOOT_LOADER_BUILD_TYPE == "tpl-atf-blob" ]]; then
 
         tools/mkimage -n $SOCFAMILY -T rksd -d $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$DDR_BLOB:spl/u-boot-spl.bin $BOOT_LOADER_BIN \
         >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
