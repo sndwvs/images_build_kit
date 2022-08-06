@@ -27,11 +27,12 @@ compile_boot_loader() {
     # added in name suffix
     change_name_version "-$SOCFAMILY"
 
-    [[ ! -z $ATF && ! -z $BL31 ]] && export BL31=$SOURCE/$ATF_DIR/bl31.${BL31##*.}
-    [[ ! -z $ATF && -z $BL31 ]] && export BL31=$SOURCE/$ATF_DIR/bl31.bin
+# fixed
+#    [[ ! -z $ATF && ! -z $BL31_BLOB ]] && export BL31=$SOURCE/$ATF_DIR/bl31.${BL31_BLOB##*.}
+#    [[ ! -z $ATF && -z $BL31_BLOB ]] && export BL31=$SOURCE/$ATF_DIR/bl31.bin
 
     if [[ $SOCFAMILY == rk35* ]]; then
-        [[ ! -z $ATF && ! -z $BL31 ]] && ln -fs $SOURCE/$ATF_DIR/bl31.${BL31##*.} bl31.${BL31##*.}
+        [[ ! -z $ATF && ! -z $BL31_BLOB ]] && ln -fs $SOURCE/$ATF_DIR/bl31.${BL31_BLOB##*.} bl31.${BL31_BLOB##*.}
         [[ ! -z $ATF && ! -z $OPTEE ]] && ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$OPTEE tee.bin
     fi
 
@@ -49,7 +50,7 @@ compile_boot_loader() {
         make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
         # completely open components
-        if [[ USE_DDR_BLOB != yes ]]; then
+        if [[ ${BOOT_LOADER_BUILD_TYPE} != "blobs" ]]; then
             make $CTHREADS ARCH=$ARCH u-boot.itb CROSS_COMPILE=$CROSS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
     fi
@@ -75,7 +76,7 @@ compile_atf() {
     message "" "compiling" "$ATF_DIR $ATF_BRANCH"
     cd $SOURCE/$ATF_DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
-    if [[ -z $BL31 && $SOCFAMILY == rk33* ]]; then
+    if [[ ${BOOT_LOADER_BUILD_TYPE} != "blobs" && $SOCFAMILY == rk33* ]]; then
         make realclean >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         CFLAGS='-gdwarf-2' \
         CROSS_COMPILE=$CROSS \
@@ -89,21 +90,17 @@ compile_atf() {
     fi
 
     if [[ $SOCFAMILY == rk3* ]]; then
-        if [[ -z $BL31 ]]; then
+        if [[ ${BOOT_LOADER_BUILD_TYPE} == "blobs" || ${BOOT_LOADER_BUILD_TYPE} == "spl-blob" ||
+              ${BOOT_LOADER_BUILD_TYPE} == "tpl-spl-blob" ]]; then
+            ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL31_BLOB == "blobs" bl31.elf
+            ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL31_BLOB bl31.bin
+            #[[ ! -z $BL32_BLOB ]] && ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL32_BLOB bl32.bin
+        else
             ln -fs ./build/$ATF_PLAT/release/bl31/bl31.elf bl31.elf
             ln -fs ./build/$ATF_PLAT/release/bl31/bl31.elf bl31.bin
-        else
-            ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL31 bl31.elf
-            ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL31 bl31.bin
-            #[[ ! -z $BL32 ]] && ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL32 bl32.bin
         fi
     elif [[ $SOCFAMILY == sun50* ]]; then
         [[ -e ./build/$ATF_PLAT/release/bl31.bin ]] && ln -fs ./build/$ATF_PLAT/release/bl31.bin bl31.bin
-    fi
-
-    if [[ $SOCFAMILY == rk33* ]]; then
-        $SOURCE/$BOOT_LOADER_TOOLS_DIR/tools/trust_merger $CWD/config/atf/$SOCFAMILY/trust.ini >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        install -Dm644 trust.img $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
 }
 
