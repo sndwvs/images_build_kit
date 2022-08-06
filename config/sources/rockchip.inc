@@ -94,8 +94,10 @@ create_uboot()
         $SOURCE/$BOOT_LOADER_TOOLS_DIR/tools/loaderimage --pack --uboot u-boot-dtb.bin uboot.img $LOAD_ADDRESS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         install -Dm644 uboot.img $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/uboot.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
+        pushd $SOURCE/$ATF_DIR >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         $SOURCE/$BOOT_LOADER_TOOLS_DIR/tools/trust_merger $CWD/config/atf/$SOCFAMILY/trust.ini >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         install -Dm644 trust.img $BUILD/$OUTPUT/$TOOLS/$BOARD_NAME/boot/trust.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        popd >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     else
        echo "Without supporting the setting '$BOOT_LOADER_BUILD_TYPE' for u-boot" >> $LOG 2>&1 && false || (message "err" "details" && exit 1) || exit 1
