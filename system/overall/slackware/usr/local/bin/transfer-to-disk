@@ -179,7 +179,8 @@ prepare_disk() {
     TRUST_OFFSET_LOADER=$(echo $OFFSET_LOADER | cut -d ':' -f3)
 
     if [[ ( ! -e /boot/$SPL_LOADER || ! -e /boot/$UBOOT_LOADER || ! -e /boot/$TRUST_LOADER ) || \
-          ( ! -e /boot/$SPL_LOADER || ! -e /boot/$UBOOT_LOADER ) ]]; then
+          ( ! -e /boot/$SPL_LOADER || ! -e /boot/$UBOOT_LOADER ) || \
+          ! -e /boot/$SPL_LOADER ]]; then
         msginfo " ATTENTION " "\nmissing one of the bootloader files in the /boot directory\nfor your hardware\nSoC: '$COMPATIBLE'\nmodel: '$MODEL'" && exit 1
     fi
 
