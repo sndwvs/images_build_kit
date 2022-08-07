@@ -61,9 +61,9 @@ uboot_prepare()
 
         if [[ ${BOOT_LOADER_BUILD_TYPE} == "blobs" || ${BOOT_LOADER_BUILD_TYPE} == "tpl-atf-blob" ||
               ${BOOT_LOADER_BUILD_TYPE} == "atf-blob" ]]; then
-            ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL31_BLOB -r $SOURCE/$ATF_DIR/bl31.elf
             #[[ ! -z $BL32_BLOB ]] && ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL32_BLOB -r $SOURCE/$ATF_DIR/bl32.bin
             [[ ! -z $OPTEE_BLOB ]] && ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$OPTEE_BLOB -r $SOURCE/$ATF_DIR/tee.bin
+            ln -fs $SOURCE/$RKBIN_DIR/bin/${SOCFAMILY:0:4}/$BL31_BLOB -r $SOURCE/$ATF_DIR/bl31.elf
         else
             ln -fs $SOURCE/$ATF_DIR/build/$ATF_PLAT/release/bl31/bl31.elf -r $SOURCE/$ATF_DIR/bl31.elf
         fi
@@ -119,7 +119,7 @@ create_uboot()
        echo "Without supporting the setting '$BOOT_LOADER_BUILD_TYPE' for u-boot" >> $LOG 2>&1 && false || (message "err" "details" && exit 1) || exit 1
     fi
 
-    if [[ $BOOT_LOADER_SPI = yes ]] ; then
+    if [[ $BOOT_LOADER_SPI == yes ]]; then
 
         tools/mkimage -n $SOCFAMILY -T rkspi -d tpl/u-boot-tpl.bin:spl/u-boot-spl.bin rkspi_tpl_spl.img >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         dd if=/dev/zero of=rkspi_loader.img count=8192 status=none >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
