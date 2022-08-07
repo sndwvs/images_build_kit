@@ -23,12 +23,12 @@ MODEL=$(cat /proc/device-tree/model | tr -d [:cntrl:])
 
 
 case ${COMPATIBLE} in
-    *rock64*|*rock*pi*|*pinebook*pro*|*station*m1*)
+    *rock*pi*[4s]|*pinebook*pro*|*station*[pm]2*)
             OFFSET_LOADER="64:16384:24576"
             LOADER="idbloader.img:uboot.img:trust.img"
             FIX_BOOT_DISK=true
     ;;
-    *rockpro64*|*firefly*rk33*|*helios64*|*station*p1*)
+    *rock64*|*rockpro64*|*firefly*rk33*|*rock*pi*e*|*helios64*|*station*p1*|*station*m1*)
             OFFSET_LOADER="64:16384:"
             LOADER="idbloader.img:u-boot.itb:"
             FIX_BOOT_DISK=true
@@ -177,6 +177,11 @@ prepare_disk() {
     SPL_OFFSET_LOADER=$(echo $OFFSET_LOADER | cut -d ':' -f1)
     UBOOT_OFFSET_LOADER=$(echo $OFFSET_LOADER | cut -d ':' -f2)
     TRUST_OFFSET_LOADER=$(echo $OFFSET_LOADER | cut -d ':' -f3)
+
+    if [[ ( ! -e /boot/$SPL_LOADER || ! -e /boot/$UBOOT_LOADER || ! -e /boot/$TRUST_LOADER ) || \
+          ( ! -e /boot/$SPL_LOADER || ! -e /boot/$UBOOT_LOADER ) ]]; then
+        msginfo " ATTENTION " "\nmissing one of the bootloader files in the /boot directory\nfor your hardware\nSoC: '$COMPATIBLE'\nmodel: '$MODEL'" && exit 1
+    fi
 
     if [[ ${MODEL} == *X96*Max* ]]; then
         msginfo " ATTENTION " "\nstart backup u-boot default"
