@@ -28,7 +28,7 @@ case ${COMPATIBLE} in
             LOADER="idbloader.img:uboot.img:trust.img"
             FIX_BOOT_DISK=true
     ;;
-    *rock64*|*rockpro64*|*firefly*rk33*|*rock*pi*e*|*helios64*|*station*p1*|*station*m1*)
+    *rock64*|*rockpro64*|*firefly*rk33*|*rock*pi*e*|*helios64*|*station*p1*|*station*m1*|*rock3*|*quartz64*)
             OFFSET_LOADER="64:16384:"
             LOADER="idbloader.img:u-boot.itb:"
             FIX_BOOT_DISK=true
@@ -66,7 +66,7 @@ case ${COMPATIBLE} in
             fi
     ;;
     *)
-            exit
+            msginfo " ATTENTION " "\nsystem migration is not supported\nfor your hardware\nSoC: '$COMPATIBLE'\nmodel: '$MODEL'" && exit 1
     ;;
 
 esac
@@ -209,16 +209,22 @@ prepare_disk() {
         dd if=/boot/$TRUST_LOADER of=/dev/$DISK seek=$TRUST_OFFSET_LOADER status=noxfer >/dev/null 2>&1
     fi
 
-    [[ ${COMPATIBLE} =~ raspberry*pi || ${MODEL} == *X96*Max* ]] && unset OFFSET && SIZE="+512M"
+    [[ ${COMPATIBLE} =~ raspberry.*pi || ${MODEL} == *X96*Max* ]] && unset OFFSET && SIZE="+512M"
 
     echo -e "\no\nn\np\n${PART}\n${OFFSET}\n${SIZE}\nw" | fdisk "/dev/$DISK" >/dev/null 2>&1 || true
 
     # device is busy
     sleep 2
 
-    if [[ ${COMPATIBLE} =~ raspberry*pi || ${MODEL} == *X96*Max* ]]; then
+    if [[ ${COMPATIBLE} =~ raspberry.*pi || ${MODEL} == *X96*Max* ]]; then
         echo -e "\nn\np\n\n\n\nt\n${PART}\nc\nw" | fdisk "/dev/$DISK" >/dev/null 2>&1
     fi
+
+    if [[ ${COMPATIBLE} =~ .*rock3.*|.*quartz64.* ]]; then
+        OFFSET=32768 && SIZE="+512M"
+        echo -e "\ng\nn\n1\n$OFFSET\n$SIZE\nt\n1\nn\n2\n\n\nw" | fdisk "/dev/$DISK" >/dev/null 2>&1
+    fi
+
     if [[ ${MODEL} == *X96*Max* ]]; then
         msginfo " ATTENTION " "\nstart restore u-boot"
         dd if=/boot/u-boot-default-aml.img of="/dev/$DISK" bs=1M count=4 >/dev/null 2>&1
@@ -232,10 +238,14 @@ prepare_disk() {
         DISK=${DISK}${PART}
     fi
 
-    if [[ ${COMPATIBLE} =~ raspberry*pi || ${MODEL} == *X96*Max* ]]; then
+    if [[ ${COMPATIBLE} =~ raspberry.*pi || ${MODEL} == *X96*Max* ]]; then
         DISK0=$DISK
         DISK=$(echo ${DISK} | sed 's:\(\w\)$:2:g')
         mkfs.vfat -F 32 "/dev/$DISK0" >/dev/null 2>&1
+    elif [[ ${COMPATIBLE} =~ .*rock3.*|.*quartz64.* ]]; then
+        DISK0=$DISK
+        DISK=$(echo ${DISK} | sed 's:\(\w\)$:2:g')
+        echo y | mkfs.ext4 -F -m 0 -L boot "/dev/$DISK0" >/dev/null 2>&1
     fi
 
     echo y | mkfs.ext4 -F -m 0 -L linuxroot "/dev/$DISK" >/dev/null 2>&1
@@ -297,7 +307,7 @@ fix_config() {
         fi
 
         DISK=${DISK%[0-9]*}
-        [[ ${COMPATIBLE} =~ raspberry*pi && ! $(grep "${DISK}" $OUTPUT/boot/cmdline.txt 2>/dev/null) ]] && sed -i "s/\(root=\/dev\/\).*/\1${DISK}/g" $OUTPUT/boot/cmdline.txt
+        [[ ${COMPATIBLE} =~ raspberry.*pi && ! $(grep "${DISK}" $OUTPUT/boot/cmdline.txt 2>/dev/null) ]] && sed -i "s/\(root=\/dev\/\).*/\1${DISK}/g" $OUTPUT/boot/cmdline.txt
     fi
     sed -i '/\(=.*\)/,/^$/d;/\(if.*\)/,/^$/d' $OUTPUT/etc/issue
 }
@@ -330,7 +340,7 @@ DISK=$OUT
 
 mount /dev/$DISK $OUTPUT
 
-if [[ ${COMPATIBLE} =~ raspberry*pi || ${MODEL} == *X96*Max* ]] ;then
+if [[ ${COMPATIBLE} =~ raspberry.*pi|.*rock3.*|.*quartz64.* || ${MODEL} == *X96*Max* ]]; then
     mkdir -p $OUTPUT/boot
     DISK0=$(echo ${DISK} | sed 's:\(\w\)$:1:g')
     mount /dev/$DISK0 $OUTPUT/boot
@@ -340,7 +350,7 @@ transfer
 
 fix_config "$DISK"
 
-[[ ${COMPATIBLE} =~ raspberry*pi || ${MODEL} == *X96*Max* ]] && umount $OUTPUT/boot
+[[ ${COMPATIBLE} =~ raspberry.*pi|.*rock3.*|.*quartz64.* || ${MODEL} == *X96*Max* ]] && umount $OUTPUT/boot
 
 umount $OUTPUT
 
