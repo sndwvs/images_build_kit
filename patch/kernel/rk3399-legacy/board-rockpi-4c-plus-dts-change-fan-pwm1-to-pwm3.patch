@@ -1,0 +1,24 @@
+From 45db073a6b25ed6b4e1ee17e94875d90ab864b61 Mon Sep 17 00:00:00 2001
+From: Ken <ken@radxa.com>
+Date: Mon, 18 Apr 2022 17:29:39 +0800
+Subject: [PATCH] arm64: dts: rockpi-4cplus: change fan pwm1 to pwm3
+
+Signed-off-by: Ken <ken@radxa.com>
+---
+ arch/arm64/boot/dts/rockchip/rk3399-rock-pi-4c-plus.dts | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/rockchip/rk3399-rock-pi-4c-plus.dts b/arch/arm64/boot/dts/rockchip/rk3399-rock-pi-4c-plus.dts
+index c4a5ae283f791..70adc7ea70419 100644
+--- a/arch/arm64/boot/dts/rockchip/rk3399-rock-pi-4c-plus.dts
++++ b/arch/arm64/boot/dts/rockchip/rk3399-rock-pi-4c-plus.dts
+@@ -749,8 +749,7 @@
+ 	status = "disabled";
+ };
+ 
+-/* pwm fan */
+-&pwm1 {
++&pwm3 {
+ 	status = "okay";
+ };
+ 

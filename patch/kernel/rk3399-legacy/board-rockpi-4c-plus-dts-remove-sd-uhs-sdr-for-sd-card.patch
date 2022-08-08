@@ -1,0 +1,25 @@
+From 9af8592731dc0d3769bc759c7ed2ab5d02608cc4 Mon Sep 17 00:00:00 2001
+From: Stephen <stephen@vamrs.com>
+Date: Sat, 15 Jan 2022 21:39:50 +0800
+Subject: [PATCH] arm64: dts: rockpi-4cplus: remove sd-uhs-sdr* for sd card
+
+Signed-off-by: Stephen <stephen@vamrs.com>
+---
+ arch/arm64/boot/dts/rockchip/rk3399-rock-pi-4c-plus.dts | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/rockchip/rk3399-rock-pi-4c-plus.dts b/arch/arm64/boot/dts/rockchip/rk3399-rock-pi-4c-plus.dts
+index 352883ada00eb..2c691d8c7d9bb 100644
+--- a/arch/arm64/boot/dts/rockchip/rk3399-rock-pi-4c-plus.dts
++++ b/arch/arm64/boot/dts/rockchip/rk3399-rock-pi-4c-plus.dts
+@@ -261,10 +261,6 @@
+ 	cap-sd-highspeed;
+ 	disable-wp;
+ 	num-slots = <1>;
+-	sd-uhs-sdr12;
+-	sd-uhs-sdr25;
+-	sd-uhs-sdr50;
+-	sd-uhs-sdr104;
+ 	vqmmc-supply = <&vccio_sd>;
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&sdmmc_clk &sdmmc_cmd &sdmmc_cd &sdmmc_bus4>;

@@ -1,0 +1,31 @@
+From fc9c70b1256f1452e45b3fedbd7cc896d12f562a Mon Sep 17 00:00:00 2001
+From: marcone <48169102+marcone@users.noreply.github.com>
+Date: Sat, 25 Jun 2022 06:01:37 -0700
+Subject: [PATCH] arm64: dts: rockpi-4cplus: add user-led1 (#12)
+
+Add an entry for the green "power" led, so it can be controlled
+in the same way as the red/blue "status" led. By default it is set
+to just be on so it functions as before.
+
+Signed-off-by: Marco Nelissen<marco.nelissen@gmail.com>
+---
+ arch/arm64/boot/dts/rockchip/rk3399-rock-pi-4c-plus.dts | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/arch/arm64/boot/dts/rockchip/rk3399-rock-pi-4c-plus.dts b/arch/arm64/boot/dts/rockchip/rk3399-rock-pi-4c-plus.dts
+index 7b2a3384e8ded..8fae0322b5339 100644
+--- a/arch/arm64/boot/dts/rockchip/rk3399-rock-pi-4c-plus.dts
++++ b/arch/arm64/boot/dts/rockchip/rk3399-rock-pi-4c-plus.dts
+@@ -191,6 +191,12 @@
+ 		compatible = "gpio-leds";
+ 		status = "okay";
+ 
++		user-led1 {
++			gpios = <&gpio3 RK_PD4 GPIO_ACTIVE_LOW>;
++			linux,default-trigger = "default-on";
++			default-state = "on";
++		};
++
+ 		user-led2 {
+ 			gpios = <&gpio3 RK_PD5 GPIO_ACTIVE_HIGH>;
+ 			linux,default-trigger = "heartbeat";
