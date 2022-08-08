@@ -20,7 +20,7 @@ diff --git a/drivers/soc/Kconfig b/drivers/soc/Kconfig
 index 833e04a7835c..9ddbd976395d 100644
 --- a/drivers/soc/Kconfig
 +++ b/drivers/soc/Kconfig
-@@ -23,5 +23,6 @@
+@@ -21,5 +21,6 @@ source "drivers/soc/ux500/Kconfig"
  source "drivers/soc/ux500/Kconfig"
  source "drivers/soc/versatile/Kconfig"
  source "drivers/soc/xilinx/Kconfig"
@@ -28,9 +28,10 @@ index 833e04a7835c..9ddbd976395d 100644
  
  endmenu
 diff --git a/drivers/soc/Makefile b/drivers/soc/Makefile
-index 2ec355003524..277b5bf269c7 100644
+index f678e4d9e..cfc815a7e 100644
 --- a/drivers/soc/Makefile
 +++ b/drivers/soc/Makefile
+@@ -29,3 +29,4 @@ obj-y				+= ti/
  obj-$(CONFIG_ARCH_U8500)	+= ux500/
  obj-$(CONFIG_PLAT_VERSATILE)	+= versatile/
  obj-y				+= xilinx/

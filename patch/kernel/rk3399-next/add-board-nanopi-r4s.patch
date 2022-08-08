@@ -1,157 +1,76 @@
---- a/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dts	2022-04-23 14:34:53.819331574 +0300
-+++ b/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dts	2022-04-23 14:39:56.871182238 +0300
-@@ -17,50 +17,53 @@
- 
- / {
- 	model = "FriendlyElec NanoPi R4S";
--	compatible = "friendlyarm,nanopi-r4s", "rockchip,rk3399";
+This patch is an adapted version of:
+https://github.com/friendlyarm/kernel-rockchip/commit/0e2cbeb4b1e645f5827b54bf50c65577be3eb7b4
+
+Adjusted:
+ - do not mess with common Nano{Pi,PC}4 device tree (rk3399-nanopi4.dtsi)
+ - disabled non existent bluetooth node at uart0
+ - disabled usb_host1
+
+diff --git a/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dts b/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dts
+new file mode 100644
+index 000000000000..7b136d4707c8
+--- /dev/null
++++ b/arch/arm64/boot/dts/rockchip/rk3399-nanopi-r4s.dts
+@@ -0,0 +1,156 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright (c) 2020 FriendlyElec Computer Tech. Co., Ltd.
++ * (http://www.friendlyarm.com)
++ */
++
++/dts-v1/;
++#include "rk3399-nanopi4.dtsi"
++
++/ {
++	model = "FriendlyElec NanoPi R4S";
 +	compatible = "friendlyelec,nanopi-r4s", "rockchip,rk3399";
- 
--	/delete-node/ display-subsystem;
--
--	gpio-leds {
--		pinctrl-0 = <&lan_led_pin>, <&sys_led_pin>, <&wan_led_pin>;
++
 +	aliases {
 +		ethernet1 = &r8169;
 +	};
- 
--		/delete-node/ led-0;
++
++	gpio-keys {
++		button@1 {
++			debounce-interval = <50>;
++			gpios = <&gpio1 RK_PC6 GPIO_ACTIVE_LOW>;
++			label = "K1";
++			linux,code = <BTN_1>;
++			wakeup-source;
++		};
++	};
++
 +	vdd_5v: vdd-5v {
 +		compatible = "regulator-fixed";
 +		regulator-name = "vdd_5v";
 +		regulator-always-on;
 +		regulator-boot-on;
 +	};
- 
--		lan_led: led-lan {
--			gpios = <&gpio1 RK_PA1 GPIO_ACTIVE_HIGH>;
--			label = "green:lan";
--		};
-+	fan: pwm-fan {
-+		compatible = "pwm-fan";
-+		cooling-levels = <0 18 102 170 255>;
-+		#cooling-cells = <2>;
-+		fan-supply = <&vdd_5v>;
-+		pwms = <&pwm1 0 50000 0>;
++
++	vcc5v0_usb1: vcc5v0-usb1 {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc5v0_usb1";
++		regulator-always-on;
++		regulator-boot-on;
++		vin-supply = <&vcc5v0_sys>;
++	};
++
++	vcc5v0_usb2: vcc5v0-usb2 {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc5v0_usb2";
++		regulator-always-on;
++		regulator-boot-on;
++		vin-supply = <&vcc5v0_sys>;
 +	};
 +};
- 
--		sys_led: led-sys {
--			gpios = <&gpio0 RK_PB5 GPIO_ACTIVE_HIGH>;
--			label = "red:power";
--			default-state = "on";
-+&cpu_thermal {
-+	trips {
-+		cpu_warm: cpu_warm {
-+			temperature = <55000>;
-+			hysteresis = <2000>;
-+			type = "active";
- 		};
- 
--		wan_led: led-wan {
--			gpios = <&gpio1 RK_PA0 GPIO_ACTIVE_HIGH>;
--			label = "green:wan";
-+		cpu_hot: cpu_hot {
-+			temperature = <65000>;
-+			hysteresis = <2000>;
-+			type = "active";
- 		};
- 	};
- 
--	gpio-keys {
--		pinctrl-0 = <&reset_button_pin>;
--
--		/delete-node/ power;
--
--		reset {
--			debounce-interval = <50>;
--			gpios = <&gpio1 RK_PC6 GPIO_ACTIVE_LOW>;
--			label = "reset";
--			linux,code = <KEY_RESTART>;
-+	cooling-maps {
-+		map2 {
-+			trip = <&cpu_warm>;
-+			cooling-device = <&fan THERMAL_NO_LIMIT 1>;
- 		};
--	};
- 
--	vdd_5v: vdd-5v {
--		compatible = "regulator-fixed";
--		regulator-name = "vdd_5v";
--		regulator-always-on;
--		regulator-boot-on;
-+		map3 {
-+			trip = <&cpu_hot>;
-+			cooling-device = <&fan 2 THERMAL_NO_LIMIT>;
-+		};
- 	};
- };
- 
-@@ -68,38 +71,87 @@
- 	status = "disabled";
- };
- 
--&i2c4 {
-+&fusb0 {
- 	status = "disabled";
- };
- 
--&pcie0 {
--	max-link-speed = <1>;
--	num-lanes = <1>;
--	vpcie3v3-supply = <&vcc3v3_sys>;
-+&i2c2 {
-+	clock-frequency = <200000>;
-+	i2c-scl-rising-time-ns = <150>;
-+	i2c-scl-falling-time-ns = <30>;
-+	status = "okay";
 +
-+	eeprom@51 {
-+		compatible = "microchip,24c02", "atmel,24c02";
-+		reg = <0x51>;
-+		#address-cells = <2>;
-+		#size-cells = <0>;
-+		pagesize = <16>;
-+		size = <256>;
-+
-+		eui_48: eui-48@fa {
-+			reg = <0xfa 0x06>;
-+		};
-+	};
- };
- 
--&pinctrl {
--	gpio-leds {
--		/delete-node/ status-led-pin;
-+&i2c4 {
++&emmc_phy {
 +	status = "disabled";
 +};
- 
--		lan_led_pin: lan-led-pin {
--			rockchip,pins = <1 RK_PA1 RK_FUNC_GPIO &pcfg_pull_none>;
--		};
-+&keys {
-+	button@1 {
-+		debounce-interval = <50>;
-+		gpios = <&gpio1 RK_PC6 GPIO_ACTIVE_LOW>;
-+		label = "K1";
-+		linux,code = <BTN_1>;
-+		wakeup-source;
-+	};
++
++&fusb0 {
++	status = "disabled";
 +};
- 
--		sys_led_pin: sys-led-pin {
--			rockchip,pins = <0 RK_PB5 RK_FUNC_GPIO &pcfg_pull_none>;
--		};
-+&key_pins {
-+	rockchip,pins =
-+		<0 RK_PA5 RK_FUNC_GPIO &pcfg_pull_up>,
-+		<1 RK_PC6 RK_FUNC_GPIO &pcfg_pull_up>;
-+};
- 
--		wan_led_pin: wan-led-pin {
--			rockchip,pins = <1 RK_PA0 RK_FUNC_GPIO &pcfg_pull_none>;
--		};
++
 +&leds {
 +	lan_led: led-2 {
 +		gpios = <&gpio1 RK_PA1 GPIO_ACTIVE_HIGH>;
@@ -161,25 +80,27 @@
 +	wan_led: led-3 {
 +		gpios = <&gpio1 RK_PA0 GPIO_ACTIVE_HIGH>;
 +		label = "wan_led";
- 	};
++	};
 +};
 +
-+&leds_pin {
-+	rockchip,pins =
-+		<0 RK_PB5 RK_FUNC_GPIO &pcfg_pull_none>,
-+		<1 RK_PA0 RK_FUNC_GPIO &pcfg_pull_none>,
-+		<1 RK_PA1 RK_FUNC_GPIO &pcfg_pull_none>;
++&pinctrl {
++	key_pins {
++		rockchip,pins =
++			<1 RK_PC6 RK_FUNC_GPIO &pcfg_pull_up>;
++	};
++
++	network_leds_pins {
++		rockchip,pins =
++			<1 RK_PA0 RK_FUNC_GPIO &pcfg_pull_none>,
++			<1 RK_PA1 RK_FUNC_GPIO &pcfg_pull_none>;
++	};
 +};
- 
--	rockchip-key {
--		/delete-node/ power-key;
-+&mach {
++
++/*&mach {
 +	hwrev = <0x09>;
 +	model = "NanoPi R4S";
-+};
- 
--		reset_button_pin: reset-button-pin {
--			rockchip,pins = <1 RK_PC6 RK_FUNC_GPIO &pcfg_pull_up>;
++};*/
++
 +&pcie0 {
 +	max-link-speed = <1>;
 +	num-lanes = <1>;
@@ -193,19 +114,57 @@
 +		r8169: pcie@0,0 {
 +			reg = <0x000000 0 0 0 0>;
 +			local-mac-address = [ 00 00 00 00 00 00 ];
- 		};
- 	};
- };
-@@ -131,3 +183,12 @@
- &vcc3v3_sys {
- 	vin-supply = <&vcc5v0_sys>;
- };
++		};
++	};
++};
 +
-+// tweaks
++&sdhci {
++	status = "disabled";
++};
++
++&sdio0 {
++	status = "disabled";
++};
++
++&sdmmc {
++	host-index-min = <1>;
++};
++
++&u2phy0_host {
++	phy-supply = <&vdd_5v>;
++};
++
++&u2phy1_host {
++	status = "disabled";
++};
++
++&usbdrd_dwc3_0 {
++	dr_mode = "host";
++};
++
++&vcc3v3_sys {
++	vin-supply = <&vcc5v0_sys>;
++};
++
++// Armbian tweaks
 +&lan_led {
-+       linux,default-trigger = "r8169-0-100:00:link";
++	linux,default-trigger = "r8169-100:00:link";
 +};
 +
 +&wan_led {
-+       linux,default-trigger = "stmmac-0:01:link";
++	linux,default-trigger = "stmmac-0:01:link";
++};
++
++&uart0 {
++	bluetooth {
++		status = "disabled";
++	};
++};
++
++&usb_host1_ehci {
++	status = "disabled";
++};
++
++&usb_host1_ohci {
++	status = "disabled";
 +};

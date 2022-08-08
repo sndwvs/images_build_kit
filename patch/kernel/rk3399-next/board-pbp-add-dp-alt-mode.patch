@@ -88,16 +88,7 @@ index 0edfb89e04a8..40dd68c20159 100644
 +#include <linux/extcon-provider.h>
  #include <linux/mutex.h>
  #include <linux/module.h>
- #include <linux/property.h>
-@@ -68,6 +70,8 @@
- 	struct fwnode_handle *connector_fwnode;
- };
- 
-+static void dp_altmode_update_extcon(struct dp_altmode *dp, bool disconnect);
-+
- static int dp_altmode_notify(struct dp_altmode *dp)
- {
- 	unsigned long conf;
+ #include <linux/usb/pd_vdo.h>
 diff --git a/drivers/usb/typec/altmodes/displayport.c b/drivers/usb/typec/altmodes/displayport.c
 index ba1387ab5..4d2eaeab1 100644
 --- a/drivers/usb/typec/altmodes/displayport.c
@@ -116,7 +107,7 @@ index ba1387ab5..4d2eaeab1 100644
  	return ret;
  }
  
-+static void dp_altmode_update_extcon(struct dp_altmode *dp, bool disconnect) {
++void dp_altmode_update_extcon(struct dp_altmode *dp, bool disconnect) {
 +	const struct device *dev = &dp->port->dev;
 +	struct extcon_dev* edev = NULL;
 +
@@ -383,7 +374,7 @@ index 82b19ebd7838..6f00b17afc15 100644
  static int tcpm_fw_get_caps(struct tcpm_port *port,
  			    struct fwnode_handle *fwnode)
  {
-@@ -5934,6 +6037,23 @@
+@@ -4434,6 +4537,23 @@ static int tcpm_fw_get_caps(struct tcpm_port *port,
  	if (!fwnode)
  		return -EINVAL;
  
@@ -407,9 +398,27 @@ index 82b19ebd7838..6f00b17afc15 100644
  	/*
  	 * This fwnode has a "compatible" property, but is never populated as a
  	 * struct device. Instead we simply parse it to read the properties.
-@@ -6393,6 +6513,12 @@
- 				     port->port_altmode, ALTMODE_DISCOVERY_MAX);
- 	port->registered = true;
+@@ -4766,6 +4886,17 @@ struct tcpm_port *tcpm_register_port(struct device *dev, struct tcpc_dev *tcpc)
+ 		goto out_destroy_wq;
+ 
+ 	port->try_role = port->typec_caps.prefer_role;
++#ifdef CONFIG_EXTCON
++	port->extcon = devm_extcon_dev_allocate(dev, port->extcon_cables);
++	if (IS_ERR(port->extcon)) {
++		dev_err(dev, "Failed to allocate extcon device: %ld", PTR_ERR(port->extcon));
++		goto out_destroy_wq;
++	}
++	if((err = devm_extcon_dev_register(dev, port->extcon))) {
++		dev_err(dev, "Failed to register extcon device: %d", err);
++		goto out_destroy_wq;
++	}
++#endif
+ 
+ 	port->typec_caps.fwnode = tcpc->fwnode;
+ 	port->typec_caps.revision = 0x0120;	/* Type-C spec release 1.2 */
+@@ -4793,6 +4924,12 @@ struct tcpm_port *tcpm_register_port(struct device *dev, struct tcpc_dev *tcpc)
+ 		goto out_role_sw_put;
+ 	}
  
 +	err = tcpm_fw_get_caps_late(port, tcpc->fwnode);
 +	if (err < 0) {
@@ -423,3 +432,16 @@ index 82b19ebd7838..6f00b17afc15 100644
 -- 
 2.26.2
 
+diff --git a/drivers/usb/typec/altmodes/displayport.c b/drivers/usb/typec/altmodes/displayport.c
+index c1d8c23ba..bb08742b3 100644
+--- a/drivers/usb/typec/altmodes/displayport.c
++++ b/drivers/usb/typec/altmodes/displayport.c
+@@ -68,6 +68,8 @@ struct dp_altmode {
+ 	struct fwnode_handle *connector_fwnode;
+ };
+ 
++void dp_altmode_update_extcon(struct dp_altmode *dp, bool disconnect);
++
+ static int dp_altmode_notify(struct dp_altmode *dp)
+ {
+ 	unsigned long conf;
