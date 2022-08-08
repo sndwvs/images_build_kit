@@ -19,8 +19,8 @@ itest.b *0x10028 == 0x03 && echo "U-boot loaded from SPI"
 echo "Boot script loaded from ${devtype}"
 
 if test -e ${devtype} ${devnum} ${prefix}uEnv.txt; then
-	load ${devtype} ${devnum} ${load_addr} ${prefix}uEnv.txt
-	env import -t ${load_addr} ${filesize}
+    load ${devtype} ${devnum} ${load_addr} ${prefix}uEnv.txt
+    env import -t ${load_addr} ${filesize}
 fi
 
 if test "${console}" = "display" || test "${console}" = "both"; then setenv consoleargs "console=%SERIAL_CONSOLE%,%SERIAL_CONSOLE_SPEED% console=tty1"; fi
