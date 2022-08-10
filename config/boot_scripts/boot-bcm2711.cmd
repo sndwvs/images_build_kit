@@ -14,7 +14,7 @@ if load ${devtype} ${devnum}:1 ${load_addr} uEnv.txt; then
 fi
 
 if test "${console}" = "display" || test "${console}" = "both"; then setenv consoleargs "earlyprintk console=tty1"; fi
-if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "${consoleargs} console=%SERIAL_CONSOLE%,%SERIAL_CONSOLE_SPEED%n8"; fi
+if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "console=%SERIAL_CONSOLE%,%SERIAL_CONSOLE_SPEED%n8 ${consoleargs}"; fi
 
 fdt addr ${fdt_addr}
 fdt get value bootargs /chosen bootargs

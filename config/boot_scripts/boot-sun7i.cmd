@@ -26,7 +26,7 @@ if test -e ${devtype} ${devnum} ${load_addr} ${prefix}uEnv.txt; then
 fi
 
 if test "${console}" = "display" || test "${console}" = "both"; then setenv consoleargs "earlyprintk console=tty1"; fi
-if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "${consoleargs} console=%SERIAL_CONSOLE%,%SERIAL_CONSOLE_SPEED%"; fi
+if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "console=%SERIAL_CONSOLE%,%SERIAL_CONSOLE_SPEED% ${consoleargs}"; fi
 
 # get PARTUUID of first partition on SD/eMMC it was loaded from
 # mmc 0 is always mapped to device u-boot (2016.09+) was loaded from

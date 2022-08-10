@@ -21,7 +21,7 @@ if load ${devtype} ${devnum} ${load_addr} ${prefix}uEnv.txt; then
 fi
 
 if test "${console}" = "display" || test "${console}" = "both"; then setenv consoleargs "console=tty1"; fi
-if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "${consoleargs} console=%SERIAL_CONSOLE%,%SERIAL_CONSOLE_SPEED%n8"; fi
+if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "console=%SERIAL_CONSOLE%,%SERIAL_CONSOLE_SPEED%n8 ${consoleargs}"; fi
 if test "${earlycon}" = "on"; then setenv consoleargs "earlycon ${consoleargs}"; fi
 
 setenv bootargs "root=${rootdev} ro rootwait rootfstype=${rootfstype} init=/sbin/init ${consoleargs} consoleblank=0 loglevel=${verbosity} usb-storage.quirks=${usbstoragequirks} ${extraargs}"

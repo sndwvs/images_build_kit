@@ -102,7 +102,7 @@ if test "${kernel}" = "legacy"; then
     fi
 
     if test "${console}" = "display" || test "${console}" = "both"; then setenv consoleargs "console=tty1"; fi
-    if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "${consoleargs} console=ttyS0,%SERIAL_CONSOLE_SPEED%"; fi
+    if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "console=ttyS0,%SERIAL_CONSOLE_SPEED% ${consoleargs}"; fi
 
     setenv bootargs "root=${rootdev} ro rootwait rootfstype=${rootfstype} init=/sbin/init ${consoleargs} consoleblank=0 coherent_pool=2M loglevel=${verbosity} ${amlogic} no_console_suspend fsck.repair=yes net.ifnames=0 elevator=noop hdmimode=${hdmimode} cvbsmode=576cvbs max_freq_a55=${max_freq_a55} maxcpus=${maxcpus} voutmode=${voutmode} ${cmode} disablehpd=${disablehpd} cvbscable=${cvbscable} overscan=${overscan} ${hid_quirks} monitor_onoff=${monitor_onoff} ${cec_enable} sdrmode=${sdrmode}"
     echo "Legacy bootargs: ${bootargs}"
