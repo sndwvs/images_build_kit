@@ -360,7 +360,7 @@ setting_ntp() {
 
 
 create_initrd() {
-    if [[ $MARCH == "x86_64" || ( $MARCH != "riscv64" && $ARCH == "riscv64" ) ]]; then
+    if [[ $MARCH == "x86_64" ]]; then
         if [[ $SOCFAMILY == bcm2* || $BOARD_NAME == x96_max_plus ]]; then
             find "$SOURCE/$ROOTFS/boot/" -type l -exec rm -rf {} \+ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
@@ -374,11 +374,17 @@ create_initrd() {
     mount --bind /dev "$SOURCE/$ROOTFS/dev"
     mount --bind /proc "$SOURCE/$ROOTFS/proc"
 
-    echo "mkinitrd -R -L -u -w 2 -c -k ${KERNEL_VERSION} -m ${INITRD_MODULES} \\" > "$SOURCE/$ROOTFS/tmp/initrd.sh"
-    echo "         -s /tmp/initrd-tree -o /tmp/initrd.gz" >> "$SOURCE/$ROOTFS/tmp/initrd.sh"
     # mkinitrd corrupted for ARM
-    [[ $ARCH == arm ]] && export MKINITRD_ALLOWEXEC=yes
+    export MKINITRD_ALLOWEXEC=yes && echo "export MKINITRD_ALLOWEXEC=yes" > "$SOURCE/$ROOTFS/tmp/initrd.sh"
+    echo "mkinitrd -R -L -u -w 2 -c -k ${KERNEL_VERSION} -m ${INITRD_MODULES} \\" >> "$SOURCE/$ROOTFS/tmp/initrd.sh"
+    echo "         -s /tmp/initrd-tree -o /tmp/initrd.gz" >> "$SOURCE/$ROOTFS/tmp/initrd.sh"
+
+    [[ $MARCH == "aarch64" && ( $ARCH == "riscv64" || $ARCH == "arm" ) ]] && prepare_chroot "prepare"
     chroot "$SOURCE/$ROOTFS" /bin/bash -c 'chmod +x /tmp/initrd.sh > /dev/null 2>&1 && /tmp/initrd.sh > /dev/null 2>&1'
+    [[ $MARCH == "aarch64" && ( $ARCH == "riscv64" || $ARCH == "arm" ) ]] && prepare_chroot "cleaning"
+
+    umount "$SOURCE/$ROOTFS/proc"
+    umount "$SOURCE/$ROOTFS/dev"
 
     pushd "$SOURCE/$ROOTFS/tmp/initrd-tree/" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     echo "initrd-${KERNEL_VERSION}" > "$SOURCE/$ROOTFS/tmp/initrd-tree/initrd-name"
@@ -387,9 +393,6 @@ create_initrd() {
 
     mkimage -A $KARCH -O linux -T ramdisk -C gzip  -n 'uInitrd' -d "$SOURCE/$ROOTFS/tmp/initrd-${KERNEL_VERSION}.img" "$SOURCE/$ROOTFS/boot/uInitrd-${KERNEL_VERSION}" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     rm -rf $SOURCE/$ROOTFS/tmp/initrd* >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
-    umount "$SOURCE/$ROOTFS/proc"
-    umount "$SOURCE/$ROOTFS/dev"
 
     if [[ $SOCFAMILY == bcm2* || $BOARD_NAME == x96_max_plus ]]; then
         cp -a "$SOURCE/$ROOTFS/boot/uInitrd-${KERNEL_VERSION}" "$SOURCE/$ROOTFS/boot/uInitrd" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1

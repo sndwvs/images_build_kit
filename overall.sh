@@ -457,4 +457,34 @@ create_img() {
 }
 
 
+#---------------------------------------------
+# preparing a chroot environment
+#---------------------------------------------
+prepare_chroot() {
+    local TYPE="$1"
+    message "" "${TYPE}" "chroot for $ARCH"
+    BINFMT_MISC_PATH="/proc/sys/fs/binfmt_misc"
+
+    if [[ ${TYPE} == "prepare" ]]; then
+        if [[ ! $(mount | grep binfmt_misc) ]]; then
+            modprobe binfmt_misc >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            mount binfmt_misc -t binfmt_misc $BINFMT_MISC_PATH >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            echo 1 > $BINFMT_MISC_PATH/status >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        fi
+
+        # uregister arch
+        [[ -e $BINFMT_MISC_PATH/qemu-${ARCH} ]] && ( echo -1 > $BINFMT_MISC_PATH/qemu-${ARCH} >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+
+        # register arch
+        cat $CWD/blobs/qemu-static/qemu-${ARCH}.conf > $BINFMT_MISC_PATH/register >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        install -Dm755 $CWD/blobs/qemu-static/qemu-${ARCH}-static $SOURCE/$ROOTFS/usr/bin >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+
+    elif [[ ${TYPE} == "cleaning" ]]; then
+        # uregister arch
+        [[ -e $BINFMT_MISC_PATH/qemu-${ARCH} ]] && ( echo -1 > $BINFMT_MISC_PATH/qemu-${ARCH} >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
+
+        rm $SOURCE/$ROOTFS/usr/bin/qemu-${ARCH}-static >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
+}
+
 
