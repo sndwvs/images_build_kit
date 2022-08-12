@@ -476,8 +476,8 @@ prepare_chroot() {
         [[ -e $BINFMT_MISC_PATH/qemu-${ARCH} ]] && ( echo -1 > $BINFMT_MISC_PATH/qemu-${ARCH} >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
 
         # register arch
-        cat $CWD/blobs/qemu-static/qemu-${ARCH}.conf > $BINFMT_MISC_PATH/register >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-        install -Dm755 $CWD/blobs/qemu-static/qemu-${ARCH}-static $SOURCE/$ROOTFS/usr/bin >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        cat $CWD/blobs/qemu-static/${MARCH}/qemu-${ARCH}.conf > $BINFMT_MISC_PATH/register >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        install -Dm755 $CWD/blobs/${MARCH}/qemu-static/qemu-${ARCH}-static $SOURCE/$ROOTFS/usr/bin >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
     elif [[ ${TYPE} == "cleaning" ]]; then
         # uregister arch
