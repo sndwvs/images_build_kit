@@ -11,20 +11,15 @@ setenv verbosity "1"
 setenv rootfstype "ext4"
 setenv console "both"
 
-# Print boot source
-itest.b *0x10028 == 0x00 && echo "U-boot loaded from SD"
-itest.b *0x10028 == 0x02 && echo "U-boot loaded from eMMC or secondary SD"
-itest.b *0x10028 == 0x03 && echo "U-boot loaded from SPI"
+echo "Boot script loaded from ${devtype} ${devnum}"
 
-echo "Boot script loaded from ${devtype}"
-
-if test -e ${devtype} ${devnum} ${prefix}uEnv.txt; then
-    load ${devtype} ${devnum} ${load_addr} ${prefix}uEnv.txt
+if load ${devtype} ${devnum} ${load_addr} ${prefix}uEnv.txt; then
     env import -t ${load_addr} ${filesize}
 fi
 
-if test "${console}" = "display" || test "${console}" = "both"; then setenv consoleargs "console=%SERIAL_CONSOLE%,%SERIAL_CONSOLE_SPEED% console=tty1"; fi
-if test "${console}" = "serial"; then setenv consoleargs "console=%SERIAL_CONSOLE%,%SERIAL_CONSOLE_SPEED%"; fi
+#if test "${console}" = "display" || test "${console}" = "both"; then setenv consoleargs "console=tty1"; fi
+#if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "console=%SERIAL_CONSOLE%,%SERIAL_CONSOLE_SPEED%n8 ${consoleargs}"; fi
+if test "${earlycon}" = "on"; then setenv consoleargs "earlycon ${consoleargs}"; fi
 
 # get PARTUUID of first partition on SD/eMMC it was loaded from
 # mmc 0 is always mapped to device u-boot (2016.09+) was loaded from
@@ -66,4 +61,4 @@ else
 fi
 
 # Recompile with:
-# mkimage -C none -A arm -T script -d /boot/boot.cmd /boot/boot.scr
+# mkimage -C none -A riscv -T script -d /boot/boot.cmd /boot/boot.scr
