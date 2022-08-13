@@ -380,7 +380,7 @@ create_initrd() {
     echo "         -s /tmp/initrd-tree -o /tmp/initrd.gz" >> "$SOURCE/$ROOTFS/tmp/initrd.sh"
 
     [[ $MARCH == "aarch64" && ( $ARCH == "riscv64" || $ARCH == "arm" ) ]] && prepare_chroot "prepare"
-    chroot "$SOURCE/$ROOTFS" /bin/bash -c 'chmod +x /tmp/initrd.sh > /dev/null 2>&1 && /tmp/initrd.sh > /dev/null 2>&1'
+    chroot "$SOURCE/$ROOTFS" /bin/bash -c 'chmod +x /tmp/initrd.sh >> $LOG 2>&1 && /tmp/initrd.sh >> $LOG 2>&1'
     [[ $MARCH == "aarch64" && ( $ARCH == "riscv64" || $ARCH == "arm" ) ]] && prepare_chroot "cleaning"
 
     umount "$SOURCE/$ROOTFS/proc"
