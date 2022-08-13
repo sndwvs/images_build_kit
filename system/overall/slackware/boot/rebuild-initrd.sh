@@ -17,6 +17,7 @@ MESSAGES+=("modules")
 case $(uname -m) in
     arm*) KARCH="arm" ;;
     aarch64) KARCH="arm64" ;;
+    riscv64) KARCH="riscv" ;;
 esac
 
 
