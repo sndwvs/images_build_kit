@@ -251,7 +251,6 @@ if [ ! -z ${MODULES} ]; then
         else
             echo "WARNING: missing module $file"
         fi
-  echo "modprobe -S $KERNEL_VERSION --show-depends $MODULE | cut -d ' ' -f2-"
     done <<< $(modprobe -S $KERNEL_VERSION --show-depends $MODULE | cut -d ' ' -f2-)
   done <<< $(tr ':' '\n' <<< ${MODULES})
 
