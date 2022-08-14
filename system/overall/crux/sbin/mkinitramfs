@@ -1,0 +1,309 @@
+#!/bin/bash
+# This file based in part on the mkinitramfs script for the LFS LiveCD
+# written by Alexander E. Patrakov and Jeremy Huntwork.
+#
+# 2021-06-26 added installation of certain module with dependencies and firmwared
+#            mara
+# 2022-08-14 added request bin/sbin in /usr
+#            fixed INITRAMFS_FILE creation place in BUILD_DIR
+#            mara
+
+usage() {
+    echo
+    echo "usage: $(basename $0) [-k 5.12.1] [-m xfs:ext4:tun] [-b /home/user]"
+    echo "       -k      specify the kernel version"
+    echo "       -m      specify kernel modules by separating them \":\""
+    echo "       -b      specify the build directory, by default \"/tmp\""
+    echo "       -h      displays this message "
+    echo
+    exit 1
+}
+
+while [ -n "$1" ]; do # while loop starts
+    case "$1" in
+    -k)
+        KERNEL_VERSION="$2"
+        shift
+        ;;
+    -m)
+        MODULES="$2"
+        shift
+        ;;
+    -b)
+        BUILD_DIR="$2"
+        shift
+        ;;
+    -h) usage ;;
+    --)
+        shift # The double dash makes them parameters
+        break
+        ;;
+     *) usage ;;
+    esac
+    shift
+done
+
+KERNEL_VERSION=${KERNEL_VERSION:-$(uname -r)}
+BUILD_DIR=${BUILD_DIR:-/tmp}
+
+# Automatically determine the architecture we're building on:
+if [ -z "$ARCH" ]; then
+  case "$( uname -m )" in
+    i?86) export ARCH=i586 ;;
+    arm*) export ARCH=arm ;;
+    # Unless $ARCH is already set, use uname -m for all other archs:
+       *) export ARCH=$( uname -m ) ;;
+  esac
+fi
+
+copy()
+{
+  local file
+
+  if [ "$2" = "lib" ]; then
+    file=$(PATH=/lib type -p $1)
+    if [ -n $file ]; then
+        file=$(PATH=/lib64 type -p $1)
+    fi
+  else
+    file=$(type -p $1)
+  fi
+
+  if [ -n "$file" ] ; then
+    cp $file $WDIR/$2
+  else
+    echo "Missing required file: $1 for directory $2"
+    rm -rf $WDIR
+    exit 1
+  fi
+}
+
+if [ -z ${MODULES} ] ; then
+  INITRAMFS_FILE=initrd.img-no-kmods
+else
+  INITRAMFS_FILE=initrd.img-$KERNEL_VERSION
+fi
+
+if [ ! -d "/lib/modules/$KERNEL_VERSION" ] ; then
+  echo "No modules directory named $KERNEL_VERSION"
+  exit 1
+fi
+
+printf "Creating $INITRAMFS_FILE...\n"
+
+binfiles="sh cat cp dd killall ls mkdir mknod mount "
+binfiles="$binfiles umount sed sleep ln rm uname"
+binfiles="$binfiles readlink basename"
+
+# Systemd installs udevadm in /bin. Other udev implementations have it in /sbin
+if [ -x /bin/udevadm ] ; then binfiles="$binfiles udevadm"; fi
+
+sbinfiles="modprobe blkid switch_root"
+
+# Optional files and locations
+for f in mdadm mdmon udevd udevadm; do
+  if [ -x /sbin/$f ] ; then sbinfiles="$sbinfiles $f"; fi
+done
+
+# Add lvm if present (cannot be done with the others because it
+# also needs dmsetup
+if [ -x /sbin/lvm ] ; then sbinfiles="$sbinfiles lvm dmsetup"; fi
+
+unsorted=$(mktemp ${BUILD_DIR}/unsorted.XXXXXXXXXX)
+
+DATADIR=/usr/share/mkinitramfs
+INITIN=init.in
+
+# Create a temporary working directory
+WDIR=$(mktemp -d ${BUILD_DIR}/initrd-work.XXXXXXXXXX)
+
+# Create base directory structure
+mkdir -p $WDIR/{dev,run,sys,proc,lib/{firmware,modules},bin,sbin}
+mkdir -p $WDIR/etc/{modprobe.d,udev/rules.d}
+touch $WDIR/etc/modprobe.d/modprobe.conf
+#ln -s /bin      $WDIR/bin
+#ln -s /lib      $WDIR/lib
+#ln -s /sbin     $WDIR/sbin
+ln -s $WDIR/lib -r  $WDIR/lib64
+
+# Create necessary device nodes
+mknod -m 640 $WDIR/dev/console c 5 1
+mknod -m 664 $WDIR/dev/null    c 1 3
+
+# Install the udev configuration files
+if [ -f /etc/udev/udev.conf ]; then
+  cp /etc/udev/udev.conf $WDIR/etc/udev/udev.conf
+fi
+
+for file in $(find /etc/udev/rules.d/ -type f) ; do
+  cp $file $WDIR/etc/udev/rules.d
+done
+
+# Copy the RAID configuration file if present
+if [ -f /etc/mdadm.conf ] ; then
+  cp /etc/mdadm.conf $WDIR/etc
+fi
+
+# Install the init file
+install -m0755 $DATADIR/$INITIN $WDIR/init
+
+if [ -n "$KERNEL_VERSION" ] ; then
+  if [ -x /sbin/kmod ] ; then
+    sbinfiles="$sbinfiles kmod"
+  else
+    binfiles="$binfiles lsmod"
+    sbinfiles="$sbinfiles insmod"
+  fi
+fi
+
+# Install basic binaries
+for f in $binfiles ; do
+  if [ -x /usr/bin/$f ]; then
+    BIN_PREFFIX="/usr"
+  fi
+  ldd $BIN_PREFFIX/bin/$f | sed "s/\t//" | cut -d " " -f1 >> $unsorted
+  copy $BIN_PREFFIX/bin/$f bin
+  unset BIN_PREFFIX
+done
+
+for f in $sbinfiles ; do
+  if [ -x /usr/sbin/$f ]; then
+    SBIN_PREFFIX="/usr"
+  fi
+  ldd $SBIN_PREFFIX/sbin/$f | sed "s/\t//" | cut -d " " -f1 >> $unsorted
+  copy $SBIN_PREFFIX/sbin/$f sbin
+  unset SBIN_PREFFIX
+done
+
+# Add udevd libraries if not in /usr/sbin
+if [ -x /lib/udev/udevd ] ; then
+  ldd /lib/udev/udevd | sed "s/\t//" | cut -d " " -f1 >> $unsorted
+elif [ -x /lib/systemd/systemd-udevd ] ; then
+  ldd /lib/systemd/systemd-udevd | sed "s/\t//" | cut -d " " -f1 >> $unsorted
+fi
+
+# Add module symlinks if appropriate
+if [ -n "$KERNEL_VERSION" ] && [ -x /sbin/kmod ] ; then
+  ln -s /sbin/kmod -r $WDIR/bin/lsmod
+  ln -s /sbin/kmod -r $WDIR/bin/insmod
+fi
+
+# Add lvm symlinks if appropriate
+# Also copy the lvm.conf file
+if  [ -x /sbin/lvm ] ; then
+  ln -s /sbin/lvm -r $WDIR/sbin/lvchange
+  ln -s /sbin/lvm -r $WDIR/sbin/lvrename
+  ln -s /sbin/lvm -r $WDIR/sbin/lvextend
+  ln -s /sbin/lvm -r $WDIR/sbin/lvcreate
+  ln -s /sbin/lvm -r $WDIR/sbin/lvdisplay
+  ln -s /sbin/lvm -r $WDIR/sbin/lvscan
+
+  ln -s /sbin/lvm -r $WDIR/sbin/pvchange
+  ln -s /sbin/lvm -r $WDIR/sbin/pvck
+  ln -s /sbin/lvm -r $WDIR/sbin/pvcreate
+  ln -s /sbin/lvm -r $WDIR/sbin/pvdisplay
+  ln -s /sbin/lvm -r $WDIR/sbin/pvscan
+  ln -s /sbin/lvm -r $WDIR/sbin/vgchange
+  ln -s /sbin/lvm -r $WDIR/sbin/vgcreate
+  ln -s /sbin/lvm -r $WDIR/sbin/vgscan
+  ln -s /sbin/lvm -r $WDIR/sbin/vgrename
+  ln -s /sbin/lvm -r $WDIR/sbin/vgck
+  # Conf file(s)
+  cp -a /etc/lvm $WDIR/etc
+fi
+
+# Install libraries
+sort $unsorted | uniq | while read library ; do
+# linux-vdso and linux-gate are pseudo libraries and do not correspond to a file
+# libsystemd-shared is in /lib/systemd, so it is not found by copy, and
+# it is copied below anyway
+  if [[ "$library" == linux-vdso.so.1 ]] ||
+     [[ "$library" == linux-gate.so.1 ]] ||
+     [[ "$library" == libsystemd-shared* ]]; then
+    continue
+  fi
+
+  copy $library lib
+done
+
+if [ -d /lib/udev ]; then
+  cp -a /lib/udev $WDIR/lib
+fi
+if [ -d /lib/systemd ]; then
+  cp -a /lib/systemd $WDIR/lib
+fi
+if [ -d /lib/elogind ]; then
+  cp -a /lib/elogind $WDIR/lib
+fi
+if [ -d /lib64/elogind ]; then
+  cp -a /lib64/elogind $WDIR/lib64
+fi
+
+if [ ! -z ${MODULES} ]; then
+# Install the kernel modules if requested
+  while read -r -a MODULE;
+  do
+    while read -r -a file;
+    do
+        if $(cp -a --parents "${file}" $WDIR 2>/dev/null) ; then
+            echo "OK: added module $file"
+            echo $file | rev | cut -d '/' -f1 | cut -d '.' -f2 | rev >> $WDIR/modules
+        else
+            echo "WARNING: missing module $file"
+        fi
+  echo "modprobe -S $KERNEL_VERSION --show-depends $MODULE | cut -d ' ' -f2-"
+    done <<< $(modprobe -S $KERNEL_VERSION --show-depends $MODULE | cut -d ' ' -f2-)
+  done <<< $(tr ':' '\n' <<< ${MODULES})
+
+# Install the kernel firmware if requested
+  while read -r -a MODULE;
+  do
+    while read -r -a file;
+    do
+        [[ -z "${file}" ]] && continue
+        if $(cp -a --parents "${file}" $WDIR 2>/dev/null) ; then
+            echo "OK: added firmware $file"
+        else
+            echo "WARNING: missing firmware $file"
+        fi
+    done <<< $(modinfo -k $KERNEL_VERSION -F firmware $MODULE | grep -v 'name:' | sed 's:^\(.*\):\/lib\/firmware\/\1 :g')
+  done <<< $(tr ':' '\n' <<< ${MODULES})
+fi
+
+if [ ! -z ${MODULES} ] ; then
+    cp /lib/modules/$KERNEL_VERSION/modules.{builtin,order}                     \
+                $WDIR/lib/modules/$KERNEL_VERSION
+    depmod -a -b $WDIR $KERNEL_VERSION
+fi
+
+( cd $WDIR ; find . | cpio -o -H newc --quiet | gzip -9 ) > $BUILD_DIR/$INITRAMFS_FILE
+
+# Prepare early loading of microcode if available
+if ls /lib/firmware/intel-ucode/* >/dev/null 2>&1 ||
+   ls /lib/firmware/amd-ucode/*   >/dev/null 2>&1 &&
+   [[ $ARCH == *86* ]]; then
+
+# first empty WDIR to reuse it
+  rm -r $WDIR/*
+
+  DSTDIR=$WDIR/kernel/x86/microcode
+  mkdir -p $DSTDIR
+
+  if [ -d /lib/firmware/amd-ucode ]; then
+    cat /lib/firmware/amd-ucode/microcode_amd*.bin > $DSTDIR/AuthenticAMD.bin
+  fi
+
+  if [ -d /lib/firmware/intel-ucode ]; then
+    cat /lib/firmware/intel-ucode/* > $DSTDIR/GenuineIntel.bin
+  fi
+
+  ( cd $WDIR; find . | cpio -o -H newc --quiet ) > $BUILD_DIR/microcode.img
+  cat $BUILD_DIR/microcode.img $BUILD_DIR/$INITRAMFS_FILE > $BUILD_DIR/tmpfile
+  mv $BUILD_DIR/tmpfile $BUILD_DIR/$INITRAMFS_FILE
+  rm $BUILD_DIR/microcode.img
+fi
+
+# Remove the temporary directories and files
+rm -rf $WDIR $unsorted
+printf "done.\n"
+
