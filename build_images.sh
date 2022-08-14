@@ -374,10 +374,15 @@ create_initrd() {
     mount --bind /dev "$SOURCE/$ROOTFS/dev"
     mount --bind /proc "$SOURCE/$ROOTFS/proc"
 
-    # mkinitrd corrupted for ARM
-    export MKINITRD_ALLOWEXEC=yes && echo "export MKINITRD_ALLOWEXEC=yes" > "$SOURCE/$ROOTFS/tmp/initrd.sh"
-    echo "mkinitrd -R -L -u -w 2 -c -k ${KERNEL_VERSION} -m ${INITRD_MODULES} \\" >> "$SOURCE/$ROOTFS/tmp/initrd.sh"
-    echo "         -s /tmp/initrd-tree -o /tmp/initrd.gz" >> "$SOURCE/$ROOTFS/tmp/initrd.sh"
+    if [[ $DISTR != crux* ]]; then
+        # mkinitrd corrupted for ARM
+        export MKINITRD_ALLOWEXEC=yes && echo "export MKINITRD_ALLOWEXEC=yes" > "$SOURCE/$ROOTFS/tmp/initrd.sh"
+        echo "mkinitrd -R -L -u -w 2 -c -k ${KERNEL_VERSION} -m ${INITRD_MODULES} \\" >> "$SOURCE/$ROOTFS/tmp/initrd.sh"
+        echo "         -s /tmp/initrd-tree -o /tmp/initrd.gz" >> "$SOURCE/$ROOTFS/tmp/initrd.sh"
+    else
+        echo "mkinitramfs -k ${KERNEL_VERSION} -m ${INITRD_MODULES}" > "$SOURCE/$ROOTFS/tmp/initrd.sh"
+        echo "mv /tmp/initrd.img-${KERNEL_VERSION} /tmp/initrd-${KERNEL_VERSION}.img" >> "$SOURCE/$ROOTFS/tmp/initrd.sh"
+    fi
 
     [[ $MARCH == "aarch64" && ( $ARCH == "riscv64" || $ARCH == "arm" ) ]] && prepare_chroot "prepare"
     chroot "$SOURCE/$ROOTFS" /bin/bash -c 'chmod +x /tmp/initrd.sh 2>&1 && /tmp/initrd.sh 2>&1 ' >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
@@ -386,11 +391,12 @@ create_initrd() {
     umount "$SOURCE/$ROOTFS/proc"
     umount "$SOURCE/$ROOTFS/dev"
 
-    pushd "$SOURCE/$ROOTFS/tmp/initrd-tree/" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-    echo "initrd-${KERNEL_VERSION}" > "$SOURCE/$ROOTFS/tmp/initrd-tree/initrd-name"
-    find . | cpio --quiet -H newc -o | gzip -9 -n > "$SOURCE/$ROOTFS/tmp/initrd-${KERNEL_VERSION}.img" 2>/dev/null
-    popd >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
-
+    if [[ $DISTR != crux* ]]; then
+        pushd "$SOURCE/$ROOTFS/tmp/initrd-tree/" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+        echo "initrd-${KERNEL_VERSION}" > "$SOURCE/$ROOTFS/tmp/initrd-tree/initrd-name"
+        find . | cpio --quiet -H newc -o | gzip -9 -n > "$SOURCE/$ROOTFS/tmp/initrd-${KERNEL_VERSION}.img" 2>/dev/null
+        popd >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
     mkimage -A $KARCH -O linux -T ramdisk -C gzip  -n 'uInitrd' -d "$SOURCE/$ROOTFS/tmp/initrd-${KERNEL_VERSION}.img" "$SOURCE/$ROOTFS/boot/uInitrd-${KERNEL_VERSION}" >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     rm -rf $SOURCE/$ROOTFS/tmp/initrd* >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 

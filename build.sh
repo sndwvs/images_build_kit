@@ -291,8 +291,8 @@ for image_type in ${DISTR_IMAGES[@]}; do
         setting_datetime
         setting_ssh
         setting_dhcp
+        create_initrd
         if [[ ${DISTR} != crux* ]]; then
-            create_initrd
             setting_wifi
             setting_governor
         fi
