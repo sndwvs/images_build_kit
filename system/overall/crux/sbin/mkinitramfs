@@ -62,7 +62,7 @@ copy()
 
   if [ "$2" = "lib" ]; then
     file=$(PATH=/lib type -p $1)
-    if [ -n $file ]; then
+    if [ -z $file ]; then
         file=$(PATH=/lib64 type -p $1)
     fi
   else
