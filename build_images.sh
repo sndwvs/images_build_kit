@@ -211,7 +211,7 @@ download_pkg() {
             [[ -z ${_PKG_NAME} ]] && ( echo "empty download package ${category}/$pkg" >> $LOG 2>&1 && message "err" "details" && exit 1 )
 
             message "" "download" "package $category/${_PKG_NAME/\%23/#}"
-            wget --no-check-certificate -c -nc -nd -np ${url}/${category}/${_PKG_NAME} -P $BUILD/$PKG/${type}/${ARCH}/${category}/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+            wget --no-check-certificate -c -nc -nd -np ${url}/${category}/${_PKG_NAME} -P $BUILD/$PKG/${type}/${ARCH}/${DISTR_VERSION}/${category}/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             unset _PKG_NAME
         fi
     done
@@ -237,12 +237,12 @@ install_pkg(){
         if [[ ! -z ${pkg} ]];then
             message "" "install" "package $category/${pkg}"
             if [[ $DISTR == sla* ]]; then
-                ROOT=$SOURCE/$ROOTFS upgradepkg --install-new $BUILD/$PKG/${type}/${ARCH}/$category/${pkg}-* >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+                ROOT=$SOURCE/$ROOTFS upgradepkg --install-new $BUILD/$PKG/${type}/${ARCH}/${DISTR_VERSION}/$category/${pkg}-* >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             elif [[ $DISTR == crux* ]]; then
                 [[ $type == *-update ]] && local up="-u -f"
                 # fixed install packages
                 [[ ! -e $SOURCE/$ROOTFS/var/lib/pkg/db ]] && ( install -Dm644 /dev/null $SOURCE/$ROOTFS/var/lib/pkg/db >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1 )
-                pkgadd ${up} --root $SOURCE/$ROOTFS $BUILD/$PKG/${type}/${ARCH}/$category/${pkg}#* >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+                pkgadd ${up} --root $SOURCE/$ROOTFS $BUILD/$PKG/${type}/${ARCH}/${DISTR_VERSION}/$category/${pkg}#* >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
             fi
         fi
     done

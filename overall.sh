@@ -392,10 +392,10 @@ read_packages() {
     local TYPE="$1"
     local PKG
     local PKG_PATH
-    if [[ -e $CWD/config/packages/${DISTR}/packages-${TYPE}.conf ]]; then
-        PKG_PATH=$CWD/config/packages/${DISTR}/packages-${TYPE}.conf
-    elif [[ -e $CWD/config/packages/${DISTR}/${ARCH}/packages-${TYPE}.conf ]]; then
-        PKG_PATH=$CWD/config/packages/${DISTR}/${ARCH}/packages-${TYPE}.conf
+    if [[ -e $CWD/config/packages/${DISTR}/${DISTR_VERSION}/packages-${TYPE}.conf ]]; then
+        PKG_PATH=$CWD/config/packages/${DISTR}/${DISTR_VERSION}/packages-${TYPE}.conf
+    elif [[ -e $CWD/config/packages/${DISTR}/${DISTR_VERSION}/${ARCH}/packages-${TYPE}.conf ]]; then
+        PKG_PATH=$CWD/config/packages/${DISTR}/${DISTR_VERSION}/${ARCH}/packages-${TYPE}.conf
     fi
     [[ ! -z ${PKG_PATH} ]] && PKG=( $(grep -vP "^#|^$" ${PKG_PATH}) )
     eval "$2=\${PKG[*]}"
