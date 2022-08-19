@@ -1,0 +1,46 @@
+--- a/drivers/net/wireless/hflps170/fullmac/bl_main.c	2022-08-19 21:34:20.433994014 +0300
++++ b/drivers/net/wireless/hflps170/fullmac/bl_main.c	2022-08-19 22:23:55.606915550 +0300
+@@ -479,7 +479,11 @@ static void bl_csa_finish(struct work_st
+         } else
+             bl_txq_vif_stop(vif, BL_TXQ_STOP_CHAN, bl_hw);
+         spin_unlock_bh(&bl_hw->cmd_mgr.lock);
+-        cfg80211_ch_switch_notify(vif->ndev, &csa->chandef);
++        #if LINUX_VERSION_CODE < KERNEL_VERSION(5, 19, 2)
++            cfg80211_ch_switch_notify(vif->ndev, &csa->chandef);
++        #else
++            cfg80211_ch_switch_notify(vif->ndev, &csa->chandef, 0);
++        #endif
+     }
+     bl_del_csa(vif);
+ }
+@@ -1714,7 +1718,11 @@ static int bl_cfg80211_change_beacon(str
+ /**
+  * * @stop_ap: Stop being an AP, including stopping beaconing.
+  */
++#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 19, 2)
+ static int bl_cfg80211_stop_ap(struct wiphy *wiphy, struct net_device *dev)
++#else
++static int bl_cfg80211_stop_ap(struct wiphy *wiphy, struct net_device *dev, unsigned int link_id)
++#endif
+ {
+     struct bl_hw *bl_hw = wiphy_priv(wiphy);
+     struct bl_vif *bl_vif = netdev_priv(dev);
+@@ -2004,9 +2012,17 @@ static int bl_cfg80211_dump_survey(struc
+  *	For monitor interfaces, it should return %NULL unless there's a single
+  *	current monitoring channel.
+  */
++#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 19, 2)
+ static int bl_cfg80211_get_channel(struct wiphy *wiphy,
+                                      struct wireless_dev *wdev,
+-                                     struct cfg80211_chan_def *chandef) {
++                                     struct cfg80211_chan_def *chandef) 
++#else
++static int bl_cfg80211_get_channel(struct wiphy *wiphy,
++                                     struct wireless_dev *wdev,
++                                     unsigned int link_id,
++                                     struct cfg80211_chan_def *chandef)
++#endif
++{
+ 
+     struct bl_hw *bl_hw = wiphy_priv(wiphy);
+     struct bl_vif *bl_vif = container_of(wdev, struct bl_vif, wdev);

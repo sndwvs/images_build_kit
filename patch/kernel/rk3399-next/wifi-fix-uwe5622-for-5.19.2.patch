@@ -1,0 +1,30 @@
+--- a/drivers/net/wireless/uwe5622/unisocwifi/cfg80211.c	2022-08-19 21:10:37.979911985 +0300
++++ b/drivers/net/wireless/uwe5622/unisocwifi/cfg80211.c	2022-08-19 21:12:55.504503766 +0300
+@@ -984,7 +984,12 @@ static int sprdwl_cfg80211_change_beacon
+ 	return sprdwl_change_beacon(vif, beacon);
+ }
+ 
++//#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 0, 0)
++#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 19, 2)
+ static int sprdwl_cfg80211_stop_ap(struct wiphy *wiphy, struct net_device *ndev)
++#else
++static int sprdwl_cfg80211_stop_ap(struct wiphy *wiphy, struct net_device *ndev, unsigned int link_id)
++#endif
+ {
+ #ifdef DFS_MASTER
+ 	struct sprdwl_vif *vif = netdev_priv(ndev);
+--- a/drivers/net/wireless/uwe5622/unisocwifi/cmdevt.c	2022-08-19 21:17:37.417714140 +0300
++++ b/drivers/net/wireless/uwe5622/unisocwifi/cmdevt.c	2022-08-19 21:27:07.096149692 +0300
+@@ -3301,7 +3301,11 @@ void sprdwl_event_chan_changed(struct sp
+ 						NL80211_CHAN_HT20);
+ 		else
+ 			wl_err("%s, ch is null!\n", __func__);
+-		cfg80211_ch_switch_notify(vif->ndev, &chandef);
++		#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 19, 2)
++			cfg80211_ch_switch_notify(vif->ndev, &chandef);
++		#else
++			cfg80211_ch_switch_notify(vif->ndev, &chandef, 0);
++		#endif
+ 	}
+ }
+ 
