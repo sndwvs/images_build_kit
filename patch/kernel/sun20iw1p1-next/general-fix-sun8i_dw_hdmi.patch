@@ -1,0 +1,41 @@
+--- a/drivers/gpu/drm/sun4i/sun8i_dw_hdmi.c	2022-08-20 15:39:28.050886442 +0300
++++ b/drivers/gpu/drm/sun4i/sun8i_dw_hdmi.c	2022-08-20 15:45:20.116245430 +0300
+@@ -133,11 +133,6 @@ static int sun8i_dw_hdmi_bind(struct dev
+ 		return dev_err_probe(dev, PTR_ERR(hdmi->rst_ctrl),
+ 				     "Could not get ctrl reset control\n");
+ 
+-	hdmi->rst_sub = devm_reset_control_get_optional_shared(dev, "sub");
+-	if (IS_ERR(hdmi->rst_sub))
+-		return dev_err_probe(dev, PTR_ERR(hdmi->rst_sub),
+-				     "Could not get sub reset control\n");
+-
+ 	hdmi->clk_tmds = devm_clk_get_optional(dev, "tmds");
+ 	if (IS_ERR(hdmi->clk_tmds))
+ 		return dev_err_probe(dev, PTR_ERR(hdmi->clk_tmds),
+@@ -160,16 +155,10 @@ static int sun8i_dw_hdmi_bind(struct dev
+ 		goto err_disable_regulator;
+ 	}
+ 
+-	ret = reset_control_deassert(hdmi->rst_sub);
+-	if (ret) {
+-		dev_err(dev, "Could not deassert sub reset control\n");
+-		goto err_assert_ctrl_reset;
+-	}
+-
+ 	ret = clk_prepare_enable(hdmi->clk_tmds);
+ 	if (ret) {
+ 		dev_err(dev, "Could not enable tmds clock\n");
+-		goto err_assert_sub_reset;
++		goto err_assert_ctrl_reset;
+ 	}
+ 
+ 	phy_node = of_parse_phandle(dev->of_node, "phys", 0);
+@@ -216,8 +205,6 @@ cleanup_encoder:
+ 	drm_encoder_cleanup(encoder);
+ err_disable_clk_tmds:
+ 	clk_disable_unprepare(hdmi->clk_tmds);
+-err_assert_sub_reset:
+-	reset_control_assert(hdmi->rst_sub);
+ err_assert_ctrl_reset:
+ 	reset_control_assert(hdmi->rst_ctrl);
+ err_disable_regulator:
