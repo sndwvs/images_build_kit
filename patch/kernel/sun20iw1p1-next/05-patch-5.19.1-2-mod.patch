@@ -18907,16 +18907,7 @@ diff --git a/drivers/irqchip/Kconfig b/drivers/irqchip/Kconfig
 index bbb11cb8b0f73..6b287dc025a9b 100644
 --- a/drivers/irqchip/Kconfig
 +++ b/drivers/irqchip/Kconfig
-@@ -177,7 +177,7 @@ config MADERA_IRQ
- config IRQ_MIPS_CPU
- 	bool
- 	select GENERIC_IRQ_CHIP
--	select GENERIC_IRQ_IPI if SYS_SUPPORTS_MULTITHREADING
-+	select GENERIC_IRQ_IPI if SMP && SYS_SUPPORTS_MULTITHREADING
- 	select IRQ_DOMAIN
- 	select GENERIC_IRQ_EFFECTIVE_AFF_MASK
- 
-@@ -323,6 +323,7 @@
+@@ -323,6 +323,7 @@ config KEYSTONE_IRQ
  config MIPS_GIC
  	bool
  	select GENERIC_IRQ_IPI if SMP
