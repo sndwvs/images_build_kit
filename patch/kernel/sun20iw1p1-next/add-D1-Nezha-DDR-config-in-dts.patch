@@ -17,10 +17,10 @@ diff --git a/arch/riscv/boot/dts/allwinner/Makefile b/arch/riscv/boot/dts/allwin
 index a01b6d4914d2cd..e4367ce2420ec1 100644
 --- a/arch/riscv/boot/dts/allwinner/Makefile
 +++ b/arch/riscv/boot/dts/allwinner/Makefile
-@@ -2,3 +2,6 @@
- dtb-$(CONFIG_ARCH_SUNXI) += sun20i-d1-nezha.dtb
+@@ -8,3 +8,6 @@ dtb-$(CONFIG_ARCH_SUNXI) += sun20i-d1-li
  dtb-$(CONFIG_ARCH_SUNXI) += sun20i-d1-lichee-rv.dtb
- dtb-$(CONFIG_ARCH_SUNXI) += sun20i-d1-lichee-rv-dock.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun20i-d1-mangopi-mq-pro.dtb
+ dtb-$(CONFIG_ARCH_SUNXI) += sun20i-d1-nezha.dtb
 +dtb-$(CONFIG_ARCH_SUNXI) += sun20i-d1-nezha-1g.dtb
 +dtb-$(CONFIG_ARCH_SUNXI) += sun20i-d1-nezha-2g.dtb
 +dtb-$(CONFIG_ARCH_SUNXI) += sun20i-d1-nezha-512m.dtb
