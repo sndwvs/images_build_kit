@@ -1,0 +1,28 @@
+--- a/drivers/net/wireless/xradio/ap.c	2022-08-26 20:18:13.110832203 +0300
++++ a/drivers/net/wireless/xradio/ap.c	2022-08-26 21:03:43.661671595 +0300
+@@ -498,6 +498,9 @@ void xradio_bss_info_changed(struct ieee
+ 		ap_printk(XRADIO_DBG_NIY, "BSS_CHANGED_ASSOC.\n");
+ 		if (info->assoc) { /* TODO: ibss_joined */
+ 			struct ieee80211_sta *sta = NULL;
++#if LINUX_VERSION_CODE > KERNEL_VERSION(5, 11, 0)
++			struct ieee80211_link_sta *link_sta = NULL;
++#endif
+ 			if (info->dtim_period)
+ 				priv->join_dtim_period = info->dtim_period;
+ 			priv->beacon_int = info->beacon_int;
+@@ -512,9 +515,15 @@ void xradio_bss_info_changed(struct ieee
+ 				/* TODO:COMBO:Change this once
+ 				* mac80211 changes are available */
+ 				BUG_ON(!hw_priv->channel);
++#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 11, 0)
+ 				hw_priv->ht_oper.ht_cap = sta->ht_cap;
+ 				priv->bss_params.operationalRateSet =__cpu_to_le32(
+ 				  xradio_rate_mask_to_wsm(hw_priv, sta->supp_rates[hw_priv->channel->band]));
++#else
++				hw_priv->ht_oper.ht_cap = link_sta->ht_cap;
++				priv->bss_params.operationalRateSet =__cpu_to_le32(
++				  xradio_rate_mask_to_wsm(hw_priv, link_sta->supp_rates[hw_priv->channel->band]));
++#endif
+ 				/* TODO by Icenowy: I think this may lead to some problems. */
+ //				hw_priv->ht_oper.channel_type   = info->channel_type;
+ 				hw_priv->ht_oper.operation_mode = info->ht_operation_mode;
