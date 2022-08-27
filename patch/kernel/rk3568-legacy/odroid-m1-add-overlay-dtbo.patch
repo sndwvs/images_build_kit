@@ -1,11 +1,11 @@
 --- a/arch/arm64/boot/dts/rockchip/overlay/Makefile	2022-07-14 20:30:56.206283616 +0300
 +++ b/arch/arm64/boot/dts/rockchip/overlay/Makefile	2022-07-14 20:35:14.667405730 +0300
-@@ -53,7 +53,27 @@ dtbo-$(CONFIG_ARCH_ROCKCHIP) += \
- 	rock-3ab-rpi-camera-v1p3-ov5647.dtbo \
+@@ -58,7 +58,27 @@ dtbo-$(CONFIG_ARCH_ROCKCHIP) += \
  	rock-3b-disable-hdmicec.dtbo \
  	rock-3b-hdmi-and-sharp-lq133t1jw01-edp-lcd.dtbo \
--	rock-3b-radxa-10p1inch-display.dtbo
-+	rock-3b-radxa-10p1inch-display.dtbo \
+ 	rock-3b-radxa-10p1inch-display.dtbo \
+-	audioinjector-isolated-soundcard.dtbo
++	audioinjector-isolated-soundcard.dtbo \
 +	odroid-m1-can0.dtbo \
 +	odroid-m1-display_vu8m.dtbo \
 +	odroid-m1-i2c0.dtbo \
