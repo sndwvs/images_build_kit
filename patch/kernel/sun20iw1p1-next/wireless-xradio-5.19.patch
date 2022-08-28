@@ -1,0 +1,14 @@
+--- a/drivers/net/wireless/xradio/main.c	2022-08-28 12:25:59.054484328 +0300
++++ b/drivers/net/wireless/xradio/main.c	2022-08-28 12:44:29.534251503 +0300
+@@ -517,7 +517,11 @@ int xradio_core_init(struct sdio_func* f
+ 
+ 	// fill in mac addresses
+ 	if (hw_priv->pdev->of_node) {
++#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 19, 0)
+ 		addr = of_get_mac_address(hw_priv->pdev->of_node);
++#else
++		addr = of_get_mac_address(hw_priv->pdev->of_node, hw_priv->addresses[0].addr);
++#endif
+ 	}
+ 	if (!addr) {
+ 		dev_warn(hw_priv->pdev, "no mac address provided, using random\n");
