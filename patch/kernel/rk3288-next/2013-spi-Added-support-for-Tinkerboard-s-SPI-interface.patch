@@ -1,21 +1,20 @@
-From d4d128324b8f8a9f5c441203d94703e41fa07df3 Mon Sep 17 00:00:00 2001
-From: "Miouyouyou (Myy)" <myy@miouyouyou.fr>
-Date: Mon, 5 Nov 2018 19:57:56 +0100
-Subject: [PATCH] spi: Added support for Tinkerboard's SPI interface
-
-Imported from ARMbian
-
-Signed-off-by: Miouyouyou (Myy) <myy@miouyouyou.fr>
----
-
 diff --git a/drivers/spi/spidev.c b/drivers/spi/spidev.c
---- a/drivers/spi/spidev.c	2021-07-24 05:08:14.664774984 +0000
-+++ b/drivers/spi/spidev.c	2021-07-24 05:27:20.518440681 +0000
-@@ -684,6 +684,7 @@
- 	{ .compatible = "menlo,m53cpld" },
- 	{ .compatible = "cisco,spi-petra" },
- 	{ .compatible = "micron,spi-authenta" },
-+	{ .compatible = "rockchip,spi_tinker" },
+index b2775d82d2d..555dd3cb7d7 100644
+--- a/drivers/spi/spidev.c
++++ b/drivers/spi/spidev.c
+@@ -691,6 +691,7 @@ static const struct spi_device_id spidev_spi_ids[] = {
+ 	{ .name = "m53cpld" },
+ 	{ .name = "spi-petra" },
+ 	{ .name = "spi-authenta" },
++	{ .name = "spi_tinker" },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(spi, spidev_spi_ids);
+@@ -717,6 +718,7 @@ static const struct of_device_id spidev_dt_ids[] = {
+ 	{ .compatible = "menlo,m53cpld", .data = &spidev_of_check },
+ 	{ .compatible = "cisco,spi-petra", .data = &spidev_of_check },
+ 	{ .compatible = "micron,spi-authenta", .data = &spidev_of_check },
++	{ .compatible = "rockchip,spi_tinker", .data = &spidev_of_check },
  	{},
  };
  MODULE_DEVICE_TABLE(of, spidev_dt_ids);
