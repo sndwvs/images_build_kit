@@ -47,7 +47,7 @@ compile_boot_loader() {
         make $CTHREADS ARCH=$ARCH CROSS_COMPILE=$CROSS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
 
         # completely open components
-        if [[ ${BOOT_LOADER_BUILD_TYPE} != "blobs" ]]; then
+        if [[ ${BOOT_LOADER_BUILD_TYPE} != "blobs" && $SOCFAMILY != rk32* ]]; then
             make $CTHREADS ARCH=$ARCH u-boot.itb CROSS_COMPILE=$CROSS >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
         fi
     fi
