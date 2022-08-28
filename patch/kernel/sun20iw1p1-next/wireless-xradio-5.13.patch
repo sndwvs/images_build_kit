@@ -16,7 +16,7 @@ diff --git a/main.c b/main.c
 index b60e18d..06cb1f6 100644
 --- a/drivers/net/wireless/xradio/main.c
 +++ b/drivers/net/wireless/xradio/main.c
-@@ -13,6 +13,7 @@
+@@ -14,6 +14,7 @@
  #include <net/cfg80211.h>
  #include <linux/of_net.h>
  #include <linux/mmc/sdio_func.h>
@@ -24,8 +24,8 @@ index b60e18d..06cb1f6 100644
  
  #include "xradio.h"
  #include "fwio.h"
-@@ -499,8 +500,12 @@ int xradio_core_init(struct sdio_func* func)
- 	int if_id;
+@@ -501,8 +502,12 @@ int xradio_core_init(struct sdio_func* f
+ 	u8 b;		/* MRK 5.5a */
  	struct ieee80211_hw *dev;
  	struct xradio_common *hw_priv;
 +#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 13, 0)
@@ -37,7 +37,7 @@ index b60e18d..06cb1f6 100644
  
  	//init xradio_common
  	dev = xradio_init_common(sizeof(struct xradio_common));
-@@ -513,6 +518,16 @@ int xradio_core_init(struct sdio_func* func)
+@@ -515,6 +520,16 @@ int xradio_core_init(struct sdio_func* f
  	hw_priv->sdio_func = func;
  	sdio_set_drvdata(func, hw_priv);
  
@@ -54,12 +54,11 @@ index b60e18d..06cb1f6 100644
  	// fill in mac addresses
  	if (hw_priv->pdev->of_node) {
  		addr = of_get_mac_address(hw_priv->pdev->of_node);
-@@ -522,6 +537,8 @@ int xradio_core_init(struct sdio_func* func)
+@@ -524,6 +539,7 @@ int xradio_core_init(struct sdio_func* f
  		eth_random_addr(randomaddr);
  		addr = randomaddr;
  	}
 +#endif
-+
- 	memcpy(hw_priv->addresses[0].addr, addr, ETH_ALEN);
- 	memcpy(hw_priv->addresses[1].addr, addr, ETH_ALEN);
- 	hw_priv->addresses[1].addr[5] += 0x01;
+ 	for (b = 0; b < XRWL_MAX_VIFS; b++) {				/* MRK 5.5a */
+ 		memcpy(hw_priv->addresses[b].addr, addr, ETH_ALEN);
+ 		hw_priv->addresses[b].addr[5] += b;
