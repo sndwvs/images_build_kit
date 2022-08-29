@@ -300,6 +300,9 @@ setting_system() {
     if [[ -d $CWD/system/socs/$SOCFAMILY ]]; then
         rsync -av --chown=root:root $CWD/system/socs/$SOCFAMILY/ $SOURCE/$ROOTFS/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
+    if [[ -d $CWD/system/socs/${SOCFAMILY}-${KERNEL_SOURCE} ]]; then
+        rsync -av --chown=root:root $CWD/system/socs/${SOCFAMILY}-${KERNEL_SOURCE}/ $SOURCE/$ROOTFS/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
+    fi
     if [[ -d $CWD/system/boards/${BOARD_NAME} ]]; then
         rsync -av --chown=root:root $CWD/system/boards/${BOARD_NAME}/ $SOURCE/$ROOTFS/ >> $LOG 2>&1 || (message "err" "details" && exit 1) || exit 1
     fi
