@@ -1,0 +1,16 @@
+diff --git a/Makefile b/Makefile
+index 65dc4f93ffdbf..1c4f1ecb93488 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,7 +1,7 @@
+ # SPDX-License-Identifier: GPL-2.0
+ VERSION = 5
+ PATCHLEVEL = 19
+-SUBLEVEL = 4
++SUBLEVEL = 5
+ EXTRAVERSION =
+ NAME = Superb Owl
+ 
+diff --git a/scripts/dummy-tools/dummy-plugin-dir/include/plugin-version.h b/scripts/dummy-tools/dummy-plugin-dir/include/plugin-version.h
+new file mode 100644
+index 0000000000000..e69de29bb2d1d
