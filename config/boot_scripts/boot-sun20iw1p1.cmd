@@ -17,8 +17,8 @@ if load ${devtype} ${devnum} ${load_addr} ${prefix}uEnv.txt; then
     env import -t ${load_addr} ${filesize}
 fi
 
-#if test "${console}" = "display" || test "${console}" = "both"; then setenv consoleargs "console=tty1"; fi
-#if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "console=%SERIAL_CONSOLE%,%SERIAL_CONSOLE_SPEED%n8 ${consoleargs}"; fi
+if test "${console}" = "display" || test "${console}" = "both"; then setenv consoleargs "console=tty1"; fi
+if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "console=%SERIAL_CONSOLE%,%SERIAL_CONSOLE_SPEED%n8 ${consoleargs}"; fi
 if test "${earlycon}" = "on"; then setenv consoleargs "earlycon ${consoleargs}"; fi
 
 # get PARTUUID of first partition on SD/eMMC it was loaded from
