@@ -60,18 +60,6 @@ index 8b78694d56b88..4af4195eed76b 100644
  
  	return SPECTRE_MITIGATED;
  }
-diff --git a/arch/arm64/kernel/entry.S b/arch/arm64/kernel/entry.S
-index 1f79abb1e5ddb..4551c0f35fc44 100644
---- a/arch/arm64/kernel/entry.S
-+++ b/arch/arm64/kernel/entry.S
-@@ -1038,6 +1038,7 @@ __ni_sys_trace:
- 	b	.
- 2:
- 	tramp_map_kernel	x30
-+	isb
- 	tramp_data_read_var     x30, vectors
- 	prfm    plil1strm, [x30, #(1b - \vector_start)]
- 	msr	vbar_el1, x30
 diff --git a/arch/x86/kernel/head64.c b/arch/x86/kernel/head64.c
 index b5785c197e534..2b2060d842d1f 100644
 --- a/arch/x86/kernel/head64.c
