@@ -1,0 +1,10 @@
+--- a/Makefile	2022-09-17 16:05:42.820715624 +0300
++++ b/Makefile	2022-09-17 16:04:49.860503791 +0300
+@@ -389,6 +389,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstric
+ 		   -fno-strict-aliasing -fno-common -fshort-wchar \
+ 		   -Werror-implicit-function-declaration \
+ 		   -Wno-format-security -Wno-misleading-indentation \
++		   -Wno-unused-function \
+ 		   -Werror	\
+ 		   -std=gnu89 $(call cc-option,-fno-PIE)
+ 
