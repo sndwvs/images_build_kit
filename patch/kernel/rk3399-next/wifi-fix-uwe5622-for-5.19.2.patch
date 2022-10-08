@@ -13,6 +13,16 @@
  {
  #ifdef DFS_MASTER
  	struct sprdwl_vif *vif = netdev_priv(ndev);
+@@ -2384,7 +2384,9 @@ void sprdwl_report_connection(struct spr
+ 		 conn_info->status == SPRDWL_ROAM_SUCCESS){
+ #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 14, 0)
+ 		struct cfg80211_roam_info roam_info = {
++#if LINUX_VERSION_CODE <= KERNEL_VERSION(5, 19, 14)
+ 			.bss = bss,
++#endif
+ 			.req_ie = conn_info->req_ie,
+ 			.req_ie_len = conn_info->req_ie_len,
+ 			.resp_ie = conn_info->resp_ie,
 --- a/drivers/net/wireless/uwe5622/unisocwifi/cmdevt.c	2022-08-19 21:17:37.417714140 +0300
 +++ b/drivers/net/wireless/uwe5622/unisocwifi/cmdevt.c	2022-08-19 21:27:07.096149692 +0300
 @@ -3301,7 +3301,11 @@ void sprdwl_event_chan_changed(struct sp
