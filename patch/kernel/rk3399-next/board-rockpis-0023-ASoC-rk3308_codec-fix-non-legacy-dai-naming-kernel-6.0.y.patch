@@ -1,0 +1,12 @@
+--- a/sound/soc/codecs/rk3308_codec.c	2022-10-08 23:08:36.888836336 +0300
++++ b/sound/soc/codecs/rk3308_codec.c	2022-10-08 23:11:14.569426090 +0300
+@@ -4142,7 +4142,9 @@ static const struct snd_soc_component_dr
+ 	// .idle_bias_on		= 1,
+ 	// .use_pmdown_time	= 1,
+ 	.endianness		= 1,
++#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 19, 14)
+ 	.non_legacy_dai_naming	= 1,
++#endif
+ };
+ 
+ static const struct reg_default rk3308_codec_reg_defaults[] = {
