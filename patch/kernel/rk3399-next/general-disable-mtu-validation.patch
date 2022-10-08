@@ -18,22 +18,22 @@ diff --git a/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c b/drivers/net/eth
 index 91cd5073d..b409a7598 100644
 --- a/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c
 +++ b/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c
-@@ -5435,14 +5435,8 @@ static void stmmac_set_rx_mode(struct net_device *dev)
+@@ -5564,27 +5564,15 @@
  static int stmmac_change_mtu(struct net_device *dev, int new_mtu)
  {
  	struct stmmac_priv *priv = netdev_priv(dev);
 -	int txfifosz = priv->plat->tx_fifo_size;
+ 	struct stmmac_dma_conf *dma_conf;
  	const int mtu = new_mtu;
+ 	int ret;
  
 -	if (txfifosz == 0)
 -		txfifosz = priv->dma_cap.tx_fifo_size;
 -
 -	txfifosz /= priv->plat->tx_queues_to_use;
 -
- 	if (netif_running(dev)) {
- 		netdev_err(priv->dev, "must be stopped to change its MTU\n");
- 		return -EBUSY;
-@@ -5453,12 +5447,6 @@ static int stmmac_change_mtu(struct net_device *dev, int new_mtu)
+ 	if (stmmac_xdp_is_enabled(priv) && new_mtu > ETH_DATA_LEN) {
+ 		netdev_dbg(priv->dev, "Jumbo frames not supported for XDP\n");
  		return -EINVAL;
  	}
  
@@ -43,9 +43,8 @@ index 91cd5073d..b409a7598 100644
 -	if ((txfifosz < new_mtu) || (new_mtu > BUF_SIZE_16KiB))
 -		return -EINVAL;
 -
- 	dev->mtu = mtu;
- 
- 	netdev_update_features(dev);
+ 	if (netif_running(dev)) {
+ 		netdev_dbg(priv->dev, "restarting interface to change its MTU\n");
+ 		/* Try to allocate the new DMA conf with the new mtu */
 -- 
 Created with Armbian build tools https://github.com/armbian/build
-

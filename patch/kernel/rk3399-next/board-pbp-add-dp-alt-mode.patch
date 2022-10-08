@@ -292,14 +292,14 @@ index 82b19ebd7838..6f00b17afc15 100644
  				tcpm_register_partner_altmodes(port);
  			}
  			break;
-@@ -2693,6 +2735,7 @@ static int tcpm_src_attach(struct tcpm_port *port)
+@@ -3681,6 +3723,7 @@ out_disable_mux:
  static void tcpm_typec_disconnect(struct tcpm_port *port)
  {
  	if (port->connected) {
 +		tcpm_update_extcon_data(port, false);
+ 		typec_partner_set_usb_power_delivery(port->partner, NULL);
  		typec_unregister_partner(port->partner);
  		port->partner = NULL;
- 		port->connected = false;
 @@ -2750,6 +2793,8 @@ static void tcpm_detach(struct tcpm_port *port)
  		port->hard_reset_count = 0;
  
