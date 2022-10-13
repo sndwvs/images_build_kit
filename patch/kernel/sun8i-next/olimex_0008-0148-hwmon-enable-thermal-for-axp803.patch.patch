@@ -24,13 +24,14 @@ diff --git a/drivers/iio/adc/axp20x_adc.c b/drivers/iio/adc/axp20x_adc.c
 index 88059480da17..d5370d144f77 100644
 --- a/drivers/iio/adc/axp20x_adc.c
 +++ b/drivers/iio/adc/axp20x_adc.c
-@@ -6,6 +6,7 @@
+@@ -6,6 +6,8 @@
   */
  
  #include <linux/completion.h>
 +#include <linux/hwmon.h>
  #include <linux/interrupt.h>
  #include <linux/io.h>
++#include <linux/of.h>
  #include <linux/module.h>
 @@ -14,7 +15,6 @@
  #include <linux/platform_device.h>
