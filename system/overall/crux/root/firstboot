@@ -13,9 +13,6 @@ case "$1" in
                 [[ $(free | grep Mem | awk '{print $2}') -lt $((1024*512)) ]] && swap_size=$((1024*512))
 
                 if [ -f /root/part ]; then
-                    echo -e "\e[0;37mResizing SD card file-system\x1B[0m"
-                    /sbin/resize2fs -p /dev/${device}${partition} >/dev/null
-
                     echo -e "\e[0;37mCreating $(($swap_size/1024))Mb emergency swap area\x1B[0m"
                     dd if=/dev/zero of=/swap bs=1024 count=$swap_size status=noxfer >/dev/null 2>&1
                     chown root:root /swap
@@ -40,6 +37,10 @@ case "$1" in
 
                     # add part one
                     touch /root/part
+
+                    sleep 2
+                    echo -e "\e[0;37mResizing SD card file-system\x1B[0m"
+                    /sbin/resize2fs -p /dev/${device}${partition} >/dev/null
 
                     sleep 2
                     shutdown -r now
