@@ -2806,32 +2806,6 @@ index 42457f7d9bc9..90cc3b33e2a0 100644
 
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Alex Bee <knaerzche@gmail.com>
-Date: Sat, 15 Aug 2020 21:11:08 +0200
-Subject: [PATCH] !fixup drm/rockchip: rk3368's vop does not support 10-bit
- formats
-
----
- drivers/gpu/drm/rockchip/rockchip_vop_reg.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/gpu/drm/rockchip/rockchip_vop_reg.c b/drivers/gpu/drm/rockchip/rockchip_vop_reg.c
-index 1aecdcf63da9..870e388c2345 100644
---- a/drivers/gpu/drm/rockchip/rockchip_vop_reg.c
-+++ b/drivers/gpu/drm/rockchip/rockchip_vop_reg.c
-@@ -794,8 +794,8 @@ static const struct vop_intr rk3368_vop_intr = {
- 
- static const struct vop_win_phy rk3368_win01_data = {
- 	.scl = &rk3288_win_full_scl,
--	.data_formats = formats_win_full_10,
--	.nformats = ARRAY_SIZE(formats_win_full_10),
-+	.data_formats = formats_win_full,
-+	.nformats = ARRAY_SIZE(formats_win_full),
- 	.format_modifiers = format_modifiers_win_full,
- 	.enable = VOP_REG(RK3368_WIN0_CTRL0, 0x1, 0),
- 	.format = VOP_REG(RK3368_WIN0_CTRL0, 0x7, 1),
-
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: Alex Bee <knaerzche@gmail.com>
 Date: Wed, 14 Oct 2020 16:42:05 +0100
 Subject: [PATCH] drm/rockchip: split rk3328 vop for 10-bit support
 
@@ -2898,7 +2872,7 @@ diff --git a/drivers/gpu/drm/rockchip/rockchip_drm_vop.c b/drivers/gpu/drm/rockc
 index 04a135730b12..96a301501584 100644
 --- a/drivers/gpu/drm/rockchip/rockchip_drm_vop.c
 +++ b/drivers/gpu/drm/rockchip/rockchip_drm_vop.c
-@@ -958,6 +958,7 @@ static void vop_plane_atomic_update(struct drm_plane *plane,
+@@ -921,6 +921,7 @@ static void vop_plane_atomic_update(stru
  	int format;
  	int is_yuv = fb->format->is_yuv;
  	int i;
@@ -2906,7 +2880,7 @@ index 04a135730b12..96a301501584 100644
  
  	/*
  	 * can't update plane when vop is disabled.
-@@ -976,8 +977,14 @@ static void vop_plane_atomic_update(struct drm_plane *plane,
+@@ -939,8 +940,14 @@ static void vop_plane_atomic_update(stru
  	obj = fb->obj[0];
  	rk_obj = to_rockchip_obj(obj);
  
@@ -2922,16 +2896,16 @@ index 04a135730b12..96a301501584 100644
  	act_info = (actual_h - 1) << 16 | ((actual_w - 1) & 0xffff);
  
  	dsp_info = (drm_rect_height(dest) - 1) << 16;
-@@ -1019,7 +1026,7 @@ static void vop_plane_atomic_update(struct drm_plane *plane,
+@@ -976,7 +983,7 @@ static void vop_plane_atomic_update(stru
+ 	}
  
  	VOP_WIN_SET(vop, win, format, format);
- 	VOP_WIN_SET(vop, win, fmt_10, is_fmt_10(fb->format->format));
 -	VOP_WIN_SET(vop, win, yrgb_vir, DIV_ROUND_UP(fb->pitches[0], 4));
 +	VOP_WIN_SET(vop, win, yrgb_vir, DIV_ROUND_UP(fb->pitches[0], 4 >> skiplines));
  	VOP_WIN_SET(vop, win, yrgb_mst, dma_addr);
  	VOP_WIN_YUV2YUV_SET(vop, win_yuv2yuv, y2r_en, is_yuv);
  	VOP_WIN_SET(vop, win, y_mir_en,
-@@ -1043,7 +1050,7 @@ static void vop_plane_atomic_update(struct drm_plane *plane,
+@@ -996,7 +1003,7 @@ static void vop_plane_atomic_update(stru
  		offset += (src->y1 >> 16) * fb->pitches[1] / vsub;
  
  		dma_addr = rk_uv_obj->dma_addr + offset + fb->offsets[1];
