@@ -108,7 +108,7 @@ new file mode 100644
 index 000000000000..6707a5dbe5fb
 --- /dev/null
 +++ b/drivers/pwm/pwm-gpio.c
-@@ -0,0 +1,255 @@
+@@ -0,0 +1,258 @@
 +/*
 + * Copyright (c) 2015 Olliver Schinagl <oliver@schinagl.nl>
 + *
@@ -140,6 +140,7 @@ index 000000000000..6707a5dbe5fb
 +#include <linux/hrtimer.h>
 +#include <linux/ktime.h>
 +#include <linux/kernel.h>
++#include <linux/version.h>
 +#include <linux/platform_device.h>
 +
 +#define DRV_NAME "pwm-gpio"
@@ -246,10 +247,12 @@ index 000000000000..6707a5dbe5fb
 +}
 +
 +static const struct pwm_ops gpio_pwm_ops = {
++#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 0, 0)
 +	.config = gpio_pwm_config,
 +	.set_polarity = gpio_pwm_set_polarity,
 +	.enable = gpio_pwm_enable,
 +	.disable = gpio_pwm_disable,
++#endif
 +	.owner = THIS_MODULE,
 +};
 +
