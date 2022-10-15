@@ -12,7 +12,7 @@ BOOT_LOADER_TOOLS_SOURCE="https://github.com/rockchip-linux/u-boot.git"
 BOOT_LOADER_TOOLS_DIR="u-boot-tools-rockchip"
 BOOT_LOADER_TOOLS_BRANCH="next-dev::"
 
-BOOT_LOADER_BRANCH="master:tag:v2022.07"
+BOOT_LOADER_BRANCH="master:tag:v2022.10"
 BOOT_LOADER_BIN="idbloader.img"
 
 
