@@ -2896,10 +2896,10 @@ index 04a135730b12..96a301501584 100644
  	act_info = (actual_h - 1) << 16 | ((actual_w - 1) & 0xffff);
  
  	dsp_info = (drm_rect_height(dest) - 1) << 16;
-@@ -976,7 +983,7 @@ static void vop_plane_atomic_update(stru
- 	}
+@@ -997,7 +1028,7 @@ static void vop_plane_atomic_update(stru
  
  	VOP_WIN_SET(vop, win, format, format);
+ 	VOP_WIN_SET(vop, win, fmt_10, is_fmt_10(fb->format->format));
 -	VOP_WIN_SET(vop, win, yrgb_vir, DIV_ROUND_UP(fb->pitches[0], 4));
 +	VOP_WIN_SET(vop, win, yrgb_vir, DIV_ROUND_UP(fb->pitches[0], 4 >> skiplines));
  	VOP_WIN_SET(vop, win, yrgb_mst, dma_addr);
