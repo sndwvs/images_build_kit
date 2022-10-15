@@ -3630,3 +3630,34 @@ index 428e057dd415..9f13f2aa87d1 100644
  	}
  
  	hdmi_writeb(hdmi, intr_stat, HDMI_IH_PHY_STAT0);
+--- a/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c	2022-10-15 06:29:45.512226719 +0300
++++ b/drivers/gpu/drm/rockchip/dw_hdmi-rockchip.c	2022-10-15 06:30:12.456321992 +0300
+@@ -11,6 +11,8 @@
+ #include <linux/regmap.h>
+ #include <linux/regulator/consumer.h>
+ 
++#include <uapi/linux/media-bus-format.h>
++
+ #include <drm/bridge/dw_hdmi.h>
+ #include <drm/drm_edid.h>
+ #include <drm/drm_of.h>
+--- a/drivers/gpu/drm/rockchip/rockchip_drm_vop.c	2022-10-15 06:13:32.056796799 +0300
++++ b/drivers/gpu/drm/rockchip/rockchip_drm_vop.c	2022-10-15 06:28:37.467985939 +0300
+@@ -9,6 +9,7 @@
+ #include <linux/delay.h>
+ #include <linux/iopoll.h>
+ #include <linux/kernel.h>
++#include <uapi/linux/media-bus-format.h>
+ #include <linux/module.h>
+ #include <linux/of.h>
+ #include <linux/of_device.h>
+--- a/drivers/gpu/drm/rockchip/rockchip_drm_vop2.c	2022-10-15 06:29:02.560074759 +0300
++++ b/drivers/gpu/drm/rockchip/rockchip_drm_vop2.c	2022-10-15 06:29:21.088140322 +0300
+@@ -33,6 +33,7 @@
+ #include <drm/drm_probe_helper.h>
+ #include <drm/drm_vblank.h>
+ 
++#include <uapi/linux/media-bus-format.h>
+ #include <uapi/linux/videodev2.h>
+ #include <dt-bindings/soc/rockchip,vop2.h>
+ 
