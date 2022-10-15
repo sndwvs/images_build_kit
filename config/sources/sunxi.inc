@@ -8,7 +8,7 @@ SERIAL_CONSOLE=ttyS0
 
 IMAGE_OFFSET=2048
 
-BOOT_LOADER_BRANCH="master:tag:v2022.07"
+BOOT_LOADER_BRANCH="master:tag:v2022.10"
 BOOT_LOADER_BIN="u-boot-sunxi-with-spl.bin"
 
 if [[ ${SOCFAMILY} == sun7i ]]; then
