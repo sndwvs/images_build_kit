@@ -1,0 +1,11 @@
+--- a/drivers/ram/rockchip/sdram_rk3328.c	2022-10-16 20:08:13.608504804 +0300
++++ a/drivers/ram/rockchip/sdram_rk3328.c	2022-10-16 20:08:44.600589541 +0300
+@@ -561,7 +561,7 @@ static int rk3328_dmc_of_to_plat(struct
+ 		       __func__, ret);
+ 		return ret;
+ 	}
+-	ret = regmap_init_mem(dev, &plat->map);
++	ret = regmap_init_mem(dev_ofnode(dev), &plat->map);
+ 	if (ret)
+ 		printf("%s: regmap failed %d\n", __func__, ret);
+ #endif
