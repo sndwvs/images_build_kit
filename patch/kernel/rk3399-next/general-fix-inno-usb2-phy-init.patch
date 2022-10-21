@@ -11,14 +11,15 @@ diff --git a/drivers/phy/rockchip/phy-rockchip-inno-usb2.c b/drivers/phy/rockchi
 index 5223d4c9afdf..0341f8208989 100644
 --- a/drivers/phy/rockchip/phy-rockchip-inno-usb2.c
 +++ b/drivers/phy/rockchip/phy-rockchip-inno-usb2.c
-@@ -1165,11 +1165,6 @@ static int rockchip_usb2phy_otg_port_init(struct rockchip_usb2phy *rphy,
- 		if (ret)
+@@ -1166,12 +1166,6 @@ static int rockchip_usb2phy_otg_port_ini
  			dev_err(rphy->dev, "register USB HOST notifier failed\n");
- 
+ 			goto out;
+ 		}
+-
 -		if (!of_property_read_bool(rphy->dev->of_node, "extcon")) {
 -			/* do initial sync of usb state */
--			ret = property_enabled(rphy->grf, &rport->port_cfg->utmi_id);
--			extcon_set_state_sync(rphy->edev, EXTCON_USB_HOST, !ret);
+-			id = property_enabled(rphy->grf, &rport->port_cfg->utmi_id);
+-			extcon_set_state_sync(rphy->edev, EXTCON_USB_HOST, !id);
 -		}
  	}
  
