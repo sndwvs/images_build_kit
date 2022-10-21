@@ -194,3 +194,14 @@ index f4b6799a8..a1041ec3e 100644
  	status = "okay";
  };
 
+--- a/arch/arm64/boot/dts/rockchip/rk3328-roc-pc.dts	2022-10-21 22:18:55.121067473 +0300
++++ b/arch/arm64/boot/dts/rockchip/rk3328-roc-pc.dts	2022-10-21 22:20:25.005549025 +0300
+@@ -132,7 +132,7 @@
+ 	gpio = <&gpio0 RK_PA0 GPIO_ACTIVE_HIGH>;
+ };
+ 
+-&vcc_sdio {
++&vccio_sd {
+ 	gpios = <&gpio0 RK_PD3 GPIO_ACTIVE_HIGH>;
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&sdio_per_pin>;

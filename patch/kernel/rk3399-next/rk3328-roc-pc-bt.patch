@@ -5,17 +5,17 @@
  };
  
 +&uart1 {
-+  status = "disabled";
++	status = "disabled";
 +};
 +
 +&uart2 {
-+    status = "okay";
++	status = "okay";
 +
-+    bluetooth {
-+        compatible = "realtek,rtl8723ds-bt";
-+        enable-gpios = <&gpio1 RK_PD0 GPIO_ACTIVE_HIGH>;
-+        host-wake-gpios = <&gpio1 RK_PD2 GPIO_ACTIVE_HIGH>;
-+    };
++	bluetooth {
++		compatible = "realtek,rtl8723ds-bt";
++		enable-gpios = <&gpio1 RK_PD0 GPIO_ACTIVE_HIGH>;
++		host-wake-gpios = <&gpio1 RK_PD2 GPIO_ACTIVE_HIGH>;
++	};
 +};
 +
 +
